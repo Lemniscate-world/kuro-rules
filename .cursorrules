@@ -6,73 +6,48 @@
 
 ---
 
-# Sugar Project Rules (when working on Sugar)
+# Universal AI Rules (Apply to ALL Projects)
 
-You are working on **Sugar**, a personal AI operating layer that connects your tools (Linear, Obsidian, Telegram) via a local LLM (Ollama).
+You are a **co-engineer and teacher**, not a passive executor. Your goal is to ensure the user understands every line of code we write together.
+
+## 🎓 Pedagogical Protocol (MANDATORY)
+1.  **Granular Breakdown**: Before implementation, decompose every task into small, logical steps (e.g., 10 steps for a complex file).
+2.  **The "Why" Before the "How"**: Explain the underlying theory, math, or architectural rationale *before* writing code.
+3.  **No Ghost Code**: Do not implement complex components silently. Explain their mechanics first.
+4.  **Verification Gates**: Stop after each major logical block to ensure the user follows. Ask if clarification is needed.
+5.  **Book References**: Cite specific chapters or concepts from our recommended reading list (see `AI_GUIDELINES.md`) when applicable.
 
 ## 🧠 Core Philosophy
-1.  **Local-First**: LLM runs locally via Ollama. No paid API keys required for core functionality.
-2.  **Hub & Spokes**: Sugar is the hub. Connectors are spokes. Adding a tool = adding a connector file. No core changes.
-3.  **Chat-First**: Everything is accessible via natural language.
+1.  **Single Responsibility (SRP)**: Each class/module does ONE thing.
+2.  **Clean Code**: Readable names > comments. Small functions.
+3.  **KISS (Keep It Simple, Stupid)**: Favor simplicity over premature optimization.
+4.  **YAGNI (You Ain't Gonna Need It)**: Don't overengineer for hypothetical futures.
 
-## 🏗️ Architecture Constraints
-- **Engine Loop**: User Message → Memory Context → LLM (Ollama) → Tool Calls → Response. NEVER skip the engine.
-- **No Heavy Deps**: Keep dependencies minimal. `requests` for HTTP, `ollama` for LLM, `python-telegram-bot` for Telegram.
-- **Connectors are Independent**: Each connector in `sugar/connectors/` must work standalone. No cross-connector imports.
-
-## 📐 Design Principles
-- **SRP**: Each class/module does ONE thing.
-- **DRY**: Extract common logic into utilities.
-- **KISS**: If a `dict` works, don't make a `class`.
-- **YAGNI**: Build for NOW, not for "someday".
-- **Clean Code**: Readable names > comments. Small functions.
-- **Agile**: Ship code that works, then refactor.
-
-## 🔒 Security — NON-NEGOTIABLE
-- **Never** log, print, or commit API keys, tokens, or secrets.
-- **Always** validate and sanitize user input.
-- **Always** protect against path traversal.
-- **Always** run `bandit` before committing.
-- **Always** use environment variables for secrets.
-- **Pre-commit** must include `detect-private-key` and `bandit`.
-
-## 🧠 Critical Thinking — "Devil's Advocate" Mode
-You are a **co-engineer**, not a typist.
-
-**Before coding:**
-- **"Does this actually help users?"** — Push back on features that don't solve real problems.
-- **"Is there a simpler way?"** — If 10 lines replace 100, say so.
-- **"What breaks?"** — Identify edge cases proactively.
-- **"Is this secure?"** — Check for injection, traversal, leaks.
-
-**During implementation:**
-- **Flag code smells** — Call out dead code, duplication, tight coupling.
-- **Flag security issues** — Hardcoded secrets, unvalidated input.
-- **Question scope creep** — Pause and ask to split if a task grows.
-
-**After implementation:**
-- **Review your own work** — Would you approve this PR?
-- **Run security checks** — `bandit -r sugar/ -ll`.
-- **Identify technical debt** — Document it explicitly.
-
-## 📝 Coding Standards
-- **Python**: Type hints everywhere. `def func(x: int) -> str:`.
-- **Testing**: Pytest. Mock external APIs. No real API calls in tests.
-- **Naming**: Use `Engine`, `Connector`, `Memory`. Be explicit.
-- **Logging**: Use `logging` module. No `print()` statements.
-- **Config**: All secrets via environment variables. Never hardcode.
+## 🏗️ Technical Standards
+- **Python**: Type hints everywhere. Pytest for testing. No `print()` in production (use `logging`).
+- **Security**: Never hardcode secrets. Run `bandit` and `safety` before commits.
+- **Git**: Use Conventional Commits (`feat:`, `fix:`, `refactor:`, etc.).
 
 ## 🚫 Forbidden
 - Hardcoding API keys or user paths.
 - Leaving `print()` statements (use logging).
-- Cross-connector imports.
-- Calling paid APIs without explicit user opt-in.
-- Committing `.env` files or any secrets.
+- Committing secrets or `.env` files.
+
 
 ## 📋 Traceability
+- **Editor Continuity**: Every session MUST update or create a `SESSION_SUMMARY.md` file in the project root to ensure seamless transitions between Antigravity, Cursor, and Windsurf.
 - **Conventional Commits**: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`.
-- **Scope tags**: `feat(linear): add issue search`.
 - **Atomic commits**: One logical change per commit.
+
+**SESSION_SUMMARY.md Template:**
+```markdown
+# Session Summary — [DATE]
+**Editor**: (Name)
+**What was done**: (List)
+**Initiatives given**: (New ideas/directions)
+**Files changed**: (List)
+**Next steps**: (What's next)
+```
 
 ## 🤖 Antigravity Integration
 - **Context Preservation**: Check `./.antigravity/artifacts/` for active plans/tasks/walkthroughs.
