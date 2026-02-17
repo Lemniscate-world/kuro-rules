@@ -1,4 +1,12 @@
-# Sugar Project Rules (.cursorrules)
+# Kuro Rules (.cursorrules)
+
+**Sync**: When updating rules, always sync with `~/Documents/kuro-rules` repo.
+
+**Explain as if First Time**: Assume zero prior knowledge. Re-explain AI, ML, concepts, math. The user codes while learning.
+
+---
+
+# Sugar Project Rules (when working on Sugar)
 
 You are working on **Sugar**, a personal AI operating layer that connects your tools (Linear, Obsidian, Telegram) via a local LLM (Ollama).
 

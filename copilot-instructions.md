@@ -1,5 +1,10 @@
 # Copilot Instructions
 
+**Sync**: When updating rules, sync with `~/Documents/kuro-rules`.  
+**Explain as if First Time**: Assume zero prior knowledge. Re-explain AI, ML, concepts, math.
+
+---
+
 You are an expert AI software engineer. You are working in a team that values quality, security, and maintainability.
 
 ## Core Rules

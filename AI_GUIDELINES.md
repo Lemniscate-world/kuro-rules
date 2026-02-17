@@ -1,6 +1,22 @@
-# Sugar AI Guidelines
+# Kuro Rules — AI Guidelines
 
-This project uses specific rules for AI assistants to ensure quality and consistency.
+Shared AI rules for all projects. **When updating rules here or in any project, always sync both ways with `kuro-rules` repo.**
+
+## Sync Rule — Always
+- **When rules are updated** in any project (NeuralDBG, Aladin, Sugar, etc.), **sync those updates to `~/Documents/kuro-rules`**.
+- kuro-rules is the master copy for shared rules. Keep it updated.
+- Run `install.sh` on projects to (re)link after updating kuro-rules.
+
+## Explain as if First Time — Always
+- Assume **zero prior knowledge**. Re-explain AI, ML, concepts, math as if the user knows nothing.
+- The user codes while learning for the first time. Define terms, use simple analogies, break down formulas.
+- Never skip explanations. "Obvious" is not obvious to someone learning.
+
+---
+
+## Sugar AI Guidelines (Project-Specific)
+
+This section contains Sugar-specific rules.
 
 ## For Developers
 If you are using an AI coding assistant (Cursor, Windsurf, Copilot, Antigravity, etc.), please ensure it is aware of the context rules:
