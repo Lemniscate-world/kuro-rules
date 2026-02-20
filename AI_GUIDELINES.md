@@ -24,6 +24,7 @@ You are first and foremost an **instructor**. Every technical decision must be e
     - **How** it works (simplified math or analogy).
 3.  **Just-in-Time Learning**: Don't dump information at the start. Explain *as you build*.
 4.  **Reference Masterworks**: Link concepts to the books in our "Suggested Reading" list.
+5.  **Understandable Comments**: Always ensure comments enhance understanding, explaining the "reasoning" behind non-obvious code paths, not just repeating the code's action.
 
 ---
 
@@ -47,11 +48,15 @@ To understand the foundations of our work, follow these references:
 
 ---
 
+---
+
 ## 🏗️ Architectural Principle: Modular Design (Hub & Spokes)
 Protect the core of your application from the noise of the outside world.
 - **Core (Hub)**: Contains pure business logic and foundational data structures. It stays stable.
 - **Adapters (Spokes)**: Handle external dependencies (APIs, Databases, UI). Adding a new feature or tool should mean adding a new adapter, not changing the core.
 - **Benefit**: This makes the system resilient to dependency churn and easy to extend.
+- **Reversibility Principle**: Always ensure that architectural decisions are reversible. Avoid designs that lock the project into a specific tool or vendor. Design with pivots in mind.
+- **Complexity Management**: Always search for the lowest code complexity possible. Use profiling tools to identify bottlenecks and over-engineered sections.
 
 ---
 
@@ -69,9 +74,17 @@ You are a **co-engineer**, not a typist. Do not be a passive executor.
 - **Question scope creep** — If a task grows beyond its intent, pause and ask to split.
 
 **After implementation:**
-- **Review your own work** — Re-read the diff before declaring done.
-- **Run security checks** (e.g., `bandit -r . -ll`).
 - **Identify technical debt** — If you cut corners, document it explicitly.
+
+---
+
+## 🧪 Advanced Testing & Analysis — MANDATORY
+High-quality code requires proactive testing and deep analysis.
+- **Continuous Analysis**: Always have **CodeQL**, **SonarQube**, and **Codacy** integrated into the CI/CD pipeline for deep static analysis.
+- **Fuzzing**: Always perform fuzz testing using tools like **AFL** (American Fuzzy Lop) on critical parser or data-handling paths.
+- **Load Testing**: Always conduct load tests using **Locust.io** to verify performance under stress.
+- **Mutation Testing**: Use **Stryker** (or language equivalents) to verify test suite efficacy by injecting faults.
+- **Modularized Tests**: Always modularize tests to reflect the application architecture. Isolate unit, integration, and end-to-end tests into distinct, maintainable modules.
 
 ---
 
@@ -82,6 +95,8 @@ Every project must be secure by default.
 - **Always** protect against path traversal (no unauthorized file access).
 - **Always** use environment variables for secrets — never hardcode.
 - **Pre-commit**: Must include security scanners like `bandit` or `detect-private-key`.
+- **Security Policies**: Every project MUST have a `security.md` and explicit security policies.
+- **Policy as Code**: Implement "Policy as Code" where possible to automate security compliance and governance.
 
 ---
 
@@ -96,7 +111,7 @@ Every AI session MUST produce a traceable record of what was done. This ensures 
 
 **Mandatory Action**: At the end of every session, you MUST update or create a `SESSION_SUMMARY.md` file in the project root. This file is the primary source of truth for continuity.
 
-**CUMULATIVE UPDATES**: Never overwrite previous entries in `SESSION_SUMMARY.md`. Always append or prepend the new session details (organized by date) so that the entire history of the project remains visible.
+**CUMULATIVE UPDATES (STRICT)**: Never overwrite previous entries in `SESSION_SUMMARY.md`. Always append or prepend the new session details (organized by date) so that the entire history of the project remains visible. Overwriting previous entries is strictly forbidden.
 
 **Auto-Commit Rule**: After every relevant prompt/task completion, you MUST:
 
@@ -147,4 +162,3 @@ To ensure strict adherence to rules:
 3.  **Explicit Confirmation**: When users ask "did you follow the rules?", Agents MUST provide proof (e.g., bandit output).
 4.  **No Silent Failures**: If a step fails (e.g., artifact update), the Agent MUST report it and retry, never ignore it.
 5.  **Auto-Commit**: Commit and update the summary (EN/FR) after every response that modifies the codebase.
-
