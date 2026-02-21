@@ -6,11 +6,16 @@ Shared AI rules for all projects. **When updating rules here or in any project, 
 - **When rules are updated** in any project (NeuralDBG, Aladin, Sugar, etc.), **sync those updates to `~/Documents/kuro-rules`**.
 - kuro-rules is the master copy for shared rules. Keep it updated.
 - Run `install.sh` on projects to (re)link after updating kuro-rules.
+- **Rule Enforcement (MANDATORY)**: AI Agents have a tendency to forget or ignore rules. You MUST read this `AI_GUIDELINES.md` file FIRST upon starting any new task. Do not rely on your base training.
 
 ## Explain as if First Time — Always
 - Assume **zero prior knowledge**. Re-explain AI, ML, concepts, math as if the user knows nothing.
 - The user codes while learning for the first time. Define terms, use simple analogies, break down formulas.
 - Never skip explanations. "Obvious" is not obvious to someone learning.
+
+## ⚙️ DevOps & Automation (Windows & Docs)
+- **Windows Testing**: Never assume code works on Windows just because it runs on Linux. Always provide methods (GitHub Actions or local scripts) to build and test Windows `.exe` formats.
+- **Session Sync Automation**: The user manually copies `SESSION_SUMMARY.md` to a Word document and WhatsApp. When creating a session summary, you MUST also generate or update a script (e.g. `sync_summary.py` or a bash script) that automates converting the markdown to `.docx` (using `python-docx` or `pandoc`) to save the user time.
 
 ---
 
@@ -85,6 +90,7 @@ High-quality code requires proactive testing and deep analysis.
 - **Load Testing**: Always conduct load tests using **Locust.io** to verify performance under stress.
 - **Mutation Testing**: Use **Stryker** (or language equivalents) to verify test suite efficacy by injecting faults.
 - **Modularized Tests**: Always modularize tests to reflect the application architecture. Isolate unit, integration, and end-to-end tests into distinct, maintainable modules.
+- **Automated UI Testing**: Always ensure UI flows are automatically testable without requiring a physical screen. Use tools like `xvfb` (Linux) or headless browser runners to run GUI tests invisibly in CI pipelines.
 
 ---
 
@@ -94,7 +100,11 @@ Every project must be secure by default.
 - **Always** validate and sanitize user input to prevent injection.
 - **Always** protect against path traversal (no unauthorized file access).
 - **Always** use environment variables for secrets — never hardcode.
-- **Pre-commit**: Must include security scanners like `bandit` or `detect-private-key`.
+- **Language-Specific Scanners (MANDATORY)**: You must use the appropriate security scanner based on the project's language:
+  - **Python**: Run `bandit -r .` et `safety check`.
+  - **Rust**: Run `cargo audit` et `cargo clippy`.
+  - **Node.js/React**: Run `npm audit`.
+- **Pre-commit**: Must include these security scanners.
 - **Security Policies**: Every project MUST have a `security.md` and explicit security policies.
 - **Policy as Code**: Implement "Policy as Code" where possible to automate security compliance and governance.
 
