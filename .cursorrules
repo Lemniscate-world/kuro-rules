@@ -69,6 +69,10 @@ You are a **co-engineer**, not a typist. Do not be a passive executor.
 
 ## Advanced Testing & Analysis — MANDATORY
 High-quality code requires proactive testing and deep analysis.
+- **Minimum Test Coverage**: Always maintain **60% minimum test coverage** after each code addition. No exceptions.
+- **Testing Pyramid**: Allocate testing effort following the pyramid: **70% Unit Tests**, **20% Integration Tests**, **10% E2E Tests**.
+- **Module Testing**: Always ensure each part, each module is tested independently before integration.
+- **Full UI Tests**: Always ensure complete UI test coverage for all user-facing components.
 - **Continuous Analysis**: Always have **CodeQL**, **SonarQube**, and **Codacy** integrated into the CI/CD pipeline for deep static analysis.
 - **Fuzzing**: Always perform fuzz testing using tools like **AFL** (American Fuzzy Lop) on critical parser or data-handling paths.
 - **Load Testing**: Always conduct load tests using **Locust.io** to verify performance under stress.
@@ -141,11 +145,20 @@ Every AI session MUST produce a traceable record of what was done. This ensures 
 ---
 
 ## Protocol
-- **Step-by-Step**: Stick to the plan.
+- **Step-by-Step**: Always go step by step following the plan and verify last phase is done before continuing. Ask: "Are we done with the last phase?"
 - **Phase Gate**: Verify Phase N completion before N+1.
 - **Context Persistence**: Always update and maintain artifacts.
+- **Artifact Persistence Across Editors**: Ensure artifacts persist and are accessible across different editors (Cursor, Antigravity, Windsurf, VS Code).
 - **Git Tracking**: Commit artifacts regularly.
 - **Pre-commit**: MUST be installed and passing before any PR or merge.
+
+---
+
+## Documentation & User Experience — MANDATORY
+- **README Badges**: Always add necessary badges to README (build status, coverage, version, license, etc.).
+- **Update README & Changelog**: Always update README.md and CHANGELOG.md after significant changes.
+- **Zero Friction**: Always ensure zero friction for users when using tools. Clear documentation, simple setup, intuitive UX.
+- **Solve Real Pain Points**: Always ensure what we are building solves real pain points. Build for users, not for the sake of building.
 
 ---
 
