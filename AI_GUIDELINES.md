@@ -99,8 +99,37 @@ Every project must be secure by default.
 ---
 
 ## Formula Clarity — NO LATEX
-- **Constraint**: Do not use `$` LaTeX notation in chat (it doesn't render visually for the user).
+- **Constraint**: Do NOT use `$` LaTeX notation in chat (it doesn't render visually for the user).
 - **Rule**: Use plain text, ASCII art, or clear descriptive names for math (e.g., "Moyenne / Mean (mu)" instead of mu).
+
+---
+
+## Project Progress Tracking — MANDATORY
+Every project MUST track its completion percentage in SESSION_SUMMARY.md.
+
+- **Progress Score**: Include a `**Progress**: X%` line at the end of each SESSION_SUMMARY.md entry.
+- **Scoring Methodology**: Be **REALISTIC and PESSIMISTIC**. If you think a project is 50% done, score it 30%.
+- **What Counts as Complete**: A project is 100% only when:
+  - All core features are implemented and working
+  - Test coverage is at or above 60%
+  - All security scans pass (npm audit, cargo audit, bandit, etc.)
+  - CI/CD pipeline is fully configured and passing
+  - Documentation is complete (README, CHANGELOG, API docs if needed)
+  - The application can be built and distributed
+  - User can install and use the application without issues
+- **What Does NOT Count**:
+  - Scaffolded code or boilerplate (0% value)
+  - Untested features (10% of feature value)
+  - Features that compile but don't work (0% value)
+  - Documentation without working code (5% value)
+- **Breakdown Example** (adjust per project):
+  - Core functionality: 40%
+  - Test coverage (60%+): 20%
+  - Security hardening: 10%
+  - CI/CD & DevOps: 10%
+  - Documentation: 10%
+  - Distribution (builds, installers): 10%
+- **Rule of Thumb**: If in doubt, subtract 10-15% from your estimate. Optimism is the enemy of accurate tracking.
 
 ---
 
@@ -140,6 +169,7 @@ Every AI session MUST produce a traceable record of what was done. This ensures 
 
 **Tests**: X passing
 **Blockers**: (If any)
+**Progress**: X% (pessimistic estimate)
 ```
 
 ---
