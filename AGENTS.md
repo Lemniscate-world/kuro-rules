@@ -273,7 +273,37 @@ IF agent implements without questioning:
 
 ---
 
-## RULE 9: File Protection — MANDATORY
+## RULE 9: No Emojis Anywhere — MANDATORY
+
+### Rule
+Emojis are FORBIDDEN in ALL project files, code, comments, documentation, CLI output, and user-facing text. No exceptions.
+
+### Reason
+- Encoding issues across platforms
+- Break compatibility with certain tools and terminals
+- Reduce professionalism
+- Distract from content
+
+### Verification
+```
+BEFORE any output:
+  CHECK: Does this contain emojis?
+  IF YES: REMOVE all emojis
+  CHECK: Does code/comments contain emojis?
+  IF YES: REMOVE them
+```
+
+### Enforcement
+```
+IF emoji found in any file:
+  ACTION: REMOVE immediately
+  ACTION: WARN user if emoji was in user-provided content
+  DO NOT: Add emojis to any output
+```
+
+---
+
+## RULE 10: File Protection — MANDATORY
 
 ### Rule
 Certain files MUST be in `.gitignore` and NEVER committed publicly.
@@ -305,7 +335,7 @@ IF protected file is committed:
 
 ---
 
-## RULE 10: Sync Rule — MANDATORY
+## RULE 11: Sync Rule — MANDATORY
 
 ### Rule
 When rules are updated in ANY project, SYNC to `~/Documents/kuro-rules` (master copy).
@@ -328,7 +358,7 @@ IF rules are updated without sync:
 
 ---
 
-## RULE 11: Roadmap Adherence — MANDATORY
+## RULE 12: Roadmap Adherence — MANDATORY
 
 ### Rule
 Every project MUST have a roadmap file (PLAN.md or ROADMAP.md) and all development MUST follow it.
@@ -368,7 +398,7 @@ IF code deviates from roadmap:
 
 ---
 
-## RULE 12: Roadmap Duration — MANDATORY
+## RULE 13: Roadmap Duration — MANDATORY
 
 ### Rule
 Every roadmap MUST have a minimum duration of **one month** with clearly defined phases.
@@ -406,6 +436,156 @@ IF roadmap duration < 1 month:
 
 ---
 
+## RULE 14: Periodic Validation — MANDATORY
+
+### Rule
+At progress milestones (25%, 50%, 75%, 90%, 95%), the product MUST be validated through Mom Test and Marketing Test before continuing.
+
+### Validation Gates
+
+| Progress Milestone | Required Validation |
+|-------------------|-------------------|
+| 25% | Mom Test follow-up (3+ users), Marketing Test (landing page views, signups) |
+| 50% | Mom Test validation (5+ new users), Marketing Test (conversion metrics) |
+| 75% | Mom Test expansion (different user segments), Marketing Test (pricing validation) |
+| 90% | Final Mom Test (comprehensive), Marketing Test (launch readiness) |
+| 95% | Pre-launch validation (all criteria met) |
+
+### Validation Checklist
+```
+AT each milestone:
+  CHECK: Mom Test conducted with new users?
+  CHECK: Marketing Test metrics collected?
+  CHECK: User feedback documented?
+  CHECK: Pivot/continue decision made?
+  IF validation FAILED:
+    ACTION: STOP development
+    ACTION: Address feedback or pivot
+    DO NOT: Continue without validation
+```
+
+### Mom Test Requirements
+- Interview minimum 3-5 new users at each milestone
+- Ask about actual behavior, not opinions
+- Document spontaneous mentions and solution-seeking behavior
+- Update `mom_test_results.md` with new findings
+
+### Marketing Test Requirements
+- Landing page or demo available
+- Track views, signups, engagement
+- Document conversion metrics
+- Validate pricing hypothesis (if applicable)
+
+### Enforcement
+```
+IF milestone reached without validation:
+  ACTION: STOP immediately
+  ACTION: Conduct validation before continuing
+  DO NOT: Skip validation gates
+```
+
+---
+
+## RULE 15: Rule Synchronization — MANDATORY
+
+### Rule
+When ANY rule file is updated, ALL rule files MUST be updated to include the same rule. Rules must be consistent across AGENTS.md, AI_GUIDELINES.md, .cursorrules, copilot-instructions.md, and GAD.md.
+
+### Verification
+```
+AFTER updating any rule file:
+  CHECK: Is this rule in all other rule files?
+  IF NO: ADD the rule to all files
+  CHECK: Is wording consistent?
+  IF NO: SYNC wording across files
+```
+
+### Enforcement
+```
+IF rules are inconsistent across files:
+  ACTION: SYNC immediately to all files
+  ACTION: Document sync in SYNC_LOG.md
+  DO NOT: Allow rule drift between files
+```
+
+---
+
+## RULE 16: Working Demos — MANDATORY
+
+### Rule
+At each validation milestone (25%, 50%, 75%, 90%, 95%), the project MUST have at least **2 working demos** that demonstrate core functionality.
+
+### Requirements
+- Minimum 2 demos per milestone
+- Each demo must be runnable without errors
+- Demos must demonstrate different aspects of the product
+- Demos must be documented with expected output
+
+### Verification
+```
+AT each milestone:
+  CHECK: Are there at least 2 demos?
+  CHECK: Do all demos run successfully?
+  CHECK: Do demos demonstrate different features?
+  IF demos < 2:
+    ACTION: STOP and create missing demos
+    DO NOT: Continue without 2 working demos
+```
+
+### Enforcement
+```
+IF milestone reached without 2 working demos:
+  ACTION: STOP immediately
+  ACTION: Create/fix demos until 2 are working
+  DO NOT: Skip this requirement
+```
+
+---
+
+## RULE 17: Deep Understanding Before Phase Transition — MANDATORY
+
+### Rule
+Before transitioning to the next phase, the user MUST demonstrate deep understanding of what was created, including 2nd and 3rd order consequences.
+
+### Requirements
+1. **Explain the mechanism**: How does it work under the hood?
+2. **2nd order consequences**: What happens if this is used in production? What edge cases emerge?
+3. **3rd order consequences**: What long-term effects? What dependencies form?
+4. **Teach something new**: Agent must teach user at least one new concept
+5. **Critical thinking prompts**: Agent must ask probing questions about the creation
+
+### Verification Checklist
+```
+BEFORE phase transition:
+  CHECK: Can user explain the mechanism?
+  CHECK: Have 2nd/3rd order consequences been discussed?
+  CHECK: Has user learned something new?
+  CHECK: Have critical thinking questions been asked?
+  IF NOT:
+    ACTION: STOP and provide deep explanation
+    ACTION: Ask probing questions
+    ACTION: Teach new concepts
+    DO NOT: Transition without understanding
+```
+
+### Critical Thinking Questions (Agent MUST Ask)
+1. "What could break this in production that we haven't tested?"
+2. "What would happen if 10x more users used this?"
+3. "What assumptions are we making that might be wrong?"
+4. "What would you do if this completely failed?"
+5. "What did you learn that surprised you?"
+
+### Enforcement
+```
+IF phase transition requested without deep understanding:
+  ACTION: STOP and provide explanation
+  ACTION: Ask all 5 critical thinking questions
+  ACTION: Discuss 2nd and 3rd order consequences
+  DO NOT: Allow superficial understanding
+```
+
+---
+
 ## VERIFICATION CHECKLIST FOR USERS
 
 When asking "Did you follow AGENTS.md?", the agent MUST provide:
@@ -418,10 +598,15 @@ When asking "Did you follow AGENTS.md?", the agent MUST provide:
 6. **Rule 6**: "Security scans: [PASSED/FAILED/PENDING]"
 7. **Rule 7**: "Any failures: [NONE/REPORTED]"
 8. **Rule 8**: "Critical thinking applied: [YES/NO - details]"
-9. **Rule 9**: "Protected files: [SAFE/EXPOSED]"
-10. **Rule 10**: "Rules synced: [YES/NO]"
-11. **Rule 11**: "Roadmap: [EXISTS/MISSING] - Task aligned: [YES/NO]"
-12. **Rule 12**: "Roadmap duration: [>=1 month/TOO SHORT]"
+9. **Rule 9**: "Emojis: [NONE FOUND/REMOVED]"
+10. **Rule 10**: "Protected files: [SAFE/EXPOSED]"
+11. **Rule 11**: "Rules synced: [YES/NO]"
+12. **Rule 12**: "Roadmap: [EXISTS/MISSING] - Task aligned: [YES/NO]"
+13. **Rule 13**: "Roadmap duration: [>=1 month/TOO SHORT]"
+14. **Rule 14**: "Periodic validation: [DONE/PENDING/NOT REQUIRED YET]"
+15. **Rule 15**: "All rule files synced: [YES/NO]"
+16. **Rule 16**: "Working demos: [2+/1/0]"
+17. **Rule 17**: "Deep understanding demonstrated: [YES/NO]"
 
 ---
 
@@ -437,10 +622,15 @@ When asking "Did you follow AGENTS.md?", the agent MUST provide:
 | Rule 6 (Security) | STOP commit, fix vulnerabilities |
 | Rule 7 (No Silent Failures) | Report and retry |
 | Rule 8 (Critical Thinking) | Apply questions retroactively |
-| Rule 9 (File Protection) | Remove from git, add to .gitignore |
-| Rule 10 (Sync) | Sync to kuro-rules immediately |
-| Rule 11 (Roadmap) | STOP and create PLAN.md if missing |
-| Rule 12 (Roadmap Duration) | STOP and expand plan if < 1 month |
+| Rule 9 (No Emojis) | REMOVE emojis immediately |
+| Rule 10 (File Protection) | Remove from git, add to .gitignore |
+| Rule 11 (Sync) | Sync to kuro-rules immediately |
+| Rule 12 (Roadmap) | STOP and create PLAN.md if missing |
+| Rule 13 (Roadmap Duration) | STOP and expand plan if < 1 month |
+| Rule 14 (Periodic Validation) | STOP and conduct validation at milestones |
+| Rule 15 (Rule Synchronization) | SYNC all rule files immediately |
+| Rule 16 (Working Demos) | STOP and create 2 working demos |
+| Rule 17 (Deep Understanding) | STOP and provide deep explanation |
 
 ---
 
