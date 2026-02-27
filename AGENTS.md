@@ -710,7 +710,27 @@ IF validation involves multiple shallow features or lacks a single focus:
 
 ---
 
-## VERIFICATION CHECKLIST FOR USERS
+## RULE 23: Knowledge Capture — MANDATORY
+
+### Rule
+Every project failure or pivot MUST be documented in the central `kuro-rules/KNOWLEDGE_BASE/` to ensure cross-project intelligence and prevent repeating mistakes.
+
+### Verification Checklist
+```
+AFTER a pivot or project termination:
+  1. CREATE: A post-mortem document in `kuro-rules/KNOWLEDGE_BASE/`
+  2. DOCUMENT: Rationale for failure/pivot and key technical or market learnings
+  3. SYNC: Ensure this rule is added to all local project rule files
+```
+
+### Enforcement
+```
+IF a project pivots without a post-mortem:
+  ACTION: STOP and document the failure in the master repository
+  DO NOT: Start a new project without acknowledging previous learnings
+```
+
+---
 
 When asking "Did you follow AGENTS.md?", the agent MUST provide:
 
@@ -736,6 +756,8 @@ When asking "Did you follow AGENTS.md?", the agent MUST provide:
 20. **Rule 20**: "Hard Milestone Lock: [LOCKED/UNLOCKED]"
 21. **Rule 21**: "Intelligence Harvester: At least 3 sources analyzed for the current milestone? [YES/NO]"
 22. **Rule 22**: "Feature Focus Rule: Only one feature focused on for this validation cycle? [YES/NO]"
+23. **Rule 23**: "Knowledge Capture: Post-mortem documented for pivot/failure? [YES/NO]"
+24. **Rule 24**: "Marketing & Outreach Guardian: Communities identified & templates drafted? [YES/NO]"
 
 ---
 
