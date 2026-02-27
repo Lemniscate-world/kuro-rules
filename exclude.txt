@@ -1,0 +1,7 @@
+# exclude.txt -- Repos to EXCLUDE from rule sync
+# One folder name per line (relative to ~/Documents)
+# Lines starting with # are ignored
+# kuro-rules is always excluded automatically
+
+# Third-party repos (not yours)
+ChatDev
