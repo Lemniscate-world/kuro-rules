@@ -1,5 +1,31 @@
 ﻿# Sync Log
 
+## 2026-02-28 09:30:37
+- Astral : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Automatons : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- BloomDB : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Charmed : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- datalint : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Dissect : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Echo : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, copilot-instructions.md
+- Lemniscate-world : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Metatron : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- MetatronCube : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Again : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Aquarium : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Research : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDBG : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDSL : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralPaper : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuroDose : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- OpenQuant : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Project-Dirac : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- TokenWise : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Vault : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Verbose : AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+
 ## 2026-02-27 08:18:11
 - Astral : AGENTS.md
 - Automatons : AGENTS.md
@@ -136,6 +162,7 @@ The following rule files were synced to all projects:
 - **NeuroDose\web\node_modules\recharts\AGENTS.md** - Third-party dependency, not a project
 
 All projects now follow the same strict, enforceable rules for AI agent development.
+
 
 
 
