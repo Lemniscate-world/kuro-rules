@@ -18,7 +18,9 @@ $RULE_FILES = @(
     "AI_GUIDELINES.md",
     "GAD.md",
     ".cursorrules",
-    "copilot-instructions.md"
+    "copilot-instructions.md",
+    "acquisition_tracker.md",
+    "sync_summary.py"
 )
 
 # Read exclude list
