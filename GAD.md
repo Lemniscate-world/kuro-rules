@@ -482,7 +482,7 @@ Every team member MUST use the following standardized stack. The AI Agent MUST v
 ### Onboarding Checklist
 When a new team member joins, the AI Agent MUST walk them through this checklist:
 ```
-[ ] Git configured (name, email, SSH key)
+[ ] Git configured (name, email)
 [ ] GitHub access to the repository
 [ ] IDE installed (Cursor recommended)
 [ ] Linear account created and connected (Rule 29)
