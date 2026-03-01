@@ -1,4 +1,13 @@
 ﻿# Sync Log
+## [2026-03-01] — Sync Rule 34 & File Protection
+**Author**: Antigravity
+**Changes**:
+- Added **RULE 34: Strict Project Isolation** to all rule files.
+- Reason: Enforce strict scope filtering for project **Sagittarius** on Linear/GitHub.
+- Updated `.gitignore` in both `Sagittarius` and `kuro-rules` to include reflection files (`mom_test_script.md`, `decision.md`, `concept/`, etc.).
+- Verified parity across: `AGENTS.md`, `AI_GUIDELINES.md`, `.cursorrules`, `copilot-instructions.md`, `GAD.md`.
+
+---
 
 ## 2026-03-01 11:19:20
 - Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
