@@ -1,4 +1,31 @@
 ﻿# Sync Log
+
+## 2026-03-01 11:38:21
+- Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Automatons : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- BloomDB : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Charmed : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- datalint : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Dissect : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Echo : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Lemniscate-world : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Metatron : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- MetatronCube : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Neural-Again : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Neural-Aquarium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Neural-Research : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- NeuralDBG : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- NeuralDSL : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- NeuralPaper : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- NeuroDose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- OpenQuant : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Project-Dirac : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- TokenWise : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Vault : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+- Verbose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md
+
 ## [2026-03-01] — Sync Rule 34 & File Protection
 **Author**: Antigravity
 **Changes**:
@@ -447,6 +474,7 @@ The following rule files were synced to all projects:
 - **NeuroDose\web\node_modules\recharts\AGENTS.md** - Third-party dependency, not a project
 
 All projects now follow the same strict, enforceable rules for AI agent development.
+
 
 
 
