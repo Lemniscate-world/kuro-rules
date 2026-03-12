@@ -163,6 +163,8 @@ Rules:
 - stale or deleted repositories must be removed promptly
 - workspace-wide audit should fail if a listed repository is missing
 - repo mode must not depend on external sibling repositories
+- sync-rules.ps1 must sync only repositories listed in `projects.txt`
+- untracked git repositories under the workspace must be reported as NOTICE only and must not be synced implicitly
 
 ## Project scaffold
 

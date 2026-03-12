@@ -3,6 +3,65 @@
 
 ## Francais
 **Ce qui a ete fait** :
+- Alignement du comportement reel de `sync-rules.ps1` avec la politique `projects.txt`
+- Identification de la cause racine : le script fusionnait `projects.txt` avec la decouverte automatique de tous les depots git du workspace
+- Modification du script pour que seuls les depots listes dans `projects.txt` soient des cibles de synchronisation
+- Conservation de la visibilite des depots git non suivis sous forme de `NOTICE` sans synchronisation implicite
+- Verification par `-DryRun` : 23 cibles exactement, issues de `projects.txt`
+- Verification de coherence : l'audit workspace continue de passer avec les memes `NOTICE`
+- Mise a jour de `README.md` pour documenter que `projects.txt` est la seule autorite de synchronisation
+
+**Initiatives donnees** :
+- Elimination du double systeme d'autorite entre liste explicite et auto-decouverte
+- Renforcement de la reversibilite : les depots non suivis restent visibles mais hors impact
+- Reduction du risque de sync silencieux vers des depots non gouvernes
+
+**Fichiers modifies** :
+- `sync-rules.ps1`
+- `README.md`
+- `SESSION_SUMMARY.md`
+
+**Etapes suivantes** :
+- Decider si `AEther`, `Helium`, `Playground` et `Sagittarius` doivent entrer dans `projects.txt`
+- Evaluer si le hook `post-commit` doit rester actif ou devenir optionnel
+- Eventuellement nettoyer l'historique de `SYNC_LOG.md` qui contient encore des traces d'encodage anterieures
+
+## English
+**What was done**:
+- Aligned the real behavior of `sync-rules.ps1` with the `projects.txt` policy
+- Identified the root cause: the script merged `projects.txt` with automatic discovery of every git repository in the workspace
+- Changed the script so only repositories listed in `projects.txt` are synchronization targets
+- Preserved visibility of untracked git repositories as `NOTICE` entries without implicit synchronization
+- Verified with `-DryRun`: exactly 23 targets, all coming from `projects.txt`
+- Verified consistency: the workspace audit still passes with the same `NOTICE` entries
+- Updated `README.md` to document that `projects.txt` is the single synchronization authority
+
+**Initiatives given**:
+- Removed the dual-authority model between explicit tracking and auto-discovery
+- Improved reversibility: untracked repositories remain visible but unaffected
+- Reduced the risk of silent sync into non-governed repositories
+
+**Files changed**:
+- `sync-rules.ps1`
+- `README.md`
+- `SESSION_SUMMARY.md`
+
+**Next steps**:
+- Decide whether `AEther`, `Helium`, `Playground`, and `Sagittarius` should enter `projects.txt`
+- Evaluate whether the `post-commit` hook should remain always-on or become optional
+- Optionally clean historical encoding residue still present in `SYNC_LOG.md`
+
+**Tests**: `sync-rules.ps1 -DryRun` PASSED with 23 targets; workspace audit PASSED
+**Blockers**: `SYNC_LOG.md` still contains historical encoding drift unrelated to this alignment pass
+**Progress**: 10% (governance alignment improved; broader project validation still pending)
+
+---
+
+# Session Summary - 2026-03-12
+**Editor**: Cursor
+
+## Francais
+**Ce qui a ete fait** :
 - Finalisation de l'ajustement H sur l'audit des regles dans `kuro-rules`
 - Promotion de la version staged de `audit-rules.py` pour que les depots git non suivis soient signales en `NOTICE` sans faire echouer l'audit workspace
 - Correction d'un doublon `stages: [pre-commit]` dans `.pre-commit-config.yaml`

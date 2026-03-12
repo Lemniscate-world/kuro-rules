@@ -1,9 +1,7 @@
-# sync-rules.ps1 -- Synchronize AI rule files from kuro-rules to all git repos
-# Auto-detects git repos in ~/Documents, excludes repos listed in exclude.txt
-# Usage: .\sync-rules.ps1 [-Force] [-DryRun] [-Project <name>]
-# Master copy: ~/Documents/kuro-rules
+# sync-rules.ps1 - Synchronize shared AI rule files and validation scaffold
 param(
     [switch]$Force,
+    [switch]$ForceScaffold,
     [switch]$DryRun,
     [string]$Project
 )
@@ -12,126 +10,436 @@ $ErrorActionPreference = "Stop"
 $RULES_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DOCS_DIR = Split-Path -Parent $RULES_DIR
 
-# Files to sync (relative to kuro-rules)
 $RULE_FILES = @(
-    "AGENTS.md",
-    "AI_GUIDELINES.md",
-    "GAD.md",
-    ".cursorrules",
-    "copilot-instructions.md",
-    "acquisition_tracker.md",
-    "sync_summary.py"
+    @{ Source = "AGENTS.md"; Target = "AGENTS.md" },
+    @{ Source = "AI_GUIDELINES.md"; Target = "AI_GUIDELINES.md" },
+    @{ Source = "GAD.md"; Target = "GAD.md" },
+    @{ Source = ".cursorrules"; Target = ".cursorrules" },
+    @{ Source = "copilot-instructions.md"; Target = ".github/copilot-instructions.md" }
 )
 
-# Read exclude list
-$excludeFile = Join-Path $RULES_DIR "exclude.txt"
-$excluded = @("kuro-rules")  # always exclude self
-if (Test-Path $excludeFile) {
-    $excludeLines = Get-Content $excludeFile | Where-Object { $_ -and $_ -notmatch '^\s*#' }
-    foreach ($line in $excludeLines) {
-        $excluded += $line.Trim()
+$SCAFFOLD_FILES = @(
+    @{ Source = "PROJECT_SCAFFOLD/decision-memo.md"; Target = "decision-memo.md"; Template = $true },
+    @{ Source = "PROJECT_SCAFFOLD/prompts/perplexity.md"; Target = "prompts/perplexity.md"; Template = $true },
+    @{ Source = "PROJECT_SCAFFOLD/prompts/grok.md"; Target = "prompts/grok.md"; Template = $true },
+    @{ Source = "PROJECT_SCAFFOLD/research/README.md"; Target = "research/README.md"; Template = $false },
+    @{ Source = "PROJECT_SCAFFOLD/research/evidence-matrix.csv"; Target = "research/evidence-matrix.csv"; Template = $true },
+    @{ Source = "PROJECT_SCAFFOLD/research/scorecard.md"; Target = "research/scorecard.md"; Template = $true },
+    @{ Source = "PROJECT_SCAFFOLD/research/open-questions.md"; Target = "research/open-questions.md"; Template = $true },
+    @{ Source = "PROJECT_SCAFFOLD/research/.gitignore"; Target = "research/.gitignore"; Template = $false }
+)
+
+$PRIVATE_IGNORE_BEGIN = "# --- kuro-rules private research ---"
+$PRIVATE_IGNORE_END = "# --- end kuro-rules private research ---"
+$PRIVATE_IGNORE_LINES = @(
+    "mom_test_results.md",
+    "mom_test_script.md",
+    "decision.md",
+    "ideas.md",
+    "architecture_notes.md",
+    "concept/",
+    "research/private/",
+    "research/raw/",
+    "research/interviews/",
+    "research/contact-lists/",
+    "notes-private.md",
+    "contacts.csv",
+    "leads.csv",
+    "prospects.csv"
+)
+
+function Get-ProjectDefaults {
+    param([string]$Name)
+
+    $defaults = @{
+        DATE = (Get-Date -Format "yyyy-MM-dd")
+        PROJECT_NAME = $Name
+        PRIMARY_GEO = "TBD"
+        TARGET_USER = "TBD"
+        BUYER = "TBD"
+        PAIN_POINT = "TBD"
+        PRODUCT_WEDGE = "TBD"
+        ALTERNATIVES = "TBD"
+        VALIDATION_STAGE = "L0"
+        IN_SCOPE = "TBD"
+        OUT_OF_SCOPE = "TBD"
+        CLAIM = "TBD"
+        WHAT_IT_PROVES = "TBD"
+        OPEN_QUESTION = "TBD"
+        QUESTION_1 = "What is the highest-confidence pain point for this project?"
+        WHY_1 = "The wedge is undefined until the operational pain is precise."
+        HOW_1 = "Run desk research and 3-5 expert calls."
+        STAGE_1 = "L0 -> L1"
+        QUESTION_2 = "Who owns the budget and approval path?"
+        WHY_2 = "A problem without a buyer is not enough."
+        HOW_2 = "Interview likely operators, buyers, and integrators."
+        STAGE_2 = "L1 -> L2"
+        QUESTION_3 = "Can the first pilot avoid heavy integration or compliance work?"
+        WHY_3 = "Pilot friction determines speed to first contract."
+        HOW_3 = "Map current workflow and minimum required controls."
+        STAGE_3 = "L2 -> L3"
+        SOURCE_URL = "TBD"
+        SOURCE_DATE = (Get-Date -Format "yyyy-MM-dd")
+    }
+
+    switch ($Name) {
+        "Iroko" {
+            $defaults.PRIMARY_GEO = "Togo"
+            $defaults.TARGET_USER = "tier-2 banks and MFIs"
+            $defaults.BUYER = "head of operations, digital banking, or support"
+            $defaults.PAIN_POINT = "customer-support and self-service workflows are expensive, fragile, and pressured by digital migration"
+            $defaults.PRODUCT_WEDGE = "white-label banking workflow for support, self-care, human handoff, and audit trail"
+            $defaults.ALTERNATIVES = "Semoa, internal teams, integrators, call center plus branch"
+            $defaults.VALIDATION_STAGE = "L1"
+            $defaults.IN_SCOPE = "support, self-care, human handoff, audit trail"
+            $defaults.OUT_OF_SCOPE = "bot-initiated payments, full KYC, open general AI assistant"
+            $defaults.CLAIM = "there may still be a narrow banking-workflow wedge beyond generic WhatsApp Banking"
+            $defaults.WHAT_IT_PROVES = "digital pressure exists, but the anti-incumbent wedge is still unproven"
+            $defaults.OPEN_QUESTION = "is there a sellable wedge beyond Semoa and internal workflows?"
+            $defaults.QUESTION_1 = "Is there a sellable Iroko wedge beyond Semoa?"
+            $defaults.WHY_1 = "Without a clear wedge, the project is category demand without startup space."
+            $defaults.HOW_1 = "Interview banks, MFIs, BSPs, and integrators."
+            $defaults.STAGE_1 = "L1 -> L2"
+            $defaults.QUESTION_2 = "What deterministic WhatsApp workflow remains compliant and acceptable?"
+            $defaults.WHY_2 = "Platform and compliance boundaries define the real product."
+            $defaults.HOW_2 = "Confirm policy and operating constraints with BSPs and compliance owners."
+            $defaults.STAGE_2 = "L1 -> L2"
+            $defaults.QUESTION_3 = "Can a pilot start without deep payment-core integration?"
+            $defaults.WHY_3 = "Heavy integration kills the first contract."
+            $defaults.HOW_3 = "Map the narrowest workflow that still creates ROI."
+            $defaults.STAGE_3 = "L2 -> L3"
+        }
+        "Kapok" {
+            $defaults.PRIMARY_GEO = "Togo"
+            $defaults.TARGET_USER = "insurers and claims operations teams"
+            $defaults.BUYER = "head of claims, operations, CIO, or digital lead"
+            $defaults.PAIN_POINT = "claims intake, document collection, and status follow-up are slow, manual, and hard to audit"
+            $defaults.PRODUCT_WEDGE = "claims ops SaaS for first notice of loss, document capture, completeness checks, expert queue, status tracking, and fraud flags"
+            $defaults.ALTERNATIVES = "email plus Excel, core-insurance modules, brokers, TPAs, internal teams"
+            $defaults.VALIDATION_STAGE = "L1"
+            $defaults.IN_SCOPE = "first notice of loss, document capture, completeness checklist, expert queue, status tracking, fraud flags"
+            $defaults.OUT_OF_SCOPE = "underwriting, pricing, policy administration, generic AI chatbot"
+            $defaults.CLAIM = "claims workflow pressure creates a cleaner first wedge than generic insurtech messaging"
+            $defaults.WHAT_IT_PROVES = "claims-process pain is recent and operational, but buyer and integration proof still require calls"
+            $defaults.OPEN_QUESTION = "can a narrow pilot start without replacing the insurer core?"
+            $defaults.QUESTION_1 = "Who owns the budget for claims workflow improvement?"
+            $defaults.WHY_1 = "Budget ownership determines whether the project is sellable."
+            $defaults.HOW_1 = "Interview claims leads, operations leads, and CIOs."
+            $defaults.STAGE_1 = "L1 -> L2"
+            $defaults.QUESTION_2 = "Which claims line is the best first wedge?"
+            $defaults.WHY_2 = "The first pilot must be narrow enough to show ROI quickly."
+            $defaults.HOW_2 = "Compare document defects, delays, and volume by claims line."
+            $defaults.STAGE_2 = "L2 -> L3"
+            $defaults.QUESTION_3 = "What minimum controls are mandatory for a pilot?"
+            $defaults.WHY_3 = "Compliance scope sets the real build cost."
+            $defaults.HOW_3 = "Validate with insurer IT, compliance, and local integrators."
+            $defaults.STAGE_3 = "L2 -> L3"
+        }
+    }
+
+    return $defaults
+}
+
+function Expand-TemplateContent {
+    param(
+        [string]$Content,
+        [hashtable]$Context
+    )
+
+    $result = $Content
+    foreach ($key in $Context.Keys) {
+        $result = $result.Replace("{{${key}}}", [string]$Context[$key])
+    }
+    return $result
+}
+
+function Ensure-ParentDirectory {
+    param([string]$Path)
+    $parent = Split-Path -Parent $Path
+    if ($parent -and -not (Test-Path -LiteralPath $parent)) {
+        New-Item -ItemType Directory -Path $parent -Force | Out-Null
     }
 }
 
-# Auto-detect git repos in Documents
-$allDirs = Get-ChildItem -Path $DOCS_DIR -Directory -ErrorAction SilentlyContinue
-$projects = @()
-foreach ($dir in $allDirs) {
-    $gitDir = Join-Path $dir.FullName ".git"
-    if (Test-Path $gitDir) {
-        if ($excluded -notcontains $dir.Name) {
-            $projects += $dir.Name
+function Copy-RuleFile {
+    param(
+        [string]$SourcePath,
+        [string]$DestinationPath,
+        [switch]$Overwrite,
+        [switch]$Preview
+    )
+
+    $needsCopy = $Overwrite -or -not (Test-Path -LiteralPath $DestinationPath)
+    if (-not $needsCopy) {
+        try {
+            $srcHash = (Get-FileHash -LiteralPath $SourcePath -Algorithm MD5).Hash
+            $dstHash = (Get-FileHash -LiteralPath $DestinationPath -Algorithm MD5).Hash
+            $needsCopy = $srcHash -ne $dstHash
+        } catch {
+            $needsCopy = $true
+        }
+    }
+
+    if ($needsCopy) {
+        if ($Preview) {
+            return "WOULD SYNC $DestinationPath"
+        }
+        Ensure-ParentDirectory -Path $DestinationPath
+        if (Test-Path -LiteralPath $DestinationPath) {
+            Remove-Item -LiteralPath $DestinationPath -Force -ErrorAction SilentlyContinue
+        }
+        Copy-Item -LiteralPath $SourcePath -Destination $DestinationPath -Force
+        return "SYNCED $DestinationPath"
+    }
+
+    return $null
+}
+
+function Ensure-ScaffoldFile {
+    param(
+        [string]$SourcePath,
+        [string]$DestinationPath,
+        [bool]$IsTemplate,
+        [hashtable]$Context,
+        [switch]$Overwrite,
+        [switch]$Preview
+    )
+
+    if ((Test-Path -LiteralPath $DestinationPath) -and -not $Overwrite) {
+        return $null
+    }
+
+    if ($Preview) {
+        if (Test-Path $DestinationPath) {
+            return "WOULD REFRESH $DestinationPath"
+        }
+        return "WOULD CREATE $DestinationPath"
+    }
+
+    Ensure-ParentDirectory -Path $DestinationPath
+    if ($IsTemplate) {
+        $content = Get-Content -LiteralPath $SourcePath -Raw
+        $rendered = Expand-TemplateContent -Content $content -Context $Context
+        Set-Content -LiteralPath $DestinationPath -Value $rendered -Encoding utf8
+    } else {
+        Copy-Item -LiteralPath $SourcePath -Destination $DestinationPath -Force
+    }
+
+    if ($Overwrite) {
+        return "REFRESHED $DestinationPath"
+    }
+    return "CREATED $DestinationPath"
+}
+
+function Remove-LegacyRootCopilotCopy {
+    param(
+        [string]$ProjectDir,
+        [switch]$Preview
+    )
+
+    $rootCopy = Join-Path $ProjectDir "copilot-instructions.md"
+    $githubCopy = Join-Path $ProjectDir ".github/copilot-instructions.md"
+
+    if (-not ((Test-Path -LiteralPath $rootCopy) -and (Test-Path -LiteralPath $githubCopy))) {
+        return $null
+    }
+
+    try {
+        $rootHash = (Get-FileHash -LiteralPath $rootCopy -Algorithm MD5).Hash
+        $githubHash = (Get-FileHash -LiteralPath $githubCopy -Algorithm MD5).Hash
+    } catch {
+        return "WARN could not compare legacy root copilot-instructions.md in $ProjectDir"
+    }
+
+    if ($rootHash -ne $githubHash) {
+        return "WARN legacy root copilot-instructions.md differs from canonical .github copy in $ProjectDir"
+    }
+
+    if ($Preview) {
+        return "WOULD CLEAN $rootCopy"
+    }
+
+    Remove-Item -LiteralPath $rootCopy -Force
+    return "CLEANED $rootCopy"
+}
+function Ensure-PrivateIgnoreBlock {
+    param(
+        [string]$ProjectDir,
+        [switch]$Preview
+    )
+
+    $gitignorePath = Join-Path $ProjectDir ".gitignore"
+    $block = @($PRIVATE_IGNORE_BEGIN) + $PRIVATE_IGNORE_LINES + @($PRIVATE_IGNORE_END)
+
+    if (-not (Test-Path -LiteralPath $gitignorePath)) {
+        if ($Preview) {
+            return "WOULD CREATE $gitignorePath"
+        }
+        Set-Content -LiteralPath $gitignorePath -Value $block -Encoding utf8
+        return "UPDATED $gitignorePath"
+    }
+
+    $existing = Get-Content -LiteralPath $gitignorePath
+    if ($existing -contains $PRIVATE_IGNORE_BEGIN) {
+        return $null
+    }
+
+    if ($Preview) {
+        return "WOULD UPDATE $gitignorePath"
+    }
+
+    Add-Content -LiteralPath $gitignorePath -Value ""
+    Add-Content -LiteralPath $gitignorePath -Value $block
+    return "UPDATED $gitignorePath"
+}
+
+$excludeFile = Join-Path $RULES_DIR "exclude.txt"
+$excluded = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+[void]$excluded.Add("kuro-rules")
+if (Test-Path $excludeFile) {
+    foreach ($line in Get-Content $excludeFile) {
+        if ($line -and $line -notmatch '^\s*#') {
+            [void]$excluded.Add($line.Trim())
         }
     }
 }
 
+$candidateNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$projectsFile = Join-Path $RULES_DIR "projects.txt"
+if (-not (Test-Path -LiteralPath $projectsFile)) {
+    Write-Host "ERROR: projects.txt not found at $projectsFile" -ForegroundColor Red
+    exit 1
+}
+
+foreach ($line in Get-Content $projectsFile) {
+    if ($line -and $line -notmatch '^\s*#') {
+        [void]$candidateNames.Add($line.Trim())
+    }
+}
+
+$trackedProjectPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$projects = @()
+foreach ($name in ($candidateNames | Sort-Object)) {
+    if ($excluded.Contains($name)) { continue }
+    $projectDir = Join-Path $DOCS_DIR $name
+    if (Test-Path -LiteralPath $projectDir) {
+        [void]$trackedProjectPaths.Add([System.IO.Path]::GetFullPath($projectDir))
+        $projects += [pscustomobject]@{
+            Name = $name
+            Path = $projectDir
+        }
+    } else {
+        Write-Host "WARN listed project missing from workspace: $name" -ForegroundColor Yellow
+    }
+}
+
+$untrackedRepos = @()
+Get-ChildItem -Path $DOCS_DIR -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+    $candidatePath = $_.FullName
+    if ($excluded.Contains($_.Name)) { return }
+    if (-not (Test-Path (Join-Path $candidatePath ".git"))) { return }
+    $resolvedCandidate = [System.IO.Path]::GetFullPath($candidatePath)
+    if ($trackedProjectPaths.Contains($resolvedCandidate)) { return }
+    $untrackedRepos += $_.Name
+}
+
 if ($Project) {
-    $projects = $projects | Where-Object { $_ -eq $Project }
+    $projects = $projects | Where-Object { $_.Name -eq $Project }
     if (-not $projects) {
-        Write-Host "ERROR: Project '$Project' not found or excluded" -ForegroundColor Red
+        Write-Host "ERROR: Project '$Project' not found." -ForegroundColor Red
         exit 1
     }
 }
 
-$syncCount = 0
-$skipCount = 0
-$newProjects = @()
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$logEntries = @()
+$logEntries = New-Object System.Collections.Generic.List[string]
+$changeCount = 0
 
 Write-Host "`n=== kuro-rules sync ===" -ForegroundColor Cyan
 Write-Host "Source: $RULES_DIR" -ForegroundColor Gray
-Write-Host "Detected: $($projects.Count) git repos" -ForegroundColor Gray
-Write-Host "Excluded: $($excluded -join ', ')" -ForegroundColor DarkGray
+Write-Host "Targets (projects.txt): $($projects.Count)" -ForegroundColor Gray
+if ($untrackedRepos.Count -gt 0) {
+    Write-Host "Untracked git repositories (NOTICE only): $($untrackedRepos.Count)" -ForegroundColor Yellow
+}
 if ($DryRun) { Write-Host "[DRY RUN]" -ForegroundColor Yellow }
 Write-Host ""
+foreach ($repoName in ($untrackedRepos | Sort-Object)) {
+    Write-Host "NOTICE: $repoName is a git repository under $DOCS_DIR but is not tracked in projects.txt" -ForegroundColor Yellow
+}
+if ($untrackedRepos.Count -gt 0) { Write-Host "" }
 
-foreach ($proj in $projects) {
-    $targetDir = Join-Path $DOCS_DIR $proj
-
-    $projSynced = @()
-    $isNew = $false
+foreach ($projectInfo in $projects) {
+    Write-Host "Project: $($projectInfo.Name)" -ForegroundColor Cyan
+    $context = Get-ProjectDefaults -Name $projectInfo.Name
+    $projectChanges = New-Object System.Collections.Generic.List[string]
 
     foreach ($file in $RULE_FILES) {
-        $src = Join-Path $RULES_DIR $file
-        $dst = Join-Path $targetDir $file
+        $src = Join-Path $RULES_DIR $file.Source
+        $dst = Join-Path $projectInfo.Path $file.Target
+        if (-not (Test-Path -LiteralPath $src)) { continue }
 
-        if (-not (Test-Path $src)) { continue }
-
-        $needsSync = $false
-        if (-not (Test-Path $dst)) {
-            $needsSync = $true
-            $isNew = $true
-        } elseif ($Force) {
-            $needsSync = $true
-        } else {
-            $srcHash = (Get-FileHash $src -Algorithm MD5).Hash
-            $dstHash = (Get-FileHash $dst -Algorithm MD5).Hash
-            if ($srcHash -ne $dstHash) { $needsSync = $true }
-        }
-
-        if ($needsSync) {
-            if ($DryRun) {
-                Write-Host "  WOULD COPY $file -> $proj" -ForegroundColor Cyan
-            } else {
-                Copy-Item -Path $src -Destination $dst -Force
-                Write-Host "  SYNCED $file -> $proj" -ForegroundColor Green
-            }
-            $projSynced += $file
-            $syncCount++
+        $result = Copy-RuleFile -SourcePath $src -DestinationPath $dst -Overwrite:$Force -Preview:$DryRun
+        if ($result) {
+            Write-Host "  $result" -ForegroundColor Green
+            [void]$projectChanges.Add($result)
+            $changeCount++
         }
     }
 
-    if ($isNew -and -not $DryRun) {
-        $newProjects += $proj
+    foreach ($file in $SCAFFOLD_FILES) {
+        $src = Join-Path $RULES_DIR $file.Source
+        $dst = Join-Path $projectInfo.Path $file.Target
+        if (-not (Test-Path -LiteralPath $src)) { continue }
+
+        $result = Ensure-ScaffoldFile `
+            -SourcePath $src `
+            -DestinationPath $dst `
+            -IsTemplate $file.Template `
+            -Context $context `
+            -Overwrite:$ForceScaffold `
+            -Preview:$DryRun
+
+        if ($result) {
+            Write-Host "  $result" -ForegroundColor Yellow
+            [void]$projectChanges.Add($result)
+            $changeCount++
+        }
     }
 
-    if ($projSynced.Count -eq 0) {
-        Write-Host "  $proj -- up to date" -ForegroundColor DarkGray
+    $gitignoreResult = Ensure-PrivateIgnoreBlock -ProjectDir $projectInfo.Path -Preview:$DryRun
+    if ($gitignoreResult) {
+        Write-Host "  $gitignoreResult" -ForegroundColor Yellow
+        [void]$projectChanges.Add($gitignoreResult)
+        $changeCount++
+    }
+
+    $cleanupResult = Remove-LegacyRootCopilotCopy -ProjectDir $projectInfo.Path -Preview:$DryRun
+    if ($cleanupResult) {
+        $cleanupColor = if ($cleanupResult.StartsWith("WARN")) { "Yellow" } else { "Green" }
+        Write-Host "  $cleanupResult" -ForegroundColor $cleanupColor
+        [void]$projectChanges.Add($cleanupResult)
+        $changeCount++
+    }
+
+    if ($projectChanges.Count -eq 0) {
+        Write-Host "  up to date" -ForegroundColor DarkGray
     } else {
-        $logEntries += "- $proj : $($projSynced -join ', ')"
+        [void]$logEntries.Add("- $($projectInfo.Name) : $($projectChanges -join ', ')")
     }
 }
 
 Write-Host "`n=== Summary ===" -ForegroundColor Cyan
-Write-Host "Synced: $syncCount files across $($projects.Count) repos" -ForegroundColor Green
-if ($newProjects.Count -gt 0) {
-    Write-Host "New repos detected: $($newProjects -join ', ')" -ForegroundColor Magenta
-}
-Write-Host ""
+Write-Host "Changes: $changeCount" -ForegroundColor Green
 
-# Update SYNC_LOG.md
 if (-not $DryRun -and $logEntries.Count -gt 0) {
     $logFile = Join-Path $RULES_DIR "SYNC_LOG.md"
-    $logHeader = "## $timestamp`n"
-    $logBody = ($logEntries -join "`n") + "`n`n"
-
-    if (Test-Path $logFile) {
-        $existing = Get-Content $logFile -Raw
-        $newContent = "# Sync Log`n`n" + $logHeader + $logBody + ($existing -replace '^# Sync Log\s*\n*', '')
-    } else {
-        $newContent = "# Sync Log`n`n" + $logHeader + $logBody
+    $existing = if (Test-Path -LiteralPath $logFile) { Get-Content -LiteralPath $logFile -Raw } else { "" }
+    $existingBody = ($existing -replace '^# Sync Log\s*', '').Trim()
+    $newSection = "## $timestamp`r`n" + ($logEntries -join "`r`n") + "`r`n`r`n"
+    $newContent = "# Sync Log`r`n`r`n$newSection"
+    if ($existingBody) {
+        $newContent += $existingBody + "`r`n"
     }
-    Set-Content -Path $logFile -Value $newContent -Encoding UTF8
+    Set-Content -LiteralPath $logFile -Value $newContent -Encoding utf8
     Write-Host "SYNC_LOG.md updated" -ForegroundColor Gray
 }
