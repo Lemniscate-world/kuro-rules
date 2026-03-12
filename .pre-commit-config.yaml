@@ -30,3 +30,12 @@ repos:
       - id: bandit
         args: ["-c", "pyproject.toml", "-r", "sugar/"]
         additional_dependencies: ["bandit[toml]"]
+
+- repo: local
+  hooks:
+    - id: kuro-rules-audit
+      name: kuro-rules audit
+      entry: python audit-rules.py --mode repo --scope all
+      language: system
+      pass_filenames: false
+      stages: [pre-commit]
