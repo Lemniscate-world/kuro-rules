@@ -1,5 +1,35 @@
 ﻿# Sync Log
 
+## 2026-03-21 16:32:10
+- AEther : SYNCED C:\Users\Utilisateur\Documents\AEther\AGENTS.md
+- Astral : SYNCED C:\Users\Utilisateur\Documents\Astral\AGENTS.md
+- Automatons : SYNCED C:\Users\Utilisateur\Documents\Automatons\AGENTS.md
+- BloomDB : SYNCED C:\Users\Utilisateur\Documents\BloomDB\AGENTS.md
+- CADAM : SYNCED C:\Users\Utilisateur\Documents\CADAM\AGENTS.md
+- Charmed : SYNCED C:\Users\Utilisateur\Documents\Charmed\AGENTS.md
+- datalint : SYNCED C:\Users\Utilisateur\Documents\datalint\AGENTS.md
+- Dissect : SYNCED C:\Users\Utilisateur\Documents\Dissect\AGENTS.md
+- Echo : SYNCED C:\Users\Utilisateur\Documents\Echo\AGENTS.md
+- Iroko : SYNCED C:\Users\Utilisateur\Documents\Iroko\AGENTS.md
+- Kapok : SYNCED C:\Users\Utilisateur\Documents\Kapok\AGENTS.md
+- Lemniscate-world : SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AGENTS.md
+- Metatron : SYNCED C:\Users\Utilisateur\Documents\Metatron\AGENTS.md
+- Neural-Again : SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AGENTS.md
+- Neural-Aquarium : SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AGENTS.md
+- NeuralDBG : SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AGENTS.md
+- NeuralDSL : SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AGENTS.md
+- NeuralPaper : SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AGENTS.md
+- Neural-Research : SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AGENTS.md
+- NeuroDose : SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AGENTS.md
+- OpenMind : SYNCED C:\Users\Utilisateur\Documents\OpenMind\AGENTS.md
+- OpenQuant : SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AGENTS.md
+- Playground : SYNCED C:\Users\Utilisateur\Documents\Playground\AGENTS.md
+- Project-Dirac : SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AGENTS.md
+- Sagittarius : SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AGENTS.md
+- TokenWise : SYNCED C:\Users\Utilisateur\Documents\TokenWise\AGENTS.md
+- Vault : SYNCED C:\Users\Utilisateur\Documents\Vault\AGENTS.md
+- Verbose : SYNCED C:\Users\Utilisateur\Documents\Verbose\AGENTS.md
+
 ## 2026-03-19 14:29:28
 - AEther : SYNCED C:\Users\Utilisateur\Documents\AEther\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\AEther\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\AEther\GAD.md, SYNCED C:\Users\Utilisateur\Documents\AEther\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\AEther\.github\copilot-instructions.md
 - Astral : SYNCED C:\Users\Utilisateur\Documents\Astral\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Astral\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Astral\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Astral\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Astral\.github\copilot-instructions.md
