@@ -2608,6 +2608,8 @@ When asking "Did you follow AGENTS.md?", the agent MUST provide:
 52. **Rule 52**: "Skills Tracking: Skill percentages updated in Profile README? [YES/NO]"
 54. **Rule 54**: "PR Analysis Feedback: Corrections list and guideline generated after PR review? [YES/NO]"
 55. **Rule 55**: "PR Ownership: Author required to fix their own PR (no reviewer override)? [YES/NO]"
+  56. **Rule 56**: v0.dev Landing Page Workflow: [YES/NO]
+  57. **Rule 57**: Parallel Validation Tracks: [YES/NO]
 
 ---
 
@@ -2669,6 +2671,8 @@ When asking "Did you follow AGENTS.md?", the agent MUST provide:
 | Rule 52 (Skills Tracking) | Update skill percentages in README |
 | Rule 54 (PR Analysis Feedback) | STOP and generate corrections list and guideline |
 | Rule 55 (PR Ownership) | Deposit feedback; DO NOT fix code on author behalf |
+| Rule 56 (v0.dev) | STOP and generate v0.dev prompt |
+| Rule 57 (Parallel Validation) | STOP and activate missing validation track |
 | **All Rules** | Cease work immediately - Do NOT bypass |
 
 ---
@@ -2681,3 +2685,4 @@ These rules are NON-NEGOTIABLE. They exist to ensure:
 - Security is never compromised
 - Progress is accurately tracked
 - Knowledge persists across sessions
+
