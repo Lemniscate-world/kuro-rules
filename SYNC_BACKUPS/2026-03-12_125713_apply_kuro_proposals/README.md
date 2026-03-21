@@ -1,0 +1,129 @@
+# Kuro Rules
+
+Centralized AI coding guidelines, project isolation rules, and validation scaffold for all my projects.
+
+## How it works
+
+This repository contains the master copies of the shared rules.
+When you install into a project, the core rule files are linked or copied into that project and the project also receives a local validation scaffold.
+
+```mermaid
+graph LR
+    A["kuro-rules/AI_GUIDELINES.md"] -->|sync| B["Iroko/AI_GUIDELINES.md"]
+    A -->|sync| C["Kapok/AI_GUIDELINES.md"]
+    D["kuro-rules/PROJECT_SCAFFOLD/"] -->|seed| E["Project research/ + prompts/"]
+```
+
+Benefit: edit `kuro-rules` once, then resync every project from the same source of truth.
+
+## Usage
+
+### Linux / macOS / WSL
+
+Install in one project:
+
+```bash
+~/Documents/kuro-rules/install.sh /path/to/my-project
+```
+
+Resync all known projects:
+
+```powershell
+pwsh ~/Documents/kuro-rules/sync-rules.ps1 -Force
+```
+
+### Windows PowerShell
+
+Install in one project using copy mode:
+
+```powershell
+.\install.ps1 -TargetDir "C:\Path\To\Project"
+```
+
+Install with symbolic links:
+
+```powershell
+.\install.ps1 -TargetDir "C:\Path\To\Project" -UseSymlinks
+```
+
+Resync all known projects:
+
+```powershell
+.\sync-rules.ps1 -Force
+```
+
+## New machine setup
+
+1. Clone this repo:
+
+```bash
+git clone https://github.com/yourusername/kuro-rules.git ~/Documents/kuro-rules
+```
+
+2. Run `install.sh` or `install.ps1` on your existing projects.
+
+## Shared files
+
+- `AGENTS.md`: full operating contract and enforcement rules.
+- `AI_GUIDELINES.md`: high-level principles for security, quality, and architecture.
+- `GAD.md`: global AI directives and rule summary.
+- `.cursorrules`: Cursor-specific instructions.
+- `copilot-instructions.md`: source file synced into `.github/copilot-instructions.md`.
+- `.pre-commit-config.yaml`: standard git hooks.
+- `MARKETING_MEMORY/`: master due-diligence prompt templates.
+- `PROJECT_SCAFFOLD/`: local prompts, staged `research/` files, and `decision-memo.md`.
+
+
+## Canonical path policy
+
+`copilot-instructions.md` in this repository is the master source file.
+In projects, the canonical installed location is:
+
+- `.github/copilot-instructions.md`
+
+The repository root copy is considered legacy only and should not exist in synced projects.
+The install and sync scripts are expected to remove a redundant root copy automatically when it is byte-identical to the canonical `.github` copy. If the two files differ, the scripts must warn instead of deleting.
+
+## Audit
+
+Run the audit to detect:
+
+- missing repositories listed in `projects.txt`
+- rule file drift
+- missing rule numbers in `AGENTS.md`
+- unexpected root-level `copilot-instructions.md` files
+- non-canonical Copilot instruction placement
+
+Linux / macOS / WSL:
+
+```bash
+python ~/Documents/kuro-rules/audit-rules.py
+```
+
+Windows PowerShell:
+
+```powershell
+python .udit-rules.py
+```
+
+## Project scaffold
+
+Every installed project gets:
+
+- `prompts/perplexity.md`
+- `prompts/grok.md`
+- `research/README.md`
+- `research/evidence-matrix.csv`
+- `research/scorecard.md`
+- `research/open-questions.md`
+- `decision-memo.md`
+
+The scaffold is organized around staged validation:
+
+1. `L0` problem hypothesis
+2. `L1` desk evidence
+3. `L2` expert confirmation
+4. `L3` pilot-ready offer
+5. `L4` willingness-to-pay proof
+
+Private notes, raw interviews, and contact lists are ignored by default through a managed `.gitignore` block and `research/.gitignore`.

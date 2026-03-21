@@ -1,0 +1,28 @@
+project,status,details
+AEther,NOTICE,git repository discovered under base directory but not tracked in projects.txt
+Helium,NOTICE,git repository discovered under base directory but not tracked in projects.txt
+Playground,NOTICE,git repository discovered under base directory but not tracked in projects.txt
+Sagittarius,NOTICE,git repository discovered under base directory but not tracked in projects.txt
+Astral,PASS,mode=workspace; scope=all
+Automatons,PASS,mode=workspace; scope=all
+BloomDB,PASS,mode=workspace; scope=all
+Charmed,PASS,mode=workspace; scope=all
+datalint,PASS,mode=workspace; scope=all
+Dissect,PASS,mode=workspace; scope=all
+Echo,PASS,mode=workspace; scope=all
+Lemniscate-world,PASS,mode=workspace; scope=all
+Metatron,PASS,mode=workspace; scope=all
+Neural-Again,PASS,mode=workspace; scope=all
+Neural-Aquarium,PASS,mode=workspace; scope=all
+Neural-Research,PASS,mode=workspace; scope=all
+NeuralDBG,PASS,mode=workspace; scope=all
+NeuralDSL,PASS,mode=workspace; scope=all
+NeuralPaper,PASS,mode=workspace; scope=all
+NeuroDose,PASS,mode=workspace; scope=all
+OpenQuant,PASS,mode=workspace; scope=all
+Project-Dirac,PASS,mode=workspace; scope=all
+TokenWise,PASS,mode=workspace; scope=all
+Vault,PASS,mode=workspace; scope=all
+Verbose,PASS,mode=workspace; scope=all
+Iroko,PASS,mode=workspace; scope=all
+Kapok,PASS,mode=workspace; scope=all

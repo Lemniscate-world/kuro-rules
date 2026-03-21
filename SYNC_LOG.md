@@ -1,3 +1,115 @@
+﻿# Sync Log
+
+## 2026-03-19 14:29:28
+- AEther : SYNCED C:\Users\Utilisateur\Documents\AEther\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\AEther\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\AEther\GAD.md, SYNCED C:\Users\Utilisateur\Documents\AEther\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\AEther\.github\copilot-instructions.md
+- Astral : SYNCED C:\Users\Utilisateur\Documents\Astral\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Astral\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Astral\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Astral\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Astral\.github\copilot-instructions.md
+- Automatons : SYNCED C:\Users\Utilisateur\Documents\Automatons\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Automatons\.github\copilot-instructions.md
+- BloomDB : SYNCED C:\Users\Utilisateur\Documents\BloomDB\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\GAD.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\BloomDB\.github\copilot-instructions.md
+- CADAM : SYNCED C:\Users\Utilisateur\Documents\CADAM\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\GAD.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\CADAM\.github\copilot-instructions.md
+- Charmed : SYNCED C:\Users\Utilisateur\Documents\Charmed\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Charmed\.github\copilot-instructions.md
+- datalint : SYNCED C:\Users\Utilisateur\Documents\datalint\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\datalint\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\datalint\GAD.md, SYNCED C:\Users\Utilisateur\Documents\datalint\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\datalint\.github\copilot-instructions.md
+- Dissect : SYNCED C:\Users\Utilisateur\Documents\Dissect\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Dissect\.github\copilot-instructions.md
+- Echo : SYNCED C:\Users\Utilisateur\Documents\Echo\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Echo\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Echo\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Echo\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Echo\.github\copilot-instructions.md
+- Helium : SYNCED C:\Users\Utilisateur\Documents\Helium\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Helium\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Helium\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Helium\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Helium\.github\copilot-instructions.md
+- Iroko : SYNCED C:\Users\Utilisateur\Documents\Iroko\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Iroko\.github\copilot-instructions.md
+- Kapok : SYNCED C:\Users\Utilisateur\Documents\Kapok\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Kapok\.github\copilot-instructions.md
+- Lemniscate-world : SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\.github\copilot-instructions.md
+- Metatron : SYNCED C:\Users\Utilisateur\Documents\Metatron\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Metatron\.github\copilot-instructions.md
+- Neural-Again : SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\.github\copilot-instructions.md
+- Neural-Aquarium : SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\.github\copilot-instructions.md
+- NeuralDBG : SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\.github\copilot-instructions.md
+- NeuralDSL : SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\.github\copilot-instructions.md
+- NeuralPaper : SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\.github\copilot-instructions.md
+- Neural-Research : SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\.github\copilot-instructions.md
+- NeuroDose : SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\.github\copilot-instructions.md
+- OpenMind : SYNCED C:\Users\Utilisateur\Documents\OpenMind\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\GAD.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\OpenMind\.github\copilot-instructions.md
+- OpenQuant : SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\GAD.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\.github\copilot-instructions.md
+- Playground : SYNCED C:\Users\Utilisateur\Documents\Playground\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Playground\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Playground\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Playground\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Playground\.github\copilot-instructions.md
+- Project-Dirac : SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\.github\copilot-instructions.md
+- Sagittarius : SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\.github\copilot-instructions.md
+- TokenWise : SYNCED C:\Users\Utilisateur\Documents\TokenWise\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\GAD.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\TokenWise\.github\copilot-instructions.md
+- Vault : SYNCED C:\Users\Utilisateur\Documents\Vault\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Vault\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Vault\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Vault\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Vault\.github\copilot-instructions.md
+- Verbose : SYNCED C:\Users\Utilisateur\Documents\Verbose\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Verbose\.github\copilot-instructions.md
+
+## 2026-03-19 14:22:14
+- Helium : CLEANED C:\Users\Utilisateur\Documents\Helium\copilot-instructions.md
+- Playground : CLEANED C:\Users\Utilisateur\Documents\Playground\copilot-instructions.md
+- Sagittarius : CLEANED C:\Users\Utilisateur\Documents\Sagittarius\copilot-instructions.md
+
+## 2026-03-19 14:21:56
+- AEther : SYNCED C:\Users\Utilisateur\Documents\AEther\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\AEther\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\AEther\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\AEther\.github\copilot-instructions.md
+- Astral : SYNCED C:\Users\Utilisateur\Documents\Astral\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Astral\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Astral\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Astral\.github\copilot-instructions.md
+- Automatons : SYNCED C:\Users\Utilisateur\Documents\Automatons\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Automatons\.github\copilot-instructions.md
+- BloomDB : SYNCED C:\Users\Utilisateur\Documents\BloomDB\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\BloomDB\.github\copilot-instructions.md
+- CADAM : SYNCED C:\Users\Utilisateur\Documents\CADAM\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\CADAM\.github\copilot-instructions.md
+- Charmed : SYNCED C:\Users\Utilisateur\Documents\Charmed\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Charmed\.github\copilot-instructions.md
+- datalint : SYNCED C:\Users\Utilisateur\Documents\datalint\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\datalint\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\datalint\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\datalint\.github\copilot-instructions.md
+- Dissect : SYNCED C:\Users\Utilisateur\Documents\Dissect\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Dissect\.github\copilot-instructions.md
+- Echo : SYNCED C:\Users\Utilisateur\Documents\Echo\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Echo\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Echo\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Echo\.github\copilot-instructions.md
+- Helium : SYNCED C:\Users\Utilisateur\Documents\Helium\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Helium\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Helium\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Helium\.github\copilot-instructions.md, WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Helium
+- Iroko : SYNCED C:\Users\Utilisateur\Documents\Iroko\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Iroko\.github\copilot-instructions.md
+- Kapok : SYNCED C:\Users\Utilisateur\Documents\Kapok\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Kapok\.github\copilot-instructions.md
+- Lemniscate-world : SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\.github\copilot-instructions.md
+- Metatron : SYNCED C:\Users\Utilisateur\Documents\Metatron\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Metatron\.github\copilot-instructions.md
+- Neural-Again : SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\.github\copilot-instructions.md
+- Neural-Aquarium : SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\.github\copilot-instructions.md
+- NeuralDBG : SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\.github\copilot-instructions.md
+- NeuralDSL : SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\.github\copilot-instructions.md
+- NeuralPaper : SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\.github\copilot-instructions.md
+- Neural-Research : SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\.github\copilot-instructions.md
+- NeuroDose : SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\.github\copilot-instructions.md
+- OpenMind : SYNCED C:\Users\Utilisateur\Documents\OpenMind\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\OpenMind\.github\copilot-instructions.md
+- OpenQuant : SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\.github\copilot-instructions.md
+- Playground : SYNCED C:\Users\Utilisateur\Documents\Playground\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Playground\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Playground\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Playground\.github\copilot-instructions.md, WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Playground
+- Project-Dirac : SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\.github\copilot-instructions.md
+- Sagittarius : SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\.github\copilot-instructions.md, WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Sagittarius
+- TokenWise : SYNCED C:\Users\Utilisateur\Documents\TokenWise\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\TokenWise\.github\copilot-instructions.md
+- Vault : SYNCED C:\Users\Utilisateur\Documents\Vault\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Vault\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Vault\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Vault\.github\copilot-instructions.md
+- Verbose : SYNCED C:\Users\Utilisateur\Documents\Verbose\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Verbose\.github\copilot-instructions.md
+
+## 2026-03-19 14:17:03
+- AEther : SYNCED C:\Users\Utilisateur\Documents\AEther\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\AEther\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\AEther\GAD.md, SYNCED C:\Users\Utilisateur\Documents\AEther\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\AEther\.github\copilot-instructions.md
+- Helium : SYNCED C:\Users\Utilisateur\Documents\Helium\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Helium\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Helium\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Helium\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Helium\.github\copilot-instructions.md, WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Helium
+- Playground : SYNCED C:\Users\Utilisateur\Documents\Playground\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Playground\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Playground\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Playground\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Playground\.github\copilot-instructions.md, WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Playground
+- Sagittarius : SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Sagittarius\.github\copilot-instructions.md, WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Sagittarius
+
+## 2026-03-19 14:13:22
+- Astral : SYNCED C:\Users\Utilisateur\Documents\Astral\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Astral\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Astral\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Astral\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Astral\.github\copilot-instructions.md
+- Automatons : SYNCED C:\Users\Utilisateur\Documents\Automatons\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Automatons\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Automatons\.github\copilot-instructions.md
+- BloomDB : SYNCED C:\Users\Utilisateur\Documents\BloomDB\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\GAD.md, SYNCED C:\Users\Utilisateur\Documents\BloomDB\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\BloomDB\.github\copilot-instructions.md
+- CADAM : SYNCED C:\Users\Utilisateur\Documents\CADAM\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\GAD.md, SYNCED C:\Users\Utilisateur\Documents\CADAM\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\CADAM\.github\copilot-instructions.md
+- Charmed : SYNCED C:\Users\Utilisateur\Documents\Charmed\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Charmed\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Charmed\.github\copilot-instructions.md
+- datalint : SYNCED C:\Users\Utilisateur\Documents\datalint\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\datalint\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\datalint\GAD.md, SYNCED C:\Users\Utilisateur\Documents\datalint\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\datalint\.github\copilot-instructions.md
+- Dissect : SYNCED C:\Users\Utilisateur\Documents\Dissect\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Dissect\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Dissect\.github\copilot-instructions.md
+- Echo : SYNCED C:\Users\Utilisateur\Documents\Echo\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Echo\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Echo\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Echo\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Echo\.github\copilot-instructions.md
+- Iroko : SYNCED C:\Users\Utilisateur\Documents\Iroko\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Iroko\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Iroko\.github\copilot-instructions.md
+- Kapok : SYNCED C:\Users\Utilisateur\Documents\Kapok\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Kapok\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Kapok\.github\copilot-instructions.md
+- Lemniscate-world : SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Lemniscate-world\.github\copilot-instructions.md
+- Metatron : SYNCED C:\Users\Utilisateur\Documents\Metatron\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Metatron\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Metatron\.github\copilot-instructions.md
+- Neural-Again : SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Again\.github\copilot-instructions.md
+- Neural-Aquarium : SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Aquarium\.github\copilot-instructions.md
+- NeuralDBG : SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralDBG\.github\copilot-instructions.md
+- NeuralDSL : SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralDSL\.github\copilot-instructions.md
+- NeuralPaper : SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuralPaper\.github\copilot-instructions.md
+- Neural-Research : SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Neural-Research\.github\copilot-instructions.md
+- NeuroDose : SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\GAD.md, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\NeuroDose\.github\copilot-instructions.md
+- OpenMind : SYNCED C:\Users\Utilisateur\Documents\OpenMind\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\GAD.md, SYNCED C:\Users\Utilisateur\Documents\OpenMind\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\OpenMind\.github\copilot-instructions.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\decision-memo.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\prompts\perplexity.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\prompts\grok.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\research\README.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\research\evidence-matrix.csv, CREATED C:\Users\Utilisateur\Documents\OpenMind\research\scorecard.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\research\open-questions.md, CREATED C:\Users\Utilisateur\Documents\OpenMind\research\.gitignore, UPDATED C:\Users\Utilisateur\Documents\OpenMind\.gitignore
+- OpenQuant : SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\GAD.md, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\OpenQuant\.github\copilot-instructions.md
+- Project-Dirac : SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Project-Dirac\.github\copilot-instructions.md
+- TokenWise : SYNCED C:\Users\Utilisateur\Documents\TokenWise\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\GAD.md, SYNCED C:\Users\Utilisateur\Documents\TokenWise\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\TokenWise\.github\copilot-instructions.md
+- Vault : SYNCED C:\Users\Utilisateur\Documents\Vault\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Vault\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Vault\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Vault\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Vault\.github\copilot-instructions.md
+- Verbose : SYNCED C:\Users\Utilisateur\Documents\Verbose\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\GAD.md, SYNCED C:\Users\Utilisateur\Documents\Verbose\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\Verbose\.github\copilot-instructions.md
+
+## 2026-03-15 22:30:00
+- Global: ADDED RULE 46: Web/GUI Debugging Protocol (Web-Debug-7).
+- SYNCED: AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md in kuro-rules.
+- SYNCED: CADAM project local rules updated to parity.
+
+## 2026-03-12 14:20:31
+- Helium : WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Helium
+- Playground : WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Playground
+- Sagittarius : WARN legacy root copilot-instructions.md differs from canonical .github copy in C:\Users\Utilisateur\Documents\Sagittarius
+
 ## 2026-03-12 13:20
 - Implemented proposals A-G in kuro-rules.
 - Added local pre-commit audit hook using repo mode: `python audit-rules.py --mode repo --scope all`.
@@ -8,7 +120,7 @@
 - Resynchronized tracked repositories after master rule changes.
 - Final verification passed in both repo mode and workspace mode.
 
-﻿# Sync Log
+Ã¯Â»Â¿# Sync Log
 
 ## 2026-03-12 12:58:54
 - AEther : SYNCED C:\Users\Utilisateur\Documents\AEther\AGENTS.md, SYNCED C:\Users\Utilisateur\Documents\AEther\AI_GUIDELINES.md, SYNCED C:\Users\Utilisateur\Documents\AEther\GAD.md, SYNCED C:\Users\Utilisateur\Documents\AEther\.cursorrules, SYNCED C:\Users\Utilisateur\Documents\AEther\.github\copilot-instructions.md
@@ -65,7 +177,7 @@
 - Status: All rule files now synchronized with kuro-rules master
 
 
-ï»¿# Sync Log
+ÃƒÂ¯Ã‚Â»Ã‚Â¿# Sync Log
 
 
 
@@ -321,7 +433,7 @@
 
 
 
-## [2026-03-01] â€” Sync Rule 34 & File Protection
+## [2026-03-01] ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Sync Rule 34 & File Protection
 
 **Author**: Antigravity
 
@@ -1141,25 +1253,25 @@ The following rule files were synced to all projects:
 
 |---------|-----------|--------------|------------------|--------|-------------------------|
 
-| Neural-Again | Ã¢Å“â€¦ Created | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| Neural-Again | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Created | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| Neural-Aquarium | Ã¢Å“â€¦ Created | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| Neural-Aquarium | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Created | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| Neural-Research | Ã¢Å“â€¦ Created | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| Neural-Research | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Created | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| NeuralDSL | Ã¢Å“â€¦ Created | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| NeuralDSL | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Created | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| Project-Dirac | Ã¢Å“â€¦ Created | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| Project-Dirac | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Created | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| OpenQuant | Ã¢Å“â€¦ Created | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| OpenQuant | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Created | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| Echo | Ã¢Å“â€¦ Current | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| Echo | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Current | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| NeuralDBG | Ã¢Å“â€¦ Source | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced | Ã¢Å“â€¦ Synced |
+| NeuralDBG | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Source | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Synced |
 
-| Astral | - | - | Ã¢Å“â€¦ Existing | - | Ã¢Å“â€¦ Existing |
+| Astral | - | - | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Existing | - | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Existing |
 
-| Charmed | - | - | Ã¢Å“â€¦ Existing | - | Ã¢Å“â€¦ Existing |
+| Charmed | - | - | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Existing | - | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Existing |
 
 
 
@@ -1224,18 +1336,18 @@ All projects now follow the same strict, enforceable rules for AI agent developm
 
 ---
 
-## SYNC ENTRY â€“ 2026-03-11
+## SYNC ENTRY ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ 2026-03-11
 
 ### Action: Manual Sync to Helium Project
 
 **Project**: Helium
 **Files Synced**:
-- `.cursorrules` â€“ Synced from kuro-rules master
-- `AGENTS.md` â€“ Synced from kuro-rules master
-- `AI_GUIDELINES.md` â€“ Synced from kuro-rules master
-- `copilot-instructions.md` â€“ Synced from kuro-rules master
-- `GAD.md` â€“ Synced from kuro-rules master
-- `acquisition_tracker.md` â€“ Already identical (no change needed)
+- `.cursorrules` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Synced from kuro-rules master
+- `AGENTS.md` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Synced from kuro-rules master
+- `AI_GUIDELINES.md` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Synced from kuro-rules master
+- `copilot-instructions.md` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Synced from kuro-rules master
+- `GAD.md` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Synced from kuro-rules master
+- `acquisition_tracker.md` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Already identical (no change needed)
 
 **Reason**: User requested verification of rule sync status. Comparison showed 5 out of 6 files were out of sync (missing Rules 41, 45, 47 and encoding differences). All files now synced to match kuro-rules master copy.
 
@@ -1267,3 +1379,4 @@ All projects now follow the same strict, enforceable rules for AI agent developm
 - `SYNC_BACKUPS/2026-03-12_140026_final_h_plan_notice`
 
 **Timestamp**: 2026-03-12T14:03:16Z
+

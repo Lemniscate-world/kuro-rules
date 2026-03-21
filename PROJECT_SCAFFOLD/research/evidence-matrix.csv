@@ -1,0 +1,2 @@
+venture,claim,source_url,source_date,geo,signal_type,confidence,what_it_proves,open_question
+{{PROJECT_NAME}},{{CLAIM}},{{SOURCE_URL}},{{SOURCE_DATE}},{{PRIMARY_GEO}},existence du marche,medium,{{WHAT_IT_PROVES}},{{OPEN_QUESTION}}

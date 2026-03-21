@@ -119,7 +119,7 @@ To prevent "milestone amnesia," development MUST automatically lock when progres
 ## Rule 21: Intelligence Harvester — MANDATORY
 L'agent a l'obligation de collecter et d'analyser au moins 3 sources externes (Reddit, App Store, Forums) pour identifier les "Pain Points" utilisateurs et les failles des concurrents à chaque jalon (10, 25, 50, 75, 90, 95%). Cette analyse doit être consignée avant toute validation.
 
-## Security Hardening — Non-Negotiable
+## Security Hardening - Non-Negotiable
 Every project must be secure by default.
 - **Never** log, print, or commit API keys, tokens, or secrets.
 - **Always** validate and sanitize user input to prevent injection.
@@ -233,9 +233,17 @@ Every AI session MUST produce a traceable record of what was done. This ensures 
 
 **Principe**: Ne pas ecrire une seule ligne de code de production avant d'avoir valide que le probleme existe et est douloureux.
 
+**Gate type de projet (obligatoire)**: Toujours demander **"Quel type de projet s'agit-il ?"** et classer:
+- Projet demande par un client
+- Probleme deja verifie (validation existante)
+- Projet personnel
+- Projet Startup (Mom Test requis)
+
+Si le projet est **client**, **personnel**, ou **probleme verifie**, le Mom Test est **NON requis** (R2 = N/A) et on passe directement a la livraison/solution.
+
 ### Regle absolue
-- **Progress 0-10%**: Mom Test uniquement. Pas de code, pas d'architecture.
-- **Gate**: Le passage a 10%+ necessite une validation explicite du probleme.
+- **Si Mom Test requis**: **Progress 0-10%** = Mom Test uniquement. Pas de code, pas d'architecture.
+- **Gate**: Le passage a 10%+ necessite une validation explicite du probleme (si R2 n'est pas N/A).
 - **Criteres de validation**:
   - Minimum 5 interviews avec la target utilisateur
   - Au moins 3 personnes ont mentionne le probleme spontanement
@@ -270,7 +278,7 @@ Every AI session MUST produce a traceable record of what was done. This ensures 
 - [ ] **Mise à jour de `acquisition_tracker.md` (MANDATORY)** — Tout post (Reddit, Discord, X) pour le Mom Test ou le Growth DOIT être consigné dans `~/Documents/kuro-rules/acquisition_tracker.md` avec son résultat (ban, succès, réponse) pour créer une mémoire collective d'acquisition.
 
 ### Integration Progress Tracking
-Le Mom Test represente **les premiers 10%** du progress. Un projet ne peut pas depasser 10% sans:
+Le Mom Test represente **les premiers 10%** du progress **quand il est requis**. Un projet ne peut pas depasser 10% sans:
 - `mom_test_results.md` complete
 - Decision documentee dans `decision.md`
 - Mise à jour de `acquisition_tracker.md` avec les plateformes testées.
@@ -320,7 +328,7 @@ To ensure strict adherence to rules:
 
 ## Periodic Validation (MANDATORY)
 
-At progress milestones (25%, 50%, 75%, 90%, 95%), the product MUST be validated:
+At progress milestones (25%, 50%, 75%, 90%, 95%), the product MUST be validated (Mom Test if required):
 
 | Milestone | Required Validation |
 |-----------|-------------------|
@@ -359,7 +367,7 @@ When ANY rule file is updated, ALL rule files MUST be updated:
 - AGENTS.md
 - AI_GUIDELINES.md
 - .cursorrules
-- copilot-instructions.md
+- copilot-instructions.md (master source synced into project `.github/copilot-instructions.md` targets)
 - GAD.md
 
 **Enforcement**: SYNC immediately to all files, document in SYNC_LOG.md.
@@ -398,6 +406,21 @@ Before transitioning to the next phase, the user MUST demonstrate deep understan
 5. "What did you learn that surprised you?"
 
 **Enforcement**: STOP and provide deep explanation before phase transition.
+
+---
+
+## RULE 24: Marketing & Outreach Guardian - MANDATORY
+Avant tout lancement public, outreach, ou campagne marketing, l'agent DOIT preparer les fondations de communication.
+
+### Verification minimum
+- Identifier au moins 3 communautes ou canaux pertinents pour le projet.
+- Preparer un canal de feedback actif et surveille.
+- Preparer des templates d'annonce, bug report, et feature request.
+- Verifier que le contenu marketing respecte le scope reel du produit.
+
+### Enforcement
+- Pas de lancement public sans canal de retour ni templates prets.
+- Pas de promesse marketing qui depasse le scope reel valide.
 
 ---
 
@@ -675,7 +698,7 @@ IF a session starts:
 ## RULE 33: Global Rule Parity and Mandatory Cross-Branch Sync -- CRITICAL
 
 ### Rule
-The AI rule set (AGENTS.md, AI_GUIDELINES.md, .cursorrules) represents the immutable "Physical Laws" of the repository ecosystem. Rules are **global** and MUST NOT vary between branches. 
+The AI rule set (AGENTS.md, AI_GUIDELINES.md, .cursorrules, GAD.md, and the master copilot-instructions.md source synced into `.github/copilot-instructions.md`) represents the immutable "Physical Laws" of the repository ecosystem. Rules are **global** and MUST NOT vary between branches. 
 
 ### Authority Restriction
 Only branches with the **`ceo/`** scope have the authority to modify rule files. Any rule changes attempted on `infra/`, `feat/`, or other branches MUST be rejected by the AI Agent. Non-CEO branches MUST merge rule updates FROM a `ceo/` branch to maintain parity.
@@ -704,3 +727,78 @@ IF Linear search returns issues from multiple projects:
   ACTION: Filter results and present ONLY the relevant context.
   ACTION: Ask for clarification if project selection is ambiguous.
 ```
+
+## RULE 35: CEO Progress Visibility in Linear - MANDATORY
+- The CEO's current work, completed work, and upcoming work MUST be visible in Linear.
+- If this visibility is missing, the agent must stop and restore it before continuing coordinated work.
+
+## RULE 36: Automated Session Status Report - MANDATORY
+- At session start, report current branch, progress, pending Linear work, and blockers.
+- This report is the session gate for coordinated work.
+
+## RULE 37: CEO Real-Time Activity Sync to Linear - CRITICAL
+- Session progress and CEO activity MUST be synchronized to Linear in near real time.
+- If sync is stale or broken, stop and repair visibility first.
+
+## RULE 38: Mandatory Code Review After Commit - MANDATORY
+- Rule work MUST not continue after a push without a completed review.
+- Pending review is a hard blocker for continued rule modification.
+
+## RULE 39: Pre-Marketing Pain-Point Due Diligence - MANDATORY
+Avant tout marketing, outreach, landing page, waitlist, paid acquisition, ou nouveau discours produit sur un pain point, l'agent DOIT executer une recherche desk structuree.
+
+### Verification minimum
+- Executer le prompt local `prompts/perplexity.md` pour les sources citees.
+- Executer le prompt local `prompts/grok.md` pour les signaux sociaux, tweets, blogs recents, et forums.
+- Privilegier les sources 2025-2026, ou une source 2024 seulement si elle est structurelle et officielle.
+- Documenter ce que les sources prouvent, ce qu'elles ne prouvent PAS, et si 3-5 appels experts restent obligatoires.
+- Si le doute restant porte sur la volonte de payer, la conformite, ou l'integration, la desk research ne suffit pas.
+
+### Enforcement
+- Pas de claim marketing presente comme un fait si cette verification n'est pas faite.
+- Pas de "pain point valide" par simple intuition, ni par hype generale de marche.
+- Les templates Perplexity et Grok sont la base par defaut, pas une option.
+
+## RULE 40: CEO Complete Linear Dashboard Visibility - MANDATORY
+- Linear must expose the full CEO dashboard: done, in progress, backlog, blockers, and current progress.
+- If the dashboard is incomplete, stop and restore full visibility.
+## RULE 45: Mandatory Pull Request Analysis and Improvement — MANDATORY
+
+### Rule
+Every Pull Request (PR) MUST be strictly analyzed for code quality, security, and architectural alignment. Minimal compliance is NOT sufficient; the AI Agent MUST proactively identify and implement improvements to technical debt, documentation, or performance.
+
+### Verification Checklist
+```
+AFTER reviewing a PR:
+  1. ANALYZE: Does this diff strictly improve the codebase?
+  2. CHECK: Are all Rule 5/6/18 criteria met?
+  3. IDENTIFY: What are the 2nd/3rd order consequences (Rule 17)?
+  4. IMPROVE: Have we refactored related technical debt?
+```
+
+### Enforcement
+```
+IF a PR only meets minimal requirements without improvement:
+  ACTION: STOP and propose 2+ specific improvements.
+  ACTION: Do NOT approve or merge until improvements are integrated.
+```
+
+---
+
+## RULE 46: Web/GUI Debugging Protocol – MANDATORY
+
+### Rule
+The AI Agent MUST follow a strictly systematic protocol when debugging web applications or GUIs to prevent "silent regressions" and "ghost bugs".
+
+### Protocol Steps (The "Web-Debug-7" Protocol)
+1. **Console First**: Inspect browser console for errors and warnings. Report the exact error message and stack trace.
+2. **Network Inspection**: For any data flow issue, inspect the Network tab. Check HTTP status codes (2xx, 4xx, 5xx), response payloads, and latency.
+3. **State Audit**: Verify component state, props, and context (React/Vue/Svelte). Ensure the frontend state is synchronized with the backend.
+4. **Backend Correlation**: Cross-reference frontend errors with backend logs (FastAPI, Node.js, etc.) using timestamps.
+5. **DOM/Style Verification**: Inspect the DOM for layout issues, hidden elements (z-index, display: none), and ID collisions.
+6. **Storage & Auth**: Verify LocalStorage, SessionStorage, and Cookies. Ensure authentication tokens are valid and not expired.
+7. **Regression Suite**: After any fix, run the entire UI and E2E test suite (Playwright, Cypress, Vitest) to ensure no regressions.
+
+### Enforcement
+- NEVER declare a bug "fixed" without providing evidence from at least 3 of the 7 steps above.
+- IF a bug is complex, CREATE a "Debug Trace" artifact documenting the findings from steps 1-4.

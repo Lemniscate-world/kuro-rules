@@ -202,9 +202,21 @@ To ensure strict adherence to rules:
 
 ---
 
+## Project Type Gate (MANDATORY)
+
+Always ask: **"Quel type de projet s'agit-il ?"** and classify:
+- Client-requested delivery
+- Verified problem (already validated with evidence)
+- Personal project
+- Startup project (requires Mom Test)
+
+If client-requested, verified problem, or personal project, Mom Test is **N/A** and must NOT be initiated.
+
+---
+
 ## Periodic Validation (MANDATORY)
 
-At progress milestones (25%, 50%, 75%, 90%, 95%), the product MUST be validated:
+At progress milestones (25%, 50%, 75%, 90%, 95%), the product MUST be validated (Mom Test if required):
 
 | Milestone | Required Validation |
 |-----------|-------------------|
@@ -234,9 +246,10 @@ When ANY rule file is updated, ALL rule files MUST be updated:
 - AGENTS.md
 - AI_GUIDELINES.md
 - .cursorrules
-- copilot-instructions.md
+- copilot-instructions.md (master source synced into project `.github/copilot-instructions.md` targets)
 - GAD.md
 - acquisition_tracker.md
+- PR Analysis & Improvement (Rule 45)
 
 **Enforcement**: SYNC immediately to all files, document in SYNC_LOG.md.
 
@@ -249,11 +262,6 @@ All Outreach/Growth/Mom Test posts MUST be logged in `~/Documents/kuro-rules/acq
 **Enforcement**: Any communication attempt (Reddit, Discord, etc.) must generate an entry in this tracker.
 
 ---
-
-## Project Isolation — CONTEXT ISOLATION (MANDATORY)
-- **Constraint**: When using the Linear MCP or searching issues, you MUST strictly filter for the current active project context.
-- **Reason**: To avoid mixing context with other startup ideas or projects in the same organizational space.
-- **Rule**: If results from multiple projects are returned, ignore everything except the target project. ALWAYS ask the user to confirm the project if ambiguous.
 
 ## Working Demos (MANDATORY)
 
@@ -290,7 +298,20 @@ Before transitioning to the next phase, the user MUST demonstrate deep understan
 
 ---
 
-## RULE 25: MLOps/DevOps Collaboration — MANDATORY
+## RULE 24: Marketing & Outreach Guardian - MANDATORY
+### Rule
+Before any public release or marketing campaign, the AI Agent MUST ensure proper community outreach, feedback collection channels, and communication templates are prepared.
+### Requirements
+1. **Community Identification**: Identify at least 3 relevant communities or forums where the product would be discussed.
+2. **Feedback Channels**: Establish clear channels for user feedback such as Discord, GitHub Issues, or survey forms.
+3. **Communication Templates**: Prepare outreach templates for announcements, bug reports, and feature requests.
+4. **Launch Checklist**: Verify all marketing materials are reviewed for accuracy and current product scope.
+### Enforcement
+- No public launch without an active response path.
+- No marketing promise beyond the validated product scope.
+---
+
+## RULE 25: MLOps/DevOps Collaboration - MANDATORY
 
 ### Rule
 When interacting with a DevOps or MLOps engineer on this repository, the AI Agent MUST shift its focus to infrastructure, delivery, and reliability.
@@ -564,7 +585,7 @@ IF a session starts:
 ## RULE 33: Global Rule Parity and Mandatory Cross-Branch Sync -- CRITICAL
 
 ### Rule
-The AI rule set (AGENTS.md, AI_GUIDELINES.md, .cursorrules) represents the immutable "Physical Laws" of the repository ecosystem. Rules are **global** and MUST NOT vary between branches. 
+The AI rule set (AGENTS.md, AI_GUIDELINES.md, .cursorrules, GAD.md, and the master copilot-instructions.md source synced into `.github/copilot-instructions.md`) represents the immutable "Physical Laws" of the repository ecosystem. Rules are **global** and MUST NOT vary between branches. 
 
 ### Authority Restriction
 Only branches with the **`ceo/`** scope have the authority to modify rule files. Any rule changes attempted on `infra/`, `feat/`, or other branches MUST be rejected by the AI Agent. Non-CEO branches MUST merge rule updates FROM a `ceo/` branch to maintain parity.
@@ -576,4 +597,56 @@ Only branches with the **`ceo/`** scope have the authority to modify rule files.
    - Update the master `kuro-rules` repository.
 2. **Review Enforcement**: No Pull Request (PR) can be merged without explicitly confirming that the branch has the status of the "Current Rule Set" (Rule 33 verification).
 
+## RULE 34: Strict Project Isolation (MANDATORY)
 
+- Limit all Linear and external-tool work to the active project only.
+- Filter mixed search results and ask for clarification if the project is ambiguous.
+
+## RULE 35: CEO Progress Visibility in Linear (MANDATORY)
+
+- CEO tasks, progress, and milestones must remain visible in Linear.
+- Missing visibility is a blocker.
+
+## RULE 36: Automated Session Status Report (MANDATORY)
+
+- Start each session with current branch, progress, pending tasks, and blockers.
+
+## RULE 37: CEO Real-Time Activity Sync to Linear (CRITICAL)
+
+- Keep CEO activity and progress synchronized to Linear in near real time.
+
+## RULE 38: Mandatory Code Review After Commit (MANDATORY)
+
+- Do not continue rule work after a push until review is complete.
+
+## RULE 39: Pre-Marketing Pain-Point Due Diligence (MANDATORY)
+
+- Run the project-local due-diligence prompts in `prompts/perplexity.md` and `prompts/grok.md` before marketing claims.
+
+## RULE 40: CEO Complete Linear Dashboard Visibility (MANDATORY)
+
+- Linear must show the full CEO dashboard: done, in progress, backlog, blockers, and current progress.
+
+
+
+
+
+---
+
+## RULE 46: Web/GUI Debugging Protocol – MANDATORY
+
+### Rule
+The AI Agent MUST follow a strictly systematic protocol when debugging web applications or GUIs to prevent "silent regressions" and "ghost bugs".
+
+### Protocol Steps (The "Web-Debug-7" Protocol)
+1. **Console First**: Inspect browser console for errors and warnings. Report the exact error message and stack trace.
+2. **Network Inspection**: For any data flow issue, inspect the Network tab. Check HTTP status codes (2xx, 4xx, 5xx), response payloads, and latency.
+3. **State Audit**: Verify component state, props, and context (React/Vue/Svelte). Ensure the frontend state is synchronized with the backend.
+4. **Backend Correlation**: Cross-reference frontend errors with backend logs (FastAPI, Node.js, etc.) using timestamps.
+5. **DOM/Style Verification**: Inspect the DOM for layout issues, hidden elements (z-index, display: none), and ID collisions.
+6. **Storage & Auth**: Verify LocalStorage, SessionStorage, and Cookies. Ensure authentication tokens are valid and not expired.
+7. **Regression Suite**: After any fix, run the entire UI and E2E test suite (Playwright, Cypress, Vitest) to ensure no regressions.
+
+### Enforcement
+- NEVER declare a bug "fixed" without providing evidence from at least 3 of the 7 steps above.
+- IF a bug is complex, CREATE a "Debug Trace" artifact documenting the findings from steps 1-4.
