@@ -133,23 +133,35 @@ ELSE IF any checklist item is FALSE:
 
 Every project MUST track progress in `SESSION_SUMMARY.md` with PESSIMISTIC estimates.
 
-### Progress Calculation
+### Progress Calculation (Extreme Rigor)
 
-| Component | Weight | When Complete |
+Progress is calculated as: `Raw_Total * Quality_Multiplier - Validation_Penalties`
 
-|-----------|--------|---------------|
+#### 1. Baseline Weights (Raw_Total max 100%)
+| Component | Weight | Criteria for 1.0x completion |
+|-----------|--------|-------------------------------|
+| **Mom Test** | 10% | 5+ interviews, `mom_test_results.md` filled, `decision.md` signed. |
+| **Core: Data Extraction** | 10% | Hooks/Probes working, zero-overhead, compiler-aware. |
+| **Core: Semantic Logic** | 10% | Raw data -> semantic events (health states, regime shifts). |
+| **Core: Reasoning Engine** | 10% | Causal inference, hypothesis ranking, graph export (Mermaid). |
+| **Core: Scale/Robustness** | 10% | Stress tested (large models), zero memory leaks, distributed safe. |
+| **Test Coverage (60%+)** | 20% | `pytest --cov` report showing exact percentage. |
+| **Security & Hardening** | 10% | `bandit` 0 issues, `safety` 0 critical vulnerabilities. |
+| **CI/CD & DevOps** | 10% | Pipeline passing on `main`, PR gates enforced, CD configured. |
+| **Documentation & Mkt** | 10% | README, CHANGELOG, API docs, and 1+ Marketing Test metrics. |
 
-| Mom Test | 10% | All deliverables done, decision made |
+#### 2. Quality Multiplier (0.5x to 1.0x)
+Apply a multiplier to each completed component based on quality:
+- **1.0x**: Fully documented, tested, and optimized.
+- **0.8x**: Functional and tested, but lacking deep documentation.
+- **0.5x**: Functional but "hacky", no tests, or missing edge case handling.
 
-| Core functionality | 40% | All features working and tested |
-
-| Test coverage (60%+) | 20% | Coverage report shows 60%+ |
-
-| Security hardening | 10% | All scans pass (bandit, safety, etc.) |
-
-| CI/CD & DevOps | 10% | Pipeline configured and passing |
-
-| Documentation | 10% | README, CHANGELOG, API docs complete |
+#### 3. Automated Validation Penalties (Debt)
+Subtract from the total for every failed gate:
+- **-10%** for persistent Optimism Bias (if progress was inflated in previous session).
+- **-5%** per milestone (25/50/75/90/95) reached without "VALIDATION_PASSED" evidence.
+- **-5%** if security scans are missing or have red issues.
+- **-5%** if Rule 17 (Deep Understanding) was skipped for a phase transition.
 
 ### Infrastructure Progress Grid (DevOps/MLOps persona)
 When the contributor is a DevOps or MLOps engineer, use this alternative grid instead of the one above:
@@ -161,21 +173,21 @@ When the contributor is a DevOps or MLOps engineer, use this alternative grid in
 | Security scans pass | 15% | bandit + safety clean |
 | Documentation updated | 15% | README, CODEBASE_GUIDE updated |
 
-This grid does **NOT** include Mom Test, Core Functionality, or Marketing. The infra contributor's progress is calculated independently and does **NOT** trigger product milestone gates (Rule 14/20).
-
 ### Verification
 
 ```
 
 BEFORE reporting progress:
 
-  CALCULATE: Sum of completed components
+  1. SUM: (Weight_A * Multiplier_A) + (Weight_B * Multiplier_B) ...
+  2. IDENTIFY: Active validation debt (Rule 14/17/20).
+  3. SUBTRACT: Total Debt.
+  4. VERIFY: "If this feature were deleted today, what % of the MVP would be missing?"
+  5. REPORT: The resulting percentage in SESSION_SUMMARY.md.
 
-  SUBTRACT: 10-15% for optimism bias
-
-  VERIFY: Does this match reality?
-
-  IF doubt: Subtract another 10%
+  IF percentage > actual completion:
+    ACTION: STOP and recalculate.
+    ACTION: Document the gap.
 
 ```
 
