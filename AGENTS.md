@@ -1,4 +1,4 @@
-# AGENTS.md — Strict Rules for AI Agents
+﻿# AGENTS.md ÔÇö Strict Rules for AI Agents
 
 **Purpose**: This file contains STRICT, ENFORCEABLE rules. Unlike `AI_GUIDELINES.md` (philosophy and best practices), this file is a CONTRACT that AI agents MUST follow. Violations MUST be reported to the user.
 
@@ -8,7 +8,7 @@
 
 ---
 
-## RULE 1: Read Rules First — MANDATORY
+## RULE 1: Read Rules First ÔÇö MANDATORY
 
 ### Rule
 
@@ -36,7 +36,7 @@ IF agent starts working without reading rules:
 
 ---
 
-## RULE 2: Mom Test Gate — MANDATORY
+## RULE 2: Mom Test Gate ÔÇö MANDATORY
 
 ### Rule
 
@@ -127,7 +127,7 @@ ELSE IF any checklist item is FALSE:
 
 ---
 
-## RULE 3: Progress Tracking — MANDATORY
+## RULE 3: Progress Tracking ÔÇö MANDATORY
 
 ### Rule
 
@@ -207,7 +207,7 @@ IF progress > actual completion:
 
 ---
 
-## RULE 4: Session Summary — MANDATORY
+## RULE 4: Session Summary ÔÇö MANDATORY
 
 ### Rule
 
@@ -217,7 +217,7 @@ Every session MUST update `SESSION_SUMMARY.md` with BOTH English and French vers
 
 ```markdown
 
-# Session Summary — YYYY-MM-DD
+# Session Summary ÔÇö YYYY-MM-DD
 
 **Editor**: (VS Code | Cursor | Antigravity | Windsurf)
 
@@ -281,7 +281,7 @@ IF session ends without summary:
 
 ---
 
-## RULE 5: Testing Requirements — MANDATORY
+## RULE 5: Testing Requirements ÔÇö MANDATORY
 
 ### Rule
 
@@ -331,7 +331,7 @@ IF coverage < 60%:
 
 ---
 
-## RULE 6: Security Scanning — MANDATORY
+## RULE 6: Security Scanning ÔÇö MANDATORY
 
 ### Rule
 
@@ -381,7 +381,7 @@ IF security scan fails:
 
 ---
 
-## RULE 7: No Silent Failures — MANDATORY
+## RULE 7: No Silent Failures ÔÇö MANDATORY
 
 ### Rule
 
@@ -423,7 +423,7 @@ IF agent ignores a failure:
 
 ---
 
-## RULE 8: Critical Thinking — MANDATORY
+## RULE 8: Critical Thinking ÔÇö MANDATORY
 
 ### Rule
 
@@ -473,7 +473,7 @@ IF agent implements without questioning:
 
 ---
 
-## RULE 9: No Emojis Anywhere — MANDATORY
+## RULE 9: No Emojis Anywhere ÔÇö MANDATORY
 
 ### Rule
 
@@ -521,7 +521,7 @@ IF emoji found in any file:
 
 ---
 
-## RULE 10: File Protection — MANDATORY
+## RULE 10: File Protection ÔÇö MANDATORY
 
 ### Rule
 
@@ -579,7 +579,7 @@ IF protected file is committed:
 
 ---
 
-## RULE 11: Sync Rule — MANDATORY
+## RULE 11: Sync Rule ÔÇö MANDATORY
 
 ### Rule
 
@@ -615,7 +615,7 @@ IF rules are updated without sync:
 
 ---
 
-## RULE 12: Roadmap Adherence — MANDATORY
+## RULE 12: Roadmap Adherence ÔÇö MANDATORY
 
 ### Rule
 
@@ -679,7 +679,7 @@ IF code deviates from roadmap:
 
 ---
 
-## RULE 13: Roadmap Duration — MANDATORY
+## RULE 13: Roadmap Duration ÔÇö MANDATORY
 
 ### Rule
 
@@ -719,7 +719,7 @@ The roadmap progress contributes to overall SESSION_SUMMARY.md progress:
 
 |-----------|--------|-------------|
 
-| Roadmap Phase Completion | Sub-component of Core Functionality | (Completed Phases / Total Phases) × 40% |
+| Roadmap Phase Completion | Sub-component of Core Functionality | (Completed Phases / Total Phases) ├ù 40% |
 
 | Phase Quality | Multiplier | 0.5x (incomplete) to 1.0x (fully tested) |
 
@@ -739,7 +739,7 @@ IF roadmap duration < 1 month:
 
 ---
 
-## RULE 14: Periodic Validation — MANDATORY
+## RULE 14: Periodic Validation ÔÇö MANDATORY
 
 ### Rule
 
@@ -826,7 +826,7 @@ IF milestone reached without validation:
 
 ---
 
-## RULE 15: Rule Synchronization — MANDATORY
+## RULE 15: Rule Synchronization ÔÇö MANDATORY
 
 ### Rule
 
@@ -864,7 +864,7 @@ IF rules are inconsistent across files:
 
 ---
 
-## RULE 16: Working Demos — MANDATORY
+## RULE 16: Working Demos ÔÇö MANDATORY
 
 ### Rule
 
@@ -916,7 +916,7 @@ IF milestone reached without 2 working demos:
 
 ---
 
-## RULE 17: Deep Understanding Before Phase Transition — MANDATORY
+## RULE 17: Deep Understanding Before Phase Transition ÔÇö MANDATORY
 
 ### Rule
 
@@ -990,7 +990,7 @@ IF phase transition requested without deep understanding:
 
 ---
 
-## RULE 18: Regression Prevention — MANDATORY
+## RULE 18: Regression Prevention ÔÇö MANDATORY
 
 ### Rule
 
@@ -1032,7 +1032,7 @@ IF a regression is detected:
 
 ---
 
-## RULE 19: Strict Versioning — MANDATORY
+## RULE 19: Strict Versioning ÔÇö MANDATORY
 
 ### Rule
 
@@ -1068,7 +1068,7 @@ IF milestone reached without version tag:
 
 ---
 
-## RULE 20: Hard Milestone Lock — CRITICAL
+## RULE 20: Hard Milestone Lock ÔÇö CRITICAL
 
 ### Rule
 
@@ -1105,7 +1105,7 @@ IF a milestone is reached and "VALIDATION_PASSED" is NOT found in SESSION_SUMMAR
 
 ---
 
-## RULE 21: Intelligence Harvester — MANDATORY
+## RULE 21: Intelligence Harvester ÔÇö MANDATORY
 
 ### Rule
 
@@ -1143,7 +1143,7 @@ IF milestone reached without Intelligence Report:
 
 ---
 
-## RULE 22: Feature Focus Rule — MANDATORY
+## RULE 22: Feature Focus Rule ÔÇö MANDATORY
 
 ### Rule
 
@@ -1183,7 +1183,7 @@ IF validation involves multiple shallow features or lacks a single focus:
 
 ---
 
-## RULE 23: Knowledge Capture — MANDATORY
+## RULE 23: Knowledge Capture ÔÇö MANDATORY
 
 ### Rule
 
@@ -1217,7 +1217,7 @@ IF a project pivots without a post-mortem:
 
 ---
 
-## RULE 24: Marketing & Outreach Guardian — MANDATORY
+## RULE 24: Marketing & Outreach Guardian ÔÇö MANDATORY
 
 ### Rule
 
@@ -1269,7 +1269,7 @@ IF launch or outreach begins without marketing foundations:
 
 ---
 
-## RULE 25: MLOps/DevOps Collaboration — MANDATORY
+## RULE 25: MLOps/DevOps Collaboration ÔÇö MANDATORY
 
 ### Rule
 
@@ -1305,7 +1305,7 @@ IF providing MLOps/DevOps assistance:
 
 ---
 
-## RULE 26: DevOps/MLOps Milestone Task Generation — MANDATORY
+## RULE 26: DevOps/MLOps Milestone Task Generation ÔÇö MANDATORY
 
 ### Rule
 
@@ -1341,7 +1341,7 @@ IF a milestone is reached:
 
 ---
 
-## RULE 27: Persona Adaptability — MANDATORY
+## RULE 27: Persona Adaptability ÔÇö MANDATORY
 
 ### Rule
 
@@ -1377,7 +1377,7 @@ When in doubt, ASK the user. Do not assume.
 
 ---
 
-## RULE 28: Linear Automation and DevOps Review — MANDATORY
+## RULE 28: Linear Automation and DevOps Review ÔÇö MANDATORY
 
 ### Rule
 
@@ -1455,7 +1455,7 @@ IF the DevOps/MLOps engineer submits work:
 
 ---
 
-## RULE 29: Mandatory Linear Integration — CRITICAL
+## RULE 29: Mandatory Linear Integration ÔÇö CRITICAL
 
 ### Rule
 
@@ -1511,7 +1511,7 @@ IF a new team member joins:
 
 ---
 
-## RULE 30: Mandatory Branch Creation — CRITICAL
+## RULE 30: Mandatory Branch Creation ÔÇö CRITICAL
 
 ### Rule
 
@@ -2366,7 +2366,7 @@ IF Mom Test data exists and remains only in the project repo:
 
 ---
 
-## RULE 46: Web/GUI Debugging Protocol & 80% Coverage — MANDATORY
+## RULE 46: Web/GUI Debugging Protocol & 80% Coverage ÔÇö MANDATORY
 
 ### Rule
 The AI Agent MUST follow a strictly systematic protocol when debugging web applications or GUIs to prevent "silent regressions" and "ghost bugs". Before transitioning to any new architectural phase, the project MUST achieve **80% debug web coverage** (stable core flows, zero silent console errors).
@@ -2392,7 +2392,7 @@ The AI Agent MUST follow a strictly systematic protocol when debugging web appli
 
 ---
 
-## RULE 47: Build In Public (Daily X Vlog) — MANDATORY
+## RULE 47: Build In Public (Daily X Vlog) ÔÇö MANDATORY
 
 ### Rule
 At the end of every work session, the agent MUST generate a short, engaging summary tweet (vlog format) about the day's progress for Twitter/X. This enforces the "Build in Public" marketing strategy.
@@ -2413,7 +2413,7 @@ IF session ends without an X vlog draft:
 
 ---
 
-## RULE 48: Market Gravity Test (B2C Validation) — MANDATORY
+## RULE 48: Market Gravity Test (B2C Validation) ÔÇö MANDATORY
 
 ### Rule
 When traditional B2B Mom Test outreach (Rule 2) fails due to unresponsiveness in B2C/Indie markets, the project CAN pivot to a "Market Gravity Test". This requires a Scorecard, an Evidence Matrix, AND "Skin in the game" metrics.
@@ -2436,7 +2436,7 @@ IF Mom Test is blocked by unresponsive users:
 
 ---
 
-## RULE 49: Strict Mom Test Simulation Bypass — MANDATORY
+## RULE 49: Strict Mom Test Simulation Bypass ÔÇö MANDATORY
 
 ### Rule
 If real-world B2C users are unresponsive, the agent can perform an "Adversarial Mom Test Simulation" as a proxy. The simulation's absolute goal is to INVALIDATE and BREAK the user's idea, never to confirm it. If the simulation remains realistic, strict, and the idea survives the adversarial attacks, it CAN bypass the traditional Mom Test gate (Rule 2).
@@ -2448,7 +2448,7 @@ If real-world B2C users are unresponsive, the agent can perform an "Adversarial 
 
 ---
 
-## RULE 50: Project Documentation Link (Google Docs) — MANDATORY
+## RULE 50: Project Documentation Link (Google Docs) ÔÇö MANDATORY
 
 ### Rule
 The AI MUST natively ask the user for a shared Google Docs link associated with the active project (if one is not provided). Because the AI cannot reliably write directly to external Google Docs interfaces via API natively, the AI MUST generate a localized, perfectly formatted summary block intended for the Google Doc at the end of each session. The user will copy/paste this block.
@@ -2469,10 +2469,10 @@ IF the session ends without generating the Google Docs summary block:
 
 ---
 
-## RULE 51: Profile README Synchronization — MANDATORY
+## RULE 51: Profile README Synchronization ÔÇö MANDATORY
 
 ### Rule
-At the end of any session or milestone that results in new learnings, project progression (percentage updates), or new projects added to a ╬╗-Section, the AI MUST proactively update the user's Github Profile `README.md` (`Lemniscate-world/Lemniscate-world/README.md`) to reflect these new metrics natively.
+At the end of any session or milestone that results in new learnings, project progression (percentage updates), or new projects added to a Ôò¼Ôòù-Section, the AI MUST proactively update the user's Github Profile `README.md` (`Lemniscate-world/Lemniscate-world/README.md`) to reflect these new metrics natively.
 
 ### Verification Checklist
 ```
@@ -2489,7 +2489,7 @@ IF progress is updated but the profile README is not:
 
 ---
 
-## RULE 52: Advanced Skills & Competency Tracking — MANDATORY
+## RULE 52: Advanced Skills & Competency Tracking ÔÇö MANDATORY
 
 ### Rule
 The AI MUST continuously monitor and evaluate the user's skill progression based on the complexity of the tasks accomplished during the session. If the user learns a new concept, masters a framework, or demonstrates increased proficiency in an existing skill, the AI MUST proactively update the "Advanced & Precise Skills" section in the user's Github Profile `README.md` (`Lemniscate-world/Lemniscate-world/README.md`), adjusting the percentages upwards. Novel skills discovered during projects MUST be added as new badges.
@@ -2532,7 +2532,7 @@ IF feedback is missing after PR analysis:
 
 ---
 
-## RULE 55: PR Ownership and Correction Policy — MANDATORY
+## RULE 55: PR Ownership and Correction Policy ÔÇö MANDATORY
 
 ### Rule
 When a Pull Request requires corrections or fails a verification gate, the AI Agent or reviewing team member MUST NOT fix the code for the author. Instead, they must deposit the pedagogical feedback (from Rule 34) on the Linear ticket or GitHub PR, and empower the original author to implement the fixes themselves.
