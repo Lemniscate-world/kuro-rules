@@ -1,0 +1,12 @@
+# Enforce UTF-8 for all markdown files to prevent mojibake
+*.md text eol=lf working-tree-encoding=UTF-8
+
+# Standardize line endings for scripts
+*.ps1 text eol=crlf
+*.py text eol=lf
+*.sh text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.docx binary
