@@ -87,7 +87,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 
 - lambda-ESN 0% (Prototypage) - Reseau social d entreprise prive, Slack personnalise.
 - Sagittarius 15% (Validation) - MLOps & AI Agent Assistant pour DevOps. Validation L2 complete (40 jobs scrapes, burnout 60%).
-- Kuro 0% (Vision) - Agent autonome 24/7 pour gestion de projet lambda-Section. Surveillance SESSION_SUMMARY, alertes inactivite, GUI dashboard.
+- Kuro 5% (Actif) - Daemon MVP fonctionnel (Python + watchdog + SQLite). Surveillance 24/7 SESSION_SUMMARY.md, parser auto, alertes inactivite, 21 projets indexes.
 
 ---
 
