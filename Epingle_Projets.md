@@ -22,6 +22,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 - Aquarium 3% (Prototypage) - IDE dedie au developpement et a l entrainement des reseaux de neurones.
 - Metatron 0% (Prototypage) - Multi-language debugger with abductive reasoning. Motto: "Buy time".
 - DataLint 5% (Actif) - Validation intelligente des donnees ML : detection automatique de problemes de qualite, valeurs aberrantes, incohérences.
+- Prompt2Model 0% (Validation) - Generation automatique de modeles ML a partir de descriptions textuelles. Phase de validation Mom Test.
 
 ---
 
@@ -42,6 +43,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 - Charmed 50% (Actif) - Reveil intelligent pour utilisateurs Spotify. Desktop et Android.
 - Thanatos 0% (Prototypage) - Application mobile mixant entrainements arts martiaux et calisthenie.
 - Echo 5% (Actif) - Systeme de repetition espacee pour notes et documents. Desktop, web et Android.
+- Flow-Regulator 5% (Actif) - Environnement de productivite premium avec Pomodoro adaptatif, binaural beats, controle Philips Hue et focus mode.
 
 ---
 
@@ -117,6 +119,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 - Audio Room Visualizer 0% (Prototypage) - Visualiser la musique dans l espace, en 3D/2D/projections.
 - Interpoem 0% (Prototypage) - Plateforme d immersion du lecteur dans un poeme (musique, 3D, VR, art digital).
 - Charles 0% (Prototypage) - Production musicale par code et electronique avancee (SuperCollider, plugins FL Studio).
+- OpenMind 15% (Actif) - Application de journaling Windows (WinUI 3) avec analyse IA via Ollama, exports multiples et packaging MSIX.
 
 ---
 
