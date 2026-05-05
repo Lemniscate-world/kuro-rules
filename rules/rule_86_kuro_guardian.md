@@ -57,10 +57,11 @@ ALERT if:
 ## AI Agent Responsibilities
 
 ### During Portfolio Updates (R85 + R86)
-1. **Scan Phase**: Use Kuro activity log as HINT only
-2. **Verify Phase**: READ actual SESSION_SUMMARY.md files
-3. **Analysis Phase**: Extract real progress, not just declared
-4. **Update Phase**: Sync corrected data to Epingle_Projets.md
+1. **Scan Phase**: Use Kuro activity log as HINT only.
+2. **Verify Phase**: READ actual SESSION_SUMMARY.md files.
+3. **Ownership Phase (R87)**: Filter out external repositories from active tracking unless specified.
+4. **Analysis Phase**: Extract real progress, not just declared.
+5. **Update Phase**: Sync corrected data to Epingle_Projets.md, respecting ownership boundaries.
 
 ### During Project Work
 1. **Start**: Check Kuro for project context

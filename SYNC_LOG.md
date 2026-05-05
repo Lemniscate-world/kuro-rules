@@ -1,5 +1,106 @@
 ﻿# Sync Log
 
+## 2026-05-05 22:42:57
+- AEther : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aladin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aquarium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Astral : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Automatons : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- BloomDB : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Charmed : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- datalint : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Dissect : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- EchoX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Epure : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Flow-Regulator : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Helium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Hermes : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Iroko : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Kapok : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- KuroGuardian : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Metatron : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Again : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Research : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDBG : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDSL : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralPaper : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuroDose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Nwt : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Odin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Onlook : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenMind : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenQuant : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- POFS : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Project-Dirac : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Prompt2Model : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- QuSolve : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SOGEXCO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SaasX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Sagittarius : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- TokenWise : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Verbose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 22:42:23
+- AEther : AGENTS.md
+- Aladin : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- datalint : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Flow-Regulator : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- KuroGuardian : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Nwt : AGENTS.md
+- Odin : AGENTS.md
+- Onlook : AGENTS.md
+- OpenMind : AGENTS.md
+- OpenQuant : AGENTS.md
+- POFS : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Prompt2Model : AGENTS.md
+- QuSolve : AGENTS.md
+- SOGEXCO : AGENTS.md
+- SaasX : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Verbose : AGENTS.md
+- Constant_Yield : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- DevDemeterDAO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Vault : AGENTS.md
+- XP_Farming_System : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 22:26:03
+- Aladin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Constant_Yield : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Flow-Regulator : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Nwt : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Onlook : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenMind : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- POFS : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Prompt2Model : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- QuSolve : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SOGEXCO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SaasX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
 ## 2026-05-05 21:57:11
 - Astral : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
 - Automatons : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md

@@ -19,6 +19,7 @@ PROJECTS_FILE = ROOT_DIR / "projects.txt"
 EXCLUDE_FILE = ROOT_DIR / "exclude.txt"
 AGENTS_FILE = ROOT_DIR / "AGENTS.md"
 SYNC_LOG_FILE = ROOT_DIR / "SYNC_LOG.md"
+KURO_DB_FILE = Path.home() / ".kuro" / "kuro.db"
 OUTPUT_FILE = DASHBOARD_DIR / "dashboard-data.json"
 
 RULE_PATTERN = re.compile(r"^## RULE\s+(\d+):\s*(.+)$")
@@ -440,6 +441,38 @@ def discover_untracked_repositories(
     return extras
 
 
+def collect_kuro_daemon_state() -> dict[str, Any]:
+    import sqlite3
+    state = {"status": "inactive", "alerts": [], "projectCount": 0}
+    if not KURO_DB_FILE.exists():
+        return state
+    
+    try:
+        conn = sqlite3.connect(KURO_DB_FILE)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Check if daemon was active recently (last hour)
+        cursor.execute("SELECT MAX(timestamp) FROM activity_log")
+        row = cursor.fetchone()
+        if row and row[0]:
+            last_ts = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
+            if (datetime.now().astimezone() - last_ts).total_seconds() < 3600:
+                state["status"] = "active"
+        
+        cursor.execute("SELECT COUNT(*) FROM projects")
+        state["projectCount"] = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT a.*, p.name as project_name FROM alerts a JOIN projects p ON a.project_id = p.id WHERE a.acknowledged = 0")
+        state["alerts"] = [dict(r) for r in cursor.fetchall()]
+        
+        conn.close()
+    except Exception:
+        state["status"] = "error"
+        
+    return state
+
+
 def collect_kuro_rules_repo_state() -> dict[str, Any]:
     snapshot = collect_project_snapshot(ROOT_DIR.name, ROOT_DIR)
     snapshot["tracked"] = False
@@ -490,6 +523,7 @@ def main() -> int:
         },
         "ruleHighlights": rule_highlights,
         "syncLog": sync_log,
+        "kuroDaemon": collect_kuro_daemon_state(),
         "kuroRulesRepo": collect_kuro_rules_repo_state(),
     }
 

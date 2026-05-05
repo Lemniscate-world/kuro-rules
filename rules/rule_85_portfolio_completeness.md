@@ -12,13 +12,14 @@ ACTION: List all directories in ~/Documents with AGENTS.md or .git
 VERIFY: Each directory is either:
   - Listed in Epingle_Projets.md with percentage and description
   - Listed in "Autres Projets En Reflexion" section
-  - Explicitly excluded (non-project directories like .windsurf, vcpkg, etc.)
+  - Explicitly excluded (non-project directories)
 
-ACTION: Read directory contents to identify project type
-VERIFY: Classify as:
-  - lambda-Section project (has AGENTS.md, startup structure)
-  - Tool/Utility (fork, open-source tool, personal script)
-  - Non-project (system directory, IDE config, etc.)
+ACTION: Perform Ownership & Deep Status Check (R87)
+VERIFY: Check git remotes and README markers. Classify as:
+  - Owned lambda-Section project (Lemniscate-world)
+  - External project (Demeter-Financial-Labs)
+  - Archived/Obsolete project
+  - Special (Obsidian Vault, Tool, Fork)
 ```
 
 ### Exclusions Allowed
@@ -47,8 +48,9 @@ AI MUST:
    - Project type and section
    - Current percentage
    - Accurate description
-5. Add missing projects with complete information
-6. Report to user: "Added X projects: [names]"
+5. Verify Ownership (R87) before adding to any "Owned" section.
+6. Add missing projects with complete information and correct ownership classification.
+7. Report to user: "Added X projects, identified Y external repositories."
 
 ### When User Asks "Tout est à jour ?"
 AI MUST:

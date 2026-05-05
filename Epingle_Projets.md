@@ -1,4 +1,4 @@
-﻿# Epingle_Projets.md - lambda-Section Portfolio
+# Epingle_Projets.md - lambda-Section Portfolio
 # Last updated: 2026-05-05 (Deep analysis complete - SESSION_SUMMARY parsed)
 # Master copy: ~/Documents/kuro-rules/Epingle_Projets.md
 
@@ -16,14 +16,24 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 
 ## lambda-Section-1 - User Lambda Enter Real AI [AI, Reseaux De Neurones]
 
-- NeuralDbg 72% (Actif) - Debugger reseaux de neurones avec causalite automatique. V2 dogfoodee sur ResNet-18 (79 tests, 0 failles). Bug inplace ops corrige.
-- TokenWise 0% (Prototypage) - Analyse et reduction du cout par tokens utilises.
-- Astral 15% (Actif) - Multi-repo intelligence avec client Hindsight. Data Gravity moat implemente, Next.js MVP.
+- NeuralDbg 72% (Actif) - Debugger reseaux de neurones avec causalite automatique. V2 dogfoodee sur ResNet-18 (79 tests, 0 failles). Analyse causale des echecs d entrainement.
+- Neural-Again 10% (Archive) - DSL pour reseaux de neurones. Obsolete, remplace par Keras/PyTorch + code gen.
+- Neural-Research 5% (Archive) - Recherches avancees sur les architectures neuronales.
+- NeuralDSL 0% (Archive) - Domain Specific Language for neural networks.
+- NeuralPaper 0% (Archive) - Drafts and research for neural network papers.
+- NeuroDose 5% (Actif) - Cognitive Supplement Tracker & Visualizer. Optimisation de la sante cognitive via modelisation pharmacocinetique.
+- TokenWise 0% (Prototypage) - Analyse et reduction du cout par tokens utilises. Phase de validation Mom Test.
+- Astral 15% (Actif) - Multi-repo intelligence with client Hindsight. Data Gravity moat implemente, Next.js MVP.
 - Aquarium 3% (Prototypage) - IDE dedie au developpement et a l entrainement des reseaux de neurones.
 - Metatron 0% (Prototypage) - Multi-language debugger with abductive reasoning. Motto: "Buy time".
 - DataLint 10% (Actif) - Gouvernance kuro-rules + validation ML. Alignement sync-rules.ps1 avec projects.txt, workspace audit.
 - Prompt2Model 0% (Validation) - Generation automatique de modeles ML a partir de descriptions textuelles. Phase de validation Mom Test.
 - Odin 10% (Actif) - Fork/customisation d'Open Interpreter permettant aux LLMs d'executer du code localement (Python, JS, Shell) avec interface conversationnelle.
+- Aladin 40% (Actif) - Architecture Transformer & LLM research project.
+- Automatons 0% (Prototypage) - Agent orchestration and automation framework.
+- Onlook 0% (Prototypage) - Visual monitoring or observability tool.
+- Vault (Obsidian Notes) - Base de connaissances personnelle Lemniscate-SHA-256.
+- Verbose 0% (Prototypage) - Logging or communication tool.
 
 ---
 
@@ -54,6 +64,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 - G&S Solutions 6% (Actif) - Fintech en phase de mindmapping.
 - Iroko 0% (Prototypage) - Fintech.
 - Kapok 0% (Prototypage) - Insurtech.
+- SOGEXCO 0% (Prototypage) - Accounting/Business solution for SOGEXCO client.
 
 ---
 
@@ -72,6 +83,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 ## lambda-Section-7 - Helium Chain [Blockchain, Crypto, Finance Decentralisee]
 
 - Helium 25% (Actif) - Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complete, POC scripts prets.
+- POFS 0% (Prototypage) - Proof of Stake/File System research.
 
 ---
 
@@ -86,7 +98,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 ## lambda-Section-9 - Network Euler [Gestion d entreprise, Automatisations, DevOps]
 
 - lambda-ESN 0% (Prototypage) - Reseau social d entreprise prive, Slack personnalise.
-- Sagittarius 15% (Validation) - MLOps & AI Agent Assistant pour DevOps. Validation L2 complete (40 jobs scrapes, burnout 60%).
+- Sagittarius 15% (Validation) - MLOps & AI Agent Assistant for DevOps. Validation L2 complete (40 jobs scrapes, burnout 60%).
 - Kuro 5% (Actif) - Daemon MVP fonctionnel (Python + watchdog + SQLite). Surveillance 24/7 SESSION_SUMMARY.md, parser auto, alertes inactivite, 21 projets indexes.
 
 ---
@@ -106,8 +118,9 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 ## lambda-Section-12 - Hypatia [Recherches Avancees En Physique & Mathematiques]
 
 - AEther 5% (Actif) - Minkowski Space-Time Visualizer, axe ensuite sur l exploration d autres espaces-temps.
-- Logical Calculus 0% (Recherche) - Nouveau systeme de calcul infinitesimal base sur la logique et le calcul de Newton. Formalisation en cours.
+- Logical Calculus 0% (Recherche) - Nouveau systeme de calcul infinitesimal base on logic and Newton's calculus. Formalization in progress.
 - Mathematical Theorization Of Linguistics & Language 0% (Recherche) - Mathematisation du langage par theorie de Shannon, espaces de probabilites linguistiques.
+- Project-Dirac 0% (Prototypage) - Physics-inspired computational model.
 
 ---
 
@@ -123,6 +136,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 - Interpoem 0% (Prototypage) - Plateforme d immersion du lecteur dans un poeme (musique, 3D, VR, art digital).
 - Charles 0% (Prototypage) - Production musicale par code et electronique avancee (SuperCollider, plugins FL Studio).
 - OpenMind 15% (Actif) - Application de journaling Windows (WinUI 3) avec analyse IA via Ollama, exports multiples et packaging MSIX.
+- Journaux 0% (Archive) - Archive of personal journaling or log system.
 
 ---
 
@@ -130,6 +144,15 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 
 - Epure 0% (Prototypage)
 - Mori 0% (Prototypage) - Architecture biomimetique.
+
+---
+
+## Projets Tiers / Externes (Non-Propriétaire)
+
+- DevDemeterDAO 30% (Actif) - Governance framework for Demeter Labs.
+- Constant_Yield 15% (Actif) - DeFi protocol for Demeter Labs.
+- XP_Farming_System 20% (Actif) - Gamified contribution tracking for Demeter Labs.
+- Nwt (External) - nw_wrld Modules Workspace (Third-party).
 
 ---
 
