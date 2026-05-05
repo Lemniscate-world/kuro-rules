@@ -1,32 +1,32 @@
-# RULE 86: Kuro Guardian Protocol — Project Surveillance & Memory
+# RULE 86: Kuro Protocol — Project Surveillance & Memory
 
 ## Rule
 
-AI agents MUST assist in maintaining the Kuro Guardian system for continuous project surveillance and memory management across all lambda-Section projects.
+AI agents MUST assist in maintaining the Kuro system for continuous project surveillance and memory management across all lambda-Section projects.
 
 ## Verification
 
 ### When Starting Any Session
 ```
-CHECK: KuroGuardian daemon status
+CHECK: Kuro daemon status
 IF not running: NOTIFY user to start daemon
-IF running: READ latest activity log from KuroGuardian DB
+IF running: READ latest activity log from Kuro DB
 ```
 
 ### When Ending Any Session
 ```
 ACTION: Ensure SESSION_SUMMARY.md is updated
-ACTION: Guardian will auto-parse within 1 hour
-VERIFY: Session appears in KuroGuardian activity stream
+ACTION: Kuro will auto-parse within 1 hour
+VERIFY: Session appears in Kuro activity stream
 ```
 
-## Guardian Integration Points
+## Kuro Integration Points
 
 ### 1. Session Awareness
-- Guardian tracks ALL SESSION_SUMMARY.md updates
-- Guardian detects editor used (Windsurf, Cursor, VS Code, etc.)
-- Guardian extracts progress %, tests status, blockers
-- Guardian alerts if same blocker appears 3+ sessions
+- Kuro tracks ALL SESSION_SUMMARY.md updates
+- Kuro detects editor used (Windsurf, Cursor, VS Code, etc.)
+- Kuro extracts progress %, tests status, blockers
+- Kuro alerts if same blocker appears 3+ sessions
 
 ### 2. Project Health Monitoring
 ```
@@ -39,7 +39,7 @@ ALERT if:
 
 ### 3. Epingle_Projets.md Sync
 ```
-VERIFY: Epingle_Projets.md date vs Guardian last scan
+VERIFY: Epingle_Projets.md date vs Kuro last scan
 ACTION: If Epingle older than 7 days, suggest update
 ACTION: Run deep analysis (read SESSION_SUMMARY files) before update
 ```
@@ -51,24 +51,25 @@ ALERT if:
   - Landing page not deployed within 7 days of validation start
   - < 5 responses collected after 14 days
   - No Supabase dashboard accessed for 7 days
+  - Kuro will track these automatically
 ```
 
 ## AI Agent Responsibilities
 
 ### During Portfolio Updates (R85 + R86)
-1. **Scan Phase**: Use Guardian activity log as HINT only
+1. **Scan Phase**: Use Kuro activity log as HINT only
 2. **Verify Phase**: READ actual SESSION_SUMMARY.md files
 3. **Analysis Phase**: Extract real progress, not just declared
 4. **Update Phase**: Sync corrected data to Epingle_Projets.md
 
 ### During Project Work
-1. **Start**: Check Guardian for project context
-2. **During**: Write detailed SESSION_SUMMARY (Guardian parses)
-3. **End**: Confirm Guardian will capture the session
+1. **Start**: Check Kuro for project context
+2. **During**: Write detailed SESSION_SUMMARY (Kuro parses)
+3. **End**: Confirm Kuro will capture the session
 
-### Guardian Data Usage
+### Kuro Data Usage
 ```python
-# AI can query Guardian for context
+# AI can query Kuro for context
 GET /api/projects/{name}/activity  # Last 30 days
 GET /api/projects/{name}/velocity   # Sessions/week trend
 GET /api/alerts                     # Current warnings
@@ -78,10 +79,10 @@ GET /api/milestones                 # Upcoming deadlines
 ## Dashboard Integration
 
 ### GUI Elements AI Should Populate
-- **Project Cards**: Progress %, last activity, next milestone
-- **Alert Panel**: Blockers requiring human intervention
-- **Timeline View**: Session history with editor tags
-- **Velocity Chart**: Activity trend per project
+- **Project Cards**: Progress %, last activity, next milestone (from Kuro DB)
+- **Alert Panel**: Blockers requiring human intervention (Kuro detected)
+- **Timeline View**: Session history with editor tags (Kuro tracked)
+- **Velocity Chart**: Activity trend per project (Kuro calculated)
 
 ### AI-Generated Insights
 ```
@@ -93,7 +94,7 @@ GET /api/milestones                 # Upcoming deadlines
 
 ## Technical Architecture
 
-### Guardian Stack (Target)
+### Kuro Stack (Target)
 - **Daemon**: Rust/Python file watcher
 - **Database**: SQLite local storage
 - **API**: REST/GraphQL for AI queries
@@ -120,8 +121,9 @@ AI provides informed assistance
 ### R85 + R86 Combined Checklist
 - [ ] ~/Documents scanned for all projects
 - [ ] SESSION_SUMMARY.md files read and parsed
-- [ ] Guardian DB shows recent activity (if running)
-- [ ] Epingle_Projets.md updated with accurate %
+- [ ] Kuro - R86: Kuro Protocol (ce fichier)
+- Epingle_Projets.md: Source de vérité
+- Kuro DB: Activity trackingh accurate %
 - [ ] Descriptions include technical specifics
 - [ ] Date stamp: "SESSION_SUMMARY parsed"
 - [ ] Missing projects added to appropriate sections
