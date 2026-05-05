@@ -1,0 +1,121 @@
+# Helium/Kuro-Rules Gitignore Template
+# Protects sensitive files across all projects
+# Last updated: 2026-04-11 (per RULE 76)
+
+# ============================================================================
+# STRATEGY & PLANNING (CRITICAL - Rule 62 / Rule 76)
+# ============================================================================
+# Future roadmaps, competitive analysis, strategic planning
+# These files MUST never be committed to public repositories
+
+PLAN.md
+ROADMAP.md
+PRD.md
+ideas.md
+mom_test_results.md
+validation_evidence.md
+docs/strategy/*.md
+docs/strategy/
+
+# ============================================================================
+# CREDENTIALS & SECRETS (HIGH - Rule 10 / Rule 76)
+# ============================================================================
+# Private keys, certificates, environment variables
+# Exposure = immediate security incident
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+secrets/
+secrets.yml
+secrets.yaml
+secrets.json
+config/secrets/
+private/
+
+# ============================================================================
+# RUNTIME DATA (MEDIUM - Rule 76)
+# ============================================================================
+# User data, databases, logs, temporary files
+# Should not be committed but may be kept locally
+
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+logs/
+*.log
+log/
+cache/
+*.cache
+temp/
+tmp/
+*.tmp
+*.temp
+
+# ============================================================================
+# BUILD ARTIFACTS (LOW - Rule 76)
+# ============================================================================
+# Generated files, build outputs, dependencies
+# Unnecessary in version control
+
+target/
+dist/
+build/
+out/
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+node_modules/
+vendor/
+.cargo/
+*.lock  # For applications (not libraries)
+
+# ============================================================================
+# IDE & OS (LOW - Rule 76)
+# ============================================================================
+# Editor files, OS metadata
+
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================================================
+# SESSION & BACKUP (Rule 4 / Rule 76)
+# ============================================================================
+# Session summaries may contain sensitive context
+
+SESSION_SUMMARY.docx
+SESSION_SUMMARY_backup_*.md
+.sync_backup/
+
+# ============================================================================
+# PROJECT-SPECIFIC (Add per project)
+# ============================================================================
+# Helium-specific
+firecracker
+jailer
+vmlinux
+*.ext4
+*.kernel
+
+# Add project-specific patterns below:

@@ -240,3 +240,89 @@
 - "It rarely happens to me" — Not frequent enough
 - "[Tool X] is enough for me" — Not painful enough
 - "Cool project!" without story — Politeness, not validation
+
+---
+
+## B2B Expert Calls — Rule 58 Compliance
+
+### For B2B/Enterprise Validation (Kapok-style)
+
+B2B validation uses **expert calls** instead of consumer Mom Test interviews. Same principles apply:
+- Ask about their workflow, not your solution
+- Validate problem before proposing anything
+- Document verbatim quotes
+
+### B2B Expert Call Template
+
+#### Call Metadata
+- **Date**: 
+- **Company**: 
+- **Role**: Head of Claims / CIO / Operations / Broker
+- **Contact method**: LinkedIn / Referral / Cold email
+- **Call duration**: 
+
+#### Verbatim Responses (Rule 58 Requirement)
+
+Record exact quotes, not summaries:
+
+**Q1: Workflow description**
+> 
+
+**Q2: Pain points and bottlenecks**
+> 
+
+**Q3: Current document transmission methods**
+> 
+
+**Q4: Buyer and decision maker**
+> 
+
+**Q5: Budget and approval threshold**
+> 
+
+**Q6: Current core system**
+> 
+
+**Q7: Compliance requirements**
+> 
+
+**Q8: Awareness of competitors**
+> 
+
+#### Mom Test Signals Checklist
+
+| Signal | Present? | Evidence (Quote) |
+|--------|----------|------------------|
+| Spontaneous problem mention | [ ] YES / [ ] NO | "..." |
+| Solution seeking | [ ] YES / [ ] NO | "..." |
+| Budget mentioned | [ ] YES / [ ] NO | Amount: |
+| Urgency expressed | [ ] YES / [ ] NO | "..." |
+| Referrals given | [ ] YES / [ ] NO | Names: |
+
+#### Analysis
+
+- **Interest level**: High / Medium / Low
+- **Closes which K?**: K1 / K2 / K3 / K4 / K5
+- **Next action**: 
+
+---
+
+### Rule 58 Compliance Verification
+
+Before conducting B2B expert calls, verify:
+
+- [ ] **Script Mom Test compliant**: Questions ask about workflow first (no pitching)
+- [ ] **No solution in first 5 questions**: Problem validation comes first
+- [ ] **Verbatim template ready**: mom_test_results.md format prepared
+- [ ] **Minimum 3 calls planned**: B2B requires 3-5 calls (vs 5 for B2C)
+
+### B2B vs B2C Mom Test Differences
+
+| Aspect | B2C Mom Test | B2B Expert Calls |
+|--------|--------------|------------------|
+| Target | Consumers | Professionals |
+| Questions | "Tell me about the last time..." | "Describe your current workflow..." |
+| Validation | Personal pain | Organizational pain + budget |
+| Count | 5+ interviews | 3-5 expert calls |
+| Signal | Spontaneous mention | Problem + budget + buyer identified |
+| Output | mom_test_results.md | mom_test_results.md (same format) |

@@ -42,6 +42,7 @@ pids
 *.pid
 *.seed
 *.pid.lock
+dashboard/dashboard-data.json
 
 # Coverage directory used by tools like istanbul
 coverage/

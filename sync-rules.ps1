@@ -1,7 +1,6 @@
-# sync-rules.ps1 -- Synchronize AI rule files from kuro-rules to all git repos
-# Auto-detects git repos in ~/Documents, excludes repos listed in exclude.txt
+﻿# sync-rules.ps1 -- Synchronize Kuro Rules to all git repos
+# Syncs AGENTS.md (master) + IDE redirector files
 # Usage: .\sync-rules.ps1 [-Force] [-DryRun] [-Project <name>]
-# Master copy: ~/Documents/kuro-rules
 param(
     [switch]$Force,
     [switch]$DryRun,
@@ -12,126 +11,97 @@ $ErrorActionPreference = "Stop"
 $RULES_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DOCS_DIR = Split-Path -Parent $RULES_DIR
 
-# Files to sync (relative to kuro-rules)
+# AGENTS.md = master rules
+# Redirectors = thin files that tell each IDE to read AGENTS.md
 $RULE_FILES = @(
     "AGENTS.md",
-    "AI_GUIDELINES.md",
-    "GAD.md",
     ".cursorrules",
     "copilot-instructions.md",
-    "acquisition_tracker.md",
-    "sync_summary.py"
+    ".windsurfrules",
+    "AI_GUIDELINES.md"
 )
 
-# Read exclude list
 $excludeFile = Join-Path $RULES_DIR "exclude.txt"
-$excluded = @("kuro-rules")  # always exclude self
+$excluded = @("kuro-rules")
 if (Test-Path $excludeFile) {
-    $excludeLines = Get-Content $excludeFile | Where-Object { $_ -and $_ -notmatch '^\s*#' }
-    foreach ($line in $excludeLines) {
-        $excluded += $line.Trim()
-    }
+    $excludeLines = Get-Content $excludeFile | Where-Object { $_ -and $_ -notmatch "^\s*#" }
+    foreach ($line in $excludeLines) { $excluded += $line.Trim() }
 }
 
-# Auto-detect git repos in Documents
 $allDirs = Get-ChildItem -Path $DOCS_DIR -Directory -ErrorAction SilentlyContinue
 $projects = @()
 foreach ($dir in $allDirs) {
-    $gitDir = Join-Path $dir.FullName ".git"
-    if (Test-Path $gitDir) {
-        if ($excluded -notcontains $dir.Name) {
-            $projects += $dir.Name
-        }
+    if ((Test-Path (Join-Path $dir.FullName ".git")) -and ($excluded -notcontains $dir.Name)) {
+        $projects += $dir.Name
     }
 }
 
 if ($Project) {
     $projects = $projects | Where-Object { $_ -eq $Project }
-    if (-not $projects) {
-        Write-Host "ERROR: Project '$Project' not found or excluded" -ForegroundColor Red
-        exit 1
-    }
+    if (-not $projects) { Write-Host "ERROR: '$Project' not found" -ForegroundColor Red; exit 1 }
 }
 
 $syncCount = 0
-$skipCount = 0
-$newProjects = @()
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $logEntries = @()
 
 Write-Host "`n=== kuro-rules sync ===" -ForegroundColor Cyan
-Write-Host "Source: $RULES_DIR" -ForegroundColor Gray
-Write-Host "Detected: $($projects.Count) git repos" -ForegroundColor Gray
-Write-Host "Excluded: $($excluded -join ', ')" -ForegroundColor DarkGray
+Write-Host "Files: $($RULE_FILES -join ', ')" -ForegroundColor Gray
+Write-Host "Repos: $($projects.Count)" -ForegroundColor Gray
 if ($DryRun) { Write-Host "[DRY RUN]" -ForegroundColor Yellow }
 Write-Host ""
 
 foreach ($proj in $projects) {
     $targetDir = Join-Path $DOCS_DIR $proj
-
     $projSynced = @()
-    $isNew = $false
 
     foreach ($file in $RULE_FILES) {
         $src = Join-Path $RULES_DIR $file
         $dst = Join-Path $targetDir $file
-
         if (-not (Test-Path $src)) { continue }
 
+        # For copilot-instructions.md, ensure .github/ exists
+        if ($file -eq "copilot-instructions.md") {
+            $githubDir = Join-Path $targetDir ".github"
+            $dstAlt = Join-Path $githubDir "copilot-instructions.md"
+            if (Test-Path $githubDir) { $dst = $dstAlt }
+        }
+
         $needsSync = $false
-        if (-not (Test-Path $dst)) {
-            $needsSync = $true
-            $isNew = $true
-        } elseif ($Force) {
-            $needsSync = $true
-        } else {
+        if (-not (Test-Path $dst)) { $needsSync = $true }
+        elseif ($Force) { $needsSync = $true }
+        else {
             $srcHash = (Get-FileHash $src -Algorithm MD5).Hash
             $dstHash = (Get-FileHash $dst -Algorithm MD5).Hash
             if ($srcHash -ne $dstHash) { $needsSync = $true }
         }
 
         if ($needsSync) {
-            if ($DryRun) {
-                Write-Host "  WOULD COPY $file -> $proj" -ForegroundColor Cyan
-            } else {
-                Copy-Item -Path $src -Destination $dst -Force
-                Write-Host "  SYNCED $file -> $proj" -ForegroundColor Green
-            }
+            if (-not $DryRun) { [System.IO.File]::Copy($src, $dst, $true) }
             $projSynced += $file
             $syncCount++
         }
     }
 
-    if ($isNew -and -not $DryRun) {
-        $newProjects += $proj
-    }
-
-    if ($projSynced.Count -eq 0) {
-        Write-Host "  $proj -- up to date" -ForegroundColor DarkGray
-    } else {
+    if ($projSynced.Count -gt 0) {
+        Write-Host "  SYNCED -> $proj ($($projSynced -join ', '))" -ForegroundColor Green
         $logEntries += "- $proj : $($projSynced -join ', ')"
+    } else {
+        Write-Host "  $proj -- up to date" -ForegroundColor DarkGray
     }
 }
 
 Write-Host "`n=== Summary ===" -ForegroundColor Cyan
-Write-Host "Synced: $syncCount files across $($projects.Count) repos" -ForegroundColor Green
-if ($newProjects.Count -gt 0) {
-    Write-Host "New repos detected: $($newProjects -join ', ')" -ForegroundColor Magenta
-}
-Write-Host ""
+Write-Host "Synced: $syncCount file operations across repos" -ForegroundColor Green
 
-# Update SYNC_LOG.md
 if (-not $DryRun -and $logEntries.Count -gt 0) {
     $logFile = Join-Path $RULES_DIR "SYNC_LOG.md"
     $logHeader = "## $timestamp`n"
     $logBody = ($logEntries -join "`n") + "`n`n"
-
     if (Test-Path $logFile) {
         $existing = Get-Content $logFile -Raw
-        $newContent = "# Sync Log`n`n" + $logHeader + $logBody + ($existing -replace '^# Sync Log\s*\n*', '')
-    } else {
-        $newContent = "# Sync Log`n`n" + $logHeader + $logBody
-    }
-    Set-Content -Path $logFile -Value $newContent -Encoding UTF8
+        $newContent = "# Sync Log`n`n" + $logHeader + $logBody + ($existing -replace "^# Sync Log\s*\n*", "")
+    } else { $newContent = "# Sync Log`n`n" + $logHeader + $logBody }
+    [System.IO.File]::WriteAllText($logFile, $newContent, [System.Text.Encoding]::UTF8)
     Write-Host "SYNC_LOG.md updated" -ForegroundColor Gray
 }

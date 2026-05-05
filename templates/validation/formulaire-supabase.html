@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionnaire beta - Hermes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: "Manrope", sans-serif; }
+        .submitting { opacity: 0.7; pointer-events: none; }
+    </style>
+</head>
+<body class="min-h-screen bg-stone-50 px-4 py-12 text-slate-900">
+    <main class="mx-auto max-w-3xl">
+        <a href="./index.html" class="text-sm font-semibold text-slate-600 transition hover:text-slate-900">Retour a la page de presentation</a>
+
+        <section class="mt-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+            <div class="max-w-2xl">
+                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Questionnaire beta</p>
+                <h1 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+                    Aide-nous a verifier si Hermes doit exister.
+                </h1>
+                <p class="mt-4 text-sm leading-7 text-slate-600">
+                    Nous cherchons des retours concrets sur les livraisons locales dans le Grand Lome.
+                </p>
+            </div>
+
+            <div data-config-warning class="mt-8 hidden rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm leading-7 text-amber-900">
+                Configuration Supabase manquante. Verifiez <code>landing/config.js</code>.
+            </div>
+
+            <div data-success class="mt-8 hidden rounded-2xl border border-emerald-300 bg-emerald-50 p-5 text-sm leading-7 text-emerald-900">
+                Merci ! Votre reponse a ete enregistree. Nous vous recontacterons si vous avez accepte le test pilote.
+            </div>
+
+            <form data-hermes-form class="mt-8 space-y-6">
+                <div>
+                    <label for="email" class="mb-2 block text-sm font-medium text-slate-700">Email *</label>
+                    <input id="email" name="email" type="email" required placeholder="nom@exemple.com"
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                </div>
+
+                <div>
+                    <label for="role" class="mb-2 block text-sm font-medium text-slate-700">Vous etes... *</label>
+                    <select id="role" name="role" required
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                        <option value="">Selectionnez</option>
+                        <option value="merchant">Commercant</option>
+                        <option value="driver">Livreur</option>
+                        <option value="both">Les deux</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="business_type" class="mb-2 block text-sm font-medium text-slate-700">Type d'activite *</label>
+                    <select id="business_type" name="business_type" required
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                        <option value="">Selectionnez</option>
+                        <option value="restaurant">Restaurant, maquis ou snack</option>
+                        <option value="bakery">Boulangerie ou patisserie</option>
+                        <option value="pharmacy">Pharmacie ou parapharmacie</option>
+                        <option value="grocery">Epicerie ou superette</option>
+                        <option value="shop">Boutique ou commerce divers</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="zone" class="mb-2 block text-sm font-medium text-slate-700">Zone principale *</label>
+                    <input id="zone" name="zone" type="text" required placeholder="Ex: Adidogome, Tokoin, Adawlato"
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                </div>
+
+                <div>
+                    <label for="volume" class="mb-2 block text-sm font-medium text-slate-700">Combien de livraisons gerez-vous en moyenne ? *</label>
+                    <select id="volume" name="volume" required
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                        <option value="">Selectionnez</option>
+                        <option value="lt5_week">Moins de 5 par semaine</option>
+                        <option value="5_20_week">Entre 5 et 20 par semaine</option>
+                        <option value="1_5_day">Entre 1 et 5 par jour</option>
+                        <option value="gt5_day">Plus de 5 par jour</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="main_problem" class="mb-2 block text-sm font-medium text-slate-700">Votre plus gros probleme actuel *</label>
+                    <select id="main_problem" name="main_problem" required
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                        <option value="">Selectionnez</option>
+                        <option value="find_driver">Trouver un livreur disponible au bon moment</option>
+                        <option value="coordination">Coordonner les details de la course</option>
+                        <option value="tracking">Suivre l'etat de la livraison</option>
+                        <option value="proof">Confirmer qu'une livraison est bien terminee</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="budget" class="mb-2 block text-sm font-medium text-slate-700">Budget mensuel envisage si le gain est reel *</label>
+                    <select id="budget" name="budget" required
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                        <option value="">Selectionnez</option>
+                        <option value="free_only">Je ne paie que si c'est gratuit</option>
+                        <option value="5000_15000">5 000 a 15 000 FCFA</option>
+                        <option value="15000_30000">15 000 a 30 000 FCFA</option>
+                        <option value="30000_plus">Plus de 30 000 FCFA</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="beta_interest" class="mb-2 block text-sm font-medium text-slate-700">Souhaitez-vous etre recontacte pour un test pilote ? *</label>
+                    <select id="beta_interest" name="beta_interest" required
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                        <option value="">Selectionnez</option>
+                        <option value="yes">Oui, des que possible</option>
+                        <option value="maybe">Peut-etre, selon le fonctionnement</option>
+                        <option value="no">Non pour l'instant</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="phone" class="mb-2 block text-sm font-medium text-slate-700">Telephone ou WhatsApp (optionnel)</label>
+                    <input id="phone" name="phone" type="tel" placeholder="Ex: 90 12 34 56"
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200">
+                </div>
+
+                <div>
+                    <label for="notes" class="mb-2 block text-sm font-medium text-slate-700">Un exemple concret de probleme vecu (optionnel)</label>
+                    <textarea id="notes" name="notes" rows="4" placeholder="Ex: la commande etait prete mais aucun livreur n'etait joignable..."
+                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200"></textarea>
+                </div>
+
+                <button type="submit" class="w-full rounded-2xl bg-slate-900 px-6 py-4 text-base font-semibold text-white transition hover:bg-slate-700">
+                    Envoyer ma reponse
+                </button>
+
+                <p class="text-xs leading-6 text-slate-500">
+                    Aucun produit public n'est encore lance. Les reponses servent uniquement a valider le besoin.
+                </p>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const SUPABASE_URL = (window.HERMES_SUPABASE_URL || "").trim();
+            const SUPABASE_KEY = (window.HERMES_SUPABASE_KEY || "").trim();
+            const form = document.querySelector("[data-hermes-form]");
+            const warning = document.querySelector("[data-config-warning]");
+            const success = document.querySelector("[data-success]");
+            const configured = SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes("YOUR");
+
+            if (!configured) {
+                warning.classList.remove("hidden");
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    warning.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+                return;
+            }
+
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                form.classList.add("submitting");
+
+                const data = Object.fromEntries(new FormData(form));
+                // Remove empty optional fields
+                if (!data.phone) delete data.phone;
+                if (!data.notes) delete data.notes;
+
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/landing_responses`, {
+                        method: "POST",
+                        headers: {
+                            "apikey": SUPABASE_KEY,
+                            "Authorization": `Bearer ${SUPABASE_KEY}`,
+                            "Content-Type": "application/json",
+                            "Prefer": "return=minimal"
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        form.reset();
+                        success.classList.remove("hidden");
+                        success.scrollIntoView({ behavior: "smooth", block: "start" });
+                    } else {
+                        const err = await response.text();
+                        console.error("Supabase error:", err);
+                        alert("Erreur lors de l'envoi. Veuillez reessayer.");
+                    }
+                } catch (err) {
+                    console.error("Network error:", err);
+                    alert("Erreur reseau. Verifiez votre connexion.");
+                } finally {
+                    form.classList.remove("submitting");
+                }
+            });
+        }());
+    </script>
+</body>
+</html>
