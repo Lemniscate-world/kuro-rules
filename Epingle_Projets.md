@@ -1,5 +1,5 @@
 ﻿# Epingle_Projets.md - lambda-Section Portfolio
-# Last updated: 2026-05-05
+# Last updated: 2026-05-05 (Deep analysis complete - SESSION_SUMMARY parsed)
 # Master copy: ~/Documents/kuro-rules/Epingle_Projets.md
 
 ---
@@ -16,12 +16,12 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 
 ## lambda-Section-1 - User Lambda Enter Real AI [AI, Reseaux De Neurones]
 
-- NeuralDbg 30% (Actif) - Debugger et visualiseur interactifs pour reseaux de neurones. V1 archivee comme preuve de concept, V2 en cours.
+- NeuralDbg 72% (Actif) - Debugger reseaux de neurones avec causalite automatique. V2 dogfoodee sur ResNet-18 (79 tests, 0 failles). Bug inplace ops corrige.
 - TokenWise 0% (Prototypage) - Analyse et reduction du cout par tokens utilises.
-- Astral 5% (Actif) - Alternative open source a Cursor, basee sur Void avec support Ollama.
+- Astral 15% (Actif) - Multi-repo intelligence avec client Hindsight. Data Gravity moat implemente, Next.js MVP.
 - Aquarium 3% (Prototypage) - IDE dedie au developpement et a l entrainement des reseaux de neurones.
 - Metatron 0% (Prototypage) - Multi-language debugger with abductive reasoning. Motto: "Buy time".
-- DataLint 5% (Actif) - Validation intelligente des donnees ML : detection automatique de problemes de qualite, valeurs aberrantes, incohérences.
+- DataLint 10% (Actif) - Gouvernance kuro-rules + validation ML. Alignement sync-rules.ps1 avec projects.txt, workspace audit.
 - Prompt2Model 0% (Validation) - Generation automatique de modeles ML a partir de descriptions textuelles. Phase de validation Mom Test.
 - Odin 10% (Actif) - Fork/customisation d'Open Interpreter permettant aux LLMs d'executer du code localement (Python, JS, Shell) avec interface conversationnelle.
 
@@ -29,7 +29,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 
 ## lambda-Section-2 - Quant-Search [Trading Algorithmique, Modelisation Mathematique De Marches]
 
-- OpenQuant 8% (Actif) - Trading quantitatif automatise, base sur des recherches scientifiques et mathematiques.
+- OpenQuant 12% (Actif) - Trading quantitatif avec MiroFish (swarm LLM). 224 tests, backtest CL/F -10.96%, NewsAPI integre.
   - 5 Modeles Par Annee 2026 :
     - Transformer Probabiliste Pour Prediction De Prix
     - Machine Learning pour prediction des prix d actifs
@@ -41,9 +41,9 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 ## lambda-Section-3 - Hackin Life [Biohacking, Nootropiques, Sport, Discipline Par Biologie]
 
 - NeuroDose 0% (Prototypage) - Outil avance de suivi de metriques pour utilisateurs de nootropiques.
-- Charmed 50% (Actif) - Reveil intelligent pour utilisateurs Spotify. Desktop et Android.
+- Charmed 5% (Pivot) - Projet reveil Spotify ARRETE (viabilite remise en cause). Phase recherche nouveau probleme.
 - Thanatos 0% (Prototypage) - Application mobile mixant entrainements arts martiaux et calisthenie.
-- Echo 5% (Actif) - Systeme de repetition espacee pour notes et documents. Desktop, web et Android.
+- EchoX 60% (Actif) - SRS avec forgetting curves (PyQt6). Validation L1 complete ($23.9B marche), GUI desktop operationnel.
 - Flow-Regulator 5% (Actif) - Environnement de productivite premium avec Pomodoro adaptatif, binaural beats, controle Philips Hue et focus mode.
 
 ---
@@ -71,7 +71,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 
 ## lambda-Section-7 - Helium Chain [Blockchain, Crypto, Finance Decentralisee]
 
-- Helium 5% (Actif) - Creation d une Blockchain et d une crypto.
+- Helium 25% (Actif) - Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complete, POC scripts prets.
 
 ---
 
@@ -86,7 +86,8 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 ## lambda-Section-9 - Network Euler [Gestion d entreprise, Automatisations, DevOps]
 
 - lambda-ESN 0% (Prototypage) - Reseau social d entreprise prive, Slack personnalise.
-- Sagittarius 15% (Validation) - MLOps & AI Agent Assistant pour DevOps et Platform Engineers. Validation L2 complete par scraping automatique de 40 jobs (burnout 60%, 13 interruptions/heure). Pret pour MVP.
+- Sagittarius 15% (Validation) - MLOps & AI Agent Assistant pour DevOps. Validation L2 complete (40 jobs scrapes, burnout 60%).
+- KuroGuardian 0% (Vision) - Agent autonome 24/7 pour gestion de projet lambda-Section. Surveillance SESSION_SUMMARY, alertes inactivite, GUI dashboard.
 
 ---
 
