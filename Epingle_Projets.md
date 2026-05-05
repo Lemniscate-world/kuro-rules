@@ -23,6 +23,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 - Metatron 0% (Prototypage) - Multi-language debugger with abductive reasoning. Motto: "Buy time".
 - DataLint 5% (Actif) - Validation intelligente des donnees ML : detection automatique de problemes de qualite, valeurs aberrantes, incohérences.
 - Prompt2Model 0% (Validation) - Generation automatique de modeles ML a partir de descriptions textuelles. Phase de validation Mom Test.
+- Odin 10% (Actif) - Fork/customisation d'Open Interpreter permettant aux LLMs d'executer du code localement (Python, JS, Shell) avec interface conversationnelle.
 
 ---
 
@@ -85,6 +86,7 @@ Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7z
 ## lambda-Section-9 - Network Euler [Gestion d entreprise, Automatisations, DevOps]
 
 - lambda-ESN 0% (Prototypage) - Reseau social d entreprise prive, Slack personnalise.
+- Sagittarius 15% (Validation) - MLOps & AI Agent Assistant pour DevOps et Platform Engineers. Validation L2 complete par scraping automatique de 40 jobs (burnout 60%, 13 interruptions/heure). Pret pour MVP.
 
 ---
 
