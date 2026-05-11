@@ -13,6 +13,8 @@
 - [Security & Integrity](file:///c:/Users/Utilisateur/Documents/kuro-rules/rules/rule_88_integrity_recovery.md) (Always Load)
 - [Ownership Intelligence](file:///c:/Users/Utilisateur/Documents/kuro-rules/rules/rule_87_ownership_intelligence.md) (Always Load)
 - [Session Reporting](file:///c:/Users/Utilisateur/Documents/kuro-rules/rules/rule_77_79.md) (Session End)
+- [Versioning Integrity](file:///c:/Users/Utilisateur/Documents/kuro-rules/rules/rule_91_hardened_versioning.md) (Releases)
+- [Cross-Platform Reliability](file:///c:/Users/Utilisateur/Documents/kuro-rules/rules/rule_93_cross_platform.md) (Infrastructure)
 
 ## Full Rule Index
 For the full master list of rules and their load-on-demand triggers, refer to [COMPLIANCE_CHECKLIST.md](file:///c:/Users/Utilisateur/Documents/kuro-rules/rules/COMPLIANCE_CHECKLIST.md).
