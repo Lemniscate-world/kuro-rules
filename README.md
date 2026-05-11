@@ -57,3 +57,31 @@ If symlinks give you trouble on Windows, you can simply *copy* the files. The do
 - **.cursorrules**: Instructions for Cursor AI.
 - **.pre-commit-config.yaml**: Standard git hooks (linting, security).
 - **copilot-instructions.md**: Instructions for GitHub Copilot.
+
+## Kuro Control Center
+
+`kuro-rules` can now act as a local agent intelligence hub for the repos listed in `projects.txt`.
+The dashboard turns the rule repository into a control plane for:
+
+- tracked projects across repos and organizations
+- rule sync coverage and repo hygiene
+- post-mortems, Mom Test artifacts, and knowledge memory
+- failure visibility and workflow drift
+
+### Launch the GUI
+
+From PowerShell:
+
+```powershell
+.\run-dashboard.ps1
+```
+
+This refreshes a local snapshot, serves the dashboard on `http://127.0.0.1:8765`, and opens it in your browser.
+
+### Dashboard data sources
+
+- `projects.txt`
+- `KNOWLEDGE_BASE/`
+- `AGENTS.md`
+- `SYNC_LOG.md`
+- git metadata from the tracked repositories in `~/Documents`

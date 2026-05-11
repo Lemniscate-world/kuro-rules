@@ -1,5 +1,683 @@
 ﻿# Sync Log
 
+## 2026-05-05 22:42:57
+- AEther : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aladin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aquarium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Astral : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Automatons : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- BloomDB : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Charmed : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- datalint : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Dissect : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- EchoX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Epure : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Flow-Regulator : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Helium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Hermes : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Iroko : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Kapok : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- KuroGuardian : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Metatron : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Again : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Research : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDBG : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDSL : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralPaper : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuroDose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Nwt : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Odin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Onlook : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenMind : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenQuant : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- POFS : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Project-Dirac : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Prompt2Model : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- QuSolve : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SOGEXCO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SaasX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Sagittarius : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- TokenWise : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Verbose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 22:42:23
+- AEther : AGENTS.md
+- Aladin : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- datalint : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Flow-Regulator : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- KuroGuardian : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Nwt : AGENTS.md
+- Odin : AGENTS.md
+- Onlook : AGENTS.md
+- OpenMind : AGENTS.md
+- OpenQuant : AGENTS.md
+- POFS : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Prompt2Model : AGENTS.md
+- QuSolve : AGENTS.md
+- SOGEXCO : AGENTS.md
+- SaasX : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Verbose : AGENTS.md
+- Constant_Yield : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- DevDemeterDAO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Vault : AGENTS.md
+- XP_Farming_System : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 22:26:03
+- Aladin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Constant_Yield : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Flow-Regulator : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Nwt : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Onlook : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenMind : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- POFS : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Prompt2Model : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- QuSolve : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SOGEXCO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- SaasX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 21:57:11
+- Astral : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Automatons : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- BloomDB : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Charmed : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- datalint : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Dissect : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Lemniscate-world : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Metatron : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Again : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Research : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDBG : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDSL : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralPaper : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuroDose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenQuant : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Project-Dirac : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- TokenWise : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Vault : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Verbose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- AEther : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aquarium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Constant_Yield : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- DevDemeterDAO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- EchoX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Epure : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Helium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Hermes : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Iroko : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Kapok : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- KuroGuardian : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- lambda-portfolio : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Odin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Playground : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Playground 2 : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Sagittarius : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- XP_Farming_System : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 14:55:08
+- KuroGuardian : .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-05 13:39:20
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Constant_Yield : AGENTS.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+- XP_Farming_System : AGENTS.md
+
+## 2026-05-05 12:41:20
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Constant_Yield : AGENTS.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+- XP_Farming_System : AGENTS.md
+
+## 2026-05-05 12:27:07
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Constant_Yield : AGENTS.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+- XP_Farming_System : AGENTS.md
+
+## 2026-05-05 12:02:51
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Constant_Yield : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md, .cursorrules, copilot-instructions.md, AI_GUIDELINES.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+- XP_Farming_System : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-04 10:53:55
+- AEther : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aquarium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Astral : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Automatons : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- BloomDB : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Charmed : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Datalint : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- DevDemeterDAO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Dissect : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- EchoX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Epure : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Helium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Hermes : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Iroko : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Kapok : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- lambda-portfolio : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Lemniscate-world : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Metatron : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Again : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Research : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDBG : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDSL : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralPaper : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuroDose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Odin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenQuant : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Playground : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Playground 2 : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Project-Dirac : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Sagittarius : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- TokenWise : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Vault : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Verbose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-02 14:58:57
+- AEther : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Aquarium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Astral : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Automatons : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- BloomDB : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Charmed : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Datalint : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- DevDemeterDAO : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Dissect : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- EchoX : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Epure : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Helium : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Hermes : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Iroko : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Kapok : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- lambda-portfolio : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Lemniscate-world : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Metatron : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Again : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Research : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDBG : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralDSL : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuralPaper : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- NeuroDose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Odin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- OpenQuant : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Playground : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Playground 2 : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Project-Dirac : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Sagittarius : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- TokenWise : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Vault : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Verbose : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-05-02 09:38:26
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+
+## 2026-05-01 23:16:52
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+
+## 2026-04-30 10:31:36
+- AEther : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- Datalint : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- lambda-portfolio : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Odin : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Playground 2 : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+
+## 2026-03-25 17:12:26
+- AEther : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Automatons : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- BloomDB : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Charmed : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Datalint : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Dissect : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Echo : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Epure : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Iroko : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Kapok : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Lemniscate-world : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Metatron : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Again : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Aquarium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Research : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDBG : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDSL : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralPaper : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuroDose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Odin : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- OpenQuant : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Playground : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Project-Dirac : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- TokenWise : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Vault : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Verbose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+
+## 2026-03-25 17:03:16
+- AEther : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Automatons : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- BloomDB : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Charmed : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Datalint : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Dissect : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Echo : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Epure : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Iroko : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Kapok : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Lemniscate-world : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Metatron : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Again : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Aquarium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Research : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDBG : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDSL : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralPaper : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuroDose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Odin : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- OpenQuant : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Playground : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Project-Dirac : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- TokenWise : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Vault : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Verbose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+
+## 2026-03-25 16:04:22
+- AEther : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Automatons : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- BloomDB : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Charmed : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Datalint : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Dissect : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Echo : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Epure : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Iroko : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Kapok : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Lemniscate-world : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Metatron : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Again : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Aquarium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Research : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDBG : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDSL : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralPaper : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuroDose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Odin : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- OpenQuant : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Playground : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Project-Dirac : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- TokenWise : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Vault : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Verbose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+
+## 2026-03-21 18:25:53
+- AEther : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Automatons : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- BloomDB : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- CADAM : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Charmed : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Datalint : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Dissect : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Echo : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Iroko : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Kapok : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Lemniscate-world : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Metatron : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Again : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Aquarium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Research : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDBG : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDSL : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralPaper : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuroDose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- OpenQuant : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Playground : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Project-Dirac : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- TokenWise : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Vault : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Verbose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+
+## 2026-03-21 18:25:50
+- AEther : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- CADAM : AGENTS.md
+- Charmed : AGENTS.md
+- Datalint : AGENTS.md
+- Dissect : AGENTS.md
+- Echo : AGENTS.md
+- Helium : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Aquarium : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+
+## 2026-03-21 18:25:30
+- Helium : AGENTS.md
+
+## 2026-03-21 18:24:07
+- AEther : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Astral : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Automatons : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- BloomDB : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- CADAM : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Charmed : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Datalint : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Dissect : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Echo : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Helium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Iroko : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Kapok : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Lemniscate-world : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Metatron : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Again : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Aquarium : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Neural-Research : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDBG : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralDSL : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuralPaper : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- NeuroDose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- OpenQuant : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Playground : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Project-Dirac : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Sagittarius : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- TokenWise : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Vault : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+- Verbose : AGENTS.md, AI_GUIDELINES.md, GAD.md, .cursorrules, copilot-instructions.md, acquisition_tracker.md, sync_summary.py
+
+## 2026-03-21 18:23:34
+- AEther : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- CADAM : AGENTS.md
+- Charmed : AGENTS.md
+- Datalint : AGENTS.md
+- Dissect : AGENTS.md
+- Echo : AGENTS.md
+- Helium : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- Lemniscate-world : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Aquarium : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- OpenQuant : AGENTS.md
+- Playground : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Vault : AGENTS.md
+- Verbose : AGENTS.md
+
 ## 2026-03-21 18:09:52
 - AEther : AGENTS.md
 - Astral : AGENTS.md
@@ -533,6 +1211,14 @@ The following rule files were synced to all projects:
 - **NeuroDose\web\node_modules\recharts\AGENTS.md** - Third-party dependency, not a project
 
 All projects now follow the same strict, enforceable rules for AI agent development.
+
+
+
+
+
+
+
+
 
 
 

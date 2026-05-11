@@ -1,7 +1,26 @@
-# exclude.txt -- Repos to EXCLUDE from rule sync
-# One folder name per line (relative to ~/Documents)
-# Lines starting with # are ignored
-# kuro-rules is always excluded automatically
+# exclude.txt -- Repositories to exclude from auto-discovery and rule synchronization
+# One project name per line
 
-# Third-party repos (not yours)
-ChatDev
+# External / Third-party
+DevDemeterDAO
+Constant_Yield
+XP_Farming_System
+Nwt
+
+# Personal / Special
+Vault
+.windsurf
+vcpkg
+WindowsPowerShell
+MATLAB
+Adobe
+Ableton
+
+# System / Internal
+kuro-rules
+KuroGuardian
+Kuro
+lambda-portfolio
+Lemniscate-world
+Playground
+Playground 2
