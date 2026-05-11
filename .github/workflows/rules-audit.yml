@@ -1,0 +1,44 @@
+name: Rules Audit
+
+on:
+  push:
+    branches:
+      - main
+      - ceo/**
+      - infra/**
+      - feat/**
+      - fix/**
+      - docs/**
+      - refactor/**
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  audit-rules:
+    name: Audit kuro-rules policy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Run rules audit in repo mode
+        run: python audit-rules.py --mode repo --scope all --write-report
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-audit-report
+          path: |
+            reports/audit-rules-report.md
+            reports/audit-rules-report.csv
+          if-no-files-found: warn
