@@ -16,7 +16,8 @@ $RULE_FILES = @(
     ".cursorrules",
     "copilot-instructions.md",
     ".windsurfrules",
-    "AI_GUIDELINES.md"
+    "AI_GUIDELINES.md",
+    "GAD.md"
 )
 
 # 1. GENERATE SMART REDIRECTOR (AGENTS.md) for deployment
@@ -61,12 +62,12 @@ foreach ($proj in $projects) {
     $projSynced = @()
     foreach ($file in $RULE_FILES) {
         $src = Join-Path $RULES_DIR $file
-        if ($file -eq "AGENTS.md") { $src = $compiledPath }
         
         $dst = Join-Path $proj.Path $file
         if ($file -eq "copilot-instructions.md") {
             $githubDir = Join-Path $proj.Path ".github"
-            if (Test-Path $githubDir) { $dst = Join-Path $githubDir $file }
+            if (-not (Test-Path $githubDir)) { New-Item -ItemType Directory -Path $githubDir -Force | Out-Null }
+            $dst = Join-Path $githubDir $file
         }
 
         if (-not (Test-Path $src)) { continue }

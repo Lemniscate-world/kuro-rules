@@ -88,3 +88,4 @@ R83: [DONE/N-A/PENDING] - Investor-ready Discord summary generated (3-5 sentence
 R84: [DONE/N-A/PENDING] - Validation pipeline automated end-to-end: Supabase + web form + dashboard + Python analytics. No manual CSV exports or spreadsheet tracking.
 R85: [DONE/PENDING] - Portfolio completeness verified: ~/Documents scanned, all projects in Epingle_Projets.md with descriptions, missing projects identified and added.
 R86: [DONE/N-A/PENDING] - Kuro Guardian protocol: SESSION_SUMMARY tracked, Guardian daemon consulted for project context, alerts monitored.
+R89: [DONE/PENDING] - Lessons learned captured as rules when problems are solved (R89).
