@@ -1,5 +1,8 @@
 ﻿# Sync Log
 
+## 2026-05-12 10:54:04
+- NeuralDBG : GAD.md
+
 ## 2026-05-12 00:34:00
 - AEther : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md, GAD.md
 - Aladin : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md, GAD.md

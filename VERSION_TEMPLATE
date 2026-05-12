@@ -1,0 +1,19 @@
+# VERSION - Project Version Tracking
+# Update this file at every milestone tag
+# Format: vMAJOR.MINOR.PATCH-kuro
+
+MAJOR=0
+MINOR=0
+PATCH=0
+MILESTONE=0%
+LAST_TAG=none
+LAST_TAG_DATE=YYYY-MM-DD
+
+# Tag History (append new tags):
+# v0.1.0-kuro - 2024-XX-XX - 10% milestone
+# v0.2.0-kuro - 2024-XX-XX - 25% milestone
+# v0.5.0-kuro - 2024-XX-XX - 50% milestone
+# v0.7.5-kuro - 2024-XX-XX - 75% milestone
+# v0.9.0-kuro - 2024-XX-XX - 90% milestone
+# v0.9.5-kuro - 2024-XX-XX - 95% milestone
+# v1.0.0-kuro - 2024-XX-XX - 100% milestone (GA)
