@@ -109,6 +109,8 @@ public
 # Temporary folders
 tmp/
 temp/
+.tmp.driveupload/
+*.gdoc
 
 # Editor directories and files
 .vscode/*
