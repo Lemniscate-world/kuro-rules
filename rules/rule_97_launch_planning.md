@@ -8,6 +8,11 @@
 Un planning de lancement est un document unique qui couvre **J-7 à J+30**.
 Il est stocké dans `docs/launch_plan_{PROJECT_NAME}.md`.
 
+## Alignement avec la Roadmap Master (MANDATORY)
+- Le fichier de roadmap principal (`PLAN.md` ou équivalent) MUST être chronologiquement aligné avec le plan de lancement.
+- La phase active dans la roadmap principale doit être le lancement lui-même, pointant explicitement vers le lien du plan de lancement (`docs/launch_plan_{PROJECT_NAME}.md`).
+- Tous les chantiers futurs ou post-lancement (ex: interfaces graphiques lourdes, agents complexes) doivent être reportés dans une section de la roadmap principale clairement séparée et identifiée comme post-lancement ("Post-Launch Roadmap").
+
 ---
 
 ## Phases temporelles
