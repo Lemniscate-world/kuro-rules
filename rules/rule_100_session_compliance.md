@@ -5,10 +5,11 @@ Au TOUT DÉBUT de chaque session de travail, avant toute autre action.
 
 ## Obligation
 L'agent DOIT :
-1. Lire `rules/COMPLIANCE_CHECKLIST.md`
-2. Vérifier TOUTES les règles 🔴🔴 MANDATORY
-3. Signaler dans le premier message de la session l'état de conformité
-4. Si une règle mandatory est en 🔴 VIOLATED, NE PAS commencer à travailler avant correction
+1. Lire `rules/COMPLIANCE_CHECKLIST.md`.
+2. S'il existe un dossier `docs/tracking/` ou un fichier `docs/launch_plan_*.md`, lire obligatoirement `docs/tracking/acquisition_tracker.md` et le plan de lancement en début de session afin de synchroniser sa mémoire sur les publications marketing et l'historique d'acquisition.
+3. Vérifier TOUTES les règles 🔴🔴 MANDATORY.
+4. Signaler dans le premier message de la session l'état de conformité.
+5. Si une règle mandatory est en 🔴 VIOLATED, NE PAS commencer à travailler avant correction.
 
 ## Format du message de début de session
 ```
