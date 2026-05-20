@@ -16,12 +16,11 @@ $RULE_FILES = @(
     ".cursorrules",
     "copilot-instructions.md",
     ".windsurfrules",
-    "AI_GUIDELINES.md",
-    "GAD.md"
+    "AI_GUIDELINES.md"
 )
 
 # 1. GENERATE SMART REDIRECTOR (AGENTS.md) for deployment
-$compiledPath = Join-Path $RULES_DIR "AGENTS_REDIRECTOR.tmp.md"
+$agentsPath = Join-Path $RULES_DIR "AGENTS.md"
 Write-KuroLog "Generating Smart Redirector with index..." -Color Cyan
 try {
     $ruleFiles = Get-ChildItem (Join-Path $RULES_DIR "rules") -Filter "rule_*.md" | Sort-Object Name
@@ -37,7 +36,7 @@ try {
         $index += "- **$($rf.BaseName)**: $title`n"
     }
     
-    [System.IO.File]::WriteAllText($compiledPath, $index, [System.Text.Encoding]::UTF8)
+    [System.IO.File]::WriteAllText($agentsPath, $index, [System.Text.Encoding]::UTF8)
     Write-KuroLog "  OK: Smart Redirector generated with $($ruleFiles.Count) entries." -Color DarkGray
 } catch {
     Write-KuroLog "  ERROR: Failed to generate index: $_" -Color Red
@@ -106,6 +105,4 @@ if (-not $DryRun -and $logEntries.Count -gt 0) {
     [System.IO.File]::WriteAllText($logFile, $newContent, [System.Text.Encoding]::UTF8)
 }
 
-# Cleanup
-if (Test-Path $compiledPath) { Remove-Item $compiledPath -Force }
 Write-KuroLog "Done. Total syncs: $syncCount" -Color Cyan

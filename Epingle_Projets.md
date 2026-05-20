@@ -1,172 +1,251 @@
-# Epingle_Projets.md - lambda-Section Portfolio
-# Last updated: 2026-05-05 (Deep analysis complete - SESSION_SUMMARY parsed)
-# Master copy: ~/Documents/kuro-rules/Epingle_Projets.md
+# Épinglé Projets — Portfolio lambda-Section
+
+> **Dernière mise à jour** : 2026-05-17  
+> **Source** : `~/Documents/kuro-rules/Epingle_Projets.md`  
+> **Méthode** : Deep analysis — SESSION_SUMMARY parsés (R85 + R86)
 
 ---
 
-## BIENVENUE a lambda-Section
+## ⚡ Livrables Mensuels — Ne Jamais Oublier (R90)
 
-Pour plus de details, la liste exclusive des projets est disponible a :
-https://docs.google.com/document/d/1PGyC-3tWttGNy-hpDLSWdRqEa1CKrsEAj1TkmdL7iRw/edit
+> Ces projets ont des engagements récurrents. Tout agent IA DOIT vérifier leur statut
+> à chaque session portfolio ou session sur l'un de ces projets.
+> Voir `rules/rule_90_livrables_mensuels.md`.
 
-Organisation GitHub : https://github.com/LambdaSection
-Work Calendar Team : https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7zLRulgfcyj9iIoFUVkXds/edit
-
----
-
-## lambda-Section-1 - User Lambda Enter Real AI [AI, Reseaux De Neurones]
-
-- NeuralDbg 72% (Actif) - Debugger reseaux de neurones avec causalite automatique. V2 dogfoodee sur ResNet-18 (79 tests, 0 failles). Analyse causale des echecs d entrainement.
-- Neural-Again 10% (Archive) - DSL pour reseaux de neurones. Obsolete, remplace par Keras/PyTorch + code gen.
-- Neural-Research 5% (Archive) - Recherches avancees sur les architectures neuronales.
-- NeuralDSL 0% (Archive) - Domain Specific Language for neural networks.
-- NeuralPaper 0% (Archive) - Drafts and research for neural network papers.
-- NeuroDose 5% (Actif) - Cognitive Supplement Tracker & Visualizer. Optimisation de la sante cognitive via modelisation pharmacocinetique.
-- TokenWise 0% (Prototypage) - Analyse et reduction du cout par tokens utilises. Phase de validation Mom Test.
-- Astral 15% (Actif) - Multi-repo intelligence with client Hindsight. Data Gravity moat implemente, Next.js MVP.
-- Aquarium 3% (Prototypage) - IDE dedie au developpement et a l entrainement des reseaux de neurones.
-- Metatron 0% (Prototypage) - Multi-language debugger with abductive reasoning. Motto: "Buy time".
-- DataLint 10% (Actif) - Gouvernance kuro-rules + validation ML. Alignement sync-rules.ps1 avec projects.txt, workspace audit.
-- Prompt2Model 0% (Validation) - Generation automatique de modeles ML a partir de descriptions textuelles. Phase de validation Mom Test.
-- Odin 10% (Actif) - Fork/customisation d'Open Interpreter permettant aux LLMs d'executer du code localement (Python, JS, Shell) avec interface conversationnelle.
-- Aladin 40% (Actif) - Architecture Transformer & LLM research project.
-- Automatons 0% (Prototypage) - Agent orchestration and automation framework.
-- Onlook 0% (Prototypage) - Visual monitoring or observability tool.
-- Vault (Obsidian Notes) - Base de connaissances personnelle Lemniscate-SHA-256.
-- Verbose 0% (Prototypage) - Logging or communication tool.
+| Projet | Section | Livrable | Fréquence | Partie prenante |
+|--------|---------|----------|-----------|-----------------|
+| **OpenQuant** | λ-2 | Modèle de trading (backtest validé) | ~1 tous les 2 mois (5/an) | Interne |
+| **DevDemeterDAO** | Externe | Governance report / release | Mensuel | Demeter Labs |
+| **Constant_Yield** | Externe | Protocol milestone / audit | Mensuel | Demeter Labs |
+| **XP_Farming_System** | Externe | Contribution tracking release | Mensuel | Demeter Labs |
+| **Hermes** | λ-4 | Validation terrain update | Mensuel | Commerçants Lomé |
+| **Sagittarius** | λ-9 | MLOps validation deliverable | Mensuel | Externe (B2B) |
 
 ---
 
-## lambda-Section-2 - Quant-Search [Trading Algorithmique, Modelisation Mathematique De Marches]
+## Liens
 
-- OpenQuant 12% (Actif) - Trading quantitatif avec MiroFish (swarm LLM). 224 tests, backtest CL/F -10.96%, NewsAPI integre.
-  - 5 Modeles Par Annee 2026 :
-    - Transformer Probabiliste Pour Prediction De Prix
-    - Machine Learning pour prediction des prix d actifs
-    - Modele De Markov Pour Detection De Changements De Regimes
-- Console 0% (Prototypage) - Environnement de developpement d outils de trading quantitatifs et algorithmiques.
+- **Liste exclusive des projets** : [Google Doc](https://docs.google.com/document/d/1PGyC-3tWttGNy-hpDLSWdRqEa1CKrsEAj1TkmdL7iRw/edit)
+- **Organisation GitHub** : [LambdaSection](https://github.com/LambdaSection)
+- **Work Calendar Team** : [Google Doc](https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7zLRulgfcyj9iIoFUVkXds/edit)
 
 ---
 
-## lambda-Section-3 - Hackin Life [Biohacking, Nootropiques, Sport, Discipline Par Biologie]
+## λ-Section-1 — User Lambda Enter Real AI
 
-- NeuroDose 0% (Prototypage) - Outil avance de suivi de metriques pour utilisateurs de nootropiques.
-- Charmed 5% (Pivot) - Projet reveil Spotify ARRETE (viabilite remise en cause). Phase recherche nouveau probleme.
-- Thanatos 0% (Prototypage) - Application mobile mixant entrainements arts martiaux et calisthenie.
-- EchoX 60% (Actif) - SRS avec forgetting curves (PyQt6). Validation L1 complete ($23.9B marche), GUI desktop operationnel.
-- Flow-Regulator 5% (Actif) - Environnement de productivite premium avec Pomodoro adaptatif, binaural beats, controle Philips Hue et focus mode.
+> AI, Réseaux de Neurones
 
----
-
-## lambda-Section-4 - G&S Solutions [Fintech]
-
-- Hermes 10% (Validation) - Outil de coordination des livraisons pour commercants du Grand Lome, Togo. Phase de validation terrain avec landing page et pipeline automation (R84).
-- G&S Solutions 6% (Actif) - Fintech en phase de mindmapping.
-- Iroko 0% (Prototypage) - Fintech.
-- Kapok 0% (Prototypage) - Insurtech.
-- SOGEXCO 0% (Prototypage) - Accounting/Business solution for SOGEXCO client.
-
----
-
-## lambda-Section-5 - Eclipse [Ingenierie Informatique Aerospatiale]
-
-- Bad Bunny 0% (Prototypage) - Bibliotheque pour simulation de propulseurs de fusees en Rust.
-
----
-
-## lambda-Section-6 - Paranoid [Developpement de jeux video experimentaux]
-
-(En cours de definition)
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **NeuralDBG** | 80% | Actif | Debugger réseaux de neurones avec causalité automatique. V2 dogfoodée sur ResNet-18. NeuralDBG-Engine v1.0.0. Ajout d'une couche de prévention OOM et d'offloading de tenseurs sur disque en cas d'anomalie, avec stats d'activations JIT optimisées. Landing page déployée. |
+| **Neural-Agent** | 0% | Nouveau | Agent auto-correcteur pour l'entraînement de RN. Boucle fermée : NeuralDBG → Diagnostic Causal → Action → Nouvel entraînement. |
+| **Aladin** | 40% | Actif | Architecture Transformer & recherche LLM. |
+| **Astral** | 15% | Actif | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
+| **DataLint** | 10% | Actif | Gouvernance kuro-rules + validation ML. Alignement sync-rules.ps1 avec projects.txt, workspace audit. |
+| **Odin** | 10% | Actif | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM avec interface conversationnelle. |
+| **NeuroDose** | 5% | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
+| **Aquarium** | 3% | Prototypage | IDE dédié au développement et à l'entraînement des réseaux de neurones. |
+| **Damon** | 0% | Nouveau | OS Amélioré basé sur Arch Linux. |
+| **Metatron** | 0% | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
+| **TokenWise** | 0% | Prototypage | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
+| **Prompt2Model** | 0% | Validation | Génération automatique de modèles ML à partir de descriptions textuelles. Phase validation Mom Test. |
+| **Automatons** | 0% | Prototypage | Agent orchestration and automation framework. |
+| **Onlook** | 0% | Prototypage | Visual monitoring / observability tool. |
+| **Verbose** | 0% | Prototypage | Logging / communication tool. |
+| Vault | — | Outil | Base de connaissances personnelle (Obsidian). |
+| Neural-Again | 10% | Archive | DSL pour réseaux de neurones. Obsolète, remplacé par Keras/PyTorch + code gen. |
+| Neural-Research | 5% | Archive | Recherches avancées sur les architectures neuronales. |
+| NeuralDSL | 0% | Archive | Domain Specific Language for neural networks. |
+| NeuralPaper | 0% | Archive | Drafts and research for neural network papers. |
 
 ---
 
-## lambda-Section-7 - Helium Chain [Blockchain, Crypto, Finance Decentralisee]
+## λ-Section-2 — Quant-Search
 
-- Helium 25% (Actif) - Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complete, POC scripts prets.
-- POFS 0% (Prototypage) - Proof of Stake/File System research.
+> Trading Algorithmique, Modélisation Mathématique de Marchés
 
----
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **OpenQuant** | 12% | Actif | Trading quantitatif avec MiroFish (swarm LLM). 224 tests, backtest CL/F -10.96%, NewsAPI intégré. |
+| Console | 0% | Prototypage | Environnement de développement d'outils de trading quantitatifs et algorithmiques. |
 
-## lambda-Section-8 - AI8 (Algorithmic Intelligence 8) [Algorithmes, Structures, Donnees]
-
-- Dissect 8% (Actif) - Outil d audit et de visualisation de l orchestration des agents IA.
-- Algoritmi 0% (Prototypage) - Derive de Dissect centree sur la visualisation des algorithmes.
-- BloomDB 5% (Prototypage) - Base de donnees pour stockage et gestion de donnees probabilistes.
-
----
-
-## lambda-Section-9 - Network Euler [Gestion d entreprise, Automatisations, DevOps]
-
-- lambda-ESN 0% (Prototypage) - Reseau social d entreprise prive, Slack personnalise.
-- Sagittarius 15% (Validation) - MLOps & AI Agent Assistant for DevOps. Validation L2 complete (40 jobs scrapes, burnout 60%).
-- Kuro 5% (Actif) - Daemon MVP fonctionnel (Python + watchdog + SQLite). Surveillance 24/7 SESSION_SUMMARY.md, parser auto, alertes inactivite, 21 projets indexes.
+**Objectif 2026 — 5 modèles/an :**
+1. Transformer Probabiliste pour Prédiction de Prix
+2. Machine Learning pour prédiction des prix d'actifs
+3. Modèle de Markov pour détection de changements de régimes
 
 ---
 
-## lambda-Section-10 - Qu Solve [Recherches et Applications en Mecanique Quantique]
+## λ-Section-3 — Hackin Life
 
-- Etude de systemes non hermitiens.
+> Biohacking, Nootropiques, Sport, Discipline par Biologie
 
----
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **EchoX** | 60% | Actif | SRS avec forgetting curves (PyQt6). Validation L1 complète ($23.9B marché), GUI desktop opérationnel. |
+| **Flow-Regulator** | 5% | Actif | Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode. |
+| Charmed | 5% | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
+| Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
 
-## lambda-Section-11 - SaaS X [Creation Automatisee et Rapide avec Gestion de SaaS]
-
-- SaaS X 0% (Recherche) - Recherches et implementations en cours.
-
----
-
-## lambda-Section-12 - Hypatia [Recherches Avancees En Physique & Mathematiques]
-
-- AEther 5% (Actif) - Minkowski Space-Time Visualizer, axe ensuite sur l exploration d autres espaces-temps.
-- Logical Calculus 0% (Recherche) - Nouveau systeme de calcul infinitesimal base on logic and Newton's calculus. Formalization in progress.
-- Mathematical Theorization Of Linguistics & Language 0% (Recherche) - Mathematisation du langage par theorie de Shannon, espaces de probabilites linguistiques.
-- Project-Dirac 0% (Prototypage) - Physics-inspired computational model.
+> **Note** : NeuroDose est listé dans λ-Section-1 (AI). Son axe biohacking est couvert par le même projet.
 
 ---
 
-## lambda-Section-13 - Dexter.pwn [Hacking Ethique, CTFs, Decouverte De Failles Zero Day]
+## λ-Section-4 — G&S Solutions
 
-- Sybil 0% (Recherche) - Exploration des failles de reseaux de neurones.
+> Fintech
 
----
-
-## lambda-Section-14 - Charles [BeatMaking, Art, Poesie, NFTs, Experiences Audio-Visuelles]
-
-- Audio Room Visualizer 0% (Prototypage) - Visualiser la musique dans l espace, en 3D/2D/projections.
-- Interpoem 0% (Prototypage) - Plateforme d immersion du lecteur dans un poeme (musique, 3D, VR, art digital).
-- Charles 0% (Prototypage) - Production musicale par code et electronique avancee (SuperCollider, plugins FL Studio).
-- OpenMind 15% (Actif) - Application de journaling Windows (WinUI 3) avec analyse IA via Ollama, exports multiples et packaging MSIX.
-- Journaux 0% (Archive) - Archive of personal journaling or log system.
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **Hermes** | 10% | Validation | Outil de coordination des livraisons pour commerçants du Grand Lomé, Togo. Landing page + pipeline automation (R84). |
+| G&S Solutions | 6% | Actif | Fintech en phase de mindmapping. |
+| Iroko | 0% | Prototypage | Fintech. |
+| Kapok | 0% | Prototypage | Insurtech. |
+| SOGEXCO | 0% | Prototypage | Accounting/Business solution pour client SOGEXCO. |
 
 ---
 
-## lambda-Section-15 - XCAD [CAD, Genie Civil et Electromecanique]
+## λ-Section-5 — Eclipse
 
-- Epure 0% (Prototypage)
-- Mori 0% (Prototypage) - Architecture biomimetique.
+> Ingénierie Informatique Aérospatiale
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| Bad Bunny | 0% | Prototypage | Bibliothèque pour simulation de propulseurs de fusées en Rust. |
+
+---
+
+## λ-Section-6 — Paranoid
+
+> Développement de jeux vidéo expérimentaux
+
+*(En cours de définition)*
+
+---
+
+## λ-Section-7 — Helium Chain
+
+> Blockchain, Crypto, Finance Décentralisée
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **Helium** | 25% | Actif | Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. |
+| POFS | 0% | Prototypage | Proof of Stake / File System research. |
+
+---
+
+## λ-Section-8 — AI8 (Algorithmic Intelligence 8)
+
+> Algorithmes, Structures de Données
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **Dissect** | 8% | Actif | Outil d'audit et de visualisation de l'orchestration des agents IA. |
+| BloomDB | 5% | Prototypage | Base de données pour stockage et gestion de données probabilistes. |
+| Algoritmi | 0% | Prototypage | Dérivé de Dissect, centré sur la visualisation des algorithmes. |
+
+---
+
+## λ-Section-9 — Network Euler
+
+> Gestion d'entreprise, Automatisations, DevOps
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **Sagittarius** | 15% | Validation | MLOps & AI Agent Assistant for DevOps. Validation L2 complète (40 jobs scrapés, burnout 60%). |
+| **KuroGuardian** | 5% | Actif | Daemon MVP fonctionnel (Python + watchdog + SQLite). Surveillance 24/7 SESSION_SUMMARY.md, parser auto, alertes inactivité, 21 projets indexés. |
+| lambda-ESN | 0% | Prototypage | Réseau social d'entreprise privé, Slack personnalisé. |
+
+---
+
+## λ-Section-10 — QuSolve
+
+> Recherches et Applications en Mécanique Quantique
+
+- Étude de systèmes non hermitiens.
+
+---
+
+## λ-Section-11 — SaaS X
+
+> Création Automatisée et Rapide avec Gestion de SaaS
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| SaasX | 0% | Recherche | Recherches et implémentations en cours. |
+
+---
+
+## λ-Section-12 — Hypatia
+
+> Recherches Avancées en Physique & Mathématiques
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **AEther** | 5% | Actif | Minkowski Space-Time Visualizer, orienté exploration d'autres espaces-temps. |
+| Logical Calculus | 0% | Recherche | Nouveau système de calcul infinitésimal basé sur la logique et le calcul de Newton. Formalisation en cours. |
+| Math. Theorization of Linguistics | 0% | Recherche | Mathématisation du langage par théorie de Shannon, espaces de probabilités linguistiques. |
+| Project-Dirac | 0% | Prototypage | Physics-inspired computational model. |
+
+---
+
+## λ-Section-13 — Dexter.pwn
+
+> Hacking Éthique, CTFs, Découverte de Failles Zero Day
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| Sybil | 0% | Recherche | Exploration des failles de réseaux de neurones. |
+
+---
+
+## λ-Section-14 — Charles
+
+> BeatMaking, Art, Poésie, NFTs, Expériences Audio-Visuelles
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **OpenMind** | 15% | Actif | Application de journaling Windows (WinUI 3) avec analyse IA via Ollama, exports multiples et packaging MSIX. |
+| Audio Room Visualizer | 0% | Prototypage | Visualiser la musique dans l'espace, en 3D/2D/projections. |
+| Interpoem | 0% | Prototypage | Plateforme d'immersion du lecteur dans un poème (musique, 3D, VR, art digital). |
+| Charles | 0% | Prototypage | Production musicale par code et électronique avancée (SuperCollider, plugins FL Studio). |
+| Journaux | 0% | Archive | Archive of personal journaling / log system. |
+
+---
+
+## λ-Section-15 — XCAD
+
+> CAD, Génie Civil et Électromécanique
+
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| Epure | 0% | Prototypage | — |
+| Mori | 0% | Prototypage | Architecture biomimétique. |
 
 ---
 
 ## Projets Tiers / Externes (Non-Propriétaire)
 
-- DevDemeterDAO 30% (Actif) - Governance framework for Demeter Labs.
-- Constant_Yield 15% (Actif) - DeFi protocol for Demeter Labs.
-- XP_Farming_System 20% (Actif) - Gamified contribution tracking for Demeter Labs.
-- Nwt (External) - nw_wrld Modules Workspace (Third-party).
+| Projet | Progression | Statut | Description |
+|--------|-------------|--------|-------------|
+| **DevDemeterDAO** | 35% | Actif | Governance framework pour Demeter Labs. Sécurité hardened (EOA→multisig, VeVotingPowerCondition). |
+| **XP_Farming_System** | 20% | Actif | Gamified contribution tracking pour Demeter Labs. |
+| **Constant_Yield** | 18% | Actif | DeFi protocol pour Demeter Labs. Audit sécurité et ModularYieldTokenizer en cours. |
+| Nwt | — | Externe | nw_wrld Modules Workspace (Third-party). |
 
 ---
 
-## Autres Projets En Reflexion
+## Projets en Réflexion
 
-- Semantica | Robust Lambda | Mathematical Spaces Study | CodeBase As Math
-- Intelligent Autonomous Laboratory (IAL) - Domotique
-- Embeddings Visualizer | Spotipom | Open-Source Heptabase | Logos
-- Urge Surfing App | SERVERIA (Hyper Evolutive Connected Server)
-- Open-Source AI Accounting | Fo Nu NLP | Level Up Habit Tracking
+- Semantica · Robust Lambda · Mathematical Spaces Study · CodeBase As Math
+- Intelligent Autonomous Laboratory (IAL) — Domotique
+- Embeddings Visualizer · Spotipom · Open-Source Heptabase · Logos
+- Urge Surfing App · SERVERIA (Hyper Evolutive Connected Server)
+- Open-Source AI Accounting · Fo Nu NLP · Level Up Habit Tracking
 - Startup : Agriculture (Togo/Afrique)
 - Startup : Transports
-- Startup : Personnes a faible agency
+- Startup : Personnes à faible agency
 - Startup : Recherche scientifique / papiers de recherche
-- Startup : Protection contre IA defaillantes (Police IA)
+- Startup : Protection contre IA défaillantes (Police IA)
 - YC Startups Requests
 - BioX

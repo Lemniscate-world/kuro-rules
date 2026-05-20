@@ -39,3 +39,4 @@ Verbose
 Constant_Yield
 DevDemeterDAO
 XP_Farming_System
+Damon

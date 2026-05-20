@@ -18,6 +18,7 @@ NeuralDBG and related projects are developed and used across different operating
     - Use `python -m ...` instead of direct binary calls when possible.
 3. **Environment Variables**: Use `$TEMP` or `tempfile` module instead of hardcoded `/tmp/`.
 4. **Shell Selection**: If using `Makefile`, ensure it doesn't rely on specific Bash extensions that fail on Windows `cmd` or `powershell` unless wrapped.
+5. **Terminal Output Encoding Protection**: Avoid using raw Unicode emojis (e.g., 🔍, 📊, ✅) in user-facing logging/console print outputs. On Windows command consoles utilizing local character maps (like CP1252), this causes a fatal `UnicodeEncodeError`. Use ASCII indicators instead (e.g., `[Search]`, `[Stats]`, `[OK]`).
 
 ## Verification
 

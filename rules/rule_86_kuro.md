@@ -1,4 +1,4 @@
-# RULE 86: Kuro Protocol — Project Surveillance & Memory
+# RULE 86: Kuro — Project Surveillance & Memory
 
 ## Rule
 
@@ -145,8 +145,8 @@ AI provides informed assistance
 - R83: Discord investor summary
 - R84: Validation automation
 - R85: Portfolio completeness verification
-- Project: ~/Documents/KuroGuardian/
-- Vision: ~/Documents/kuro-rules/KURO_GUARDIAN_VISION.md
+- Project: ~/Documents/kuro/
+- Vision: ~/Documents/kuro/ (merged with project folder)
 
 ---
 
