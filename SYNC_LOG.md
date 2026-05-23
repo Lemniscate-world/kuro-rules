@@ -1,5 +1,52 @@
 ﻿# Sync Log
 
+## 2026-05-23 15:17:31
+- AEther : AGENTS.md
+- Aladin : AGENTS.md
+- Aquarium : AGENTS.md
+- Astral : AGENTS.md
+- Automatons : AGENTS.md
+- BloomDB : AGENTS.md
+- Charmed : AGENTS.md
+- datalint : AGENTS.md
+- Dissect : AGENTS.md
+- EchoX : AGENTS.md
+- Epure : AGENTS.md
+- Flow-Regulator : AGENTS.md
+- Helium : AGENTS.md
+- Hermes : AGENTS.md
+- Iroko : AGENTS.md
+- Kapok : AGENTS.md
+- Metatron : AGENTS.md
+- Neural-Again : AGENTS.md
+- Neural-Research : AGENTS.md
+- NeuralDBG : AGENTS.md
+- NeuralDSL : AGENTS.md
+- NeuralPaper : AGENTS.md
+- NeuroDose : AGENTS.md
+- Nwt : AGENTS.md
+- Odin : AGENTS.md
+- Onlook : AGENTS.md
+- OpenMind : AGENTS.md
+- OpenQuant : AGENTS.md
+- POFS : AGENTS.md
+- Project-Dirac : AGENTS.md
+- Prompt2Model : AGENTS.md
+- QuSolve : AGENTS.md
+- SOGEXCO : AGENTS.md
+- SaasX : AGENTS.md
+- Sagittarius : AGENTS.md
+- TokenWise : AGENTS.md
+- Verbose : AGENTS.md
+- Constant_Yield : AGENTS.md
+- DevDemeterDAO : AGENTS.md
+- XP_Farming_System : AGENTS.md
+- Damon : AGENTS.md
+- GALT-Flatcoin-Concept : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- Neural-Agent : AGENTS.md
+- NeuralDBG-Engine : AGENTS.md
+- SOLARIS : AGENTS.md, .cursorrules, .windsurfrules, AI_GUIDELINES.md
+
 ## 2026-05-20 08:51:03
 - AEther : AGENTS.md
 - Aladin : AGENTS.md
