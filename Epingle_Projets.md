@@ -1,6 +1,6 @@
 # Épinglé Projets — Portfolio lambda-Section
 
-> **Dernière mise à jour** : 2026-05-17  
+> **Dernière mise à jour** : 2026-06-07  
 > **Source** : `~/Documents/kuro-rules/Epingle_Projets.md`  
 > **Méthode** : Deep analysis — SESSION_SUMMARY parsés (R85 + R86)
 
@@ -37,11 +37,11 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **NeuralDBG** | 80% | Actif | Debugger réseaux de neurones avec causalité automatique. V2 dogfoodée sur ResNet-18. NeuralDBG-Engine v1.0.0. Ajout d'une couche de prévention OOM et d'offloading de tenseurs sur disque en cas d'anomalie, avec stats d'activations JIT optimisées. Landing page déployée. |
+| **NeuralDBG** | 90% | Actif | Debugger réseaux de neurones avec causalité automatique. V2 dogfoodée sur ResNet-18. NeuralDBG-Engine v1.0.0. Prévention OOM et offloading validés. Correctifs de compatibilité standalone et tests à 100% validés, prêt pour lancement Show HN. |
 | **Neural-Agent** | 0% | Nouveau | Agent auto-correcteur pour l'entraînement de RN. Boucle fermée : NeuralDBG → Diagnostic Causal → Action → Nouvel entraînement. |
 | **Aladin** | 40% | Actif | Architecture Transformer & recherche LLM. |
 | **Astral** | 15% | Actif | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
-| **DataLint** | 10% | Actif | Gouvernance kuro-rules + validation ML. Alignement sync-rules.ps1 avec projects.txt, workspace audit. |
+| **DataLint** | 10% | Actif | Gouvernance kuro-rules + validation ML. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo & Monorepo Governance) ajoutee 2026-06-07 : detection auto des ecosystemes (workspace/submodule/cross-repo), ECOSYSTEM_MAP.md et COMPATIBILITY_MATRIX.md obligatoires, classification OWNED/EXTERNAL/UNKNOWN dans sync-rules.ps1 (R87 enforce). 48 projets synchronises. |
 | **Odin** | 10% | Actif | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM avec interface conversationnelle. |
 | **NeuroDose** | 5% | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
 | **Aquarium** | 3% | Prototypage | IDE dédié au développement et à l'entraînement des réseaux de neurones. |
