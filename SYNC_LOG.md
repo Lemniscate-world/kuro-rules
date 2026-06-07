@@ -1,5 +1,58 @@
 ﻿# Sync Log
 
+## 2026-06-07 14:36:57
+- AEther [UNKNOWN] : AGENTS.md
+- Aladin [UNKNOWN] : AGENTS.md
+- Aquarium [OWNED] : AGENTS.md
+- Astral [UNKNOWN] : AGENTS.md
+- Automatons [UNKNOWN] : AGENTS.md
+- BloomDB [OWNED] : AGENTS.md
+- Charmed [OWNED] : AGENTS.md
+- datalint [OWNED] : AGENTS.md
+- Dissect [UNKNOWN] : AGENTS.md
+- EchoX [UNKNOWN] : AGENTS.md
+- Epure [UNKNOWN] : AGENTS.md
+- Flow-Regulator [UNKNOWN] : AGENTS.md
+- Helium [UNKNOWN] : AGENTS.md
+- Hermes [UNKNOWN] : AGENTS.md
+- Iroko [UNKNOWN] : AGENTS.md
+- Kapok [UNKNOWN] : AGENTS.md
+- Metatron [UNKNOWN] : AGENTS.md
+- Neural-Again [UNKNOWN] : AGENTS.md
+- Neural-Research [OWNED] : AGENTS.md
+- NeuralDBG [UNKNOWN] : AGENTS.md
+- NeuralDSL [UNKNOWN] : AGENTS.md
+- NeuralPaper [OWNED] : AGENTS.md
+- NeuroDose [UNKNOWN] : AGENTS.md
+- Nwt [UNKNOWN] : AGENTS.md
+- Odin [UNKNOWN] : AGENTS.md
+- Onlook [UNKNOWN] : AGENTS.md
+- OpenMind [UNKNOWN] : AGENTS.md
+- OpenQuant [OWNED] : AGENTS.md
+- POFS [UNKNOWN] : AGENTS.md
+- Project-Dirac [OWNED] : AGENTS.md
+- Prompt2Model [UNKNOWN] : AGENTS.md
+- QuSolve [UNKNOWN] : AGENTS.md
+- SOGEXCO [UNKNOWN] : AGENTS.md
+- SaasX [UNKNOWN] : AGENTS.md
+- Sagittarius [UNKNOWN] : AGENTS.md
+- TokenWise [UNKNOWN] : AGENTS.md
+- Verbose [OWNED] : AGENTS.md
+- Constant_Yield [EXTERNAL] : AGENTS.md
+- DevDemeterDAO [EXTERNAL] : AGENTS.md
+- XP_Farming_System [EXTERNAL] : AGENTS.md
+- Damon [UNKNOWN] : AGENTS.md
+- Demeter-Portfolio [EXTERNAL] : AGENTS.md
+- GALT-Flatcoin-Concept [EXTERNAL] : AGENTS.md
+- Neural-Agent [UNKNOWN] : AGENTS.md
+- NeuralDBG-Engine [UNKNOWN] : AGENTS.md
+- russel-agent [UNKNOWN] : AGENTS.md
+- SOGEXCO 2 [UNKNOWN] : AGENTS.md
+- SOLARIS [OWNED] : AGENTS.md
+
+## 2026-06-05 12:31:57
+- russel-agent : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
 ## 2026-05-23 15:17:31
 - AEther : AGENTS.md
 - Aladin : AGENTS.md

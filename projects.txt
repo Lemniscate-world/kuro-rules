@@ -1,3 +1,11 @@
+# Kuro projects list
+# One project per line. Lines starting with # are ignored.
+# Ownership is auto-detected by Get-KuroProjectOwnership (R87):
+#   - OWNED: remotes in Lemniscate-world/ | Lemniscate-SHA-256/ | pbakaus/
+#   - EXTERNAL: remotes in Demeter-Financial-Labs/ (or other external orgs)
+#   - UNKNOWN: no remote or unknown org (defaults to AGENTS.md only)
+# Per R105, multi-repo ecosystems are listed below in a single block for clarity.
+
 AEther
 Aladin
 Aquarium
