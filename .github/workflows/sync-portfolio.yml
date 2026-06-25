@@ -1,0 +1,58 @@
+name: Auto-Sync Portfolio
+
+on:
+  push:
+    paths:
+      - 'Epingle_Projets.md'
+  workflow_dispatch:  # allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  sync-portfolio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kuro-rules
+        uses: actions/checkout@v4
+        with:
+          path: kuro-rules
+
+      - name: Checkout Lemniscate-world
+        uses: actions/checkout@v4
+        with:
+          repository: Lemniscate-world/Lemniscate-world
+          path: lemniscate-world
+          token: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate portfolio
+        run: |
+          python kuro-rules/scripts/generate_portfolio.py \
+            --output lemniscate-world/index.html
+
+      - name: Check for changes
+        id: changes
+        run: |
+          cd lemniscate-world
+          if git diff --quiet index.html; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes to portfolio"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Portfolio updated — pushing"
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          cd lemniscate-world
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "chore: auto-sync portfolio from Epingle_Projets.md [skip ci]"
+          git push
