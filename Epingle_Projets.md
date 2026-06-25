@@ -1,6 +1,6 @@
 # Épinglé Projets — Portfolio lambda-Section
 
-> **Dernière mise à jour** : 2026-06-25  
+> **Dernière mise à jour** : 2026-06-25 (GitHub Action auto-sync activé)  
 > **Source** : `~/Documents/kuro-rules/Epingle_Projets.md`  
 > **Méthode** : Audit live — 54 projets scannés, git log + tests vérifiés (R85 + R86)
 
