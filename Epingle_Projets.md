@@ -87,6 +87,7 @@
 | **Flow-Regulator** | 5% | Actif | Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode. |
 | Charmed | 5% | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
 | Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
+| **LifeTrack** | 15% | Actif | Desktop habit tracker (Tauri v2 + React + TypeScript + Vite). Grille mensuelle, pastel UI, objectifs configurables. Natif Windows via WebView2. |
 
 > **Note** : NeuroDose est listé dans λ-Section-1 (AI). Son axe biohacking est couvert par le même projet.
 
@@ -103,6 +104,7 @@
 | Iroko | 0% | Prototypage | Fintech. |
 | Kapok | 0% | Prototypage | Insurtech. |
 | SOGEXCO | 0% | Prototypage | Accounting/Business solution pour client SOGEXCO. |
+| **Epure** | 20% | Actif | Cabinet d'Ingénierie Hybride IA (Togo, West Africa). Services de conception augmentés par IA. Frontend + backend + CAD service + Electron. Stack: React, TypeScript, Python, FreeCAD. |
 
 ---
 
