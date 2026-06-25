@@ -6,10 +6,17 @@ AI agents MUST verify that BOTH GitHub profile READMEs are up-to-date whenever a
 
 ## Profile READMEs
 
-| Account | Repo | README path |
-|---------|------|-------------|
-| **LambdaSection** | `LambdaSection/.github` | `profile/README.md` |
-| **Lemniscate-world** | `Lemniscate-world/Lemniscate-world` | `README.md` (root) |
+| Account | Repo | README path | Portfolio |
+|---------|------|-------------|-----------|
+| **LambdaSection** | `LambdaSection/.github` | `profile/README.md` | — |
+| **Lemniscate-world** | `Lemniscate-world/Lemniscate-world` | `README.md` (root) | `index.html` (GitHub Pages) |
+
+## Portfolio Dashboard (GitHub Pages)
+
+- **URL**: https://lemniscate-world.github.io/Lemniscate-world/
+- **Source**: Auto-generated from `Epingle_Projets.md`
+- **Generation**: `python ~/Documents/kuro-rules/scripts/generate_portfolio.py`
+- **The README.md MUST feature the dashboard link as its FIRST link**
 
 ## When This Rule Triggers
 

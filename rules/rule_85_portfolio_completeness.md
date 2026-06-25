@@ -58,6 +58,8 @@ AI MUST:
 2. List ALL projects found
 3. Compare with Epingle_Projets.md
 4. Report: Found / Missing / Needs verification
+5. Verify the portfolio HTML is in sync: run `generate_portfolio.py` and check for changes
+6. If portfolio HTML is stale → regenerate and push
 5. Propose additions for missing projects
 
 ### Compliance Checklist

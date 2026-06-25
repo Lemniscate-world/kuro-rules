@@ -25,7 +25,8 @@
 
 ## Liens
 
-- **Liste exclusive des projets** : [Google Doc](https://docs.google.com/document/d/1PGyC-3tWttGNy-hpDLSWdRqEa1CKrsEAj1TkmdL7iRw/edit)
+- **🌐 Portfolio Dashboard** : [lemniscate-world.github.io/Lemniscate-world](https://lemniscate-world.github.io/Lemniscate-world/) (auto-généré depuis ce fichier)
+- **Liste Google Doc** : [Google Doc](https://docs.google.com/document/d/1PGyC-3tWttGNy-hpDLSWdRqEa1CKrsEAj1TkmdL7iRw/edit) (miroir manuel)
 - **Organisation GitHub** : [LambdaSection](https://github.com/LambdaSection)
 - **Work Calendar Team** : [Google Doc](https://docs.google.com/document/d/15kyBC9w7NM5bIHkEw5qQv7zLRulgfcyj9iIoFUVkXds/edit)
 

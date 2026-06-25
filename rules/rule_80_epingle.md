@@ -4,7 +4,14 @@
 
 Epingle_Projets.md is the single source of truth for lambda-Section portfolio status.
 It must always reflect the REAL current state of all projects.
-The user handles Google Drive sync manually.
+A portfolio website is auto-generated from it and deployed to GitHub Pages.
+
+## Portfolio Website (auto-generated)
+
+- **URL**: https://lemniscate-world.github.io/Lemniscate-world/
+- **Source**: Auto-generated from Epingle_Projets.md by `scripts/generate_portfolio.py`
+- **Repo**: `Lemniscate-world/Lemniscate-world` → `index.html`
+- **Build**: GitHub Pages rebuilds automatically on push to main
 
 ## Trigger
 
@@ -87,6 +94,30 @@ IF session changes project % but Epingle_Projets.md not updated:
   DO NOT: Use list format (`- Project X%`) — use table format
   DO NOT: Create duplicate entries across sections
   DO NOT: Write unaccented French
+
+## Portfolio Auto-Sync — MANDATORY after Epingle update
+
+After updating Epingle_Projets.md:
+```
+STEP 1: Run the auto-generator
+  python ~/Documents/kuro-rules/scripts/generate_portfolio.py
+
+STEP 2: Push the updated portfolio
+  cd ~/Documents/Lemniscate-world
+  git add index.html && git commit -m "chore: sync portfolio from Epingle" && git push
+
+STEP 3: Verify the site is live
+  Open: https://lemniscate-world.github.io/Lemniscate-world/
+  (GitHub Pages rebuilds in ~30s after push)
+```
+
+IF the auto-generator fails:
+  - Check that Epingle_Projets.md has valid table format
+  - Check that all section headers use `## λ-Section-N — Name` format
+  - The script parses `| **Project** | pct% | Status | Description |` rows
+
+DO NOT skip the portfolio sync. The dashboard is the user's primary visualization.
+Google Drive sync is deprecated — the GitHub Pages site replaces it.
 
 ## Example
 
