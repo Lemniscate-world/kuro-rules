@@ -33,6 +33,7 @@ jobs:
       - name: Generate portfolio
         run: |
           python kuro-rules/scripts/generate_portfolio.py \
+            --epingle kuro-rules/Epingle_Projets.md \
             --output lemniscate-world/index.html
 
       - name: Check for changes

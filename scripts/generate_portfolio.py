@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """generate_portfolio.py — Generate portfolio HTML from Epingle_Projets.md.
 
-Reads ~/Documents/kuro-rules/Epingle_Projets.md and produces index.html
-for the Lemniscate-world GitHub Pages site.
+Reads Epingle_Projets.md and produces index.html for the Lemniscate-world site.
 
 Usage:
-    python scripts/generate_portfolio.py [--output path/to/index.html]
+    python scripts/generate_portfolio.py [--epingle path/to/Epingle_Projets.md] [--output path/to/index.html]
 
-The output defaults to ~/Documents/Lemniscate-world/index.html.
-Run this after updating Epingle_Projets.md.
+Defaults (local workstation):
+    --epingle ~/Documents/kuro-rules/Epingle_Projets.md
+    --output  ~/Documents/Lemniscate-world/index.html
+
+On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
 import re, sys
 from datetime import date
 from pathlib import Path
 
-KURORULES = Path.home() / "Documents" / "kuro-rules"
-LEMNISCATE = Path.home() / "Documents" / "Lemniscate-world"
-EPINGLE = KURORULES / "Epingle_Projets.md"
-OUTPUT = LEMNISCATE / "index.html"
+LOCAL_EPINGLE = Path.home() / "Documents" / "kuro-rules" / "Epingle_Projets.md"
+LOCAL_OUTPUT = Path.home() / "Documents" / "Lemniscate-world" / "index.html"
 
 CSS = """\
   :root {
@@ -205,14 +205,28 @@ def generate(sections, output_path, updated_date):
 
 
 def main():
-    output = Path(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[1] == "--output" else OUTPUT
+    args = sys.argv[1:]
+    epingle = LOCAL_EPINGLE
+    output = LOCAL_OUTPUT
 
-    if not EPINGLE.exists():
-        print(f"ERROR: {EPINGLE} not found")
+    i = 0
+    while i < len(args):
+        if args[i] == "--epingle" and i + 1 < len(args):
+            epingle = Path(args[i + 1])
+            i += 2
+        elif args[i] == "--output" and i + 1 < len(args):
+            output = Path(args[i + 1])
+            i += 2
+        else:
+            i += 1
+
+    if not epingle.exists():
+        print(f"ERROR: {epingle} not found")
+        print("  Usage: python generate_portfolio.py [--epingle path] [--output path]")
         sys.exit(1)
 
-    print(f"Parsing {EPINGLE}...")
-    sections = parse_epingle(EPINGLE)
+    print(f"Parsing {epingle}...")
+    sections = parse_epingle(epingle)
     total = sum(len(s["projects"]) for s in sections)
     print(f"  Found {len(sections)} sections, {total} projects")
 
@@ -221,13 +235,8 @@ def main():
     generate(sections, output, today)
     print(f"  Done — {output}")
 
-    # Copy to Lemniscate-world repo
-    if output != OUTPUT:
-        print(f"  Output is not the default location. Copy manually to {OUTPUT}")
-    else:
-        print(f"\nNext steps:")
-        print(f"  cd {LEMNISCATE}")
-        print(f"  git add index.html && git commit -m 'chore: update portfolio from Epingle_Projets.md' && git push")
+    if output == LOCAL_OUTPUT:
+        print(f"\nNext: cd ~/Documents/Lemniscate-world && git add index.html && git commit -m 'sync' && git push")
 
 
 if __name__ == "__main__":
