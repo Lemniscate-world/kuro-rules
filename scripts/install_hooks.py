@@ -48,7 +48,7 @@ echo "  [OK] No protected files tracked"
 # R64/D2: No workaround word in Python files
 CHANGED_PY=$(git diff --cached --name-only 2>/dev/null | grep '.py$')
 if [ -n "$CHANGED_PY" ]; then
-    WORKAROUNDS=$(grep -n "workaround" $CHANGED_PY 2>/dev/null | grep -v "pr_gate_check\|PR_GATE\|DEV_RULES\|check_portfolio")
+    WORKAROUNDS=$(grep -n "workaround" $CHANGED_PY 2>/dev/null | grep -v "pr_gate_check\\|PR_GATE\\|DEV_RULES\\|check_portfolio")
     if [ -n "$WORKAROUNDS" ]; then
         echo "  [FAIL] 'workaround' found (R64/D2):"
         echo "$WORKAROUNDS"
