@@ -1,6 +1,6 @@
 # Épinglé Projets — Portfolio lambda-Section
 
-> **Dernière mise à jour** : 2026-06-25 (GitHub Action auto-sync activé)  
+> **Dernière mise à jour** : 2026-07-25 (GitHub Action auto-sync activé)  
 > **Source** : `~/Documents/kuro-rules/Epingle_Projets.md`  
 > **Méthode** : Audit live — 54 projets scannés, git log + tests vérifiés (R85 + R86)
 
@@ -68,7 +68,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **OpenQuant** | 15% | Actif | Trading quantitatif avec MiroFish (swarm LLM). 17 fichiers de test, backtest CL/F -10.96%, NewsAPI intégré. Robot autonome livré (Avril 2026). |
+| **OpenQuant** | 25% | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
 | Console | 0% | Prototypage | Environnement de développement d'outils de trading quantitatifs et algorithmiques. |
 
 **Objectif 2026 — 5 modèles/an :**
@@ -88,7 +88,7 @@
 | **Flow-Regulator** | 5% | Actif | Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode. |
 | Charmed | 5% | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
 | Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
-| **LifeTrack** | 15% | Actif | Desktop habit tracker (Tauri v2 + React + TypeScript + Vite). Grille mensuelle, pastel UI, objectifs configurables. Natif Windows via WebView2. |
+| **LifeTrack** | 85% | Actif | Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. |
 
 > **Note** : NeuroDose est listé dans λ-Section-1 (AI). Son axe biohacking est couvert par le même projet.
 
