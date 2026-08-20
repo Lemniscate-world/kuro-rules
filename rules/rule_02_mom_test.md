@@ -4,6 +4,7 @@
 - client-requested -> R2 = N/A, proceed
 - verified-problem -> R2 = N/A, proceed
 - personal -> R2 = N/A, proceed
+- open-source utility / build useful first (outil utile day-1, validation par usage: stars/forks/issues/PRs) -> R2 = N/A, proceed (compte comme verified-problem + personal)
 - startup -> R2 ACTIVE, read below
 
 ## Gate: 0-10% phase
