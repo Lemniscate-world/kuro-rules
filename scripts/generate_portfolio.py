@@ -19,6 +19,7 @@ from pathlib import Path
 
 LOCAL_EPINGLE = Path.home() / "Documents" / "kuro-rules" / "Epingle_Projets.md"
 LOCAL_OUTPUT = Path.home() / "Documents" / "Lemniscate-world" / "index.html"
+LOCAL_README = Path.home() / "Documents" / "Lemniscate-world" / "README.md"
 
 CSS = """\
   :root {
@@ -204,6 +205,74 @@ def generate(sections, output_path, updated_date):
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def sync_readme(sections):
+    """Auto-sync README.md profile header + percentages from Epingle (R51/R80).
+
+    - Header: 31 projets / 15 sections counts
+    - Architecture table: every 'Name (X%)' replaced with Epingle pct if name exists
+    - Focus badges: '**[X% - Status]**' updated per project
+    Preserves curation (does not add/remove projects), only updates numbers.
+    """
+    readme_path = LOCAL_README
+    if not readme_path.exists():
+        print(f"  README not found: {readme_path} — skipping")
+        return
+    text = readme_path.read_text(encoding="utf-8")
+    original = text
+    total = sum(len(s["projects"]) for s in sections)
+    num_sections = len(sections)
+
+    # Build map: lower name -> (pct, status)
+    proj_map = {}
+    for s in sections:
+        for p in s["projects"]:
+            proj_map[p["name"].lower()] = (p["pct"], p["status"])
+            # also handle names with spaces? Normalize by stripping
+            proj_map[p["name"].strip().lower()] = (p["pct"], p["status"])
+
+    # 1. Header counts: > **31 projets · 15 sections
+    text = re.sub(
+        r'> \*\*\d+\s+projets\s+·\s+\d+\s+sections',
+        f'> **{total} projets \u00b7 {num_sections} sections',
+        text
+    )
+
+    # 2. Architecture table + any 'Name (X% ...)' occurrence
+    def repl_arch(m):
+        name = m.group(1)
+        key = name.lower()
+        if key in proj_map:
+            pct, _ = proj_map[key]
+            suffix = m.group(3)  # e.g. " Pivot" or "" — keep as is
+            return f'{name} ({pct}%{suffix})'
+        return m.group(0)
+
+    # Only target the architecture section to avoid touching prose
+    # Pattern: word-like name followed by (digits% ...)
+    text = re.sub(r'([A-Za-z0-9/_-]+)\s*\((\d+)%([^)]*)\)', repl_arch, text)
+
+    # 3. Focus badges: line-by-line to avoid DOTALL cross-section bug (AEther -> OpenQuant)
+    lines = text.splitlines()
+    fixed_lines = []
+    for line in lines:
+        if '](' in line and '% -' in line and '**[' in line:
+            m_proj = re.search(r'\[([^\]]+)\]\(https://github\.com', line)
+            if m_proj:
+                key = m_proj.group(1).lower().strip()
+                if key in proj_map:
+                    pct, _ = proj_map[key]
+                    # Replace only the badge percentage on this line (first occurrence)
+                    line = re.sub(r'\[\d+%\s*-\s*', f'[{pct}% - ', line, count=1)
+        fixed_lines.append(line)
+    text = "\n".join(fixed_lines)
+
+    if text != original:
+        readme_path.write_text(text, encoding="utf-8")
+        print(f"  README synced: {total} projets, {num_sections} sections, {len(proj_map)} projects mapped")
+    else:
+        print(f"  README already in sync")
+
+
 def main():
     args = sys.argv[1:]
     epingle = LOCAL_EPINGLE
@@ -235,8 +304,13 @@ def main():
     generate(sections, output, today)
     print(f"  Done — {output}")
 
+    # Auto-sync profile README (R51/R80) if using default paths
     if output == LOCAL_OUTPUT:
-        print(f"\nNext: cd ~/Documents/Lemniscate-world && git add index.html && git commit -m 'sync' && git push")
+        print(f"Syncing {LOCAL_README} from Epingle...")
+        sync_readme(sections)
+
+    if output == LOCAL_OUTPUT:
+        print(f"\nNext: cd ~/Documents/Lemniscate-world && git add index.html README.md && git commit -m 'sync' && git push")
 
 
 if __name__ == "__main__":
