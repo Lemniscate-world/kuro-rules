@@ -29,6 +29,7 @@ Deliverable: market_sizing.md
 5 mandatory risks: Market, Competition, Technical, Regulatory, Adoption
 Template per risk: Probability | Impact | Evidence For | Evidence Against | Remedy
 Deliverable: risk_analysis.md (see also R14.5)
+Obligatoire si Technical = HIGH/MEDIUM: inclure 1+ repo Tech Scout (R69) dans Remedy/Evidence Against (ex: wireguard-go, netbird, cloud-hypervisor)
 
 ## Phase 5: Gap Analysis (15min)
 What do users complain about in ALL existing solutions?
