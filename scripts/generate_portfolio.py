@@ -154,7 +154,7 @@ def generate(sections, output_path, updated_date):
     lines.append('<body>')
     lines.append('')
     lines.append('<h1>&#955; lambda-Section</h1>')
-    lines.append(f'<p class="subtitle">Portfolio — {total} projets &middot; 13 sections &middot; 2026</p>')
+    lines.append(f'<p class="subtitle">Portfolio — {total} projets &middot; {len(sections)} sections &middot; 2026</p>')
     lines.append('')
     lines.append('<div class="stats">')
     lines.append(f'  <div class="stat"><div class="stat-val">{active}</div><div class="stat-label">Actifs</div></div>')
@@ -230,7 +230,7 @@ def main():
     total = sum(len(s["projects"]) for s in sections)
     print(f"  Found {len(sections)} sections, {total} projects")
 
-    today = date.today().strftime("%d %B %Y").replace("June", "Juin").replace("July", "Juillet")
+    today = date.today().strftime("%d %B %Y").replace("January","Janvier").replace("February","Fevrier").replace("March","Mars").replace("April","Avril").replace("May","Mai").replace("June", "Juin").replace("July", "Juillet").replace("August","Aout").replace("September","Septembre").replace("October","Octobre").replace("November","Novembre").replace("December","Decembre")
     print(f"Generating {output}...")
     generate(sections, output, today)
     print(f"  Done — {output}")
