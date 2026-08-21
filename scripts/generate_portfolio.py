@@ -13,13 +13,15 @@ Defaults (local workstation):
 On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
-import re, sys
+import re, sys, subprocess
 from datetime import date
 from pathlib import Path
 
 LOCAL_EPINGLE = Path.home() / "Documents" / "kuro-rules" / "Epingle_Projets.md"
 LOCAL_OUTPUT = Path.home() / "Documents" / "Lemniscate-world" / "index.html"
 LOCAL_README = Path.home() / "Documents" / "Lemniscate-world" / "README.md"
+# Truth enrichment: if local repo exists, append last commit to description
+TRUTH_ENRICH = True
 
 CSS = """\
   :root {
@@ -180,6 +182,41 @@ def parse_epingle(path):
                 })
 
     return sections
+
+def truth_enrich(sections):
+    """Enrich each project's desc with last commit事实 if local repo exists. Returns dict for footer."""
+    if not TRUTH_ENRICH:
+        return None
+    docs = Path.home() / "Documents"
+    enriched = 0
+    truth_map = {}
+    for sec in sections:
+        for p in sec["projects"]:
+            proj_path = docs / p["name"]
+            # Try case-insensitive find (e.g. NeuralDBG vs neuraldbg)
+            if not proj_path.exists():
+                # search case-insensitive
+                candidates = [d for d in docs.iterdir() if d.is_dir() and d.name.lower() == p["name"].lower()]
+                if candidates:
+                    proj_path = candidates[0]
+                else:
+                    continue
+            if not (proj_path / ".git").exists():
+                continue
+            try:
+                out = subprocess.run('git log -1 --format="%h|%ad|%s" --date=short', cwd=str(proj_path), capture_output=True, text=True, shell=True, timeout=5)
+                if out.returncode == 0 and out.stdout.strip():
+                    parts = out.stdout.strip().strip('"').split("|", 2)
+                    h, d, msg = (parts + ["", "", ""])[:3]
+                    # append factual footer to desc if not already present
+                    fact = f" [git:{d} {h} \"{msg[:40]}...\"]"
+                    if "git:" not in p["desc"]:
+                        p["desc"] = (p["desc"] + fact) if p["desc"] else fact.strip()
+                    truth_map[p["name"]] = f"{d} {h}"
+                    enriched += 1
+            except Exception:
+                pass
+    return {"enriched": enriched, "map": truth_map}
 
 
 def project_url(name, section_name=""):
@@ -456,6 +493,11 @@ def main():
     sections = parse_epingle(epingle)
     total = sum(len(s["projects"]) for s in sections)
     print(f"  Found {len(sections)} sections, {total} projects")
+
+    # Truth enrichment before generation (facts from git log)
+    truth_info = truth_enrich(sections)
+    if truth_info:
+        print(f"  Truth enriched: {truth_info['enriched']} projets avec git fact")
 
     today = date.today().strftime("%d %B %Y").replace("January","Janvier").replace("February","Fevrier").replace("March","Mars").replace("April","Avril").replace("May","Mai").replace("June", "Juin").replace("July", "Juillet").replace("August","Aout").replace("September","Septembre").replace("October","Octobre").replace("November","Novembre").replace("December","Decembre")
     print(f"Generating {output}...")
