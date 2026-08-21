@@ -328,7 +328,47 @@ def main() -> int:
                 print(f"         FAIL: {wf['name']}")
     for act in report["actions"]:
         print(f"  ACTION: {act['repo']} / {act['workflow']} -> {act['action']} ({act['detail']})")
+    notify_discord(report)
     return 0
+
+
+def notify_discord(report: dict) -> None:
+    """Alerte Discord si des checks sont rouges ou si des actions ont été tentées."""
+    if report["overall"] != "red" and not report["actions"]:
+        return
+    webhook = os.environ.get("DISCORD_WEBHOOK_URL")
+    if not webhook:
+        print("Discord: DISCORD_WEBHOOK_URL absent - alerte ignoree")
+        return
+    failing = [r for r in report["repos"] if r["health"] == "red"]
+    lines = [f"**{len(failing)} repo(s) en échec CI**"]
+    for r in failing:
+        names = ", ".join(w["name"] for w in r["workflows"] if w["conclusion"] == "failure")
+        lines.append(f"- `{r['name']}` : {names}")
+    for act in report["actions"]:
+        if act["action"] in ("rerun_triggered", "issue_opened", "issue_updated"):
+            lines.append(f"Action : {act['action']} sur `{act['repo']}` / {act['workflow']}")
+    payload = {
+        "username": "Kuro",
+        "embeds": [
+            {
+                "title": "[ALERTE] Intégration continue",
+                "description": "\n".join(lines)[:1900],
+                "color": 15158332,
+            }
+        ],
+    }
+    try:
+        req = urllib.request.Request(
+            webhook,
+            data=json.dumps(payload).encode(),
+            method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            print(f"Discord: HTTP {resp.status}")
+    except Exception as exc:
+        print(f"Discord erreur: {exc}")
 
 
 if __name__ == "__main__":

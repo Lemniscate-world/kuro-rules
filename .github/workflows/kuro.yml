@@ -48,6 +48,7 @@ jobs:
       - name: Scan CI multi-repos + bloc README
         env:
           GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           python kuro-rules/scripts/ci_guardian.py \
             --owners LambdaSection Lemniscate-world \
@@ -80,6 +81,20 @@ jobs:
         run: |
           npx -y impeccable@latest detect --json lemniscate-world/index.html > lemniscate-world/design-report.json || true
           npx -y impeccable@latest detect lemniscate-world/index.html || true
+
+      - name: Rapport hebdo Discord (lundi uniquement)
+        if: github.event_name == 'schedule'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then
+            python kuro-rules/scripts/weekly_report.py \
+              --ci-status lemniscate-world/ci-status.json \
+              --epingle kuro-rules/Epingle_Projets.md \
+              --repos-dir /home/runner/Documents
+          else
+            echo "Pas lundi — rapport hebdo sauté"
+          fi
 
       # --- Un seul commit par repo ---
       - name: Commit kuro-rules si changements
