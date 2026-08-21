@@ -166,11 +166,16 @@ def remediate(repo: str, run: dict, token: str | None, dry_run: bool) -> dict:
             action.update(action="skipped_no_token", detail="token requis pour relancer")
             return action
         ok = rerun_failed_jobs(repo, run_id, token)
+        if ok:
+            action.update(
+                action="rerun_triggered",
+                detail=f"relance jobs échoués (run {run_id}, tentative {attempt})",
+            )
+            return action
         action.update(
-            action="rerun_triggered" if ok else "rerun_failed",
-            detail=f"relance jobs échoués (run {run_id}, tentative {attempt})",
+            action="rerun_failed",
+            detail=f"relance impossible (run {run_id}) — escalade en issue de suivi",
         )
-        return action
 
     title = f"[CI Guardian] {name} en échec persistant"
     body = (
