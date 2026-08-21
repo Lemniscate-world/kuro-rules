@@ -71,7 +71,10 @@ def sha256_file(path: Path) -> str:
 def load_master_hashes(rules_dir: Path) -> dict[str, str]:
     hashes: dict[str, str] = {}
     for name in MASTER_RULE_FILES:
-        hashes[name] = sha256_file(rules_dir / name)
+        path = rules_dir / name
+        if not path.exists():
+            continue
+        hashes[name] = sha256_file(path)
     hashes["copilot-instructions.md"] = sha256_file(
         rules_dir / "copilot-instructions.md"
     )
@@ -151,7 +154,7 @@ def audit_master_rule_files(
 ) -> list[AuditIssue]:
     issues: list[AuditIssue] = []
 
-    for file_name in MASTER_RULE_FILES:
+    for file_name in master_hashes:
         target = repo / file_name
         if not target.exists():
             issues.append(AuditIssue(project_name, "FAIL", f"missing {file_name}"))

@@ -1,0 +1,51 @@
+name: CI Guardian
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # toutes les 30 min
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kuro-rules
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Checkout Lemniscate-world (portfolio + profil)
+        uses: actions/checkout@v4
+        with:
+          repository: Lemniscate-world/Lemniscate-world
+          path: lemniscate-world
+          token: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+
+      - name: Run CI Guardian (découverte auto + surveillance + auto-fix)
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+        run: |
+          python scripts/ci_guardian.py \
+            --owners LambdaSection Lemniscate-world \
+            --output lemniscate-world/ci-status.json \
+            --readme lemniscate-world/README.md
+
+      - name: Commit ci-status + README to portfolio
+        run: |
+          cd lemniscate-world
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ci-status.json README.md
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: CI Guardian status update $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            git push
+          else
+            echo "No CI status changes"
+          fi
