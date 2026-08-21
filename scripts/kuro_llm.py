@@ -136,26 +136,27 @@ def _ollama(prompt: str, system: str) -> tuple[str | None, str]:
 
 
 def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.") -> str | None:
-    """Chaîne de moteurs : Ollama cloud d'abord (règle), OpenRouter si activé explicitement."""
+    """Chaîne de moteurs : OpenRouter cloud d'abord, Ollama cloud en fallback."""
+    text, status = _openrouter(prompt, system)
+    if text:
+        print(f"kuro_llm: openrouter/{os.environ.get('OPENROUTER_MODEL', DEFAULT_OPENROUTER_MODEL)} ok")
+        return text
+    if status != "no-key":
+        print(f"kuro_llm: openrouter indisponible ({status})")
     text, status = _ollama(prompt, system)
     if text:
+        print("kuro_llm: fallback ollama cloud ok")
         return text
     print(f"kuro_llm: ollama cloud indisponible ({status})")
-    if os.environ.get("KURO_ENABLE_OPENROUTER") == "1":
-        text, status = _openrouter(prompt, system)
-        if text:
-            print(f"kuro_llm: openrouter/{os.environ.get('OPENROUTER_MODEL', DEFAULT_OPENROUTER_MODEL)} ok")
-            return text
-        print(f"kuro_llm: openrouter indisponible ({status})")
     return None
 
 
 def available() -> str | None:
     """Nom du moteur dispo sans consommer d'appel."""
+    if os.environ.get("OPENROUTER_API_KEY"):
+        return "openrouter"
     if cloud_candidates(os.environ.get("OLLAMA_URL", DEFAULT_OLLAMA_URL)):
         return "ollama-cloud"
-    if os.environ.get("KURO_ENABLE_OPENROUTER") == "1" and os.environ.get("OPENROUTER_API_KEY"):
-        return "openrouter"
     return None
 
 

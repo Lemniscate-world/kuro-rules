@@ -23,8 +23,8 @@ Chaîne de moteurs (`scripts/kuro_llm.py`, zéro dépendance) :
 
 | Ordre | Moteur | État |
 |---|---|---|
-| 1 | **Ollama cloud** — uniquement modèles `:cloud`, auto-sélection avec fallback (403 abonnement / 410 retirés sautés). Actuel : `minimax-m3:cloud` | ✅ Actif, gratuit sur le compte |
-| 2 | OpenRouter `ox-alpha:free` — dormant, activable via `KURO_ENABLE_OPENROUTER=1` + `$OPENROUTER_API_KEY` | ⏸ Désactivé par défaut |
+| 1 | **OpenRouter** — `ox-alpha:free` (configurable via `$OPENROUTER_MODEL`) | 🔄 Principal dès que `$OPENROUTER_API_KEY` est posé |
+| 2 | **Ollama cloud** — uniquement modèles `:cloud`, auto-sélection avec fallback (403 abonnement / 410 retirés sautés). Actuel : `minimax-m3:cloud` | ✅ Fallback actif, gratuit sur le compte |
 
 Consommateurs : Advisor du Radar (analyse signaux → projets), diagnostic IA des
 issues Sentinel. Sans moteur disponible, tout reste déterministe (jamais de blocage).
