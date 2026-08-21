@@ -136,3 +136,11 @@ temp/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Build/test artifacts (unification 2026-08-21)
+__pycache__/
+*.pyc
+.pytest_cache/
+.tmp.*
+*.gdoc
+reports/
