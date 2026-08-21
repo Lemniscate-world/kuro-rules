@@ -144,3 +144,7 @@ __pycache__/
 .tmp.*
 *.gdoc
 reports/
+
+# Prive (R76)
+SYNC_BACKUPS/
+docs/
