@@ -241,7 +241,6 @@ echo -e "${BLUE}Installing shared rules into: $TARGET_DIR${RESET}"
 
 link_file "$RULES_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
 link_file "$RULES_DIR/AI_GUIDELINES.md" "$TARGET_DIR/AI_GUIDELINES.md"
-link_file "$RULES_DIR/GAD.md" "$TARGET_DIR/GAD.md"
 link_file "$RULES_DIR/.cursorrules" "$TARGET_DIR/.cursorrules"
 link_file "$RULES_DIR/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md"
 

@@ -17,7 +17,6 @@ if (-not (Test-Path $TargetDir)) {
 $RULE_FILES = @(
     @{ Source = "AGENTS.md"; Target = "AGENTS.md" },
     @{ Source = "AI_GUIDELINES.md"; Target = "AI_GUIDELINES.md" },
-    @{ Source = "GAD.md"; Target = "GAD.md" },
     @{ Source = ".cursorrules"; Target = ".cursorrules" },
     @{ Source = "copilot-instructions.md"; Target = ".github/copilot-instructions.md" }
 )

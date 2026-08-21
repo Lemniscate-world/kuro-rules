@@ -42,14 +42,12 @@ MASTER_RULE_FILES = [
     ".cursorrules",
     "AGENTS.md",
     "AI_GUIDELINES.md",
-    "GAD.md",
 ]
 
 RULE_SET_DISPLAY = [
     "AGENTS.md",
     "AI_GUIDELINES.md",
     ".cursorrules",
-    "GAD.md",
     "copilot-instructions.md -> .github/copilot-instructions.md",
 ]
 
