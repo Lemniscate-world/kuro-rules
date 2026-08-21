@@ -29,6 +29,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Clone repos into ~/Documents (source de vérité)
+        env:
+          SYNC_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+        run: |
+          python kuro-rules/scripts/clone_repos_for_truth.py --token "$SYNC_TOKEN"
+          ls ~/Documents | wc -l
+
       - name: Daily truth audit (git log + tests)
         run: |
           python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md

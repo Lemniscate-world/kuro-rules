@@ -10,7 +10,7 @@ Usage:
 
 Chaque billet est 100% factuel: commit hash, date, % avant/apres, tests, loc.
 """
-import re, subprocess, json
+import re, subprocess, json, sys
 from pathlib import Path
 from datetime import date, datetime
 
@@ -30,23 +30,14 @@ def run(cmd, cwd=None):
         return ""
 
 def parse_epingle_projects():
-    text = EPINGLE.read_text(encoding="utf-8")
+    """Source unique de vérité: réutilise le parser du portfolio (60 projets, pas les livrables)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from generate_portfolio import parse_epingle
+    sections = parse_epingle(EPINGLE)
     projs = []
-    for line in text.splitlines():
-        if line.startswith("| **") or (line.startswith("| ") and "%" in line):
-            parts = [p.strip() for p in line.split("|")[1:-1]]
-            if len(parts) >= 3:
-                name = parts[0].replace("**", "").strip()
-                pct_raw = parts[1].strip()
-                if "?-" in pct_raw or "Externe" in pct_raw:
-                    continue
-                if not name or name.lower() in ("projet", "section"):
-                    continue
-                m = re.search(r'(\d+)', pct_raw)
-                pct = int(m.group(1)) if m else 0
-                status = parts[2].strip()
-                desc = parts[3].strip() if len(parts) > 3 else ""
-                projs.append({"name": name, "pct": pct, "status": status, "desc": desc})
+    for s in sections:
+        for p in s["projects"]:
+            projs.append({"name": p["name"], "pct": p["pct"], "status": p["status"], "desc": p["desc"]})
     return projs
 
 def collect_git_facts(name):
