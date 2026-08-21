@@ -1,0 +1,69 @@
+name: Truth Daily — Audit factuel + Portfolio
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # 05:00 UTC = 06:00 Paris, quotidien
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  truth-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kuro-rules
+        uses: actions/checkout@v4
+        with:
+          path: kuro-rules
+
+      - name: Checkout Lemniscate-world
+        uses: actions/checkout@v4
+        with:
+          repository: Lemniscate-world/Lemniscate-world
+          path: lemniscate-world
+          token: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Daily truth audit (git log + tests)
+        run: |
+          python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md
+          cat kuro-rules/TRUTH_DAILY.md | head -n 30
+          # Truth enrich is done inside generate_portfolio via local git (on CI, repos are cloned via checkout)
+          # For CI truth, we clone key repos to ~/Documents equivalent:
+          mkdir -p /tmp/docs
+          # Clone or use existing checkouts for GitHub API fallback (optional)
+
+      - name: Generate portfolio (truth-enriched)
+        run: |
+          python kuro-rules/scripts/generate_portfolio.py \
+            --epingle kuro-rules/Epingle_Projets.md \
+            --output lemniscate-world/index.html
+
+      - name: Commit TRUTH_DAILY + portfolio if changed
+        run: |
+          cd kuro-rules
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add TRUTH_DAILY.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: truth daily audit $(date +%Y-%m-%d) [skip ci]"
+            git push
+          else
+            echo "No truth changes"
+          fi
+          cd ../lemniscate-world
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          # README is synced via generate_portfolio if needed, but we keep it manual on CI (no local ~/Documents)
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-sync portfolio truth $(date +%Y-%m-%d) [skip ci]"
+            git push
+          else
+            echo "No portfolio changes"
+          fi
