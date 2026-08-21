@@ -28,13 +28,13 @@
 - **AEther** `7%` mais 0 commit 30j (dernier 2026-03-09) -> verifier statut Actif
 - **Astral** `10%` mais 0 commit 30j (dernier 2026-04-05) -> verifier statut Actif
 - **Automatons** `0%` mais 0 commit 30j (dernier 2025-12-19) -> verifier statut Actif
-- **DataLint** `10%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
-- **Dissect** `10%` mais 0 commit 30j (dernier 2026-03-03) -> verifier statut Actif
-- **EchoX** `42%` mais 0 commit 30j (dernier 2026-03-07) -> verifier statut Actif
+- **DataLint** `15%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
+- **Dissect** `15%` mais 0 commit 30j (dernier 2026-03-03) -> verifier statut Actif
+- **EchoX** `32%` mais 0 commit 30j (dernier 2026-03-07) -> verifier statut Actif
 - **Metatron** `0%` mais 0 commit 30j (dernier 2026-03-01) -> verifier statut Actif
-- **Odin** `10%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
+- **Odin** `15%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **OpenQuant** `λ-2` mais 0 commit 30j (dernier 2026-03-30) -> verifier statut Actif
 - **TokenWise** `0%` mais 0 commit 30j (dernier 2026-05-17) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-21T16:28:38.954942 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-21T16:35:37.241734 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
