@@ -275,7 +275,7 @@ def generate(sections, output_path, updated_date):
     if autres > 0:
         lines.append(f'  <div class="stat"><div class="stat-val">{autres}</div><div class="stat-label">Autres</div></div>')
     lines.append('</div>')
-    lines.append(f'<p class="meta">Mise à jour : {updated_date} &middot; <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">Source (Epingle_Projets.md)</a> &middot; Généré automatiquement &middot; <a href="https://github.com/Lemniscate-world/Lemniscate-world">Profil</a></p>')
+    lines.append(f'<p class="meta">Mise à jour : {updated_date} · <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">Source (Epingle_Projets.md)</a> · Généré automatiquement · <a href="https://github.com/Lemniscate-world/Lemniscate-world">Profil</a> · <a href="blog/">📝 Blog</a> · <a href="sections/">🌍 Mondes</a></p>')
     lines.append('')
     # Filter + nav
     # Build nav anchors
@@ -347,6 +347,94 @@ def generate(sections, output_path, updated_date):
     lines.append('</html>')
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    # Generate per-section worlds (distinct design per S-*)
+    generate_section_worlds(sections, updated_date, output_path.parent)
+
+
+def generate_section_worlds(sections, updated_date, base_dir: Path):
+    """Genere un monde par section: sections/s-1/index.html etc. avec theme distinct."""
+    themes = {
+        "1": {"accent": "#58a6ff", "bg": "#0a0f1e", "emoji": "🧠", "tagline": "Reseaux de neurones, causalite, debugging"},
+        "2": {"accent": "#3fb950", "bg": "#0d1a0f", "emoji": "📈", "tagline": "Trading quantitatif, modeles proba & Markov"},
+        "3": {"accent": "#db6d28", "bg": "#1a0f0a", "emoji": "🧬", "tagline": "Biohacking, focus, corps & esprit"},
+        "4": {"accent": "#1f6feb", "bg": "#0a0f1e", "emoji": "💳", "tagline": "Fintech Afrique, coordination terrain"},
+        "5": {"accent": "#8957e5", "bg": "#100a1a", "emoji": "🚀", "tagline": "Aerospatiale, propulsion, Rust"},
+        "7": {"accent": "#f778ba", "bg": "#1a0a14", "emoji": "⛓️", "tagline": "Blockchain Rust, libp2p, DeFi"},
+        "8": {"accent": "#ff7b72", "bg": "#1a0a0a", "emoji": "🔢", "tagline": "Algorithmes, structures, visualisation"},
+        "9": {"accent": "#58a6ff", "bg": "#0a0f1e", "emoji": "🕸️", "tagline": "DevOps, MLOps, automatisation"},
+        "12": {"accent": "#a5d6ff", "bg": "#0a0f1a", "emoji": "🔭", "tagline": "Physique, Minkowski, maths pures"},
+        "14": {"accent": "#f778ba", "bg": "#1a0a14", "emoji": "🎵", "tagline": "Beatmaking, art, NFTs"},
+        "15": {"accent": "#d29922", "bg": "#1a150a", "emoji": "🏗️", "tagline": "CAD, genie civil, biomimetisme"},
+        "tiers": {"accent": "#8b949e", "bg": "#0d1117", "emoji": "🤝", "tagline": "Missions externes & collaborations"},
+    }
+    sections_dir = base_dir / "sections"
+    sections_dir.mkdir(parents=True, exist_ok=True)
+    # Index des mondes
+    idx_lines = ['<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">']
+    idx_lines.append('<title>lambda-Section — Mondes</title>')
+    idx_lines.append(f'<style>{CSS} .world-card{{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;display:block;text-decoration:none}} .world-card:hover{{border-color:var(--accent)}} .world-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}}</style>')
+    idx_lines.append('</head><body>')
+    idx_lines.append('<h1>λ Mondes — Explore chaque Section</h1>')
+    idx_lines.append('<p class="subtitle">14 univers, chacun son design, son histoire, ses projets. Clique pour entrer.</p>')
+    idx_lines.append(f'<p class="meta">Mise a jour : {updated_date} · <a href="../">← Portfolio global</a></p>')
+    idx_lines.append('<div class="world-grid">')
+    for sec in sections:
+        if len(sec["projects"]) == 0:
+            continue
+        m = re.search(r'section-(\d+)', sec["name"].lower())
+        sid = m.group(1) if m else ("tiers" if "tiers" in sec["name"].lower() else "0")
+        theme = themes.get(sid, {"accent": "#58a6ff", "bg": "#0d1117", "emoji": "λ", "tagline": ""})
+        # card for index
+        proj_count = len(sec["projects"])
+        avg = sum(p["pct"] for p in sec["projects"]) // proj_count if proj_count else 0
+        clean_name = sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")
+        idx_lines.append(f'<a class="world-card" href="s-{sid}/" style="border-top:3px solid {theme["accent"]}">')
+        idx_lines.append(f'  <div style="font-size:1.4rem">{theme["emoji"]}</div>')
+        idx_lines.append(f'  <div style="font-weight:700;color:{theme["accent"]}">{clean_name}</div>')
+        idx_lines.append(f'  <div style="color:var(--muted);font-size:0.8rem">{theme["tagline"]}</div>')
+        idx_lines.append(f'  <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--muted)">{proj_count} projets · {avg}% moyen</div>')
+        idx_lines.append('</a>')
+    idx_lines.append('</div>')
+    idx_lines.append('<div class="footer"><p>λ lambda-Section &copy; 2026 · <a href="../">Portfolio</a></p></div></body></html>')
+    (sections_dir / "index.html").write_text("\n".join(idx_lines), encoding="utf-8")
+
+    for sec in sections:
+        if len(sec["projects"]) == 0:
+            continue
+        m = re.search(r'section-(\d+)', sec["name"].lower())
+        sid = m.group(1) if m else ("tiers" if "tiers" in sec["name"].lower() else "0")
+        theme = themes.get(sid, {"accent": "#58a6ff", "bg": "#0d1117", "emoji": "λ", "tagline": ""})
+        sec_dir = sections_dir / f"s-{sid}"
+        sec_dir.mkdir(parents=True, exist_ok=True)
+        # Build per-section page
+        clean_name = sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")
+        slines = []
+        slines.append('<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">')
+        slines.append(f'<title>{clean_name} — Monde</title>')
+        slines.append(f'<style>:root{{--accent:{theme["accent"]};--bg:{theme["bg"]}}} {CSS} .hero{{background:linear-gradient(135deg,var(--bg),var(--card));border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem}} .hero h1{{color:var(--accent)}} </style>')
+        slines.append('</head><body>')
+        slines.append(f'<p class="meta"><a href="../../">← Portfolio</a> · <a href="../">Mondes</a></p>')
+        slines.append(f'<div class="hero"><div style="font-size:2rem">{theme["emoji"]}</div><h1>{clean_name}</h1><p class="section-theme">{sec["theme"]}</p><p style="color:var(--muted);font-size:0.85rem">{theme["tagline"]}</p></div>')
+        # Stats for this section
+        avg = sum(p["pct"] for p in sec["projects"]) // len(sec["projects"]) if sec["projects"] else 0
+        slines.append(f'<div class="stats"><div class="stat"><div class="stat-val">{len(sec["projects"])}</div><div class="stat-label">Projets</div></div>')
+        slines.append(f'<div class="stat"><div class="stat-val">{avg}%</div><div class="stat-label">Moyen</div></div>')
+        slines.append(f'<div class="stat"><div class="stat-val">{sum(1 for p in sec["projects"] if p["pct"]>=70)}</div><div class="stat-label">75%+</div></div></div>')
+        slines.append('<table><tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>')
+        for p in sec["projects"]:
+            badge_cls = status_badge(p["status"])
+            bar_cls = progress_class(p["pct"])
+            url = project_url(p["name"], sec["name"])
+            name_cell = f'<a href="{url}" target="_blank" rel="noopener">{p["name"]}</a>'
+            bar_html = f'<div class="bar"><div class="bar-fill {bar_cls}" style="width:{p["pct"]}%"></div></div>{p["pct"]}%'
+            searchable = f'{p["name"]} {p["status"]} {p["desc"]}'.replace('"', '&quot;')
+            slines.append(f'<tr data-search="{searchable.lower()}"><td class="proj-name">{name_cell}</td><td>{bar_html}</td><td><span class="badge {badge_cls}">{p["status"]}</span></td><td class="proj-desc">{p["desc"]}</td></tr>')
+        slines.append('</table>')
+        slines.append(f'<p class="meta">Monde S-{sid} · Mise a jour {updated_date} · <a href="../../">Retour portfolio</a></p>')
+        slines.append('<div class="footer"><p>λ lambda-Section &copy; 2026</p></div></body></html>')
+        (sec_dir / "index.html").write_text("\n".join(slines), encoding="utf-8")
+    print(f"  Mondes generes: {len([s for s in sections if len(s['projects'])>0])} sections -> sections/s-*/")
 
 
 def sync_readme(sections):

@@ -33,25 +33,34 @@ jobs:
         run: |
           python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md
           cat kuro-rules/TRUTH_DAILY.md | head -n 30
-          # Truth enrich is done inside generate_portfolio via local git (on CI, repos are cloned via checkout)
-          # For CI truth, we clone key repos to ~/Documents equivalent:
-          mkdir -p /tmp/docs
-          # Clone or use existing checkouts for GitHub API fallback (optional)
 
-      - name: Generate portfolio (truth-enriched)
+      - name: Compute realistic % (factuel)
+        run: |
+          python kuro-rules/scripts/compute_progress.py --apply || true
+          echo "Epingle diff:"
+          git -C kuro-rules diff --stat || true
+
+      - name: Generate portfolio (truth-enriched + mondes)
         run: |
           python kuro-rules/scripts/generate_portfolio.py \
             --epingle kuro-rules/Epingle_Projets.md \
             --output lemniscate-world/index.html
+          ls -la lemniscate-world/sections/ | head -n 20
+          ls -la lemniscate-world/sections/s-1/ || true
 
-      - name: Commit TRUTH_DAILY + portfolio if changed
+      - name: Generate blog (factuel)
+        run: |
+          python kuro-rules/scripts/generate_blog.py --apply
+          ls -la lemniscate-world/blog/ | head -n 20
+
+      - name: Commit TRUTH_DAILY + Epingle + portfolio if changed
         run: |
           cd kuro-rules
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add TRUTH_DAILY.md || true
+          git add TRUTH_DAILY.md Epingle_Projets.md || true
           if ! git diff --cached --quiet; then
-            git commit -m "chore: truth daily audit $(date +%Y-%m-%d) [skip ci]"
+            git commit -m "chore: truth daily audit + realistic % $(date +%Y-%m-%d) [skip ci]"
             git push
           else
             echo "No truth changes"
@@ -59,10 +68,9 @@ jobs:
           cd ../lemniscate-world
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          # README is synced via generate_portfolio if needed, but we keep it manual on CI (no local ~/Documents)
+          git add index.html sections/ blog/ || true
           if ! git diff --cached --quiet; then
-            git commit -m "chore: auto-sync portfolio truth $(date +%Y-%m-%d) [skip ci]"
+            git commit -m "chore: auto-sync portfolio + mondes + blog truth $(date +%Y-%m-%d) [skip ci]"
             git push
           else
             echo "No portfolio changes"
