@@ -69,7 +69,8 @@ jobs:
         run: |
           if [ "$(date -u +%u)" = "1" ]; then
             python kuro-rules/scripts/kuro_radar.py \
-              --append-truth kuro-rules/TRUTH_DAILY.md
+              --append-truth kuro-rules/TRUTH_DAILY.md \
+              --epingle kuro-rules/Epingle_Projets.md
           else
             echo "Pas lundi - radar saute"
           fi
