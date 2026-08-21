@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """generate_portfolio.py — Generate portfolio HTML from Epingle_Projets.md.
 
 Reads Epingle_Projets.md and produces index.html for the Lemniscate-world site.
@@ -25,7 +25,7 @@ TRUTH_ENRICH = True
 
 CSS = """\
   :root {
-    --paper: #faf9f5; --ink: #161513; --muted: #6f6c64;
+    --paper: #faf9f5; --ink: #161513; --muted: #5f5b52;
     --hair: #d9d6cc; --zebra: #f1efe8; --hover: #eae7dd;
     --serif: Georgia, 'Times New Roman', serif;
     --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, Menlo, monospace;
@@ -78,6 +78,11 @@ CSS = """\
   .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
   .footer a:hover { border-bottom-color: var(--ink); }
   a { color: inherit; }
+  .quickstarts { margin: 0.4rem 0 1.2rem; }
+  .quickstart { border: 1px solid var(--hair); border-left: 3px solid var(--ink); padding: 0.6rem 0.9rem; margin-bottom: 0.5rem; font-family: var(--mono); font-size: 0.78rem; background: var(--zebra); }
+  .quickstart .qs-title { display: block; color: var(--muted); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .quickstart a { color: var(--ink); border-bottom: 1px solid var(--hair); }
+  .quickstart a:hover { border-bottom-color: var(--ink); }
   .quickstarts { margin: 0.4rem 0 1.2rem; }
   .quickstart { border: 1px solid var(--hair); border-left: 3px solid var(--ink); padding: 0.6rem 0.9rem; margin-bottom: 0.5rem; font-family: var(--mono); font-size: 0.78rem; background: var(--zebra); }
   .quickstart .qs-title { display: block; color: var(--muted); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
@@ -306,6 +311,10 @@ def generate(sections, output_path, updated_date):
     lines.append('<meta property="og:image:width" content="1200">')
     lines.append('<meta property="og:image:height" content="630">')
     lines.append('<meta name="twitter:card" content="summary_large_image">')
+    lines.append('<meta property="og:image" content="https://lemniscate-world.github.io/Lemniscate-world/assets/og.png">')
+    lines.append('<meta property="og:image:width" content="1200">')
+    lines.append('<meta property="og:image:height" content="630">')
+    lines.append('<meta name="twitter:card" content="summary_large_image">')
     lines.append(f'<style>{CSS}</style>')
     lines.append('</head>')
     lines.append('<body>')
@@ -345,6 +354,15 @@ def generate(sections, output_path, updated_date):
         lines.append('<nav class="index-nav">' + '<span class="sep">/</span>'.join(nav_links) + '</nav>')
         lines.append('')
     lines.append('<div class="toolbar"><div class="filter"><input type="text" id="filter" placeholder="Filtrer par nom, statut, description..." oninput="filterProjects(this.value)"></div><span class="colophon">' + str(total) + ' lignes</span></div>')
+    # Utilite immediate (DESIGN.md: Quoi, prouve comment, je l'essaie comment ?)
+    lines.append('<div class="quickstarts">')
+    lines.append('  <div class="quickstart"><span class="qs-title">NeuralDBG v1.3 - debugger causal PyTorch · PyPI</span>')
+    lines.append('    <code>pip install neuraldbg</code> &nbsp; <a href="https://pypi.org/project/neuraldbg/">PyPI</a> · <a href="https://github.com/LambdaSection/NeuralDBG">source</a>')
+    lines.append('  </div>')
+    lines.append('  <div class="quickstart"><span class="qs-title">LifeTrack v0.3.2 - habit tracker desktop (Tauri)</span>')
+    lines.append('    <a href="https://github.com/Lemniscate-world/LifeTrack/releases">Telecharger (Windows MSI/NSIS)</a> · <a href="https://github.com/Lemniscate-world/LifeTrack">source</a>')
+    lines.append('  </div>')
+    lines.append('</div>')
     # Utilite immediate (DESIGN.md: Quoi, prouve comment, je l'essaie comment ?)
     lines.append('<div class="quickstarts">')
     lines.append('  <div class="quickstart"><span class="qs-title">NeuralDBG v1.3 — debugger causal PyTorch · PyPI</span>')
@@ -410,6 +428,32 @@ def generate(sections, output_path, updated_date):
     lines.append('</html>')
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # SEO S1: sitemap + robots + og:image
+    try:
+        _base = "https://lemniscate-world.github.io/Lemniscate-world/"
+        _sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+        _sm.append(f'<url><loc>{_base}</loc></url>')
+        _sm.append(f'<url><loc>{_base}sections/</loc></url>')
+        _sm.append(f'<url><loc>{_base}blog/</loc></url>')
+        for _s in sections:
+            if not _s["projects"]:
+                continue
+            import re as _re
+            _m = _re.search(r'section-(\d+)', _s["name"].lower())
+            _sid = _m.group(1) if _m else ("tiers" if "tiers" in _s["name"].lower() else None)
+            if _sid:
+                _sm.append(f'<url><loc>{_base}sections/s-{_sid}/</loc></url>')
+        _sm.append('</urlset>')
+        output_path.parent.joinpath("sitemap.xml").write_text("\n".join(_sm), encoding="utf-8")
+        output_path.parent.joinpath("robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: " + _base + "sitemap.xml\n", encoding="utf-8")
+        try:
+            import subprocess as _sp
+            _g = Path(__file__).resolve().parent / "gen_og_image.py"
+            _sp.run(["python", str(_g), "--out", str(output_path.parent / "assets" / "og.png")], timeout=60)
+        except Exception:
+            pass
+    except Exception:
+        pass
 
     # SEO: sitemap + robots (S1)
     try:

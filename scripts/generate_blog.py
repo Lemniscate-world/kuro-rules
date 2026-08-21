@@ -191,6 +191,29 @@ def generate_daily_blog(dry_run=True):
     (BLOG_DIR / "index.html").write_text("\n".join(idx), encoding="utf-8")
     print(f"  Blog index: {BLOG_DIR / 'index.html'} ({len(posts)} posts)")
 
+    # RSS feed.xml (S1)
+    base = "https://lemniscate-world.github.io/Lemniscate-world/blog/"
+    rss = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<rss version="2.0"><channel>',
+           '<title>lambda-Section — Blog</title>',
+           f'<link>{base}</link>',
+           '<description>Billets factuels auto-generes depuis git log + Epingle_Projets.md</description>']
+    for p in posts[:20]:
+        try:
+            txt = p.read_text(encoding="utf-8")
+            m = re.search(r'title:\s*"([^"]+)"', txt)
+            t = m.group(1) if m else p.stem
+            m2 = re.search(r'date:\s*(\S+)', txt)
+            d = m2.group(1) if m2 else ""
+        except Exception:
+            t, d = p.stem, ""
+        import html as _h
+        rss.append(f'<item><title>{_h.escape(t)}</title><link>{base}{p.name}</link>'
+                   f'<guid>{p.name}</guid><pubDate>{d}</pubDate></item>')
+    rss.append('</channel></rss>')
+    (BLOG_DIR / "feed.xml").write_text("\n".join(rss), encoding="utf-8")
+    print(f"  RSS: {BLOG_DIR / 'feed.xml'}")
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
