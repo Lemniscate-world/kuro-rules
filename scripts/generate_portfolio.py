@@ -13,7 +13,7 @@ Defaults (local workstation):
 On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
-import re, sys, subprocess, json
+import re, sys, subprocess, json, os
 from datetime import date
 from pathlib import Path
 
@@ -187,7 +187,10 @@ def truth_enrich(sections):
     """Enrich each project's desc with last commit事实 if local repo exists. Returns dict for footer."""
     if not TRUTH_ENRICH:
         return None
-    docs = Path.home() / "Documents"
+    docs = Path(os.environ.get("DOCS_DIR", str(Path.home() / "Documents")))
+    if not docs.exists():
+        print("  Truth enrich skipped: docs dir not available")
+        return None
     enriched = 0
     truth_map = {}
     for sec in sections:
