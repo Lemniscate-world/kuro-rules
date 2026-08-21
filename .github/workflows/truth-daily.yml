@@ -66,6 +66,12 @@ jobs:
           python kuro-rules/scripts/generate_blog.py --apply
           ls -la lemniscate-world/blog/ | head -n 20
 
+      - name: Impeccable detect gate (design, non-bloquant -> bloquant apres stabilisation)
+        run: |
+          npx -y impeccable@latest detect --json lemniscate-world/index.html > ci-status.json || true
+          npx -y impeccable@latest detect lemniscate-world/index.html || true
+          echo "Gate design execute — rapport ci-status.json"
+
       - name: Commit TRUTH_DAILY + Epingle + portfolio if changed
         run: |
           cd kuro-rules
@@ -81,7 +87,7 @@ jobs:
           cd ../lemniscate-world
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html sections/ blog/ || true
+          git add index.html sections/ blog/ ci-status.json || true
           if ! git diff --cached --quiet; then
             git commit -m "chore: auto-sync portfolio + mondes + blog truth $(date +%Y-%m-%d) [skip ci]"
             git push
