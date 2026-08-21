@@ -13,7 +13,7 @@ Defaults (local workstation):
 On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
-import re, sys, subprocess, json, os
+import re, sys, subprocess, os
 from datetime import date
 from pathlib import Path
 
@@ -25,57 +25,59 @@ TRUTH_ENRICH = True
 
 CSS = """\
   :root {
-    --bg: #0d1117; --card: #161b22; --border: #30363d;
-    --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
-    --green: #3fb950; --yellow: #d2991d; --orange: #db6d28; --red: #f85149;
+    --paper: #faf9f5; --ink: #161513; --muted: #6f6c64;
+    --hair: #d9d6cc; --zebra: #f1efe8; --hover: #eae7dd;
+    --serif: Georgia, 'Times New Roman', serif;
+    --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5; padding: 2rem 1rem; max-width: 1100px; margin: 0 auto; }
-  h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
-  h2 { font-size: 1.2rem; color: var(--accent); margin: 2rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
-  h3 { font-size: 0.85rem; color: var(--muted); font-weight: normal; margin-bottom: 1.5rem; }
-  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
-  .meta { color: var(--muted); font-size: 0.75rem; margin-bottom: 1rem; }
-  .nav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
-  .nav a { font-size: 0.7rem; padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); text-decoration: none; }
-  .nav a:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-wrap { margin-bottom: 1.2rem; }
-  .filter-wrap input { width: 100%; max-width: 340px; padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 0.85rem; }
-  .filter-wrap input::placeholder { color: var(--muted); }
-  .section { margin-bottom: 1.5rem; }
-  .section-theme { color: var(--muted); font-style: italic; font-size: 0.8rem; margin-bottom: 0.5rem; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  th { text-align: left; padding: 0.5rem 0.75rem; color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  tr:hover { background: rgba(88,166,255,0.04); }
-  .proj-name { font-weight: 600; white-space: nowrap; }
-  .proj-name a { color: var(--text); text-decoration: none; }
-  .proj-name a:hover { color: var(--accent); text-decoration: underline; }
-  .proj-desc { color: var(--muted); font-size: 0.8rem; max-width: 400px; }
-  .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
-  .badge-actif { background: rgba(63,185,80,0.15); color: var(--green); }
-  .badge-validation { background: rgba(210,153,29,0.15); color: var(--yellow); }
-  .badge-proto { background: rgba(88,166,255,0.12); color: var(--accent); }
-  .badge-nouveau { background: rgba(139,148,158,0.12); color: var(--muted); }
-  .badge-archive { background: rgba(248,81,73,0.1); color: var(--red); }
-  .badge-outil { background: rgba(139,148,158,0.08); color: var(--muted); }
-  .badge-recherche { background: rgba(139,148,158,0.1); color: var(--muted); }
-  .bar { height: 5px; background: var(--border); border-radius: 3px; min-width: 60px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 3px; }
-  .bar-high { background: var(--green); }
-  .bar-mid { background: var(--yellow); }
-  .bar-low { background: var(--orange); }
-  .bar-mini { background: var(--accent); }
-  .stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; min-width: 90px; text-align: center; }
-  .stat-val { font-size: 1.3rem; font-weight: 700; }
-  .stat-label { font-size: 0.7rem; color: var(--muted); }
-  .discord { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; }
-  .discord a.btn { background: #5865F2; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem; text-decoration: none; }
-  .discord a.btn:hover { background: #4752C4; }
-  .footer { text-align: center; color: var(--muted); font-size: 0.7rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.55; padding: 2.5rem 1.25rem 4rem; max-width: 1060px; margin: 0 auto; }
+  .over { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.4rem); letter-spacing: -0.01em; line-height: 1.05; margin: 0.35rem 0 0.4rem; }
+  .standfirst { color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
+  .rule { border: 0; border-top: 2px solid var(--ink); margin: 1.2rem 0 0; }
+  .rule-thin { border: 0; border-top: 1px solid var(--ink); margin-top: 3px; margin-bottom: 1.4rem; }
+  .index-nav { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 1.6rem; line-height: 2.1; }
+  .index-nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .index-nav a:hover { border-bottom-color: var(--ink); }
+  .index-nav .sep { color: var(--hair); margin: 0 0.45em; }
+  .toolbar { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .colophon { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+  .colophon a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .colophon a:hover { border-bottom-color: var(--ink); }
+  .filter input { width: min(340px, 100%); padding: 0.45rem 0.6rem; border: 1px solid var(--ink); background: transparent; font-family: var(--mono); font-size: 0.8rem; color: var(--ink); }
+  .filter input::placeholder { color: var(--muted); }
+  .stats { display: flex; flex-wrap: wrap; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); margin-bottom: 1rem; }
+  .stat { padding: 0.7rem 1.4rem 0.7rem 0; margin-right: 1.4rem; border-right: 1px solid var(--hair); }
+  .stat:last-child { border-right: 0; margin-right: 0; }
+  .stat-val { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; line-height: 1.15; }
+  .stat-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  h2 { font-family: var(--serif); font-size: 1.35rem; margin: 2.6rem 0 0.15rem; display: flex; align-items: baseline; gap: 0.6rem; }
+  h2 .no { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; }
+  h2 .count { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); font-weight: 400; }
+  .section-theme { font-style: italic; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.7rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  th { font-family: var(--mono); font-weight: 500; text-align: left; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--ink); }
+  td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--zebra); }
+  tr:hover td { background: var(--hover); }
+  .proj-name { white-space: nowrap; font-weight: 600; }
+  .proj-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; }
+  .proj-name a:hover { border-bottom-color: var(--ink); }
+  .proj-desc { color: var(--muted); font-size: 0.8rem; max-width: 420px; }
+  .badge { display: inline-block; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--ink); padding: 0.08rem 0.45rem; white-space: nowrap; background: transparent; color: var(--ink); }
+  .bar { display: inline-block; vertical-align: middle; height: 10px; width: 90px; border: 1px solid var(--ink); position: relative; background: transparent; }
+  .bar-fill { position: absolute; top: 0; left: 0; bottom: 0; background: var(--ink); }
+  .pct { font-family: var(--mono); font-size: 0.72rem; margin-left: 0.5rem; color: var(--muted); }
+  .notice { border: 1px solid var(--ink); padding: 1rem 1.2rem; margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: baseline; justify-content: space-between; }
+  .notice strong { font-family: var(--serif); font-size: 1.02rem; }
+  .notice p { color: var(--muted); font-size: 0.82rem; max-width: 52ch; }
+  .notice a { color: var(--ink); font-family: var(--mono); font-size: 0.78rem; border-bottom: 1px solid var(--ink); text-decoration: none; white-space: nowrap; }
+  .footer { margin-top: 3.5rem; padding-top: 0.8rem; border-top: 1px solid var(--ink); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+  .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .footer a:hover { border-bottom-color: var(--ink); }
+  a { color: inherit; }
   @media (max-width: 700px) { .proj-desc { display: none; } td { padding: 0.5rem 0.4rem; } }
 """
 
@@ -97,13 +99,6 @@ def status_badge(status):
     if "recherche" in status_lower or "pivot" in status_lower:
         return "badge-recherche"
     return "badge-nouveau"
-
-
-def progress_class(pct):
-    if pct >= 70: return "bar-high"
-    if pct >= 30: return "bar-mid"
-    if pct >= 10: return "bar-low"
-    return "bar-mini"
 
 
 def parse_epingle(path):
@@ -235,46 +230,6 @@ def project_url(name, section_name=""):
     return f"https://github.com/search?q={name}+user%3ALemniscate-world+user%3ALambdaSection&type=repositories"
 
 
-def load_ci_status(output_path):
-    """Read ci-status.json (CI Guardian) next to the generated index.html, if present."""
-    path = Path(output_path).parent / "ci-status.json"
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return None
-
-
-def ci_panel_html(ci):
-    """Render the CI Guardian health panel from ci-status.json."""
-    if not ci:
-        return []
-    overall = ci.get("overall", "green")
-    color = "var(--green)" if overall == "green" else "var(--red)"
-    label = "Tous les CI sont verts" if overall == "green" else "CI en échec — auto-fix en cours"
-    lines = []
-    lines.append('<div class="ci-panel" style="border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;margin:1rem 0;background:var(--card);">')
-    lines.append(f'  <p style="font-size:0.85rem;margin-bottom:0.5rem;"><strong style="color:{color};">&#9679; CI Guardian</strong> <span style="color:var(--muted);">— {label}</span> <span style="color:var(--muted);font-size:0.7rem;">({ci.get("generated_at", "")})</span></p>')
-    for repo in ci.get("repos", []):
-        if repo.get("health") == "no_ci":
-            continue
-        repo_health = repo.get("health", "green")
-        dot = "var(--green)" if repo_health == "green" else "var(--red)"
-        failing = [w for w in repo.get("workflows", []) if w.get("conclusion") == "failure"]
-        names = ", ".join(w["name"] for w in failing) if failing else f"{len(repo.get('workflows', []))} workflows OK"
-        actions_url = f"https://github.com/{repo['name']}/actions"
-        lines.append(
-            f'  <p style="font-size:0.78rem;margin:0.15rem 0;color:var(--muted);">'
-            f'<span style="color:{dot};">&#9679;</span> <a href="{actions_url}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">{repo["name"]}</a>'
-            f' &middot; {names}</p>'
-        )
-    no_ci = ci.get("no_ci", [])
-    if no_ci:
-        lines.append(f'  <p style="font-size:0.72rem;margin:0.35rem 0 0;color:var(--muted);">{len(no_ci)} repo(s) sans CI (forks, archives, docs)</p>')
-    lines.append('</div>')
-    lines.append('')
-    return lines
-
-
 def generate(sections, output_path, updated_date):
     """Generate the portfolio HTML."""
     # Compute stats
@@ -287,25 +242,30 @@ def generate(sections, output_path, updated_date):
     recherche = sum(1 for s in sections for p in s["projects"] if "recherche" in p["status"].lower() or "pivot" in p["status"].lower())
     # Autres = total - counted (externe/outil etc.)
     autres = total - (active + validation + proto + archive + nouveau + recherche)
+    n_sections = len([s for s in sections if len(s["projects"]) > 0])
     lines = []
     lines.append('<!DOCTYPE html>')
     lines.append('<html lang="fr">')
     lines.append('<head>')
     lines.append('<meta charset="UTF-8">')
     lines.append('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
-    lines.append(f'<title>&#955; lambda-Section — Portfolio</title>')
-    lines.append(f'<meta name="description" content="Portfolio lambda-Section — {total} projets, {len([s for s in sections if len(s["projects"])>0])} sections actives, studio AI / Quant / Biohacking. Dashboard auto-genere depuis Epingle_Projets.md">')
-    lines.append('<meta name="theme-color" content="#0d1117">')
-    lines.append('<meta property="og:title" content="λ lambda-Section — Portfolio">')
-    lines.append(f'<meta property="og:description" content="{total} projets · {len([s for s in sections if len(s["projects"])>0])} sections actives · Dashboard sombre auto-genere">')
+    lines.append(f'<title>&#955; lambda-Section — Registre des projets</title>')
+    lines.append(f'<meta name="description" content="Portfolio lambda-Section — {total} projets, {n_sections} sections actives, studio AI / Quant / Biohacking. Registre auto-genere depuis Epingle_Projets.md">')
+    lines.append('<meta name="theme-color" content="#faf9f5">')
+    lines.append('<meta property="og:title" content="λ lambda-Section — Registre des projets">')
+    lines.append(f'<meta property="og:description" content="{total} projets · {n_sections} sections actives · Registre factuel auto-genere">')
     lines.append('<meta property="og:type" content="website">')
     lines.append('<meta property="og:url" content="https://lemniscate-world.github.io/Lemniscate-world/">')
     lines.append(f'<style>{CSS}</style>')
     lines.append('</head>')
     lines.append('<body>')
     lines.append('')
+    lines.append('<p class="over">Studio indépendant — AI · Quant · Biohacking</p>')
     lines.append('<h1>&#955; lambda-Section</h1>')
-    lines.append(f'<p class="subtitle">Portfolio — {total} projets &middot; {len([s for s in sections if len(s["projects"])>0])} sections actives &middot; 2026</p>')
+    lines.append(f'<p class="standfirst">Registre des projets — {total} projets en {n_sections} sections. Chaque ligne est vérifiée contre l&rsquo;activité Git réelle, pas contre des intentions.</p>')
+    lines.append('')
+    lines.append('<hr class="rule">')
+    lines.append('<hr class="rule-thin">')
     lines.append('')
     lines.append('<div class="stats">')
     lines.append(f'  <div class="stat"><div class="stat-val">{active}</div><div class="stat-label">Actifs</div></div>')
@@ -317,9 +277,7 @@ def generate(sections, output_path, updated_date):
     if autres > 0:
         lines.append(f'  <div class="stat"><div class="stat-val">{autres}</div><div class="stat-label">Autres</div></div>')
     lines.append('</div>')
-    lines.append(f'<p class="meta">Mise à jour : {updated_date} · <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">Source (Epingle_Projets.md)</a> · Généré automatiquement · <a href="https://github.com/Lemniscate-world/Lemniscate-world">Profil</a> · <a href="blog/">📝 Blog</a> · <a href="sections/">🌍 Mondes</a></p>')
-    lines.append('')
-    lines.extend(ci_panel_html(load_ci_status(output_path)))
+    lines.append(f'<p class="colophon" style="margin:0.7rem 0 1.6rem;">Relevé du {updated_date} · <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">source : Epingle_Projets.md</a> · <a href="https://github.com/Lemniscate-world/Lemniscate-world">profil GitHub</a> · <a href="blog/">blog</a> · <a href="sections/">mondes</a></p>')
     lines.append('')
     # Filter + nav
     # Build nav anchors
@@ -333,31 +291,33 @@ def generate(sections, output_path, updated_date):
         sec["anchor"] = anchor
         nav_links.append(f'<a href="#{anchor}">{sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")}</a>')
     if nav_links:
-        lines.append('<nav class="nav">' + "".join(nav_links) + '</nav>')
+        lines.append('<nav class="index-nav">' + '<span class="sep">/</span>'.join(nav_links) + '</nav>')
         lines.append('')
-    lines.append('<div class="filter-wrap"><input type="text" id="filter" placeholder="Filtrer par nom, statut, description..." oninput="filterProjects(this.value)"></div>')
+    lines.append('<div class="toolbar"><div class="filter"><input type="text" id="filter" placeholder="Filtrer par nom, statut, description..." oninput="filterProjects(this.value)"></div><span class="colophon">' + str(total) + ' lignes</span></div>')
     lines.append('')
 
+    sec_no = 0
     for sec in sections:
         if len(sec["projects"]) == 0:
             continue
+        sec_no += 1
         anchor = sec.get("anchor", re.sub(r'[^a-zA-Z0-9]+', '-', sec["name"]).strip('-').lower())
+        clean_sec_name = sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")
         lines.append(f'<!-- {sec["name"]} -->')
-        lines.append(f'<h2 id="{anchor}">{sec["name"]}</h2>')
+        lines.append(f'<h2 id="{anchor}"><span class="no">{sec_no:02d}</span>{clean_sec_name}<span class="count">· {len(sec["projects"])}</span></h2>')
         if sec["theme"]:
             lines.append(f'<p class="section-theme">{sec["theme"]}</p>')
         lines.append('<table>')
         lines.append('<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>')
         for p in sec["projects"]:
             badge_cls = status_badge(p["status"])
-            bar_cls = progress_class(p["pct"])
             url = project_url(p["name"], sec["name"])
             name_cell = f'<a href="{url}" target="_blank" rel="noopener">{p["name"]}</a>'
             if p["status"].lower().startswith("archive"):
                 name_cell = f'<span style="color:var(--muted)"><a href="{url}" target="_blank" rel="noopener" style="color:var(--muted)">{p["name"]}</a></span>'
             bar_html = ""
             if p["pct"] > 0 or p["status"].lower() not in ("outil", "archive"):
-                bar_html = f'<div class="bar"><div class="bar-fill {bar_cls}" style="width:{p["pct"]}%"></div></div>{p["pct"]}%'
+                bar_html = f'<span class="bar"><span class="bar-fill" style="width:{p["pct"]}%"></span></span><span class="pct">{p["pct"]}%</span>'
             else:
                 bar_html = "&mdash;"
             # Row searchable text
@@ -374,15 +334,16 @@ def generate(sections, output_path, updated_date):
         lines.append('')
 
     # Discord community block (lien réel requis — pas de placeholder)
-    lines.append('<div class="discord" id="discord">')
-    lines.append('  <div><strong>Communaute Discord lambda-Section</strong><br><span style="color:var(--muted);font-size:0.8rem;">Salons par projet, updates factuelles. Lien d\'invitation a configurer dans Epingle_Projets.md (cle: discord_invite).</span></div>')
+    lines.append('<div class="notice" id="discord">')
+    lines.append('  <div><strong>Communauté Discord lambda-Section</strong><br><p style="color:var(--muted);font-size:0.82rem;max-width:52ch;">Salons par projet, updates factuelles. Lien d&rsquo;invitation à configurer dans Epingle_Projets.md (clé&nbsp;: discord_invite).</p></div>')
     lines.append('</div>')
     lines.append('')
     # Filter JS
     lines.append('<script>function filterProjects(q){q=q.toLowerCase();document.querySelectorAll("tr[data-search]").forEach(function(r){r.style.display=r.getAttribute("data-search").indexOf(q)>-1?"":"none";});} </script>')
     lines.append('')
     lines.append('<div class="footer">')
-    lines.append('  <p>&#955; lambda-Section &copy; 2026 &middot; <a href="https://github.com/Lemniscate-world">GitHub</a> &middot; <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">Source Markdown</a> &middot; Auto-généré</p>')
+    lines.append('  <p>&#955; lambda-Section &copy; 2026</p>')
+    lines.append('  <p>Compilé depuis Epingle_Projets.md · <a href="https://github.com/Lemniscate-world/kuro-rules">kuro-rules</a> · <a href="https://github.com/Lemniscate-world">GitHub</a></p>')
     lines.append('</div>')
     lines.append('')
     lines.append('</body>')
@@ -395,50 +356,53 @@ def generate(sections, output_path, updated_date):
 
 
 def generate_section_worlds(sections, updated_date, base_dir: Path):
-    """Genere un monde par section: sections/s-1/index.html etc. avec theme distinct."""
-    themes = {
-        "1": {"accent": "#58a6ff", "bg": "#0a0f1e", "emoji": "🧠", "tagline": "Reseaux de neurones, causalite, debugging"},
-        "2": {"accent": "#3fb950", "bg": "#0d1a0f", "emoji": "📈", "tagline": "Trading quantitatif, modeles proba & Markov"},
-        "3": {"accent": "#db6d28", "bg": "#1a0f0a", "emoji": "🧬", "tagline": "Biohacking, focus, corps & esprit"},
-        "4": {"accent": "#1f6feb", "bg": "#0a0f1e", "emoji": "💳", "tagline": "Fintech Afrique, coordination terrain"},
-        "5": {"accent": "#8957e5", "bg": "#100a1a", "emoji": "🚀", "tagline": "Aerospatiale, propulsion, Rust"},
-        "7": {"accent": "#f778ba", "bg": "#1a0a14", "emoji": "⛓️", "tagline": "Blockchain Rust, libp2p, DeFi"},
-        "8": {"accent": "#ff7b72", "bg": "#1a0a0a", "emoji": "🔢", "tagline": "Algorithmes, structures, visualisation"},
-        "9": {"accent": "#58a6ff", "bg": "#0a0f1e", "emoji": "🕸️", "tagline": "DevOps, MLOps, automatisation"},
-        "12": {"accent": "#a5d6ff", "bg": "#0a0f1a", "emoji": "🔭", "tagline": "Physique, Minkowski, maths pures"},
-        "14": {"accent": "#f778ba", "bg": "#1a0a14", "emoji": "🎵", "tagline": "Beatmaking, art, NFTs"},
-        "15": {"accent": "#d29922", "bg": "#1a150a", "emoji": "🏗️", "tagline": "CAD, genie civil, biomimetisme"},
-        "tiers": {"accent": "#8b949e", "bg": "#0d1117", "emoji": "🤝", "tagline": "Missions externes & collaborations"},
+    """Genere un monde par section: sections/s-1/index.html etc. — registre monochrome."""
+    taglines = {
+        "1": "Reseaux de neurones, causalite, debugging",
+        "2": "Trading quantitatif, modeles proba & Markov",
+        "3": "Biohacking, focus, corps & esprit",
+        "4": "Fintech Afrique, coordination terrain",
+        "5": "Aerospatiale, propulsion, Rust",
+        "7": "Blockchain Rust, libp2p, DeFi",
+        "8": "Algorithmes, structures, visualisation",
+        "9": "DevOps, MLOps, automatisation",
+        "12": "Physique, Minkowski, maths pures",
+        "14": "Beatmaking, art, NFTs",
+        "15": "CAD, genie civil, biomimetisme",
+        "tiers": "Missions externes & collaborations",
     }
     sections_dir = base_dir / "sections"
     sections_dir.mkdir(parents=True, exist_ok=True)
     # Index des mondes
     idx_lines = ['<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">']
     idx_lines.append('<title>lambda-Section — Mondes</title>')
-    idx_lines.append(f'<style>{CSS} .world-card{{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;display:block;text-decoration:none}} .world-card:hover{{border-color:var(--accent)}} .world-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}}</style>')
+    idx_lines.append(f'<style>{CSS} .world-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0;border-top:2px solid var(--ink)}} .world-card{{display:block;text-decoration:none;padding:1.1rem 1rem;border-bottom:1px solid var(--hair);border-right:1px solid var(--hair)}}</style>')
     idx_lines.append('</head><body>')
-    idx_lines.append('<h1>λ Mondes — Explore chaque Section</h1>')
-    idx_lines.append('<p class="subtitle">14 univers, chacun son design, son histoire, ses projets. Clique pour entrer.</p>')
-    idx_lines.append(f'<p class="meta">Mise a jour : {updated_date} · <a href="../">← Portfolio global</a></p>')
+    idx_lines.append('<p class="over">Registre des projets — Index des mondes</p>')
+    idx_lines.append('<h1>Mondes</h1>')
+    idx_lines.append('<p class="standfirst">Chaque section du studio, avec ses projets et son avancement reel.</p>')
+    idx_lines.append('<hr class="rule"><hr class="rule-thin">')
+    idx_lines.append(f'<p class="colophon" style="margin-bottom:1.4rem;">Relevé du {updated_date} · <a href="../">retour au registre</a></p>')
     idx_lines.append('<div class="world-grid">')
     for sec in sections:
         if len(sec["projects"]) == 0:
             continue
         m = re.search(r'section-(\d+)', sec["name"].lower())
         sid = m.group(1) if m else ("tiers" if "tiers" in sec["name"].lower() else "0")
-        theme = themes.get(sid, {"accent": "#58a6ff", "bg": "#0d1117", "emoji": "λ", "tagline": ""})
+        tagline = taglines.get(sid, "")
         # card for index
         proj_count = len(sec["projects"])
         avg = sum(p["pct"] for p in sec["projects"]) // proj_count if proj_count else 0
         clean_name = sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")
-        idx_lines.append(f'<a class="world-card" href="s-{sid}/" style="border-top:3px solid {theme["accent"]}">')
-        idx_lines.append(f'  <div style="font-size:1.4rem">{theme["emoji"]}</div>')
-        idx_lines.append(f'  <div style="font-weight:700;color:{theme["accent"]}">{clean_name}</div>')
-        idx_lines.append(f'  <div style="color:var(--muted);font-size:0.8rem">{theme["tagline"]}</div>')
-        idx_lines.append(f'  <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--muted)">{proj_count} projets · {avg}% moyen</div>')
+        idx_lines.append(f'<a class="world-card" href="s-{sid}/">')
+        idx_lines.append(f'  <div style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);letter-spacing:0.14em;">S-{sid.upper()}</div>')
+        idx_lines.append(f'  <div style="font-family:var(--serif);font-size:1.15rem;font-weight:700;margin:0.2rem 0 0.3rem;">{clean_name}</div>')
+        if tagline:
+            idx_lines.append(f'  <div style="color:var(--muted);font-size:0.78rem;font-style:italic;">{tagline}</div>')
+        idx_lines.append(f'  <div style="margin-top:0.55rem;font-family:var(--mono);font-size:0.72rem;color:var(--ink);">{proj_count} projets · {avg}% moyen</div>')
         idx_lines.append('</a>')
     idx_lines.append('</div>')
-    idx_lines.append('<div class="footer"><p>λ lambda-Section &copy; 2026 · <a href="../">Portfolio</a></p></div></body></html>')
+    idx_lines.append('<div class="footer"><p>λ lambda-Section &copy; 2026</p><p><a href="../">Registre</a></p></div></body></html>')
     (sections_dir / "index.html").write_text("\n".join(idx_lines), encoding="utf-8")
 
     for sec in sections:
@@ -446,35 +410,39 @@ def generate_section_worlds(sections, updated_date, base_dir: Path):
             continue
         m = re.search(r'section-(\d+)', sec["name"].lower())
         sid = m.group(1) if m else ("tiers" if "tiers" in sec["name"].lower() else "0")
-        theme = themes.get(sid, {"accent": "#58a6ff", "bg": "#0d1117", "emoji": "λ", "tagline": ""})
+        tagline = taglines.get(sid, "")
         sec_dir = sections_dir / f"s-{sid}"
         sec_dir.mkdir(parents=True, exist_ok=True)
         # Build per-section page
         clean_name = sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")
         slines = []
         slines.append('<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">')
-        slines.append(f'<title>{clean_name} — Monde</title>')
-        slines.append(f'<style>:root{{--accent:{theme["accent"]};--bg:{theme["bg"]}}} {CSS} .hero{{background:linear-gradient(135deg,var(--bg),var(--card));border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem}} .hero h1{{color:var(--accent)}} </style>')
+        slines.append(f'<title>{clean_name} — Monde S-{sid}</title>')
+        slines.append(f'<style>{CSS}</style>')
         slines.append('</head><body>')
-        slines.append(f'<p class="meta"><a href="../../">← Portfolio</a> · <a href="../">Mondes</a></p>')
-        slines.append(f'<div class="hero"><div style="font-size:2rem">{theme["emoji"]}</div><h1>{clean_name}</h1><p class="section-theme">{sec["theme"]}</p><p style="color:var(--muted);font-size:0.85rem">{theme["tagline"]}</p></div>')
+        slines.append(f'<p class="over">Monde S-{sid.upper()}</p>')
+        slines.append(f'<h1>{clean_name}</h1>')
+        if sec["theme"]:
+            slines.append(f'<p class="section-theme">{sec["theme"]}</p>')
+        if tagline:
+            slines.append(f'<p class="standfirst">{tagline}</p>')
+        slines.append('<hr class="rule"><hr class="rule-thin">')
         # Stats for this section
         avg = sum(p["pct"] for p in sec["projects"]) // len(sec["projects"]) if sec["projects"] else 0
         slines.append(f'<div class="stats"><div class="stat"><div class="stat-val">{len(sec["projects"])}</div><div class="stat-label">Projets</div></div>')
         slines.append(f'<div class="stat"><div class="stat-val">{avg}%</div><div class="stat-label">Moyen</div></div>')
-        slines.append(f'<div class="stat"><div class="stat-val">{sum(1 for p in sec["projects"] if p["pct"]>=70)}</div><div class="stat-label">75%+</div></div></div>')
+        slines.append(f'<div class="stat"><div class="stat-val">{sum(1 for p in sec["projects"] if p["pct"]>=70)}</div><div class="stat-label">70%+</div></div></div>')
         slines.append('<table><tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>')
         for p in sec["projects"]:
             badge_cls = status_badge(p["status"])
-            bar_cls = progress_class(p["pct"])
             url = project_url(p["name"], sec["name"])
             name_cell = f'<a href="{url}" target="_blank" rel="noopener">{p["name"]}</a>'
-            bar_html = f'<div class="bar"><div class="bar-fill {bar_cls}" style="width:{p["pct"]}%"></div></div>{p["pct"]}%'
+            bar_html = f'<span class="bar"><span class="bar-fill" style="width:{p["pct"]}%"></span></span><span class="pct">{p["pct"]}%</span>'
             searchable = f'{p["name"]} {p["status"]} {p["desc"]}'.replace('"', '&quot;')
             slines.append(f'<tr data-search="{searchable.lower()}"><td class="proj-name">{name_cell}</td><td>{bar_html}</td><td><span class="badge {badge_cls}">{p["status"]}</span></td><td class="proj-desc">{p["desc"]}</td></tr>')
         slines.append('</table>')
-        slines.append(f'<p class="meta">Monde S-{sid} · Mise a jour {updated_date} · <a href="../../">Retour portfolio</a></p>')
-        slines.append('<div class="footer"><p>λ lambda-Section &copy; 2026</p></div></body></html>')
+        slines.append(f'<p class="colophon" style="margin-top:1.6rem;">Relevé du {updated_date} · <a href="../../">registre complet</a> · <a href="../">mondes</a></p>')
+        slines.append('<div class="footer"><p>λ lambda-Section &copy; 2026</p><p>Monde S-' + sid + '</p></div></body></html>')
         (sec_dir / "index.html").write_text("\n".join(slines), encoding="utf-8")
     print(f"  Mondes generes: {len([s for s in sections if len(s['projects'])>0])} sections -> sections/s-*/")
 
