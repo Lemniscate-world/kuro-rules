@@ -13,7 +13,7 @@ Defaults (local workstation):
 On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
-import re, sys, subprocess
+import re, sys, subprocess, json
 from datetime import date
 from pathlib import Path
 
@@ -220,17 +220,56 @@ def truth_enrich(sections):
 
 
 def project_url(name, section_name=""):
-    """Return GitHub URL for a project. Heuristic: S-1* -> LambdaSection, else Lemniscate-world."""
-    # External projects -> Demeter or generic
-    if "Tiers" in section_name or "Externe" in section_name:
-        return f"https://github.com/search?q={name}+org%3ALemniscate-world"
-    if "&#955;-Section-1" in section_name or "Section-1" in section_name:
+    """URL GitHub. Seuls les repos CONFIRMÉS publics ont un lien direct; le reste -> recherche org (pas de 404)."""
+    confirmed_lambda = {"neuraldbg", "astral", "aquarium", "metatron", "sugar", "datalint", "logos", "odin"}
+    confirmed_lemni = {"openquant", "charmed", "dissect", "aether", "project-dirac", "charles", "debugreg", "lifetrack", "echox", "hermes", "epure", "helium", "kuroguardian", "sagittarius", "openmind", "neurodose", "flow-regulator", "devdemeterdao", "xp_farming_system", "constant_yield"}
+    key = name.lower()
+    if key in confirmed_lambda:
         return f"https://github.com/LambdaSection/{name}"
-    # Known LambdaSection projects
-    lambda_names = {"neuraldbg", "neuraldbg-engine", "neural-agent", "aladin", "astral", "datalint", "odin", "aquarium", "damon", "metatron", "tokenwise", "prompt2model", "automatons", "onlook", "verbose", "neurodose"}
-    if name.lower() in lambda_names:
-        return f"https://github.com/LambdaSection/{name}"
-    return f"https://github.com/Lemniscate-world/{name}"
+    if key in confirmed_lemni:
+        return f"https://github.com/Lemniscate-world/{name}"
+    # Non confirmé (privé/innexist) -> recherche org, jamais un lien mort
+    return f"https://github.com/search?q={name}+user%3ALemniscate-world+user%3ALambdaSection&type=repositories"
+
+
+def load_ci_status(output_path):
+    """Read ci-status.json (CI Guardian) next to the generated index.html, if present."""
+    path = Path(output_path).parent / "ci-status.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def ci_panel_html(ci):
+    """Render the CI Guardian health panel from ci-status.json."""
+    if not ci:
+        return []
+    overall = ci.get("overall", "green")
+    color = "var(--green)" if overall == "green" else "var(--red)"
+    label = "Tous les CI sont verts" if overall == "green" else "CI en échec — auto-fix en cours"
+    lines = []
+    lines.append('<div class="ci-panel" style="border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;margin:1rem 0;background:var(--card);">')
+    lines.append(f'  <p style="font-size:0.85rem;margin-bottom:0.5rem;"><strong style="color:{color};">&#9679; CI Guardian</strong> <span style="color:var(--muted);">— {label}</span> <span style="color:var(--muted);font-size:0.7rem;">({ci.get("generated_at", "")})</span></p>')
+    for repo in ci.get("repos", []):
+        if repo.get("health") == "no_ci":
+            continue
+        repo_health = repo.get("health", "green")
+        dot = "var(--green)" if repo_health == "green" else "var(--red)"
+        failing = [w for w in repo.get("workflows", []) if w.get("conclusion") == "failure"]
+        names = ", ".join(w["name"] for w in failing) if failing else f"{len(repo.get('workflows', []))} workflows OK"
+        actions_url = f"https://github.com/{repo['name']}/actions"
+        lines.append(
+            f'  <p style="font-size:0.78rem;margin:0.15rem 0;color:var(--muted);">'
+            f'<span style="color:{dot};">&#9679;</span> <a href="{actions_url}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">{repo["name"]}</a>'
+            f' &middot; {names}</p>'
+        )
+    no_ci = ci.get("no_ci", [])
+    if no_ci:
+        lines.append(f'  <p style="font-size:0.72rem;margin:0.35rem 0 0;color:var(--muted);">{len(no_ci)} repo(s) sans CI (forks, archives, docs)</p>')
+    lines.append('</div>')
+    lines.append('')
+    return lines
 
 
 def generate(sections, output_path, updated_date):
@@ -276,6 +315,8 @@ def generate(sections, output_path, updated_date):
         lines.append(f'  <div class="stat"><div class="stat-val">{autres}</div><div class="stat-label">Autres</div></div>')
     lines.append('</div>')
     lines.append(f'<p class="meta">Mise à jour : {updated_date} · <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">Source (Epingle_Projets.md)</a> · Généré automatiquement · <a href="https://github.com/Lemniscate-world/Lemniscate-world">Profil</a> · <a href="blog/">📝 Blog</a> · <a href="sections/">🌍 Mondes</a></p>')
+    lines.append('')
+    lines.extend(ci_panel_html(load_ci_status(output_path)))
     lines.append('')
     # Filter + nav
     # Build nav anchors
@@ -329,12 +370,10 @@ def generate(sections, output_path, updated_date):
         lines.append('</table>')
         lines.append('')
 
-    # Discord community block
+    # Discord community block (lien réel requis — pas de placeholder)
     lines.append('<div class="discord" id="discord">')
-    lines.append('  <div><strong>Communaute Discord lambda-Section</strong><br><span style="color:var(--muted);font-size:0.8rem;">Messages par projet, updates, entraide. Tes messages Discord peuvent alimenter Epingle -> portfolio auto.</span></div>')
-    lines.append('  <a class="btn" href="https://discord.gg/lambda-section" target="_blank" rel="noopener">Rejoindre Discord</a>')
+    lines.append('  <div><strong>Communaute Discord lambda-Section</strong><br><span style="color:var(--muted);font-size:0.8rem;">Salons par projet, updates factuelles. Lien d\'invitation a configurer dans Epingle_Projets.md (cle: discord_invite).</span></div>')
     lines.append('</div>')
-    lines.append('<p style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem;">Astuce: Exporte tes messages Discord (par salon/projet) -> colle dans <code>Epingle_Projets.md</code> -> <code>generate_portfolio.py</code> sync auto README + portfolio.</p>')
     lines.append('')
     # Filter JS
     lines.append('<script>function filterProjects(q){q=q.toLowerCase();document.querySelectorAll("tr[data-search]").forEach(function(r){r.style.display=r.getAttribute("data-search").indexOf(q)>-1?"":"none";});} </script>')
