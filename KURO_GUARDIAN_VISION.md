@@ -17,6 +17,22 @@ et `ci-guardian.yml` faisaient les mêmes choses en parallèle (3 robots, double
 collision sur `ci-status.json`). Un seul robot désormais ; le rapport design
 Impeccable va dans `design-report.json` (plus de collision avec le statut CI).
 
+## Cerveau (LLM)
+
+Chaîne de moteurs (`scripts/kuro_llm.py`, zéro dépendance) :
+
+| Ordre | Moteur | État |
+|---|---|---|
+| 1 | **Ollama cloud** — uniquement modèles `:cloud`, auto-sélection avec fallback (403 abonnement / 410 retirés sautés). Actuel : `minimax-m3:cloud` | ✅ Actif, gratuit sur le compte |
+| 2 | OpenRouter `ox-alpha:free` — dormant, activable via `KURO_ENABLE_OPENROUTER=1` + `$OPENROUTER_API_KEY` | ⏸ Désactivé par défaut |
+
+Consommateurs : Advisor du Radar (analyse signaux → projets), diagnostic IA des
+issues Sentinel. Sans moteur disponible, tout reste déterministe (jamais de blocage).
+
+**Limite connue** : le robot distant (GitHub-hosted runner) n'a pas accès au daemon
+Ollama local -> il tourne en mode déterministe en CI. Pour un cerveau en CI :
+self-hosted runner sur le PC, activation OpenRouter, ou API ollama.com.
+
 ## Composant à construire
 
 ### Kuro Radar — veille net & propositions

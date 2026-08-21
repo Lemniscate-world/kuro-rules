@@ -152,6 +152,46 @@ def find_open_issue(repo: str, workflow: str, token: str | None) -> int | None:
     return None
 
 
+def failed_steps_summary(repo: str, run_id: int, token: str | None) -> str | None:
+    """Liste compacte des jobs/steps en échec d'un run."""
+    status, data = api("GET", f"/repos/{repo}/actions/runs/{run_id}/jobs?per_page=20", token)
+    if status != 200 or not isinstance(data, dict):
+        return None
+    lines = []
+    for job in data.get("jobs", [])[:10]:
+        if job.get("conclusion") != "failure":
+            continue
+        steps = [
+            s.get("name")
+            for s in job.get("steps", [])
+            if s.get("conclusion") == "failure"
+        ]
+        lines.append(f"- job `{job.get('name')}` échoué aux étapes : {', '.join(steps) or 'n/a'}")
+    return "\n".join(lines[:8]) or None
+
+
+def ai_diagnose(repo: str, run_id: int, token: str | None) -> str | None:
+    """Diagnostic LLM du probable root cause. None si aucun moteur dispo."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from kuro_llm import ask
+    except Exception:
+        return None
+    summary = failed_steps_summary(repo, run_id, token)
+    if not summary:
+        return None
+    prompt = (
+        f"Le workflow GitHub Actions du repo {repo} (run {run_id}) échoue.\n"
+        f"Jobs et étapes en échec :\n{summary}\n\n"
+        "En 3-5 puces max : cause probable la plus vraisemblable et correctif à "
+        "tenter en premier. Réponds en français, concis, sans préambule."
+    )
+    return ask(
+        prompt,
+        system="Tu es ingénieur CI/CD senior du studio lambda-Section. Pragmatique, pas de speculations farfelues.",
+    )
+
+
 def remediate(repo: str, run: dict, token: str | None, dry_run: bool) -> dict:
     name = run.get("name") or "unknown"
     attempt = run.get("run_attempt", 1)
@@ -183,9 +223,12 @@ def remediate(repo: str, run: dict, token: str | None, dry_run: bool) -> dict:
         f"Le workflow **{name}** du repo `{repo}` échoue de façon persistante.\n\n"
         f"- Run: {run_url}\n"
         f"- Tentatives: {attempt}\n"
-        f"- Détecté: {datetime.now(timezone.utc).isoformat()}\n\n"
-        f"_Issue maintenue à jour automatiquement par le CI Guardian._"
+        f"- Détecté: {datetime.now(timezone.utc).isoformat()}\n"
     )
+    analysis = ai_diagnose(repo, run_id, token)
+    if analysis:
+        body += f"\n### Analyse IA (indicative)\n{analysis}\n"
+    body += "\n_Issue maintenue à jour automatiquement par le robot Kuro._"
     if dry_run:
         action.update(action="issue_would_open", detail=f"dry-run: issue '{title}'")
         return action

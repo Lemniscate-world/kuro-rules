@@ -305,6 +305,52 @@ def build_recommendations(
     return out
 
 
+def ai_recommendations(
+    sections: list[tuple[str, list[dict]]], epingle: Path | None
+) -> str | None:
+    """Analyse LLM des signaux vs projets. None si aucun moteur dispo."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from kuro_llm import ask
+    except Exception:
+        return None
+    if epingle is None or not epingle.exists():
+        return None
+
+    sig_lines = []
+    for name, items in sections:
+        for it in items[:4]:
+            desc = f" — {it['desc']}" if it.get("desc") else ""
+            sig_lines.append(f"- [{name}] {it['title']}{desc} ({it['url']})")
+    signals = "\n".join(sig_lines)[:2500]
+
+    try:
+        from generate_portfolio import parse_epingle
+
+        proj_lines = []
+        for sec in parse_epingle(epingle):
+            for p in sec["projects"]:
+                if p["status"].lower().startswith("archive"):
+                    continue
+                proj_lines.append(f"- {p['name']} ({p['pct']}%, {p['status']}) : {p['desc'][:90]}")
+        projects = "\n".join(proj_lines)[:2500]
+    except Exception:
+        return None
+
+    prompt = (
+        "Voici des signaux techniques de la semaine (HN, GitHub, arXiv) :\n"
+        f"{signals}\n\n"
+        "Voici nos projets internes avec leur avancement :\n"
+        f"{projects}\n\n"
+        "En te basant sur ces deux listes, donne au maximum 8 recommandations "
+        "concrètes : quel signal intégrer ou améliorer dans quel projet, ou quelle "
+        "idée de nouveau projet créer pour quelle thématique. Format strict : "
+        "une puce par ligne, '- **NomProjet** : action concrète ← signal concerné'. "
+        "Réponds en français, sans préambule."
+    )
+    return ask(prompt, system="Tu es le conseiller stratégique du studio lambda-Section.")
+
+
 def post_discord(webhook: str, blocks: list[tuple[str, str]], max_chars: int) -> None:
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     ok = 0
@@ -357,7 +403,11 @@ def main() -> int:
 
     recs = build_recommendations(sections, Path(args.epingle) if args.epingle else None)
     if recs:
-        blocks.append(("[RADAR] Recommandations pour nos projets", "\n".join(recs)))
+        blocks.append(("[RADAR] Recommandations (règles)", "\n".join(recs)))
+
+    ai_analysis = ai_recommendations(sections, Path(args.epingle) if args.epingle else None)
+    if ai_analysis:
+        blocks.append(("[RADAR] Analyse IA", ai_analysis))
 
     full_report = "\n\n".join(body for _, body in blocks)
     print(full_report)
