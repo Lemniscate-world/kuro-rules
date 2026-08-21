@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """generate_portfolio.py — Generate portfolio HTML from Epingle_Projets.md.
 
 Reads Epingle_Projets.md and produces index.html for the Lemniscate-world site.
@@ -699,6 +699,26 @@ def sync_readme(sections):
         print(f"  README already in sync")
 
 
+
+def inject_analytics(html_dir):
+    """S1b: si <html_dir>/analytics.txt contient un code GoatCounter, injecte le script
+    dans chaque .html du dossier (recursif) avant </head>. Sinon: aucune trace, rien de fake."""
+    code_file = Path(html_dir) / "analytics.txt"
+    if not code_file.exists():
+        return 0
+    code = code_file.read_text(encoding="utf-8").strip()
+    if not code or not re.fullmatch(r"[A-Za-z0-9_-]+", code):
+        return 0
+    tag = f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
+    n = 0
+    for html in Path(html_dir).rglob("*.html"):
+        txt = html.read_text(encoding="utf-8")
+        if "goatcounter" in txt or "</head>" not in txt:
+            continue
+        html.write_text(txt.replace("</head>", "  " + tag + "\n</head>", 1), encoding="utf-8")
+        n += 1
+    return n
+
 def main():
     args = sys.argv[1:]
     epingle = LOCAL_EPINGLE
@@ -739,6 +759,8 @@ def main():
     if output == LOCAL_OUTPUT:
         print(f"Syncing {LOCAL_README} from Epingle...")
         sync_readme(sections)
+        n_a = inject_analytics(LOCAL_OUTPUT.parent)
+        print(f"  Analytics: {n_a} pages injectees" if n_a else "  Analytics: analytics.txt absent — skip")
 
     if output == LOCAL_OUTPUT:
         print(f"\nNext: cd ~/Documents/Lemniscate-world && git add index.html README.md && git commit -m 'sync' && git push")

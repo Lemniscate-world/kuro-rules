@@ -34,6 +34,7 @@ def parse_epingle_projects():
     """Source unique de vérité: réutilise le parser du portfolio (60 projets, pas les livrables)."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from generate_portfolio import parse_epingle
+    from generate_portfolio import inject_analytics
     sections = parse_epingle(EPINGLE)
     projs = []
     for s in sections:
@@ -213,6 +214,9 @@ def generate_daily_blog(dry_run=True):
     rss.append('</channel></rss>')
     (BLOG_DIR / "feed.xml").write_text("\n".join(rss), encoding="utf-8")
     print(f"  RSS: {BLOG_DIR / 'feed.xml'}")
+    from generate_portfolio import inject_analytics
+    _n = inject_analytics(BLOG_DIR.parent)  # racine repo: couvre index+sections+blog
+    print(f"  Analytics blog: {_n} pages" if _n else "  Analytics: absent — skip")
 
 if __name__ == "__main__":
     import argparse
