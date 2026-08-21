@@ -16,13 +16,13 @@ Usage:
   python scripts/audit_truth_daily.py --output TRUTH_DAILY.md
 """
 
-import subprocess, re, sys
+import os, subprocess, re, sys
 from pathlib import Path
 from datetime import date, datetime
 
 HOME = Path.home()
-DOCS = HOME / "Documents"
-KURORULES = DOCS / "kuro-rules"
+DOCS = Path(os.environ.get("DOCS_DIR", str(HOME / "Documents")))
+KURORULES = Path(os.environ.get("KURO_RULES_DIR", str(DOCS / "kuro-rules")))
 EPINGLE = KURORULES / "Epingle_Projets.md"
 TRUTH_REPORT = KURORULES / "TRUTH_DAILY.md"
 

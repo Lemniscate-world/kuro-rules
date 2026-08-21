@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+env:
+  KURO_RULES_DIR: ${{ github.workspace }}/kuro-rules
+  LEMNISCATE_DIR: ${{ github.workspace }}/lemniscate-world
+  DOCS_DIR: /home/runner/Documents
+
 jobs:
   truth-audit:
     runs-on: ubuntu-latest
@@ -43,7 +48,7 @@ jobs:
 
       - name: Compute realistic % (factuel)
         run: |
-          python kuro-rules/scripts/compute_progress.py --apply || true
+          python kuro-rules/scripts/compute_progress.py --apply
           echo "Epingle diff:"
           git -C kuro-rules diff --stat || true
 

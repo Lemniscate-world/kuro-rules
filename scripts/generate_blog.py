@@ -10,14 +10,15 @@ Usage:
 
 Chaque billet est 100% factuel: commit hash, date, % avant/apres, tests, loc.
 """
-import re, subprocess, json, sys
+import os, re, subprocess, json, sys
 from pathlib import Path
 from datetime import date, datetime
 
 HOME = Path.home()
-DOCS = HOME / "Documents"
-KURORULES = DOCS / "kuro-rules"
-LEMNISCATE = DOCS / "Lemniscate-world"
+# CI-overridable paths (workflow set KURO_RULES_DIR / LEMNISCATE_DIR / DOCS_DIR)
+DOCS = Path(os.environ.get("DOCS_DIR", str(HOME / "Documents")))
+KURORULES = Path(os.environ.get("KURO_RULES_DIR", str(DOCS / "kuro-rules")))
+LEMNISCATE = Path(os.environ.get("LEMNISCATE_DIR", str(DOCS / "Lemniscate-world")))
 EPINGLE = KURORULES / "Epingle_Projets.md"
 TRUTH = KURORULES / "TRUTH_DAILY.md"
 BLOG_DIR = LEMNISCATE / "blog"

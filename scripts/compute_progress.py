@@ -15,12 +15,12 @@ Usage:
   python scripts/compute_progress.py --dry-run
   python scripts/compute_progress.py --apply  # met à jour Epingle_Projets.md
 """
-import re, subprocess, sys
+import os, re, subprocess, sys
 from pathlib import Path
 
 HOME = Path.home()
-DOCS = HOME / "Documents"
-EPINGLE = HOME / "Documents" / "kuro-rules" / "Epingle_Projets.md"
+DOCS = Path(os.environ.get("DOCS_DIR", str(HOME / "Documents")))
+EPINGLE = Path(os.environ.get("KURO_RULES_DIR", str(DOCS / "kuro-rules"))) / "Epingle_Projets.md"
 
 def run(cmd, cwd=None):
     try:
