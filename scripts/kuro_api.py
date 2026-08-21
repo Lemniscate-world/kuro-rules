@@ -32,7 +32,11 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 DB_PATH = Path.home() / ".kuro" / "kuro.db"
+DASHBOARD_DIR = Path(__file__).resolve().parent.parent / "dashboard"
+STATIC_FILES = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js",
+                "/styles.css": "styles.css", "/dashboard-data.json": "dashboard-data.json"}
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(DASHBOARD_DIR))
 
 
 def db() -> sqlite3.Connection:
@@ -203,7 +207,11 @@ class Handler(BaseHTTPRequestHandler):
         qs = urllib.parse.parse_qs(parsed.query)
         path = parsed.path.rstrip("/") or "/"
         try:
-            if path == "/api/status":
+            if path == "/api/dashboard":
+                import generate_dashboard
+
+                self._json(200, generate_dashboard.build_payload())
+            elif path == "/api/status":
                 self._json(200, get_status())
             elif path == "/api/projects":
                 self._json(200, {"projects": get_projects()})
@@ -220,6 +228,22 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, {"memory": get_memory()})
             elif path == "/api/summary":
                 self._json(200, {"summary": build_summary()})
+            elif path in STATIC_FILES:
+                file_path = DASHBOARD_DIR / STATIC_FILES[path]
+                if not file_path.exists():
+                    self._json(404, {"error": "fichier introuvable"})
+                    return
+                ctype = "text/html" if file_path.suffix == ".html" else (
+                    "application/javascript" if file_path.suffix == ".js" else (
+                        "text/css" if file_path.suffix == ".css" else "application/json"
+                    )
+                )
+                body = file_path.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", f"{ctype}; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
             else:
                 self._json(404, {"error": "route inconnue"})
         except Exception as exc:

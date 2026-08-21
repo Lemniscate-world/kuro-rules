@@ -283,10 +283,19 @@ function bindSearch() {
   });
 }
 
+async function loadData() {
+  // Source live (API Kuro) puis fallback snapshot statique
+  try {
+    const live = await fetch(`/api/dashboard?ts=${Date.now()}`);
+    if (live.ok) return await live.json();
+  } catch (_) {}
+  const response = await fetch(`dashboard-data.json?ts=${Date.now()}`);
+  return await response.json();
+}
+
 async function load() {
   try {
-    const response = await fetch(`dashboard-data.json?ts=${Date.now()}`);
-    const data = await response.json();
+    const data = await loadData();
     state.data = data;
 
     document.getElementById("generated-at").textContent = `Snapshot ${formatDate(data.generatedAt)}`;
@@ -299,7 +308,11 @@ async function load() {
     renderKnowledge(data.knowledgeBase || { entries: [], counts: {} });
     renderRules(data.ruleHighlights || []);
     renderSync(data.syncLog || {}, data.kuroRulesRepo || {});
-    bindSearch();
+    if (!window.__searchBound) {
+      bindSearch();
+      window.__searchBound = true;
+    }
+    notifyNewAlerts((data.alerts || []).length);
   } catch (error) {
     document.body.innerHTML = `
       <main class="page-shell">
@@ -314,4 +327,17 @@ async function load() {
   }
 }
 
+function notifyNewAlerts(count) {
+  const last = window.__lastAlertCount;
+  window.__lastAlertCount = count;
+  if (last === undefined || count <= last) return;
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "granted") {
+    new Notification("Kuro Desk", { body: `${count - last} nouvelle(s) alerte(s) détectée(s)` });
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission();
+  }
+}
+
 load();
+setInterval(load, 60000);

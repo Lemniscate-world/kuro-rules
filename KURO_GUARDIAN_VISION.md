@@ -71,7 +71,7 @@ Le robot Kuro regarde nos repos ; le Radar regardera dehors.
 | 2 | Radar v1 : signaux HN / GitHub / arXiv hebdo | ✅ |
 | 3 | Advisor : recommandations signaux → projets (règles + IA) | ✅ |
 | 4 | **API Kuro** : `run-api.ps1` → REST localhost:8767 sur kuro.db (`/api/status`, `/api/projects/{name}`, `/api/alerts`, `/api/summary`, `POST /api/ask` = question libre au cerveau) | ✅ |
-| 5 | Fusion Desk ↔ Daemon temps réel (heatmap live, toasts) | À faire |
+| 5 | **Desk temps réel** : dashboard servi par l'API (`http://127.0.0.1:8767/`), `/api/dashboard` live, auto-refresh 60s, toast navigateur sur nouvelles alertes | ✅ |
 
 Toute session IA peut désormais interroger l'entreprise :
 `Invoke-RestMethod http://127.0.0.1:8767/api/summary` ou POST `/api/ask`.

@@ -479,7 +479,7 @@ def collect_kuro_rules_repo_state() -> dict[str, Any]:
     return snapshot
 
 
-def main() -> int:
+def build_payload() -> dict[str, Any]:
     tracked_names = parse_list_file(PROJECTS_FILE)
     tracked_lookup = {name: DOCS_DIR / name for name in tracked_names}
     git_repositories = detect_git_repositories()
@@ -501,7 +501,7 @@ def main() -> int:
     knowledge_counts = Counter(entry["kind"] for entry in knowledge_entries)
     alerts = build_alerts(tracked_projects, untracked_repositories, knowledge_entries, sync_log)
 
-    payload: dict[str, Any] = {
+    return {
         "generatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
         "workspaceRoot": str(DOCS_DIR.resolve()),
         "kuroRulesRoot": str(ROOT_DIR.resolve()),
@@ -527,6 +527,9 @@ def main() -> int:
         "kuroRulesRepo": collect_kuro_rules_repo_state(),
     }
 
+
+def main() -> int:
+    payload = build_payload()
     OUTPUT_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(f"[+] Wrote dashboard snapshot to {OUTPUT_FILE}")
     return 0
