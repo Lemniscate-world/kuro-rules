@@ -1,0 +1,109 @@
+name: Kuro
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # un seul créneau : vérité quotidienne
+  push:
+    paths:
+      - 'Epingle_Projets.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  KURO_RULES_DIR: ${{ github.workspace }}/kuro-rules
+  LEMNISCATE_DIR: ${{ github.workspace }}/lemniscate-world
+  DOCS_DIR: /home/runner/Documents
+
+jobs:
+  kuro:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kuro-rules
+        uses: actions/checkout@v4
+        with:
+          path: kuro-rules
+
+      - name: Checkout Lemniscate-world
+        uses: actions/checkout@v4
+        with:
+          repository: Lemniscate-world/Lemniscate-world
+          path: lemniscate-world
+          token: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Clone repos into ~/Documents (source de vérité)
+        env:
+          SYNC_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+        run: |
+          python kuro-rules/scripts/clone_repos_for_truth.py --token "$SYNC_TOKEN"
+          ls ~/Documents | wc -l
+
+      # --- Sentinelle CI (santé des repos) ---
+      - name: Scan CI multi-repos + bloc README
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+        run: |
+          python kuro-rules/scripts/ci_guardian.py \
+            --owners LambdaSection Lemniscate-world \
+            --output lemniscate-world/ci-status.json \
+            --readme lemniscate-world/README.md
+
+      # --- Vérité factuelle ---
+      - name: Audit truth quotidien (git log + tests)
+        run: |
+          python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md
+          cat kuro-rules/TRUTH_DAILY.md | head -n 30
+
+      - name: Progression réaliste (% factuels)
+        run: |
+          python kuro-rules/scripts/compute_progress.py --apply
+          git -C kuro-rules diff --stat || true
+
+      # --- Publication ---
+      - name: Portfolio + mondes
+        run: |
+          python kuro-rules/scripts/generate_portfolio.py \
+            --epingle kuro-rules/Epingle_Projets.md \
+            --output lemniscate-world/index.html
+
+      - name: Blog factuel
+        run: |
+          python kuro-rules/scripts/generate_blog.py --apply
+
+      - name: Gate design Impeccable (rapport séparé)
+        run: |
+          npx -y impeccable@latest detect --json lemniscate-world/index.html > lemniscate-world/design-report.json || true
+          npx -y impeccable@latest detect lemniscate-world/index.html || true
+
+      # --- Un seul commit par repo ---
+      - name: Commit kuro-rules si changements
+        run: |
+          cd kuro-rules
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add TRUTH_DAILY.md Epingle_Projets.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "kuro: audit quotidien $(date +%Y-%m-%d) [skip ci]"
+            git push
+          else
+            echo "Rien à committer"
+          fi
+
+      - name: Commit portfolio si changements
+        run: |
+          cd lemniscate-world
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html sections/ blog/ ci-status.json design-report.json README.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "kuro: publication quotidienne $(date +%Y-%m-%d) [skip ci]"
+            git push
+          else
+            echo "Rien à publier"
+          fi
