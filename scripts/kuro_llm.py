@@ -19,7 +19,7 @@ import urllib.request
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-DEFAULT_OPENROUTER_MODEL = "ox-alpha:free"
+DEFAULT_OPENROUTER_MODEL = "stealth/ox-alpha"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_OLLAMA_URL = "http://localhost:11434"
 
@@ -65,16 +65,20 @@ def _openrouter(prompt: str, system: str) -> tuple[str | None, str]:
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
             ],
-            "max_tokens": 900,
+            "max_tokens": int(os.environ.get("OPENROUTER_MAX_TOKENS", "2500")),
             "temperature": 0.3,
         },
         {"Authorization": f"Bearer {key}"},
-        timeout=90,
+        timeout=120,
     )
     if not data:
         return None, "error"
     try:
-        text = data["choices"][0]["message"]["content"]
+        msg = data["choices"][0]["message"]
+        text = (msg.get("content") or "").strip()
+        if not text:
+            # Modele de raisonnement : le contenu peut rester en 'reasoning'
+            text = (msg.get("reasoning") or "").strip()
         return (text, "ok") if text else (None, "empty")
     except Exception:
         return None, "bad-shape"
