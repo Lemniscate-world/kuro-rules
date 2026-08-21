@@ -23,7 +23,10 @@ def send(url: str, payload: dict) -> int:
         url,
         data=json.dumps(payload).encode(),
         method="POST",
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "Kuro/1.0 (lambda-Section bot)",
+        },
     )
     with urllib.request.urlopen(req, timeout=15) as resp:
         return resp.status
