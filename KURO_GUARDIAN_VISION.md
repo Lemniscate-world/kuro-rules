@@ -76,6 +76,17 @@ Le robot Kuro regarde nos repos ; le Radar regardera dehors.
 Toute session IA peut désormais interroger l'entreprise :
 `Invoke-RestMethod http://127.0.0.1:8767/api/summary` ou POST `/api/ask`.
 
+## Durcissement (2026-08-21, soir)
+
+- **Daemon réveillé** : imports `tyn`→`typing` réparés, heartbeat écrit au
+  démarrage puis toutes les 5 min (`watcher._ping`), lancement auto au login via
+  `Startup\KuroDaemon.bat`.
+- **Divergence DB↔Epingle** : section dédiée dans le rapport hebdo (>15pts).
+- **Cerveau indisponible** : alerte Discord automatique, throttlée 24h.
+- **Acquittement** : `POST /api/alerts/{id}/ack` sur l'API Kuro.
+- **Tests** : `tests/test_kuro.py` (9 tests, logique pure) exécutés par le robot
+  avant chaque cycle.
+
 ---
 **Mis à jour** : 2026-08-21 — remplace KURO_GUARDIAN_VISION.md (vision initiale,
 le daemon visé y existe désormais).

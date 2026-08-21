@@ -37,6 +37,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Tests (pytest)
+        run: |
+          python -m pip install pytest -q
+          python -m pytest tests -q
+
       - name: Clone repos into ~/Documents (source de vérité)
         env:
           SYNC_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}

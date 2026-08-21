@@ -77,6 +77,45 @@ def ci_summary(ci_status: dict | None) -> tuple[int, int, list[str]]:
     return ok, total, reds
 
 
+def db_epingle_divergence(epingle: Path) -> list[str]:
+    """Compare les % de kuro.db (daemon) vs Epingle_Projets.md (vérité portfolio)."""
+    db_path = Path.home() / ".kuro" / "kuro.db"
+    if not db_path.exists():
+        return []
+    try:
+        import sqlite3
+
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=5)
+        db_rows = {
+            r[0].lower(): r[1]
+            for r in conn.execute("SELECT lower(name), progress_pct FROM projects")
+        }
+        conn.close()
+    except Exception as exc:
+        return [f"(lecture kuro.db impossible: {exc})"]
+
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from generate_portfolio import parse_epingle
+
+        sections = parse_epingle(epingle)
+    except Exception as exc:
+        return [f"(parse Epingle impossible: {exc})"]
+
+    out = []
+    seen = set()
+    for sec in sections:
+        for p in sec["projects"]:
+            key = p["name"].lower()
+            if key in seen or key not in db_rows:
+                continue
+            seen.add(key)
+            diff = abs(db_rows[key] - p["pct"])
+            if diff >= 15:
+                out.append(f"- {p['name']}: daemon {db_rows[key]}% vs Epingle {p['pct']}% (écart {diff}pts)")
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Rapport hebdo Kuro")
     parser.add_argument("--ci-status", default=None)
@@ -102,6 +141,11 @@ def main() -> int:
     if stale:
         lines += ["", f"**Stagnation >{STALE_DAYS}j**"]
         lines += [f"- {name} ({days}j)" for name, days in stale[:10]]
+
+    divergence = db_epingle_divergence(Path(args.epingle))
+    if divergence:
+        lines += ["", "**Divergences daemon vs Epingle (>=15pts)**"]
+        lines += divergence[:10]
 
     report = "\n".join(lines)
     print(report)

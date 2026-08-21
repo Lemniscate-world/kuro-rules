@@ -14,7 +14,9 @@ Usage:
 import json
 import os
 import sys
+import time
 import urllib.request
+from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -139,6 +141,48 @@ def _ollama(prompt: str, system: str) -> tuple[str | None, str]:
     return None, last_status
 
 
+def _alert_brain_down() -> None:
+    """Discord : cerveau indisponible (1 fois / 24h max)."""
+    webhook = os.environ.get("DISCORD_WEBHOOK_URL")
+    if not webhook:
+        return
+    import tempfile
+
+    marker = Path(tempfile.gettempdir()) / "kuro_brain_alert.timestamp"
+    now = time.time()
+    try:
+        if marker.exists() and now - float(marker.read_text().strip() or 0) < 86400:
+            return
+        marker.write_text(str(now))
+    except Exception:
+        pass
+    payload = {
+        "username": "Kuro",
+        "embeds": [
+            {
+                "title": "[ALERTE] Cerveau LLM indisponible",
+                "description": "OpenRouter et Ollama cloud injoignables. "
+                "Le robot continue en mode déterministe.",
+                "color": 16098851,
+            }
+        ],
+    }
+    try:
+        req = urllib.request.Request(
+            webhook,
+            data=json.dumps(payload).encode(),
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "Kuro/1.0 (lambda-Section bot)",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=15):
+            print("kuro_llm: alerte cerveau postée")
+    except Exception as exc:
+        print(f"kuro_llm: alerte impossible ({exc})")
+
+
 def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.") -> str | None:
     """Chaîne de moteurs : OpenRouter cloud d'abord, Ollama cloud en fallback."""
     text, status = _openrouter(prompt, system)
@@ -152,6 +196,7 @@ def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.")
         print("kuro_llm: fallback ollama cloud ok")
         return text
     print(f"kuro_llm: ollama cloud indisponible ({status})")
+    _alert_brain_down()
     return None
 
 

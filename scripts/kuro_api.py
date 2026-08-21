@@ -253,19 +253,41 @@ class Handler(BaseHTTPRequestHandler):
         if not self._auth_ok():
             self._json(401, {"error": "unauthorized"})
             return
-        if self.path.rstrip("/") != "/api/ask":
-            self._json(404, {"error": "route inconnue (POST /api/ask seulement)"})
+        path = self.path.rstrip("/")
+        if path == "/api/ask":
+            try:
+                length = int(self.headers.get("Content-Length", 0))
+                data = json.loads(self.rfile.read(length).decode("utf-8"))
+                question = (data.get("question") or "").strip()
+                if not question:
+                    self._json(400, {"error": "question vide"})
+                    return
+                self._json(200, answer_question(question))
+            except Exception as exc:
+                self._json(500, {"error": str(exc)})
             return
-        try:
-            length = int(self.headers.get("Content-Length", 0))
-            data = json.loads(self.rfile.read(length).decode("utf-8"))
-            question = (data.get("question") or "").strip()
-            if not question:
-                self._json(400, {"error": "question vide"})
+        if path.startswith("/api/alerts/") and path.endswith("/ack"):
+            parts = path.split("/")
+            if len(parts) != 4 or not parts[3].isdigit():
+                self._json(400, {"error": "attendu: POST /api/alerts/{id}/ack"})
                 return
-            self._json(200, answer_question(question))
-        except Exception as exc:
-            self._json(500, {"error": str(exc)})
+            alert_id = int(parts[3])
+            try:
+                conn = sqlite3.connect(DB_PATH, timeout=5)
+                with conn:
+                    cur = conn.execute(
+                        "UPDATE alerts SET acknowledged = 1 WHERE id = ?", (alert_id,)
+                    )
+                    updated = cur.rowcount
+                conn.close()
+                if updated:
+                    self._json(200, {"acknowledged": alert_id})
+                else:
+                    self._json(404, {"error": f"alerte {alert_id} inconnue"})
+            except Exception as exc:
+                self._json(500, {"error": str(exc)})
+            return
+        self._json(404, {"error": "route inconnue (POST /api/ask ou /api/alerts/{id}/ack)"})
 
     def log_message(self, fmt, *args):  # silence les logs d'accès
         pass
