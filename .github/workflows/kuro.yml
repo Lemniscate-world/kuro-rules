@@ -61,6 +61,19 @@ jobs:
           python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md
           cat kuro-rules/TRUTH_DAILY.md | head -n 30
 
+      - name: Kuro Radar (veille net, lundi uniquement)
+        if: github.event_name == 'schedule'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then
+            python kuro-rules/scripts/kuro_radar.py \
+              --append-truth kuro-rules/TRUTH_DAILY.md
+          else
+            echo "Pas lundi - radar saute"
+          fi
+
       - name: Progression réaliste (% factuels)
         run: |
           python kuro-rules/scripts/compute_progress.py --apply
