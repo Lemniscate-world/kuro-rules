@@ -27,7 +27,7 @@ Chaîne de moteurs (`scripts/kuro_llm.py`, zéro dépendance) :
 | 2 | **Ollama cloud** — uniquement modèles `:cloud`, auto-sélection avec fallback (403 abonnement / 410 retirés sautés). Actuel : `minimax-m3:cloud` | ✅ Fallback actif, gratuit sur le compte |
 
 Consommateurs : Advisor du Radar (analyse signaux → projets), diagnostic IA des
-issues Sentinel. Sans moteur disponible, tout reste déterministe (jamais de blocage).
+issues Sentinel, endpoint `/api/ask` de l'API. Sans moteur, tout reste déterministe.
 
 **Limite connue** : le robot distant (GitHub-hosted runner) n'a pas accès au daemon
 Ollama local -> il tourne en mode déterministe en CI. Pour un cerveau en CI :
@@ -67,10 +67,14 @@ Le robot Kuro regarde nos repos ; le Radar regardera dehors.
 | Phase | Contenu | Statut |
 |---|---|---|
 | 0 | Normes + robot Kuro unique + Daemon local + Desk | ✅ |
-| 1 | Fusion Desk ↔ Daemon : le dashboard lit kuro.db en temps réel, alertes toast | À faire |
-| 2 | Radar v1 : harvest hebdo + rapport signaux (R69/R75) | À faire |
-| 3 | Radar v2 : propositions de repos/solutions auto-issues | À faire |
-| 4 | API Kuro (REST local) pour que tout agent IA interroge l'état de l'entreprise | À faire |
+| 1 | Alertes Discord + rapport hebdo consolidé | ✅ |
+| 2 | Radar v1 : signaux HN / GitHub / arXiv hebdo | ✅ |
+| 3 | Advisor : recommandations signaux → projets (règles + IA) | ✅ |
+| 4 | **API Kuro** : `run-api.ps1` → REST localhost:8767 sur kuro.db (`/api/status`, `/api/projects/{name}`, `/api/alerts`, `/api/summary`, `POST /api/ask` = question libre au cerveau) | ✅ |
+| 5 | Fusion Desk ↔ Daemon temps réel (heatmap live, toasts) | À faire |
+
+Toute session IA peut désormais interroger l'entreprise :
+`Invoke-RestMethod http://127.0.0.1:8767/api/summary` ou POST `/api/ask`.
 
 ---
 **Mis à jour** : 2026-08-21 — remplace KURO_GUARDIAN_VISION.md (vision initiale,
