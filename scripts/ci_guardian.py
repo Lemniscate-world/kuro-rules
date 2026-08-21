@@ -194,7 +194,7 @@ def remediate(repo: str, run: dict, token: str | None, dry_run: bool) -> dict:
         return action
     existing = find_open_issue(repo, name, token)
     if existing:
-        ok = comment_issue(repo, existing, f"Nouvel échec confirmé ({attempt} tentatives): {run_url}")
+        ok = comment_issue(repo, existing, f"Nouvel échec confirmé ({attempt} tentatives): {run_url}", token)
         action.update(
             action="issue_updated" if ok else "comment_failed",
             detail=f"issue #{existing} mise à jour",
