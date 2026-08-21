@@ -2,7 +2,8 @@ name: Truth Daily — Audit factuel + Portfolio
 
 on:
   schedule:
-    - cron: "0 5 * * *"  # 05:00 UTC = 06:00 Paris, quotidien
+    - cron: "0 5 * * *"    # 05:00 UTC — créneau principal
+    - cron: "20 5 * * *"   # 05:20 UTC — redondance (GitHub peut décaler/sauter un créneau en charge)
   workflow_dispatch:
 
 permissions:
