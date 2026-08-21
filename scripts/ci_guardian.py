@@ -34,6 +34,8 @@ GUARDIAN_LABEL = "ci-guardian"
 DEFAULT_OWNERS = ["LambdaSection", "Lemniscate-world"]
 START_MARK = "<!-- CI-GUARDIAN:START"
 END_MARK = "<!-- CI-GUARDIAN:END -->"
+# Runs plus vieux que ça = fantômes (workflow supprimé ou logs expirés) -> ignorés
+RUN_MAX_AGE_DAYS = int(os.environ.get("KURO_RUN_MAX_AGE_DAYS", "45"))
 
 
 def api(method: str, path: str, token: str | None = None, payload: dict | None = None) -> tuple[int, dict | list | None]:
@@ -90,8 +92,17 @@ def default_branch(repo: str, token: str | None) -> str | None:
     return data.get("default_branch")
 
 
+def run_age_days(run: dict) -> int:
+    stamp = run.get("created_at") or ""
+    try:
+        dt = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+        return (datetime.now(timezone.utc) - dt).days
+    except Exception:
+        return 0
+
+
 def latest_workflow_runs(repo: str, token: str | None) -> list[dict]:
-    """Dernier run par workflow, branche par défaut uniquement."""
+    """Dernier run par workflow, branche par défaut, fantômes anciens exclus."""
     branch = default_branch(repo, token)
     if not branch:
         return []
@@ -101,6 +112,8 @@ def latest_workflow_runs(repo: str, token: str | None) -> list[dict]:
     latest: dict[str, dict] = {}
     for run in data.get("workflow_runs", []):
         if run.get("head_branch") != branch:
+            continue
+        if run_age_days(run) > RUN_MAX_AGE_DAYS:
             continue
         name = run.get("name") or "unknown"
         current = latest.get(name)
