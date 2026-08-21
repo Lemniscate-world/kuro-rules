@@ -63,68 +63,48 @@ def collect(project_name):
             loc += len(pf.read_text(encoding="utf-8", errors="ignore").splitlines())
         except:
             pass
-    return {"last_date": last_date, "c30": c30, "dirty": dirty, "tfuncs": tfuncs, "loc": loc, "path": cand}
+    # test files (py + ts/js, quick)
+    test_files = list(cand.rglob("test*.py")) + list(cand.rglob("*_test.py"))
+    test_files += list(cand.rglob("test*.ts")) + list(cand.rglob("*.test.ts")) + list(cand.rglob("*.spec.ts"))
+    tfiles = len([p for p in test_files if "venv" not in str(p) and "node_modules" not in str(p) and ".git" not in str(p)][:200])
+    return {"last_date": last_date, "c30": c30, "dirty": dirty, "tfuncs": 0, "loc": loc, "test_files": tfiles, "path": cand}
+
 
 def compute_pct(status, cur_pct, facts):
-    """Realiste: part de cur_pct et ajuste avec delta factuel (R3 pessimiste modere)."""
+    """Cible ABSOLUE depuis les faits, puis pas borne (converge, ne derive jamais).
+    score = base(statut) + min(30, c30*3) + min(20, test_files*2) + recence + dirty
+    Pas: +5/j max vers le haut, -10/j max vers le bas; |ecart|<3 -> stable."""
     s = status.lower()
     if "archive" in s:
         return 0
     if not facts:
         return cur_pct
-    delta = 0
-    # Recence
+    base = 25 if "actif" in s else 20 if "validation" in s else 10 if "proto" in s else 5
+    c30 = facts.get("c30", 0) or 0
+    tfiles = facts.get("test_files", 0) or 0
+    score = base + min(30, c30 * 3) + min(20, tfiles * 2)
     from datetime import date
     try:
-        last = facts.get("last_date","")
-        if last and len(last) >= 10:
-            ld = date.fromisoformat(last[:10])
-            days = (date.today() - ld).days
-            if days <= 7:
-                delta += 3
-            elif days <= 30:
-                delta += 1
-            elif days <= 60:
-                delta += 0
-            elif days <= 90:
-                delta -= 8
-            else:
-                delta -= 12
-        else:
-            delta -= 5
-    except:
-        delta -= 3
-    # Activite 30j
-    c30 = facts.get("c30",0)
-    if c30 == 0 and "actif" in s:
-        delta -= 6
-    elif c30 >= 10:
-        delta += 3
-    elif c30 >= 3:
-        delta += 1
-    # Dirty
+        last = facts.get("last_date", "")
+        days = (date.today() - date.fromisoformat(last[:10])).days if last and len(last) >= 10 else 999
+    except Exception:
+        days = 999
+    if days <= 7: score += 10
+    elif days <= 30: score += 7
+    elif days <= 60: score += 3
+    elif days <= 90: score -= 5
+    else: score -= 15
     if facts.get("dirty"):
-        delta -= 3
-    # Tests vs status
-    tfuncs = facts.get("tfuncs",0)
-    tf = facts.get("test_files",0)
-    # Si Actif mais 0 tests et pas de loc, penalite
-    if "actif" in s and tf == 0 and tfuncs == 0:
-        # check loc
-        if facts.get("loc",0) < 500:
-            delta -= 4
-    # R3 pessimiste: leger -2
-    delta -= 2
-    new_pct = cur_pct + delta
-    # Borne 0-95, jamais 100 sans tag
-    new_pct = max(0, min(95, new_pct))
-    # Si Actif et new_pct <10, plancher 10
-    if "actif" in s and new_pct < 10:
-        new_pct = 10
-    # Si ecart faible (<3), garde cur pour stabilite
-    if abs(new_pct - cur_pct) < 3:
+        score -= 3
+    target = max(0, min(95, score))
+    step = target - cur_pct
+    if abs(step) < 3:
         return cur_pct
-    return new_pct
+    step = max(-10, min(5, step))
+    new = cur_pct + step
+    if "actif" in s and new < 10:
+        new = 10
+    return new
 
 def main():
     import argparse
