@@ -144,9 +144,10 @@ def find_open_issue(repo: str, workflow: str, token: str | None) -> int | None:
     )
     if status != 200 or not isinstance(data, list):
         return None
-    prefix = f"[CI Guardian] {workflow}"
+    prefixes = (f"[Kuro Sentinel] {workflow}", f"[CI Guardian] {workflow}")
     for issue in data:
-        if issue.get("title", "").startswith(prefix) and "pull_request" not in issue:
+        title = issue.get("title", "")
+        if any(title.startswith(p) for p in prefixes) and "pull_request" not in issue:
             return issue.get("number")
     return None
 
@@ -177,7 +178,7 @@ def remediate(repo: str, run: dict, token: str | None, dry_run: bool) -> dict:
             detail=f"relance impossible (run {run_id}) — escalade en issue de suivi",
         )
 
-    title = f"[CI Guardian] {name} en échec persistant"
+    title = f"[Kuro Sentinel] {name} en échec persistant"
     body = (
         f"Le workflow **{name}** du repo `{repo}` échoue de façon persistante.\n\n"
         f"- Run: {run_url}\n"
@@ -248,14 +249,12 @@ def guard(repos: list[str], token: str | None, dry_run: bool) -> dict:
 def readme_block(report: dict) -> str:
     total_wf = sum(len(r["workflows"]) for r in report["repos"])
     ok_wf = sum(1 for r in report["repos"] for w in r["workflows"] if w["conclusion"] == "success")
-    overall = report["overall"]
-    dot = "🟢" if overall == "green" else "🔴"
     lines = [
         f"{START_MARK} auto-généré par kuro-rules/ci_guardian.py — ne pas éditer",
         "",
-        f"## {dot} CI Guardian — Santé des repos",
+        "## Intégration continue — état des repos",
         "",
-        f"Scan du {report['generated_at']} · **{ok_wf}/{total_wf} workflows verts** · "
+        f"Scan du {report['generated_at']} · **{ok_wf}/{total_wf} checks verts** · "
         f"{len(report['no_ci'])} repo(s) sans CI · "
         f"[Dashboard](https://lemniscate-world.github.io/Lemniscate-world/)",
         "",

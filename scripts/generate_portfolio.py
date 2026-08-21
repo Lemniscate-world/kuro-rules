@@ -13,7 +13,7 @@ Defaults (local workstation):
 On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
-import re, sys, subprocess, os
+import re, sys, subprocess, os, json
 from datetime import date
 from pathlib import Path
 
@@ -78,6 +78,11 @@ CSS = """\
   .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
   .footer a:hover { border-bottom-color: var(--ink); }
   a { color: inherit; }
+  .quickstarts { margin: 0.4rem 0 1.2rem; }
+  .quickstart { border: 1px solid var(--hair); border-left: 3px solid var(--ink); padding: 0.6rem 0.9rem; margin-bottom: 0.5rem; font-family: var(--mono); font-size: 0.78rem; background: var(--zebra); }
+  .quickstart .qs-title { display: block; color: var(--muted); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .quickstart a { color: var(--ink); border-bottom: 1px solid var(--hair); }
+  .quickstart a:hover { border-bottom-color: var(--ink); }
   @media (max-width: 700px) { .proj-desc { display: none; } td { padding: 0.5rem 0.4rem; } }
 """
 
@@ -230,6 +235,47 @@ def project_url(name, section_name=""):
     return f"https://github.com/search?q={name}+user%3ALemniscate-world+user%3ALambdaSection&type=repositories"
 
 
+def load_ci_status(output_path):
+    """Read ci-status.json (Kuro Sentinel) next to the generated index.html, if present."""
+    path = Path(output_path).parent / "ci-status.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def ci_panel_html(ci):
+    """Render the CI status panel from ci-status.json — neutral naming, ledger style."""
+    if not ci:
+        return []
+    overall = ci.get("overall", "green")
+    repos = [r for r in ci.get("repos", []) if r.get("health") != "no_ci"]
+    if not repos:
+        return []
+    total_wf = sum(len(r["workflows"]) for r in repos)
+    ok_wf = sum(1 for r in repos for w in r["workflows"] if w["conclusion"] == "success")
+    state = "tous les checks passent" if overall == "green" else f"{total_wf - ok_wf} check(s) en échec"
+    lines = []
+    lines.append('<div class="ci-box">')
+    lines.append('  <p class="ci-head">Intégration continue</p>')
+    lines.append(f'  <p>Relevé du {ci.get("generated_at", "")[:10]} · <span class="ok">{ok_wf}/{total_wf} checks verts</span> · {state}</p>')
+    for r in repos:
+        failing = [w["name"] for w in r["workflows"] if w["conclusion"] == "failure"]
+        mark = "✓" if r["health"] == "green" else "✕"
+        cls = "ok" if r["health"] == "green" else ""
+        detail = ", ".join(failing) if failing else f"{len(r['workflows'])} checks"
+        actions_url = f"https://github.com/{r['name']}/actions"
+        lines.append(
+            f'  <p><span class="{cls}">{mark}</span> <a href="{actions_url}" target="_blank" rel="noopener">{r["name"]}</a> — {detail}</p>'
+        )
+    no_ci = ci.get("no_ci", [])
+    if no_ci:
+        lines.append(f'  <p>{len(no_ci)} repo(s) sans CI (forks, archives)</p>')
+    lines.append('</div>')
+    lines.append('')
+    return lines
+
+
 def generate(sections, output_path, updated_date):
     """Generate the portfolio HTML."""
     # Compute stats
@@ -256,6 +302,10 @@ def generate(sections, output_path, updated_date):
     lines.append(f'<meta property="og:description" content="{total} projets · {n_sections} sections actives · Registre factuel auto-genere">')
     lines.append('<meta property="og:type" content="website">')
     lines.append('<meta property="og:url" content="https://lemniscate-world.github.io/Lemniscate-world/">')
+    lines.append('<meta property="og:image" content="https://lemniscate-world.github.io/Lemniscate-world/assets/og.png">')
+    lines.append('<meta property="og:image:width" content="1200">')
+    lines.append('<meta property="og:image:height" content="630">')
+    lines.append('<meta name="twitter:card" content="summary_large_image">')
     lines.append(f'<style>{CSS}</style>')
     lines.append('</head>')
     lines.append('<body>')
@@ -279,6 +329,7 @@ def generate(sections, output_path, updated_date):
     lines.append('</div>')
     lines.append(f'<p class="colophon" style="margin:0.7rem 0 1.6rem;">Relevé du {updated_date} · <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">source : Epingle_Projets.md</a> · <a href="https://github.com/Lemniscate-world/Lemniscate-world">profil GitHub</a> · <a href="blog/">blog</a> · <a href="sections/">mondes</a></p>')
     lines.append('')
+    lines.extend(ci_panel_html(load_ci_status(output_path)))
     # Filter + nav
     # Build nav anchors
     nav_links = []
@@ -294,6 +345,15 @@ def generate(sections, output_path, updated_date):
         lines.append('<nav class="index-nav">' + '<span class="sep">/</span>'.join(nav_links) + '</nav>')
         lines.append('')
     lines.append('<div class="toolbar"><div class="filter"><input type="text" id="filter" placeholder="Filtrer par nom, statut, description..." oninput="filterProjects(this.value)"></div><span class="colophon">' + str(total) + ' lignes</span></div>')
+    # Utilite immediate (DESIGN.md: Quoi, prouve comment, je l'essaie comment ?)
+    lines.append('<div class="quickstarts">')
+    lines.append('  <div class="quickstart"><span class="qs-title">NeuralDBG v1.3 — debugger causal PyTorch · PyPI</span>')
+    lines.append('    <code>pip install neuraldbg</code> &nbsp; <a href="https://pypi.org/project/neuraldbg/">PyPI</a> · <a href="https://github.com/LambdaSection/NeuralDBG">source</a>')
+    lines.append('  </div>')
+    lines.append('  <div class="quickstart"><span class="qs-title">LifeTrack v0.3.2 — habit tracker desktop (Tauri)</span>')
+    lines.append('    <a href="https://github.com/Lemniscate-world/LifeTrack/releases">Telecharger (Windows MSI/NSIS)</a> · <a href="https://github.com/Lemniscate-world/LifeTrack">source</a>')
+    lines.append('  </div>')
+    lines.append('</div>')
     lines.append('')
 
     sec_no = 0
@@ -350,6 +410,35 @@ def generate(sections, output_path, updated_date):
     lines.append('</html>')
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    # SEO: sitemap + robots (S1)
+    try:
+        base = "https://lemniscate-world.github.io/Lemniscate-world/"
+        sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+        sm.append(f'<url><loc>{base}</loc></url>')
+        sm.append(f'<url><loc>{base}sections/</loc></url>')
+        sm.append(f'<url><loc>{base}blog/</loc></url>')
+        for s_ in sections:
+            if not s_["projects"]:
+                continue
+            import re as _re
+            m_ = _re.search(r'section-(\d+)', s_["name"].lower())
+            sid_ = m_.group(1) if m_ else ("tiers" if "tiers" in s_["name"].lower() else None)
+            if sid_:
+                sm.append(f'<url><loc>{base}sections/s-{sid_}/</loc></url>')
+        sm.append('</urlset>')
+        output_path.parent.joinpath("sitemap.xml").write_text("\n".join(sm), encoding="utf-8")
+        output_path.parent.joinpath("robots.txt").write_text(
+            "User-agent: *\nAllow: /\nSitemap: " + base + "sitemap.xml\n", encoding="utf-8")
+        # og:image (Pillow optionnel)
+        try:
+            import subprocess as _sp
+            g = Path(__file__).resolve().parent / "gen_og_image.py"
+            _sp.run(["python", str(g), "--out", str(output_path.parent / "assets" / "og.png")], timeout=60)
+        except Exception:
+            pass
+    except Exception:
+        pass
 
     # Generate per-section worlds (distinct design per S-*)
     generate_section_worlds(sections, updated_date, output_path.parent)
