@@ -37,3 +37,10 @@ Choisir UN langage par produit (matrice R109.1), le déclarer dans son DESIGN.md
 - A11y comportementale vient de Radix : ne pas remplacer un Dialog par une div.
 - Thème = CSS variables sur `:root/.dark` ; éditer les variables, pas les composants.
 - Fork autorisé quand les variants ne couvrent pas ; wrapper interdit.
+
+## Immersif 3D — Three.js / React-Three-Fiber
+- Ce n'est PAS un design system : c'est une couche de rendu au service du langage choisi.
+- Usage légitime : mondes éditoriaux (sections λ), data-viz spatiale, démos hardware.
+- Garde-fous R109 : fallback statique si WebGL absent · scène figée sous
+  `prefers-reduced-motion` · LCP < 2.5s (lazy-load la scène) · aucune info portée
+  uniquement par le mouvement · contraste texte/3D vérifié comme toute paire sémantique.

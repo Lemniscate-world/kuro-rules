@@ -59,6 +59,13 @@ inter-produits vient du socle R109.2, pas d'un copier-coller visuel.
 - Theming agentic (3 tiers, thèmes frères, forced-colors) :
   https://agenticdevelopercookbook.com/guidelines/implementing/ui/theming-with-tokens
 
+- Build in Public Guide (partager / ne pas partager) — voir R110.8
+- Three.js / React-Three-Fiber (3D web immersive) : https://threejs.org · https://r3f.docs.pmnd.rs
+  Réservé aux surfaces où la 3D sert le produit (mondes éditoriaux, data-viz spatiale,
+  démos hardware). Garde-fous obligatoires : fallback statique sans WebGL,
+  `prefers-reduced-motion` respecté (scène figée), budget perf (LCP < 2.5s),
+  aucune information portée uniquement par le mouvement.
+
 ## R109.4 — Workflow agent obligatoire
 
 1. Lire le `DESIGN.md` du produit (ou le créer selon R109.1) AVANT toute UI.
