@@ -288,12 +288,21 @@ namespace KuroPulse
         {
             var dot = s.Overall == "green" ? Palette.Green
                     : s.Overall == "red" ? Palette.Red : (Color?)Palette.Muted;
+            // GDI : ne jamais disposer une icône encore référencée par le tray.
+            // On garde la précédente vivante et on ne libère que celle d'avant.
+            var newIcon = Icon.FromHandle(Palette.Logo(16, dot).GetHicon());
             var old = _tray.Icon;
-            _tray.Icon = Icon.FromHandle(Palette.Logo(16, dot).GetHicon());
-            try { old.Dispose(); } catch { }
+            _prevIcon = _tray.Icon;
+            _tray.Icon = newIcon;
+            try { if (_prevOld != null) _prevOld.Dispose(); } catch { }
+            _prevOld = old;
+
             _tray.Text = string.Format("CI {0} | cerveau {1} | daemon {2}",
                 s.Overall, s.Engine, s.DaemonTs);
         }
+
+        private Icon _prevIcon;
+        private Icon _prevOld;
 
         private void FetchState(bool manual)
         {
