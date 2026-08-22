@@ -7,9 +7,9 @@
 |--------|---------------|---------|-------|-----|-----|-------|
 | **Helium** | 2026-08-21 `0430af5` feat(S1): CLI polish R9 compliant - no emojis, col | main | 0 (0 funcs) | 0 | 5 |  |
 | **Metatron** | 2026-08-21 `9db1875` chore: retrait GAD.md (retire du systeme Kuro) | main | 0 (0 funcs) | 0 | 1 |  |
-| **NeuralDBG** | 2026-08-21 `6c21124` chore(quality): P0.4-P0.6 README quickstart UX fix | main | 0 (0 funcs) | 0 | 14 |  |
+| **NeuralDBG** | 2026-08-21 `6c21124` chore(quality): P0.4-P0.6 README quickstart UX fix | main | 0 (0 funcs) | 0 | 13 |  |
 | **Neural-Agent** | 2026-08-08 `b5df6e1` model: v5 LoRA adapter retrained (93.7%) | master | 0 (0 funcs) | 0 | 2 |  |
-| **LifeTrack** | 2026-08-02 `98481cc` feat: adaptive challenges + local psychoanalysis + | master | 0 (0 funcs) | 0 | 35 |  |
+| **LifeTrack** | 2026-08-02 `98481cc` feat: adaptive challenges + local psychoanalysis + | master | 0 (0 funcs) | 0 | 31 |  |
 | **Aquarium** | 2026-07-19 `06db523` chore: gitignore private files (R76 compliance) | main | 0 (0 funcs) | 0 | 0 |  |
 | **NeuralDBG-Engine** | 2026-07-05 `a9d6b6e` docs: fix license from Proprietary to MIT | master | 0 (0 funcs) | 0 | 0 |  |
 | **TokenWise** | 2026-05-17 `0869408` fix: Replace Unicode arrow with ASCII for Windows  | master | 0 (0 funcs) | 0 | 0 |  |
@@ -36,4 +36,4 @@
 - **TokenWise** `0%` mais 0 commit 30j (dernier 2026-05-17) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-22T05:16:27.378617 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-22T10:34:26.256609 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
