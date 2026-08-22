@@ -40,7 +40,7 @@
 |--------|-------------|--------|-------------|
 | **NeuralDBG** |  82%  | Actif | Debugger causal pour PyTorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 PRs upstream (BUG-002 varlen_attn, BUG-006 svdvals, BUG-008 normalize). PR Gate system déployé (6 gates). v1.3.2 sur PyPI. Engine 45 tests. Neural-Agent pipeline CPU validé. Merge rate upstream: 0% — objectif: 1ère PR mergée. |
 | **NeuralDBG-Engine** |  42%  | Actif | Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. |
-| **Neural-Agent** |  50%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
+| **Neural-Agent** |  55%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
 | **Aladin** | 40% | Actif | Architecture Transformer & recherche LLM. |
 | **Astral** |  15%  | Actif | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
 | **DataLint** |  15%  | Actif | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
@@ -48,7 +48,7 @@
 | **NeuroDose** |  15%  | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
 | **Aquarium** |  10%  | Prototypage | IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. |
 | **Damon** | 0% | Nouveau | OS Amélioré basé sur Arch Linux. |
-| **Metatron** | 0% | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
+| **Metatron** |  5%  | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
 | **TokenWise** | 0% | Prototypage | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
 | **Prompt2Model** | 0% | Validation | Génération automatique de modèles ML à partir de descriptions textuelles. Phase validation Mom Test. |
 | **Automatons** | 0% | Prototypage | Agent orchestration and automation framework. |
