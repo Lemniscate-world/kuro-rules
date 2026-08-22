@@ -1,12 +1,15 @@
 // KuroPulse — application tray native (gitify-like) pour l'intelligence d'entreprise Kuro.
 // Compile avec le csc.exe inclus dans Windows (.NET Framework 4.x), zéro dépendance runtime.
-// UI : langage Primer devtool (R109) — fond sombre, mono pour les données.
+// UI : langage Primer devtool (R109) — fond sombre, cartes, mono pour les données.
 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -45,9 +48,77 @@ namespace KuroPulse
         }
     }
 
+    // ---------- palette Primer-dark (R109) ----------
+
+    internal static class Palette
+    {
+        public static readonly Color Bg = Color.FromArgb(13, 17, 23);
+        public static readonly Color Card = Color.FromArgb(22, 27, 34);
+        public static readonly Color Border = Color.FromArgb(48, 54, 61);
+        public static readonly Color Ink = Color.FromArgb(201, 209, 217);
+        public static readonly Color Muted = Color.FromArgb(139, 148, 158);
+        public static readonly Color Green = Color.FromArgb(63, 185, 80);
+        public static readonly Color Red = Color.FromArgb(248, 81, 73);
+        public static readonly Color Accent = Color.FromArgb(88, 166, 255);
+
+        public static Bitmap Logo(int size, Color? dotColor)
+        {
+            var bmp = new Bitmap(size, size);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                g.Clear(Color.Transparent);
+
+                var r = size * 0.22f;
+                using (var path = RoundedRect(new RectangleF(1, 1, size - 2, size - 2), r))
+                using (var bg = new SolidBrush(Bg))
+                using (var pen = new Pen(Border, Math.Max(1f, size / 42f)))
+                    { g.FillPath(bg, path); g.DrawPath(pen, path); }
+
+                using (var font = new Font("Segoe UI Symbol", size * 0.55f, FontStyle.Bold, GraphicsUnit.Pixel))
+                using (var accent = new SolidBrush(Accent))
+                using (var fmt = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                })
+                {
+                    var box = new RectangleF(0, -size * 0.05f, size, size * 1.05f);
+                    g.DrawString(((char)0x03BB).ToString(), font, accent, box, fmt);
+                }
+
+                if (dotColor.HasValue)
+                {
+                    var d = size * 0.20f;
+                    using (var dotBg = new SolidBrush(Bg))
+                    using (var dot = new SolidBrush(dotColor.Value))
+                    {
+                        g.FillEllipse(dotBg, size - d * 1.6f - 1, size - d * 1.6f - 1, d * 1.6f + 2, d * 1.6f + 2);
+                        g.FillEllipse(dot, size - d * 1.4f - 1, size - d * 1.4f - 1, d * 1.4f, d * 1.4f);
+                    }
+                }
+            }
+            return bmp;
+        }
+
+        private static GraphicsPath RoundedRect(RectangleF rect, float radius)
+        {
+            var path = new GraphicsPath();
+            var d = radius * 2;
+            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
+    }
+
+    // ---------- données ----------
+
     internal class RobotState
     {
-        public bool Ok;
         public string Overall = "unknown";
         public string Engine = "déterministe";
         public string DaemonTs = "?";
@@ -61,19 +132,23 @@ namespace KuroPulse
         public string Health;
         public int ChecksOk;
         public int ChecksTotal;
-        public List<string> Failing;
+        public List<string> Failing = new List<string>();
     }
+
+    // ---------- tray ----------
 
     internal class TrayContext : ApplicationContext
     {
         private const string ApiBase = "http://127.0.0.1:8767";
         private const string KuroRoot = @"C:\Users\Utilisateur\Documents\kuro-rules";
 
+        [DllImport("dwmapi.dll")]
+        private static extern void DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
+
         private readonly NotifyIcon _tray;
         private KuroPanel _panel;
         private RobotState _last = new RobotState();
         private string _lastOverall;
-        private int _lastActionCount = -1;
         private DateTime _lastApiStart = DateTime.MinValue;
 
         public TrayContext()
@@ -82,7 +157,7 @@ namespace KuroPulse
 
             _tray = new NotifyIcon
             {
-                Icon = MakeIcon(Color.Gray),
+                Icon = Icon.FromHandle(Palette.Logo(16, null).GetHicon()),
                 Text = "KuroPulse : connexion...",
                 Visible = true
             };
@@ -106,16 +181,12 @@ namespace KuroPulse
             FetchState(false);
         }
 
-        // ---------- réseau ----------
-
         private void EnsureApi()
         {
             try
             {
                 using (var wc = new WebClient())
-                {
                     wc.DownloadString(ApiBase + "/api/status");
-                }
             }
             catch
             {
@@ -137,17 +208,14 @@ namespace KuroPulse
             using (var wc = new WebClient())
             {
                 wc.Headers["User-Agent"] = "KuroPulse/1.0";
-                var json = wc.DownloadString(ApiBase + "/api/robot?ts=" +
-                                             DateTime.UtcNow.Ticks);
+                var json = wc.DownloadString(ApiBase + "/api/robot?ts=" + DateTime.UtcNow.Ticks);
                 var ser = new JavaScriptSerializer { MaxJsonLength = 1 << 26 };
                 var data = ser.Deserialize<Dictionary<string, object>>(json);
 
-                var state = new RobotState { Ok = true };
+                var state = new RobotState();
                 object tmp;
                 if (data.TryGetValue("ci_overall", out tmp) && tmp != null)
-                {
                     state.Overall = tmp.ToString();
-                }
 
                 if (data.TryGetValue("llm_engine", out tmp) && tmp != null)
                     state.Engine = tmp.ToString();
@@ -160,17 +228,14 @@ namespace KuroPulse
                 }
 
                 if (data.TryGetValue("actions_tail", out tmp) && tmp != null)
-                {
                     foreach (var a in (System.Collections.IEnumerable)tmp)
                     {
                         var line = Clean(a.ToString());
-                        if (!line.StartsWith("scan") && !line.Contains("| scan "))
+                        if (!line.Contains("| scan "))
                             state.Actions.Add(line);
                     }
-                }
 
                 if (data.TryGetValue("repos", out tmp) && tmp != null)
-                {
                     foreach (var r in (System.Collections.IEnumerable)tmp)
                     {
                         var rd = r as Dictionary<string, object>;
@@ -180,16 +245,15 @@ namespace KuroPulse
                             Name = Str(rd, "name"),
                             Health = Str(rd, "health"),
                             ChecksOk = Int(rd, "checks_ok"),
-                            ChecksTotal = Int(rd, "checks_total")
+                            ChecksTotal = Int(rd, "checks_total"),
+                            Failing = new List<string>()
                         };
-                        row.Failing = new List<string>();
                         object fails;
                         if (rd.TryGetValue("failing", out fails) && fails != null)
                             foreach (var f in (System.Collections.IEnumerable)fails)
                                 row.Failing.Add(f.ToString());
                         state.Repos.Add(row);
                     }
-                }
                 return state;
             }
         }
@@ -220,7 +284,16 @@ namespace KuroPulse
                    .Replace("| issue (dry-run)", "| issue");
         }
 
-        // ---------- cycle principal ----------
+        private void SetTray(RobotState s)
+        {
+            var dot = s.Overall == "green" ? Palette.Green
+                    : s.Overall == "red" ? Palette.Red : (Color?)Palette.Muted;
+            var old = _tray.Icon;
+            _tray.Icon = Icon.FromHandle(Palette.Logo(16, dot).GetHicon());
+            try { old.Dispose(); } catch { }
+            _tray.Text = string.Format("CI {0} | cerveau {1} | daemon {2}",
+                s.Overall, s.Engine, s.DaemonTs);
+        }
 
         private void FetchState(bool manual)
         {
@@ -228,25 +301,16 @@ namespace KuroPulse
             try { state = Fetch(); }
             catch
             {
-                _tray.Icon = MakeIcon(Color.Gray);
+                SetTray(new RobotState { Overall = "unknown" });
                 _tray.Text = "KuroPulse : API injoignable";
-                if (_panel != null && !_panel.IsDisposed)
-                    _panel.UpdateError();
+                if (_panel != null && !_panel.IsDisposed) _panel.UpdateError();
                 return;
             }
 
-            var previous = _last;
-            _last = state;
+_last = state;
+            SetTray(state);
 
-            var dot = state.Overall == "green" ? Color.FromArgb(63, 185, 80)
-                    : state.Overall == "red" ? Color.FromArgb(248, 81, 73)
-                    : Color.Gray;
-            _tray.Icon = MakeIcon(dot);
-            _tray.Text = string.Format("CI {0} | cerveau {1} | daemon {2}",
-                state.Overall, state.Engine, state.DaemonTs);
-
-            if (_panel != null && !_panel.IsDisposed)
-                _panel.Render(state);
+            if (_panel != null && !_panel.IsDisposed) _panel.Render(state);
 
             if (!manual && _lastOverall != null && _lastOverall != state.Overall)
             {
@@ -258,17 +322,14 @@ namespace KuroPulse
             }
             _lastOverall = state.Overall;
 
-            if (!manual && previous.Actions.Count > 0 &&
-                state.Actions.Count > _lastActionCount && _lastActionCount >= 0)
+            if (!manual && state.Actions.Count > 0 &&
+                _panel != null && !_panel.IsDisposed)
             {
                 _tray.BalloonTipTitle = "KuroPulse — auto-action";
                 _tray.BalloonTipText = state.Actions[state.Actions.Count - 1];
                 _tray.ShowBalloonTip(8000);
             }
-            _lastActionCount = state.Actions.Count;
         }
-
-        // ---------- panneau ----------
 
         private void ShowPanel()
         {
@@ -285,8 +346,6 @@ namespace KuroPulse
             _panel.Activate();
         }
 
-        // ---------- utilitaires ----------
-
         private void OpenUrl(string url)
         {
             try { System.Diagnostics.Process.Start(url); } catch { }
@@ -295,7 +354,7 @@ namespace KuroPulse
         private void OpenJournal()
         {
             var path = Path.Combine(KuroRoot, "KURO_ACTIONS_LOG.md");
-            if (File.Exists(path)) System.Diagnostics.Process.Start("notepad.exe", path);
+            if (File.Exists(path)) System.Diagnostics.Process.Start("notepad.exe", "\"" + path + "\"");
         }
 
         private void ExitApp()
@@ -303,39 +362,22 @@ namespace KuroPulse
             _tray.Visible = false;
             Application.Exit();
         }
-
-        private Icon MakeIcon(Color color)
-        {
-            using (var bmp = new Bitmap(16, 16))
-            using (var g = Graphics.FromImage(bmp))
-            {
-                g.Clear(Color.Transparent);
-                using (var b = new SolidBrush(color))
-                    g.FillEllipse(b, 2, 2, 12, 12);
-                using (var pen = new Pen(Color.FromArgb(48, 48, 48)))
-                    g.DrawEllipse(pen, 2, 2, 12, 12);
-                return Icon.FromHandle(bmp.GetHicon());
-            }
-        }
     }
+
+    // ---------- panneau ----------
 
     internal class KuroPanel : Form
     {
-        private static readonly Color Bg = Color.FromArgb(13, 17, 23);
-        private static readonly Color Card = Color.FromArgb(22, 27, 34);
-        private static readonly Color Border = Color.FromArgb(48, 54, 61);
-        private static readonly Color Ink = Color.FromArgb(201, 209, 217);
-        private static readonly Color Muted = Color.FromArgb(139, 148, 158);
-        private static readonly Color Green = Color.FromArgb(63, 185, 80);
-        private static readonly Color Red = Color.FromArgb(248, 81, 73);
-        private static readonly Color Accent = Color.FromArgb(88, 166, 255);
-
         private readonly Action _refresh;
         private readonly Action _openDesk;
         private readonly Action _openActions;
         private readonly Action _openJournal;
 
         private readonly Panel _content;
+        private DateTime _lastRender = DateTime.Now;
+
+        [DllImport("dwmapi.dll")]
+        private static extern void DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
 
         public KuroPanel(Action refresh, Action openDesk, Action openActions, Action openJournal)
         {
@@ -343,23 +385,41 @@ namespace KuroPulse
             _openActions = openActions; _openJournal = openJournal;
 
             Text = "KuroPulse";
-            Size = new Size(420, 620);
-            BackColor = Bg;
-            ForeColor = Ink;
+            Size = new Size(430, 640);
+            BackColor = Palette.Bg;
+            ForeColor = Palette.Ink;
             StartPosition = FormStartPosition.Manual;
             var wa = Screen.PrimaryScreen.WorkingArea;
             Location = new Point(wa.Right - Width - 16, wa.Bottom - Height - 16);
-            MinimumSize = new Size(360, 460);
+            MinimumSize = new Size(370, 480);
             Font = new Font("Segoe UI", 9f);
 
             _content = new Panel
             {
                 Dock = DockStyle.Fill,
                 AutoScroll = true,
-                BackColor = Bg,
+                BackColor = Palette.Bg,
                 Padding = new Padding(14, 10, 14, 10)
             };
             Controls.Add(_content);
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            try
+            {
+                var one = 1;
+                DwmSetWindowAttribute(Handle, 20, ref one, 4);   // barre de titre sombre (Win10+/11)
+                DwmSetWindowAttribute(Handle, 19, ref one, 4);
+            }
+            catch { }
+            try
+            {
+                using (var bmp = Palette.Logo(64, null))
+                    Icon = Icon.FromHandle(bmp.GetHicon());
+            }
+            catch { }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -370,159 +430,245 @@ namespace KuroPulse
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true;
-                Hide();
-                return;
-            }
+            if (e.CloseReason == CloseReason.UserClosing) { e.Cancel = true; Hide(); return; }
             base.OnFormClosing(e);
         }
 
         public void UpdateError()
         {
             _content.Controls.Clear();
-            var l = new Label
+            _content.Controls.Add(new Label
             {
                 Text = "API Kuro injoignable.\nElle redémarre automatiquement.",
-                ForeColor = Muted, AutoSize = true, Padding = new Padding(8)
-            };
-            _content.Controls.Add(l);
+                ForeColor = Palette.Muted,
+                AutoSize = true,
+                Padding = new Padding(8)
+            });
         }
 
-        private Label SectionLabel(string text)
+        private Label Caption(string text)
         {
             return new Label
             {
                 Text = text,
-                ForeColor = Muted,
+                ForeColor = Palette.Muted,
                 Font = new Font("Consolas", 7.5f, FontStyle.Bold),
                 AutoSize = true,
-                Margin = new Padding(3, 12, 3, 4)
+                Margin = new Padding(3, 14, 3, 4)
             };
+        }
+
+        private Panel Card(int height)
+        {
+            var card = new Panel
+            {
+                Height = height,
+                BackColor = Palette.Card,
+                Margin = new Padding(0, 2, 0, 2),
+                Padding = new Padding(10, 8, 10, 8)
+            };
+            card.Paint += delegate(object s, PaintEventArgs e)
+            {
+                var p = s as Panel;
+                using (var pen = new Pen(Palette.Border))
+                    e.Graphics.DrawRectangle(pen, 0, 0, p.Width - 1, p.Height - 1);
+            };
+            return card;
+        }
+
+        private Control StatCard(string caption, string value, Color valueColor)
+        {
+            var card = Card(56);
+            card.Margin = new Padding(0, 2, 8, 2);
+            card.Controls.Add(new Label
+            {
+                Text = caption,
+                ForeColor = Palette.Muted,
+                Font = new Font("Consolas", 6.75f, FontStyle.Bold),
+                AutoSize = false,
+                Size = new Size(card.Width - 16, 14),
+                Location = new Point(10, 8)
+            });
+            var val = new Label
+            {
+                Text = value,
+                ForeColor = valueColor,
+                Font = new Font("Segoe UI Semibold", 11f),
+                AutoSize = false,
+                Size = new Size(card.Width - 16, 26),
+                Location = new Point(10, 24)
+            };
+            card.Controls.Add(val);
+            return card;
+        }
+
+        private Control RepoRowControl(RepoRow repo)
+        {
+            var green = repo.Health == "green";
+            var row = Card(40);
+            row.Padding = new Padding(10, 9, 10, 9);
+            row.Cursor = Cursors.Hand;
+            row.Tag = "https://github.com/" + repo.Name + "/actions";
+
+            var dotColor = green ? Palette.Green : Palette.Red;
+            row.Paint += delegate(object s, PaintEventArgs e)
+            {
+                using (var b = new SolidBrush(dotColor))
+                    e.Graphics.FillEllipse(b, 12, 15, 9, 9);
+            };
+
+            var name = new Label
+            {
+                Text = repo.Name,
+                ForeColor = Palette.Ink,
+                Font = new Font("Segoe UI Semibold", 9.25f),
+                AutoSize = true,
+                Location = new Point(28, 10)
+            };
+            row.Controls.Add(name);
+
+            var detailText = green
+                ? repo.ChecksTotal + " checks OK"
+                : (repo.Failing.Count > 0
+                    ? repo.Failing.Count + " en échec : " + string.Join(", ", repo.Failing.ToArray())
+                    : repo.ChecksOk + "/" + repo.ChecksTotal + " checks");
+
+            var detail = new Label
+            {
+                Text = detailText,
+                ForeColor = green ? Palette.Muted : Palette.Red,
+                Font = new Font("Segoe UI", 7.75f),
+                AutoSize = false,
+                Width = row.Width - 44,
+                Location = new Point(28, 23),
+                MaximumSize = new Size(row.Width - 44, 0)
+            };
+            row.Controls.Add(detail);
+
+            EventHandler enter = delegate { row.BackColor = Color.FromArgb(30, 36, 45); };
+            EventHandler leave = delegate { row.BackColor = Palette.Card; };
+            row.MouseEnter += enter; row.MouseLeave += leave;
+            name.MouseEnter += enter; name.MouseLeave += leave;
+            detail.MouseEnter += enter; detail.MouseLeave += leave;
+            row.Click += delegate { OnOpenRepo(row.Tag as string); };
+            name.Click += delegate { OnOpenRepo(row.Tag as string); };
+            detail.Click += delegate { OnOpenRepo(row.Tag as string); };
+
+            row.Resize += delegate
+            {
+                detail.Width = Math.Max(60, row.Width - 44);
+            };
+            return row;
+        }
+
+        protected virtual void OnOpenRepo(string url)
+        {
+            try { System.Diagnostics.Process.Start(url); } catch { }
         }
 
         public void Render(RobotState s)
         {
             if (InvokeRequired) { BeginInvoke((Action)delegate { Render(s); }); return; }
             if (IsDisposed) return;
+            _lastRender = DateTime.Now;
+
+            var overallColor = s.Overall == "green" ? Palette.Green
+                             : s.Overall == "red" ? Palette.Red : Palette.Muted;
 
             _content.SuspendLayout();
             _content.Controls.Clear();
 
-            var header = new Label
+            // ---- entête : logo + titres ----
+            var header = new Panel { Dock = DockStyle.Top, Height = 52, Margin = Padding.Empty };
+            var logoBox = new PictureBox
             {
-                Text = "● KuroPulse",
-                ForeColor = s.Overall == "green" ? Green : s.Overall == "red" ? Red : Muted,
+                Image = Palette.Logo(44, overallColor),
+                Size = new Size(44, 44),
+                Location = new Point(0, 2),
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+            header.Controls.Add(logoBox);
+            header.Controls.Add(new Label
+            {
+                Text = "KuroPulse",
+                ForeColor = Palette.Ink,
                 Font = new Font("Segoe UI Semibold", 15f),
                 AutoSize = true,
-                Margin = new Padding(0, 0, 0, 2)
-            };
+                Location = new Point(54, 4)
+            });
+            header.Controls.Add(new Label
+            {
+                Text = "v1.0 · intelligence d'entreprise lambda-Section",
+                ForeColor = Palette.Muted,
+                Font = new Font("Segoe UI", 7.5f),
+                AutoSize = true,
+                Location = new Point(56, 32)
+            });
             _content.Controls.Add(header);
 
-            _content.Controls.Add(new Label
-            {
-                Text = "intelligence d'entreprise lambda-Section",
-                ForeColor = Muted,
-                Font = new Font("Segoe UI", 8f),
-                AutoSize = true,
-                Margin = new Padding(2, 0, 0, 8)
-            });
+            // ---- cartes stats ----
+            var totalChecks = 0;
+            foreach (var r in s.Repos) totalChecks += r.ChecksTotal;
+            var okChecks = 0;
+            foreach (var r in s.Repos)
+                foreach (var w in r.Failing) { /* compteur via failing */ }
+            okChecks = totalChecks;
+            foreach (var r in s.Repos) okChecks -= r.Failing.Count;
 
-            var status = new Label
+            var stats = new TableLayoutPanel
             {
-                Text = string.Format("CI {0} · cerveau {1} · daemon {2}",
-                    s.Overall, s.Engine, s.DaemonTs),
-                ForeColor = Ink,
-                BackColor = Card,
-                Padding = new Padding(8, 6, 8, 6),
-                AutoSize = true,
-                Margin = new Padding(0, 2, 0, 4)
+                Dock = DockStyle.Top,
+                Height = 62,
+                ColumnCount = 3,
+                RowCount = 1,
+                Margin = new Padding(0, 6, 0, 0)
             };
-            status.Paint += delegate(object sender, PaintEventArgs e)
-            {
-                var p = sender as Label;
-                e.Graphics.DrawRectangle(new Pen(Border), 0, 0, p.Width - 1, p.Height - 1);
-            };
-            _content.Controls.Add(status);
+            for (int i = 0; i < 3; i++) stats.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3f));
 
-            _content.Controls.Add(SectionLabel("REPOS"));
+            var cChecks = StatCard("CHECKS CI", okChecks + "/" + totalChecks,
+                s.Overall == "green" ? Palette.Green : s.Overall == "red" ? Palette.Red : Palette.Muted);
+            var cBrain = StatCard("CERVEAU", s.Engine, Palette.Accent);
+            var cDaemon = StatCard("DAEMON", RelativeTime(s.DaemonTs), Palette.Ink);
+            stats.Controls.Add(cChecks); stats.Controls.Add(cBrain); stats.Controls.Add(cDaemon);
+            _content.Controls.Add(stats);
+
+            // ---- repos ----
+            _content.Controls.Add(Caption("REPOS SURVEILLÉS"));
             foreach (var repo in s.Repos)
             {
-                var green = repo.Health == "green";
-                var bullet = new Label
-                {
-                    Text = green ? "●" : "●",
-                    ForeColor = green ? Green : Red,
-                    AutoSize = true,
-                    Font = new Font("Segoe UI", 9.5f),
-                    Margin = new Padding(4, 3, 0, 0),
-                    Width = 20
-                };
-                _content.Controls.Add(bullet);
-
-                var detail = green
-                    ? string.Format("{0} checks OK", repo.ChecksTotal)
-                    : (repo.Failing.Count > 0
-                        ? string.Join(", ", repo.Failing.ToArray())
-                        : string.Format("{0}/{1} checks", repo.ChecksOk, repo.ChecksTotal));
-
-                var nameLbl = new Label
-                {
-                    Text = repo.Name,
-                    ForeColor = Ink,
-                    AutoSize = true,
-                    Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                    Margin = new Padding(0, 3, 4, 0)
-                };
-                _content.Controls.Add(nameLbl);
-
-                _content.Controls.Add(new Label
-                {
-                    Text = detail,
-                    ForeColor = green ? Muted : Red,
-                    AutoSize = true,
-                    Font = new Font("Segoe UI", 8f),
-                    Margin = new Padding(18, 0, 0, 6)
-                });
+                var ctrl = RepoRowControl(repo);
+                ctrl.Dock = DockStyle.Top;
+                _content.Controls.Add(ctrl);
+                ctrl.SendToBack();
             }
 
-            _content.Controls.Add(SectionLabel("AUTO-ACTIONS RÉCENTES"));
-            if (s.Actions.Count == 0)
+            // ---- auto-actions ----
+            _content.Controls.Add(Caption("AUTO-ACTIONS RÉCENTES"));
+            var actionsBox = new TextBox
             {
-                _content.Controls.Add(new Label
-                {
-                    Text = "Aucune action récente — tout roule.",
-                    ForeColor = Muted,
-                    AutoSize = true,
-                    Margin = new Padding(6, 2, 0, 2)
-                });
-            }
-            else
-            {
-                var box = new TextBox
-                {
-                    Multiline = true,
-                    ReadOnly = true,
-                    ScrollBars = ScrollBars.Vertical,
-                    BackColor = Card,
-                    ForeColor = Muted,
-                    BorderStyle = BorderStyle.FixedSingle,
-                    Font = new Font("Consolas", 8f),
-                    Dock = DockStyle.Top,
-                    Height = 150,
-                    Margin = new Padding(4, 2, 4, 2),
-                    Text = string.Join(Environment.NewLine, s.Actions.ToArray())
-                };
-                _content.Controls.Add(box);
-            }
+                Multiline = true,
+                ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical,
+                BackColor = Palette.Card,
+                ForeColor = Palette.Ink,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Consolas", 8f),
+                Dock = DockStyle.Top,
+                Height = 140,
+                Margin = new Padding(0, 2, 0, 2),
+                Text = s.Actions.Count > 0
+                    ? string.Join(Environment.NewLine, s.Actions.ToArray())
+                    : "Aucune action récente — tout roule."
+            };
+            _content.Controls.Add(actionsBox);
 
+            // ---- pied ----
             var footer = new FlowLayoutPanel
             {
                 Dock = DockStyle.Top,
                 FlowDirection = FlowDirection.LeftToRight,
                 AutoSize = true,
-                Margin = new Padding(0, 10, 0, 4)
+                Margin = new Padding(0, 10, 0, 2)
             };
             footer.Controls.Add(LinkBtn("Desk ↗", delegate { _openDesk(); }));
             footer.Controls.Add(LinkBtn("GitHub Actions ↗", delegate { _openActions(); }));
@@ -530,8 +676,27 @@ namespace KuroPulse
             footer.Controls.Add(LinkBtn("Rafraîchir", delegate { _refresh(); }));
             _content.Controls.Add(footer);
 
+            _content.Controls.Add(new Label
+            {
+                Text = "Relevé : " + _lastRender.ToString("dd/MM HH:mm:ss"),
+                ForeColor = Palette.Muted,
+                Font = new Font("Consolas", 7f),
+                AutoSize = true,
+                Margin = new Padding(4, 2, 0, 0)
+            });
+
             _content.ResumeLayout();
             PerformLayout();
+        }
+
+        private static string RelativeTime(string ts)
+        {
+            DateTime parsed;
+            if (!DateTime.TryParse(ts, out parsed)) return ts;
+            var delta = DateTime.Now - parsed;
+            if (delta.TotalMinutes < 90) return "il y a " + Math.Max(1, (int)delta.TotalMinutes) + " min";
+            if (delta.TotalHours < 36) return "il y a " + (int)Math.Round(delta.TotalHours) + " h";
+            return "il y a " + (int)delta.TotalDays + " j";
         }
 
         private Label LinkBtn(string text, Action onClick)
@@ -539,15 +704,15 @@ namespace KuroPulse
             var l = new Label
             {
                 Text = text,
-                ForeColor = Accent,
+                ForeColor = Palette.Accent,
                 AutoSize = true,
                 Margin = new Padding(0, 0, 16, 0),
                 Cursor = Cursors.Hand,
                 Font = new Font("Segoe UI", 8.75f)
             };
             l.Click += delegate { onClick(); };
-            l.MouseEnter += delegate { l.ForeColor = Ink; };
-            l.MouseLeave += delegate { l.ForeColor = Accent; };
+            l.MouseEnter += delegate { l.ForeColor = Palette.Ink; };
+            l.MouseLeave += delegate { l.ForeColor = Palette.Accent; };
             return l;
         }
     }

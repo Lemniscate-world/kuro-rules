@@ -151,3 +151,6 @@ docs/
 
 # canaux Discord privés
 kuro_discord_channels.local.json
+
+# artefacts generes
+apps/kuro-pulse/kuro.ico
