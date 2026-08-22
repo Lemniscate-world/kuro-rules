@@ -60,7 +60,8 @@ jobs:
           python kuro-rules/scripts/ci_guardian.py \
             --owners LambdaSection Lemniscate-world \
             --output lemniscate-world/ci-status.json \
-            --readme lemniscate-world/README.md
+            --readme lemniscate-world/README.md \
+            --actions-log kuro-rules/KURO_ACTIONS_LOG.md
 
       # --- Vérité factuelle ---
       - name: Audit truth quotidien (git log + tests)
@@ -116,7 +117,8 @@ jobs:
             python kuro-rules/scripts/weekly_report.py \
               --ci-status lemniscate-world/ci-status.json \
               --epingle kuro-rules/Epingle_Projets.md \
-              --repos-dir /home/runner/Documents
+              --repos-dir /home/runner/Documents \
+              --actions-log kuro-rules/KURO_ACTIONS_LOG.md
           else
             echo "Pas lundi — rapport hebdo sauté"
           fi
@@ -127,7 +129,7 @@ jobs:
           cd kuro-rules
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add TRUTH_DAILY.md Epingle_Projets.md || true
+          git add TRUTH_DAILY.md Epingle_Projets.md KURO_ACTIONS_LOG.md || true
           if ! git diff --cached --quiet; then
             git commit -m "kuro: audit quotidien $(date +%Y-%m-%d) [skip ci]"
             git push

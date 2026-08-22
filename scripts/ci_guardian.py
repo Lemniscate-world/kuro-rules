@@ -347,7 +347,8 @@ def main() -> int:
     parser.add_argument("--owners", nargs="+", default=DEFAULT_OWNERS, help="comptes dont tous les repos sont surveillés")
     parser.add_argument("--repos", nargs="+", default=None, help="liste explicite de repos (désactive la découverte)")
     parser.add_argument("--output", default=None, help="chemin du ci-status.json à écrire")
-    parser.add_argument("--readme", default=None, help="README du profil à mettre à jour (bloc CI Guardian)")
+    parser.add_argument("--readme", default=None, help="README du profil à mettre à jour (bloc CI)")
+    parser.add_argument("--actions-log", default=None, help="journal versionné des actions")
     parser.add_argument("--token", default=None, help="token GitHub (sinon variables d'env)")
     parser.add_argument("--dry-run", action="store_true", help="aucune écriture externe, statut seulement")
     args = parser.parse_args()
@@ -384,8 +385,53 @@ def main() -> int:
                 print(f"         FAIL: {wf['name']}")
     for act in report["actions"]:
         print(f"  ACTION: {act['repo']} / {act['workflow']} -> {act['action']} ({act['detail']})")
+    if not args.dry_run:
+        write_actions_log(Path(args.actions_log) if args.actions_log else None, report)
     notify_discord(report)
     return 0
+
+
+ACTION_ICONS = {
+    "rerun_triggered": "relance",
+    "issue_opened": "issue créée",
+    "issue_updated": "issue mise à jour",
+    "issue_would_open": "issue (dry-run)",
+    "rerun_would_trigger": "relance (dry-run)",
+}
+
+
+def render_actions_md(report: dict) -> str:
+    """Journal lisible : 1 ligne par action + ligne de synthèse du scan."""
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+    lines = [f"- {ts} | scan {report['overall']} | "
+             f"{sum(len(r['workflows']) for r in report['repos'])} checks, "
+             f"{sum(1 for r in report['repos'] if r['health'] == 'red')} repo(s) rouge(s)"]
+    for act in report["actions"]:
+        if act["action"] == "none":
+            continue
+        icon = ACTION_ICONS.get(act["action"], act["action"])
+        lines.append(f"  - {ts} | {act['action']} ({icon}) | {act['repo']} / {act['workflow']} | {act['detail']}")
+    return "\n".join(lines)
+
+
+def write_actions_log(path: Path | None, report: dict) -> None:
+    """Append au journal versionné + résumé GitHub Step Summary."""
+    entry = render_actions_md(report)
+    print(entry)
+    if path:
+        header = "" if path.exists() else (
+            "# Journal des actions Kuro\n\n"
+            "Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.\n\n"
+        )
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(header + entry + "\n")
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        try:
+            with open(summary, "a", encoding="utf-8") as fh:
+                fh.write("### 🤖 Actions Kuro Sentinel\n\n```\n" + entry + "\n```\n")
+        except Exception:
+            pass
 
 
 def notify_discord(report: dict) -> None:

@@ -116,11 +116,31 @@ def db_epingle_divergence(epingle: Path) -> list[str]:
     return out
 
 
+def actions_week(log_path: Path, days: int = 7) -> list[str]:
+    """Lignes du journal des actions Kuro des N derniers jours."""
+    if not log_path.exists():
+        return []
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    out = []
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line.startswith("- "):
+            continue
+        try:
+            ts = datetime.strptime(line[2:18], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+        except Exception:
+            continue
+        if ts >= cutoff:
+            out.append(line[2:])
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Rapport hebdo Kuro")
     parser.add_argument("--ci-status", default=None)
     parser.add_argument("--epingle", required=True)
     parser.add_argument("--repos-dir", default=None)
+    parser.add_argument("--actions-log", default=None, help="KURO_ACTIONS_LOG.md")
     args = parser.parse_args()
 
     ci_data = None
@@ -146,6 +166,14 @@ def main() -> int:
     if divergence:
         lines += ["", "**Divergences daemon vs Epingle (>=15pts)**"]
         lines += divergence[:10]
+
+    if args.actions_log:
+        acts = actions_week(Path(args.actions_log))
+        if acts:
+            lines += ["", "**Auto-actions Kuro (7j)**"]
+            lines += [f"- {a}" for a in acts[:20]]
+        else:
+            lines += ["", "**Auto-actions Kuro (7j)** : aucune"]
 
     report = "\n".join(lines)
     print(report)
