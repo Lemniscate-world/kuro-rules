@@ -166,7 +166,10 @@ def get_robot() -> dict:
         for r in ci_status.get("repos", []):
             if r.get("health") == "no_ci":
                 continue
-            fails = [w["name"] for w in r.get("workflows", []) if w.get("conclusion") == "failure"]
+            fails = []
+            for w in r.get("workflows", []):
+                if w.get("conclusion") == "failure":
+                    fails.append({"name": w["name"], "url": w.get("url", "")})
             repos.append(
                 {
                     "name": r.get("name"),
@@ -181,6 +184,7 @@ def get_robot() -> dict:
         "repos": repos,
         "ci_overall": (ci_status or {}).get("overall"),
         "llm_engine": st.get("llm_engine"),
+        "alerts_open": st.get("alerts_open"),
         "daemon": st.get("heartbeat"),
     }
 
@@ -330,6 +334,29 @@ class Handler(BaseHTTPRequestHandler):
                     self._json(200, {"acknowledged": alert_id})
                 else:
                     self._json(404, {"error": f"alerte {alert_id} inconnue"})
+            except Exception as exc:
+                self._json(500, {"error": str(exc)})
+            return
+        if path == "/api/alerts/ack-all":
+            try:
+                length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+                days = int(body.get("older_than_days", 0) or 0)
+                conn = sqlite3.connect(DB_PATH, timeout=5)
+                with conn:
+                    if days > 0:
+                        cur = conn.execute(
+                            "UPDATE alerts SET acknowledged = 1 WHERE acknowledged = 0 "
+                            "AND created_at < datetime('now', ?)",
+                            (f"-{days} days",),
+                        )
+                    else:
+                        cur = conn.execute(
+                            "UPDATE alerts SET acknowledged = 1 WHERE acknowledged = 0"
+                        )
+                    acked = cur.rowcount
+                conn.close()
+                self._json(200, {"acked": acked})
             except Exception as exc:
                 self._json(500, {"error": str(exc)})
             return
