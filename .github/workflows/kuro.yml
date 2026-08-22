@@ -153,6 +153,7 @@ jobs:
           git add TRUTH_DAILY.md Epingle_Projets.md KURO_ACTIONS_LOG.md || true
           if ! git diff --cached --quiet; then
             git commit -m "kuro: audit quotidien $(date +%Y-%m-%d) [skip ci]"
+            git pull --rebase origin master || true
             git push
           else
             echo "Rien à committer"
@@ -166,6 +167,7 @@ jobs:
           git add index.html sections/ blog/ ci-status.json design-report.json README.md || true
           if ! git diff --cached --quiet; then
             git commit -m "kuro: publication quotidienne $(date +%Y-%m-%d) [skip ci]"
+            git pull --rebase origin main || true
             git push
           else
             echo "Rien à publier"
