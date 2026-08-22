@@ -126,7 +126,7 @@ jobs:
           npx -y impeccable@latest detect lemniscate-world/index.html || true
 
       - name: Rapport hebdo Discord (lundi uniquement)
-        if: github.event_name == 'schedule'
+        if: env.KURO_FULL == 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
@@ -135,6 +135,10 @@ jobs:
               --ci-status lemniscate-world/ci-status.json \
               --epingle kuro-rules/Epingle_Projets.md \
               --repos-dir /home/runner/Documents \
+              --actions-log kuro-rules/KURO_ACTIONS_LOG.md
+            python kuro-rules/scripts/kuro_investor_digest.py \
+              --epingle kuro-rules/Epingle_Projets.md \
+              --ci-status lemniscate-world/ci-status.json \
               --actions-log kuro-rules/KURO_ACTIONS_LOG.md
           else
             echo "Pas lundi — rapport hebdo sauté"

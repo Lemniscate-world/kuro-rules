@@ -1,0 +1,5 @@
+{
+  "_comment": "Copier ce fichier en kuro_discord_channels.local.json (gitignore) et remplir les webhooks Discord.",
+  "investors": "https://discord.com/api/webhooks/INVESTORS_CHANNEL",
+  "default": ""
+}

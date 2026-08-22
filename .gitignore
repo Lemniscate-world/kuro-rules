@@ -148,3 +148,6 @@ reports/
 # Prive (R76)
 SYNC_BACKUPS/
 docs/
+
+# canaux Discord privés
+kuro_discord_channels.local.json
