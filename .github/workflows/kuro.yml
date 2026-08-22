@@ -2,7 +2,8 @@ name: Kuro
 
 on:
   schedule:
-    - cron: "0 5 * * *"   # un seul créneau : vérité quotidienne
+    - cron: "0 5 * * *"    # cycle complet quotidien (vérité + publication)
+    - cron: "*/30 * * * *" # sentinelle rapide 24/7 (scan CI seul)
   push:
     paths:
       - 'Epingle_Projets.md'
@@ -15,6 +16,7 @@ env:
   KURO_RULES_DIR: ${{ github.workspace }}/kuro-rules
   LEMNISCATE_DIR: ${{ github.workspace }}/lemniscate-world
   DOCS_DIR: /home/runner/Documents
+  KURO_FULL: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.schedule == '0 5 * * *' }}
 
 jobs:
   kuro:
@@ -43,6 +45,7 @@ jobs:
           python -m pytest kuro-rules/tests -q
 
       - name: Clone repos into ~/Documents (source de vérité)
+        if: env.KURO_FULL == 'true'
         env:
           SYNC_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
         run: |
@@ -63,8 +66,18 @@ jobs:
             --readme lemniscate-world/README.md \
             --actions-log kuro-rules/KURO_ACTIONS_LOG.md
 
+      - name: Sécurité (vulnérabilités + auto-fixes, cycle complet)
+        if: env.KURO_FULL == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python kuro-rules/scripts/kuro_security.py \
+            --owners LambdaSection Lemniscate-world
+
       # --- Vérité factuelle ---
       - name: Audit truth quotidien (git log + tests)
+        if: env.KURO_FULL == 'true'
         run: |
           python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md
           cat kuro-rules/TRUTH_DAILY.md | head -n 30
@@ -88,22 +101,26 @@ jobs:
           fi
 
       - name: Progression réaliste (% factuels)
+        if: env.KURO_FULL == 'true'
         run: |
           python kuro-rules/scripts/compute_progress.py --apply
           git -C kuro-rules diff --stat || true
 
       # --- Publication ---
       - name: Portfolio + mondes
+        if: env.KURO_FULL == 'true'
         run: |
           python kuro-rules/scripts/generate_portfolio.py \
             --epingle kuro-rules/Epingle_Projets.md \
             --output lemniscate-world/index.html
 
       - name: Blog factuel
+        if: env.KURO_FULL == 'true'
         run: |
           python kuro-rules/scripts/generate_blog.py --apply
 
       - name: Gate design Impeccable (rapport séparé)
+        if: env.KURO_FULL == 'true'
         run: |
           npx -y impeccable@latest detect --json lemniscate-world/index.html > lemniscate-world/design-report.json || true
           npx -y impeccable@latest detect lemniscate-world/index.html || true

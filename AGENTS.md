@@ -21,6 +21,7 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_106_plan_roadmap_split**: RULE 106: Private Plan + Public Roadmap Split â€” MANDATORY
 - **rule_107_upstream_pr_strategy**: RULE 107: Upstream PR Strategy — Credibility Through Merged Contributions
 - **rule_108_validation_pipeline**: RULE 108: Validation Pipeline — Progressive Gates (MANDATORY) â€” Credibility Through Merged Contributions
+- **rule_109_adaptive_design**: RULE 109: Adaptive Design Systems — identité par produit + socle tokens/a11y universel (MANDATORY)
 - **rule_14_validation_and_failure**: RULE 14.5: 5-Risk Failure Mode Table - Full Detail
 - **rule_20_21_22_23_24_25_26_27_29_31_32_33_34_35_37_40**: LINEAR, TEAM & PROJECT MANAGEMENT RULES - Full Detail
 - **rule_28_linear_review**: RULE 28: Linear Automation and DevOps Review - Full Detail

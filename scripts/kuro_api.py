@@ -141,6 +141,34 @@ def get_memory() -> list[dict]:
     )
 
 
+def get_robot() -> dict:
+    """État du robot Kuro : journal récent + santé CI + moteur."""
+    root = Path(__file__).resolve().parent.parent
+    journal = root / "KURO_ACTIONS_LOG.md"
+    actions = []
+    if journal.exists():
+        for line in journal.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("- ") or line.startswith("  - "):
+                actions.append(line.strip())
+        actions = actions[-20:]
+    ci_status = None
+    ci_path = Path.home() / "Documents" / "Lemniscate-world" / "ci-status.json"
+    try:
+        import json as _json
+
+        ci_status = _json.loads(ci_path.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    st = get_status()
+    return {
+        "actions_tail": actions,
+        "ci_overall": (ci_status or {}).get("overall"),
+        "llm_engine": st.get("llm_engine"),
+        "daemon": st.get("heartbeat"),
+    }
+
+
 def build_summary() -> str:
     st = get_status()
     conn = db()
@@ -228,6 +256,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, {"memory": get_memory()})
             elif path == "/api/summary":
                 self._json(200, {"summary": build_summary()})
+            elif path == "/api/robot":
+                self._json(200, get_robot())
             elif path in STATIC_FILES:
                 file_path = DASHBOARD_DIR / STATIC_FILES[path]
                 if not file_path.exists():

@@ -339,5 +339,33 @@ function notifyNewAlerts(count) {
   }
 }
 
+async function loadRobotPanel() {
+  let el = document.getElementById("kuro-robot");
+  if (!el) {
+    el = document.createElement("section");
+    el.id = "kuro-robot";
+    el.className = "panel";
+    el.style.cssText = "margin:0 0 1rem;padding:.8rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-raise);font-family:var(--font-mono,monospace);font-size:.72rem";
+    document.body.prepend(el);
+  }
+  try {
+    const r = await fetch(`/api/robot?ts=${Date.now()}`);
+    const d = await r.json();
+    const dot = d.ci_overall === "green" ? "🟢" : d.ci_overall === "red" ? "🔴" : "⚪";
+    const engine = d.llm_engine || "déterministe";
+    const hb = d.daemon && d.daemon.timestamp ? `daemon ${d.daemon.timestamp.slice(0, 10)}` : "daemon inconnu";
+    const acts = (d.actions_tail || []).filter(a => !a.startsWith("scan")).slice(-3);
+    el.innerHTML =
+      `<div style="margin-bottom:.35rem"><strong>${dot} Robot Kuro</strong> · moteur: ${engine} · ${hb}</div>` +
+      (acts.length
+        ? `<ul style="margin:0;padding-left:1.1rem;color:var(--muted)">${acts.map(a => `<li>${a.replace(/</g, "&lt;")}</li>`).join("")}</ul>`
+        : `<div style="color:var(--muted)">aucune auto-action récente</div>`);
+  } catch (_) {
+    el.innerHTML = "<em>Robot Kuro indisponible</em>";
+  }
+}
+
 load();
 setInterval(load, 60000);
+setInterval(loadRobotPanel, 60000);
+loadRobotPanel();
