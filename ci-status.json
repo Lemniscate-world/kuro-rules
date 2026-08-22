@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-22T22:49:15+00:00",
+  "generated_at": "2026-08-22T23:22:26+00:00",
   "overall": "red",
   "repos": [
     {
@@ -259,20 +259,20 @@
       "health": "green",
       "workflows": [
         {
-          "name": "Push on main",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32602301207",
-          "updated_at": "2026-08-22T22:24:16Z"
-        },
-        {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32602300903",
-          "updated_at": "2026-08-22T22:24:18Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32603511541",
+          "updated_at": "2026-08-22T22:49:59Z"
+        },
+        {
+          "name": "Push on main",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32603511534",
+          "updated_at": "2026-08-22T22:50:01Z"
         },
         {
           "name": "CodeQL Setup",
@@ -355,16 +355,16 @@
           "status": "in_progress",
           "conclusion": null,
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32603489125",
-          "updated_at": "2026-08-22T22:48:53Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32605014358",
+          "updated_at": "2026-08-22T23:21:51Z"
         },
         {
           "name": "Push on master",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32602300137",
-          "updated_at": "2026-08-22T22:25:20Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32603510369",
+          "updated_at": "2026-08-22T22:51:11Z"
         },
         {
           "name": "Rules Audit",
