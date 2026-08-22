@@ -152,14 +152,15 @@ def get_robot() -> dict:
             if line.startswith("- ") or line.startswith("  - "):
                 actions.append(line.strip())
         actions = actions[-20:]
+    # source fraîche en priorité : copie committée dans kuro-rules par le robot
     ci_status = None
-    ci_path = Path.home() / "Documents" / "Lemniscate-world" / "ci-status.json"
-    try:
-        import json as _json
-
-        ci_status = _json.loads(ci_path.read_text(encoding="utf-8"))
-    except Exception:
-        pass
+    for candidate in (root / "ci-status.json",
+                       Path.home() / "Documents" / "Lemniscate-world" / "ci-status.json"):
+        try:
+            ci_status = json.loads(candidate.read_text(encoding="utf-8"))
+            break
+        except Exception:
+            continue
     st = get_status()
     repos = []
     if isinstance(ci_status, dict):
