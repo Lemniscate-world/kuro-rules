@@ -161,8 +161,24 @@ def get_robot() -> dict:
     except Exception:
         pass
     st = get_status()
+    repos = []
+    if isinstance(ci_status, dict):
+        for r in ci_status.get("repos", []):
+            if r.get("health") == "no_ci":
+                continue
+            fails = [w["name"] for w in r.get("workflows", []) if w.get("conclusion") == "failure"]
+            repos.append(
+                {
+                    "name": r.get("name"),
+                    "health": r.get("health"),
+                    "checks_ok": len(r.get("workflows", [])) - len(fails),
+                    "checks_total": len(r.get("workflows", [])),
+                    "failing": fails,
+                }
+            )
     return {
         "actions_tail": actions,
+        "repos": repos,
         "ci_overall": (ci_status or {}).get("overall"),
         "llm_engine": st.get("llm_engine"),
         "daemon": st.get("heartbeat"),
