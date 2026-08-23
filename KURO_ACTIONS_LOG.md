@@ -297,3 +297,6 @@ Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.
   - 2026-08-23T20:50Z | rerun_triggered (relance) | LambdaSection/NeuralDBG / Kuro Rules Compliance | relance jobs échoués (run 32665268352, tentative 1)
 - 2026-08-23T21:22Z | scan red | 38 checks, 1 repo(s) rouge(s)
   - 2026-08-23T21:22Z | rerun_triggered (relance) | LambdaSection/NeuralDBG / Kuro Rules Compliance | relance jobs échoués (run 32667245330, tentative 1)
+- 2026-08-23T21:47Z | scan red | 38 checks, 1 repo(s) rouge(s)
+  - 2026-08-23T21:47Z | rerun_triggered (relance) | LambdaSection/NeuralDBG / Pre-commit | relance jobs échoués (run 32667245382, tentative 1)
+  - 2026-08-23T21:47Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Kuro Rules Compliance | issue #675 mise à jour
