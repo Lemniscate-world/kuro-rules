@@ -306,3 +306,6 @@ Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.
 - 2026-08-23T22:49Z | scan red | 38 checks, 1 repo(s) rouge(s)
   - 2026-08-23T22:49Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Kuro Rules Compliance | issue #675 mise à jour
   - 2026-08-23T22:49Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+- 2026-08-23T23:22Z | scan red | 38 checks, 1 repo(s) rouge(s)
+  - 2026-08-23T23:22Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Kuro Rules Compliance | issue #675 mise à jour
+  - 2026-08-23T23:22Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
