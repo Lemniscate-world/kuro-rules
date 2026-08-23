@@ -5,7 +5,7 @@
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-08-23 `3f83256` feat(ops): lot #1-#5,#9 + voix française — sécurit | main | 0 (0 funcs) | 0 | 17 |  |
+| **OpenQuant** | 2026-08-23 `a81e007` ci: build.yml en manuel uniquement (script build s | main | 0 (0 funcs) | 0 | 36 |  |
 | **NeuralDBG** | 2026-08-22 `b0122d0` feat(community): growth infrastructure (P1) — gree | main | 0 (0 funcs) | 0 | 14 |  |
 | **Helium** | 2026-08-21 `0430af5` feat(S1): CLI polish R9 compliant - no emojis, col | main | 0 (0 funcs) | 0 | 5 |  |
 | **Metatron** | 2026-08-21 `9db1875` chore: retrait GAD.md (retire du systeme Kuro) | main | 0 (0 funcs) | 0 | 1 |  |
@@ -35,4 +35,4 @@
 - **TokenWise** `0%` mais 0 commit 30j (dernier 2026-05-17) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-23T05:19:11.292629 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-23T18:30:46.944486 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
