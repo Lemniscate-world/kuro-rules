@@ -12,6 +12,8 @@ Endpoints :
     GET  /api/sessions?limit=20      sessions récentes
     GET  /api/memory                 nœuds de mémoire
     GET  /api/summary                digest textuel (humain ou prompt LLM)
+    GET  /api/finance                burn rate, runway, MRR (R111: 100% local)
+    GET  /api/metrics                lead time, vélocité, échecs CI, pivots
     POST /api/ask  {"question":".."} question libre -> cerveau Kuro
 
 Usage:
@@ -53,6 +55,7 @@ def get_status() -> dict:
     conn = db()
     hb = rows(conn, "SELECT * FROM heartbeat ORDER BY timestamp DESC LIMIT 1")
     out = {
+        "api_version": "1.1",
         "projects": rows(conn, "SELECT COUNT(*) AS n FROM projects")[0]["n"],
         "sessions": rows(conn, "SELECT COUNT(*) AS n FROM sessions")[0]["n"],
         "alerts_open": rows(conn, "SELECT COUNT(*) AS n FROM alerts WHERE acknowledged = 0")[0]["n"],
@@ -190,6 +193,25 @@ def get_robot() -> dict:
     }
 
 
+def get_finance() -> dict:
+    """Finances locales (R111) : fichier gitigné, zéro réseau, zéro LLM."""
+    try:
+        import kuro_finance
+
+        return kuro_finance.compute_from_default()
+    except Exception as exc:
+        return {"status": "unconfigured", "error": str(exc)}
+
+
+def get_metrics() -> dict:
+    try:
+        import kuro_metrics
+
+        return kuro_metrics.build_payload()
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+
+
 def build_summary() -> str:
     st = get_status()
     conn = db()
@@ -279,6 +301,10 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, {"summary": build_summary()})
             elif path == "/api/robot":
                 self._json(200, get_robot())
+            elif path == "/api/finance":
+                self._json(200, get_finance())
+            elif path == "/api/metrics":
+                self._json(200, get_metrics())
             elif path in STATIC_FILES:
                 file_path = DASHBOARD_DIR / STATIC_FILES[path]
                 if not file_path.exists():
@@ -367,6 +393,12 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
+class KuroServer(ThreadingHTTPServer):
+    # Refuse le double-bind : sur Windows SO_REUSEADDR autorise deux listeners
+    # silencieux sur le même port -> réponses aléatoires selon l'instance.
+    allow_reuse_address = False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="API REST Kuro")
     parser.add_argument("--port", type=int, default=8767)
@@ -376,7 +408,12 @@ def main() -> int:
         print(f"kuro.db introuvable: {DB_PATH}")
         return 1
 
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+    try:
+        server = KuroServer(("127.0.0.1", args.port), Handler)
+    except OSError as exc:
+        print(f"port {args.port} déjà occupé (instance Kuro API déjà active ?): {exc}")
+        return 1
+
     print(f"Kuro API sur http://127.0.0.1:{args.port} (db: {DB_PATH})")
     try:
         server.serve_forever()

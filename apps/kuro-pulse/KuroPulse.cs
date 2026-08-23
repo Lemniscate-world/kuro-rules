@@ -1,6 +1,6 @@
-// KuroPulse v1.2 — application tray native pour l'intelligence d'entreprise Kuro.
+// KuroPulse v1.4 — application tray native pour l'intelligence d'entreprise Kuro.
 // Compile avec le csc.exe inclus dans Windows (.NET Framework 4.x), zéro dépendance runtime.
-// UI : langage Primer devtool (R109).
+// UI : langage Primer devtool (R109). Finance locale R111 : burn/runway/MRR jamais sortis de la machine.
 
 using System;
 using System.Collections.Generic;
@@ -18,8 +18,11 @@ namespace KuroPulse
 {
     static class Program
     {
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetProcessDPIAware();
+
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             bool created;
             using (var mutex = new Mutex(true, "KuroPulseTrayApp", out created))
@@ -34,9 +37,11 @@ namespace KuroPulse
                 var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "last-run.log");
                 try
                 {
+                    try { SetProcessDPIAware(); } catch { }
                     File.WriteAllText(logPath, DateTime.Now + " : démarrage\n");
                     Application.EnableVisualStyles();
-                    Application.Run(new TrayContext());
+                    bool showAtStart = args != null && args.Length > 0 && args[0] == "--show";
+                    Application.Run(new TrayContext(showAtStart));
                     File.AppendAllText(logPath, DateTime.Now + " : arrêt propre\n");
                 }
                 catch (Exception ex)
@@ -70,6 +75,21 @@ namespace KuroPulse
             path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
             return path;
+        }
+
+        private static readonly Dictionary<int, Icon> IconCache = new Dictionary<int, Icon>();
+
+        public static Icon CachedTrayIcon(int size, Color? dotColor)
+        {
+            int key = dotColor.HasValue ? dotColor.Value.ToArgb() : 0;
+            Icon cached;
+            if (IconCache.TryGetValue(key, out cached)) return cached;
+            using (var bmp = Logo(size, dotColor))
+            {
+                cached = Icon.FromHandle(bmp.GetHicon());
+            }
+            IconCache[key] = cached;
+            return cached;
         }
 
         public static Bitmap Logo(int size, Color? dotColor)
@@ -126,6 +146,8 @@ namespace KuroPulse
         public int AlertsOpen;
         public List<string> Actions = new List<string>();
         public List<RepoRow> Repos = new List<RepoRow>();
+        public FinanceState Finance = new FinanceState();
+        public MetricsState Metrics = new MetricsState();
     }
 
     internal class RepoRow
@@ -135,6 +157,29 @@ namespace KuroPulse
         public int ChecksOk;
         public int ChecksTotal;
         public List<FailItem> Failing = new List<FailItem>();
+    }
+
+    internal class FinanceState
+    {
+        public bool Reachable = true;
+        public bool Configured = true;
+        public string Status = "unknown";
+        public string Runway = "?";
+        public string Burn = "?";
+        public string Mrr = "?";
+        public string TrendArrow = "";
+        public string Cac = "—";
+        public string Ltv = "—";
+        public string Ratio = "—";
+        public string UnitStatus = "idle";
+    }
+
+    internal class MetricsState
+    {
+        public string LeadAvg = "—";
+        public string Velocity = "—";
+        public string CiRate = "—";
+        public List<string> Pivots = new List<string>();
     }
 
     // ---------- contrôles dessinés ----------
@@ -209,20 +254,22 @@ namespace KuroPulse
     {
         private const string ApiBase = "http://127.0.0.1:8767";
         private const string KuroRoot = @"C:\Users\Utilisateur\Documents\kuro-rules";
+        private const string ExpectedApiVersion = "1.1";
 
         private readonly NotifyIcon _tray;
         private KuroPanel _panel;
         private RobotState _last = new RobotState();
         private string _lastOverall;
+        private string _lastFinStatus;
         private DateTime _lastApiStart = DateTime.MinValue;
 
-        public TrayContext()
+        public TrayContext(bool showAtStart = false)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             _tray = new NotifyIcon
             {
-                Icon = Icon.FromHandle(Palette.Logo(16, null).GetHicon()),
+                Icon = Palette.CachedTrayIcon(16, null),
                 Text = "KuroPulse : connexion...",
                 Visible = true
             };
@@ -242,27 +289,46 @@ namespace KuroPulse
             timer.Start();
 
             FetchState(false);
+            if (showAtStart) ShowPanel();
         }
 
         private void EnsureApi()
         {
+            var version = "";
             try
             {
                 using (var wc = new WebClient())
-                    wc.DownloadString(ApiBase + "/api/status");
-            }
-            catch
-            {
-                if ((DateTime.Now - _lastApiStart).TotalMinutes > 10)
                 {
-                    _lastApiStart = DateTime.Now;
-                    var apiScript = Path.Combine(KuroRoot, "scripts", "kuro_api.py");
-                    if (File.Exists(apiScript))
-                        System.Diagnostics.Process.Start(
-                            "pythonw",
-                            string.Format("\"{0}\" --port 8767", apiScript));
+                    var ser = new JavaScriptSerializer();
+                    var data = ser.Deserialize<Dictionary<string, object>>(
+                        wc.DownloadString(ApiBase + "/api/status"));
+                    object v;
+                    if (data != null && data.TryGetValue("api_version", out v) && v != null)
+                        version = v.ToString();
                 }
             }
+            catch { }
+
+            if (version == ExpectedApiVersion) return;
+            if ((DateTime.Now - _lastApiStart).TotalMinutes <= 10) return;
+            _lastApiStart = DateTime.Now;
+
+            try
+            {
+                // tuer l'éventuel listener périmé sur le port avant de relancer
+                var kill = System.Diagnostics.Process.Start("powershell",
+                    "-NoProfile -Command \"Get-NetTCPConnection -LocalPort 8767 -State Listen " +
+                    "-ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess " +
+                    "-Unique | ForEach-Object { Stop-Process -Id $_ -Force }\"");
+                try { kill.WaitForExit(5000); } catch { }
+            }
+            catch { }
+
+            var apiScript = Path.Combine(KuroRoot, "scripts", "kuro_api.py");
+            if (File.Exists(apiScript))
+                System.Diagnostics.Process.Start(
+                    "pythonw",
+                    string.Format("\"{0}\" --port 8767", apiScript));
         }
 
         private RobotState Fetch()
@@ -328,6 +394,19 @@ namespace KuroPulse
                             }
                         state.Repos.Add(row);
                     }
+
+                try
+                {
+                    var fj = wc.DownloadString(ApiBase + "/api/finance?ts=" + DateTime.UtcNow.Ticks);
+                    state.Finance = ParseFinance(ser.DeserializeObject(fj));
+                }
+                catch { state.Finance.Reachable = false; }
+                try
+                {
+                    var mj = wc.DownloadString(ApiBase + "/api/metrics?ts=" + DateTime.UtcNow.Ticks);
+                    state.Metrics = ParseMetrics(ser.DeserializeObject(mj));
+                }
+                catch { }
                 return state;
             }
         }
@@ -343,6 +422,124 @@ namespace KuroPulse
             if (d.TryGetValue(k, out v) && v is int) return (int)v;
             int parsed;
             return int.TryParse(Str(d, k), out parsed) ? parsed : 0;
+        }
+
+        private static double Num(Dictionary<string, object> d, string k)
+        {
+            object v;
+            if (!d.TryGetValue(k, out v) || v == null) return 0;
+            try { return Convert.ToDouble(v, System.Globalization.CultureInfo.InvariantCulture); }
+            catch { return 0; }
+        }
+
+        private static string Money(double value, string cur)
+        {
+            if (cur == "XOF" || cur == "FCFA") return value.ToString("N0") + " FCFA";
+            var symbol = cur == "EUR" ? "€" : cur == "USD" ? "$" : "";
+            return symbol + value.ToString("N2") + (symbol == "" && cur != "" ? " " + cur : "");
+        }
+
+        private static bool Bool(Dictionary<string, object> d, string k)
+        {
+            object v;
+            return d.TryGetValue(k, out v) && v is bool && (bool)v;
+        }
+
+        private static string OptMoney(Dictionary<string, object> d, string k, string cur)
+        {
+            object v;
+            if (!d.TryGetValue(k, out v) || v == null) return "—";
+            return Money(Num(d, k), cur);
+        }
+
+        private static string OptRatio(Dictionary<string, object> d, string k)
+        {
+            object v;
+            if (!d.TryGetValue(k, out v) || v == null) return "—";
+            return Num(d, k).ToString("0.00");
+        }
+
+        private static FinanceState ParseFinance(object raw)
+        {
+            var f = new FinanceState();
+            var d = raw as Dictionary<string, object>;
+            if (d == null) return f;
+            var status = Str(d, "status");
+            if (status == "unconfigured")
+            {
+                f.Configured = false;
+                return f;
+            }
+            var cur = Str(d, "currency");
+            f.Status = status == "" ? "unknown" : status;
+            object runway;
+            f.Runway = d.TryGetValue("runway_label", out runway) && runway != null ? runway.ToString() : "?";
+            f.Burn = Money(Num(d, "burn_rate_monthly"), cur);
+            f.Mrr = Money(Num(d, "mrr_monthly"), cur);
+
+            object ueRaw;
+            if (d.TryGetValue("unit_economics", out ueRaw))
+            {
+                var ue = ueRaw as Dictionary<string, object>;
+                if (ue != null && Bool(ue, "configured"))
+                {
+                    f.Cac = OptMoney(ue, "cac", cur);
+                    f.Ltv = OptMoney(ue, "ltv", cur);
+                    f.Ratio = OptRatio(ue, "ltv_cac_ratio");
+                    f.UnitStatus = Str(ue, "status");
+                }
+            }
+
+            object trendRaw;
+            if (d.TryGetValue("trend", out trendRaw))
+            {
+                var t = trendRaw as Dictionary<string, object>;
+                if (t != null)
+                {
+                    object dv;
+                    if (t.TryGetValue("runway_delta_months", out dv) && dv != null)
+                    {
+                        var val = Num(t, "runway_delta_months");
+                        if (val >= 0.05) f.TrendArrow = " ▲+" + val.ToString("0.0");
+                        else if (val <= -0.05) f.TrendArrow = " ▼" + val.ToString("0.0");
+                    }
+                }
+            }
+            return f;
+        }
+
+        private static MetricsState ParseMetrics(object raw)
+        {
+            var m = new MetricsState();
+            var d = raw as Dictionary<string, object>;
+            if (d == null) return m;
+            object avgsRaw;
+            if (d.TryGetValue("averages", out avgsRaw))
+            {
+                var a = avgsRaw as Dictionary<string, object>;
+                if (a != null)
+                {
+                    object lead;
+                    m.LeadAvg = a.TryGetValue("lead_time_days", out lead) && lead != null
+                        ? Num(a, "lead_time_days").ToString("0.0") + " j"
+                        : "—";
+                    m.Velocity = Num(a, "velocity_per_week").ToString("0.00") + " c/sem";
+                    m.CiRate = (Num(a, "ci_failure_rate") * 100).ToString("0") + "%";
+                }
+            }
+            object pivotsRaw;
+            if (d.TryGetValue("pivot_candidates", out pivotsRaw) && pivotsRaw != null)
+                foreach (var p in (System.Collections.IEnumerable)pivotsRaw)
+                {
+                    var pd = p as Dictionary<string, object>;
+                    if (pd == null) continue;
+                    long days = 0;
+                    object daysObj;
+                    if (pd.TryGetValue("days_inactive", out daysObj) && daysObj != null)
+                        try { days = Convert.ToInt64(daysObj); } catch { }
+                    m.Pivots.Add(Str(pd, "name") + " · " + days + " j");
+                }
+            return m;
         }
 
         private static string Trim10(string s)
@@ -362,7 +559,7 @@ namespace KuroPulse
         {
             var dot = s.Overall == "green" ? Palette.Green
                     : s.Overall == "red" ? Palette.Red : (Color?)Palette.Muted;
-            _tray.Icon = Icon.FromHandle(Palette.Logo(16, dot).GetHicon());
+            _tray.Icon = Palette.CachedTrayIcon(16, dot);
             var tip = string.Format("CI {0} | cerveau {1} | daemon {2} | alertes {3}",
                 s.Overall, s.Engine, s.DaemonTs, s.AlertsOpen);
             _tray.Text = tip.Length > 63 ? tip.Substring(0, 63) : tip;
@@ -396,6 +593,16 @@ namespace KuroPulse
                 _tray.ShowBalloonTip(8000);
             }
             _lastOverall = state.Overall;
+
+            if (!manual && _lastFinStatus != null && _lastFinStatus != state.Finance.Status &&
+                state.Finance.Reachable && state.Finance.Configured &&
+                state.Finance.Status == "critical")
+            {
+                _tray.BalloonTipTitle = "KuroPulse — RUNWAY critique";
+                _tray.BalloonTipText = "Moins de 3 mois de trésorerie devant soi. Recharger ou couper le burn.";
+                _tray.ShowBalloonTip(8000);
+            }
+            _lastFinStatus = state.Finance.Status;
 
             if (!manual && previousActions > 0 &&
                 state.Actions.Count > previousActions &&
@@ -642,6 +849,7 @@ namespace KuroPulse
         private readonly ColumnHost _content;
         private DateTime _lastRender = DateTime.Now;
         private int _lastOkChecks = -1;
+        private string _lastSignature;
 
         [DllImport("dwmapi.dll")]
         private static extern void DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
@@ -656,12 +864,14 @@ namespace KuroPulse
             BackColor = Palette.Bg;
             ForeColor = Palette.Ink;
             StartPosition = FormStartPosition.Manual;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             RestoreGeometry();
 
             _content = new ColumnHost
             {
                 BackColor = Palette.Bg,
-                Padding = new Padding(12, 12, 12, 12)
+                Padding = new Padding(12, 12, 12, 12),
+                Dock = DockStyle.Fill
             };
             Controls.Add(_content);
         }
@@ -678,8 +888,7 @@ namespace KuroPulse
             catch { }
             try
             {
-                using (var bmp = Palette.Logo(64, null))
-                    Icon = Icon.FromHandle(bmp.GetHicon());
+                Icon = Palette.CachedTrayIcon(64, null);
             }
             catch { }
         }
@@ -746,6 +955,7 @@ namespace KuroPulse
 
         public void UpdateError()
         {
+            _lastSignature = null;
             _content.Controls.Clear();
             _content.Controls.Add(new Label
             {
@@ -842,11 +1052,36 @@ namespace KuroPulse
             }
         }
 
+        private static string Signature(RobotState s)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append(s.Overall).Append('|').Append(s.AlertsOpen).Append('|')
+              .Append(s.Actions.Count).Append('|').Append(s.Repos.Count);
+            foreach (var r in s.Repos)
+                sb.Append('|').Append(r.Name).Append(':').Append(r.Health).Append(':').Append(r.Failing.Count);
+            sb.Append("|F:").Append(s.Finance.Reachable).Append(s.Finance.Configured)
+              .Append(':').Append(s.Finance.Status).Append(':').Append(s.Finance.Runway)
+              .Append(':').Append(s.Finance.Burn).Append(':').Append(s.Finance.Mrr)
+              .Append(':').Append(s.Finance.TrendArrow).Append(':').Append(s.Finance.Cac)
+              .Append(':').Append(s.Finance.Ltv).Append(':').Append(s.Finance.Ratio);
+            sb.Append("|M:").Append(s.Metrics.LeadAvg).Append(':')
+              .Append(s.Metrics.Velocity).Append(':').Append(s.Metrics.CiRate);
+            foreach (var p in s.Metrics.Pivots) sb.Append('|').Append(p);
+            return sb.ToString();
+        }
+
         public void Render(RobotState s)
         {
             if (InvokeRequired) { BeginInvoke((Action)delegate { Render(s); }); return; }
             if (IsDisposed) return;
             _lastRender = DateTime.Now;
+
+            var signature = Signature(s);
+            if (signature == _lastSignature && _content.Controls.Count > 0) return;
+            _lastSignature = signature;
+
+            int savedX = Math.Max(0, -_content.AutoScrollPosition.X);
+            int savedY = Math.Max(0, -_content.AutoScrollPosition.Y);
 
             var overallColor = s.Overall == "green" ? Palette.Green
                              : s.Overall == "red" ? Palette.Red : Palette.Muted;
@@ -878,7 +1113,7 @@ namespace KuroPulse
             });
             header.Controls.Add(new Label
             {
-                Text = "v1.3 · intelligence d'entreprise lambda-Section",
+                Text = "v1.4 · intelligence d'entreprise lambda-Section",
                 ForeColor = Palette.Muted,
                 Font = new Font("Segoe UI", 7.5f),
                 AutoSize = true,
@@ -917,6 +1152,8 @@ namespace KuroPulse
             var statW = (colW - 3 * 8) / 4;
             var checksValue = okChecks + "/" + totalChecks + deltaText;
             var checksColor = s.Overall == "green" ? Palette.Ink : overallColor;
+            var statsRow = new Panel { BackColor = Palette.Bg };
+            statsRow.SetBounds(0, statY, colW, 54);
             for (int i = 0; i < 4; i++)
             {
                 StatCard card;
@@ -928,10 +1165,77 @@ namespace KuroPulse
                     default: card = new StatCard("ALERTES", s.AlertsOpen.ToString(),
                         s.AlertsOpen > 0 ? Palette.Red : Palette.Ink); break;
                 }
-                card.SetBounds(i * (statW + 8), statY, statW, 54);
-                _content.Controls.Add(card);
+                card.SetBounds(i * (statW + 8), 0, statW, 54);
+                statsRow.Controls.Add(card);
             }
+            _content.Controls.Add(statsRow);
             y += 62;
+
+            // finance & exécution (R111 : données locales uniquement)
+            _content.Controls.Add(Caption("FINANCE & EXÉCUTION"));
+            var capF = _content.Controls[_content.Controls.Count - 1];
+            capF.SetBounds(0, y, colW, 24); y += 28;
+
+            var finColor = s.Finance.Status == "critical" ? Palette.Red
+                         : s.Finance.Status == "warning" ? Palette.Accent
+                         : s.Finance.Status == "healthy" ? Palette.Green : Palette.Muted;
+            var finCards = new[]
+            {
+                Tuple.Create("RUNWAY",
+                    !s.Finance.Reachable ? "API à recharger" : (!s.Finance.Configured ? "non configuré" : s.Finance.Runway + s.Finance.TrendArrow),
+                    !s.Finance.Reachable || !s.Finance.Configured ? Palette.Muted : finColor),
+                Tuple.Create("BURN / MOIS", s.Finance.Configured ? s.Finance.Burn : "—", Palette.Ink),
+                Tuple.Create("MRR", s.Finance.Configured ? s.Finance.Mrr : "—", Palette.Ink),
+                Tuple.Create("LEAD TIME MOY.", s.Metrics.LeadAvg, Palette.Accent),
+            };
+            var statsRowF1 = new Panel { BackColor = Palette.Bg };
+            statsRowF1.SetBounds(0, y, colW, 54);
+            for (int i = 0; i < 4; i++)
+            {
+                var finCard = new StatCard(finCards[i].Item1, finCards[i].Item2, finCards[i].Item3);
+                finCard.SetBounds(i * (statW + 8), 0, statW, 54);
+                statsRowF1.Controls.Add(finCard);
+            }
+            _content.Controls.Add(statsRowF1);
+            y += 62;
+
+            var unitColor = s.Finance.UnitStatus == "healthy" ? Palette.Green
+                          : s.Finance.UnitStatus == "warning" ? Palette.Accent
+                          : s.Finance.UnitStatus == "critical" ? Palette.Red : Palette.Muted;
+            var finCards2 = new[]
+            {
+                Tuple.Create("CAC", s.Finance.Cac, s.Finance.Cac == "—" ? Palette.Muted : Palette.Ink),
+                Tuple.Create("LTV", s.Finance.Ltv, s.Finance.Ltv == "—" ? Palette.Muted : Palette.Green),
+                Tuple.Create("RATIO LTV/CAC", s.Finance.Ratio, unitColor),
+                Tuple.Create("VÉLOCITÉ MOY.", s.Metrics.Velocity, Palette.Ink),
+            };
+            var statsRowF2 = new Panel { BackColor = Palette.Bg };
+            statsRowF2.SetBounds(0, y, colW, 54);
+            for (int i = 0; i < 4; i++)
+            {
+                var finCard2 = new StatCard(finCards2[i].Item1, finCards2[i].Item2, finCards2[i].Item3);
+                finCard2.SetBounds(i * (statW + 8), 0, statW, 54);
+                statsRowF2.Controls.Add(finCard2);
+            }
+            _content.Controls.Add(statsRowF2);
+            y += 62;
+
+            var pivotsText = "";
+            for (int i = 0; i < Math.Min(3, s.Metrics.Pivots.Count); i++)
+                pivotsText += (i > 0 ? ", " : "") + s.Metrics.Pivots[i];
+            var hasPivots = pivotsText.Length > 0;
+            var metricsLine = new Label
+            {
+                Text = "CI en échec " + s.Metrics.CiRate +
+                       (hasPivots ? "\nPivots possibles : " + pivotsText : ""),
+                ForeColor = hasPivots ? Palette.Red : Palette.Muted,
+                Font = new Font("Segoe UI", 7.5f),
+                AutoSize = false,
+                BackColor = Color.Transparent
+            };
+            metricsLine.SetBounds(4, y, colW - 8, hasPivots ? 34 : 18);
+            _content.Controls.Add(metricsLine);
+            y += metricsLine.Height + 12;
 
             // repos
             _content.Controls.Add(Caption("REPOS SURVEILLÉS"));
@@ -972,6 +1276,8 @@ namespace KuroPulse
             cap.SetBounds(0, y, colW, 24); y += 26;
 
             int bx = 0;
+            var btnRow = new Panel { BackColor = Palette.Bg };
+            btnRow.SetBounds(0, y, colW, 36);
             foreach (var def in new[] {
                 Tuple.Create<string, Action>("Acquitter alertes (" + s.AlertsOpen + ")", delegate { _ackAll(); }),
                 Tuple.Create<string, Action>("Déclencher robot", delegate { _triggerRobot(); }),
@@ -986,7 +1292,7 @@ namespace KuroPulse
                     ForeColor = Palette.Ink,
                     Font = new Font("Segoe UI", 8.25f),
                     AutoSize = true,
-                    Location = new Point(bx, y),
+                    Location = new Point(bx, 2),
                     Cursor = Cursors.Hand
                 };
                 b.FlatAppearance.BorderColor = Palette.Border;
@@ -996,13 +1302,16 @@ namespace KuroPulse
                 var w = TextRenderer.MeasureText(def.Item1, b.Font).Width + 22;
                 b.Width = w;
                 b.Click += delegate { act(); };
-                _content.Controls.Add(b);
+                btnRow.Controls.Add(b);
                 bx += w + 8;
             }
-            y += 36;
+            _content.Controls.Add(btnRow);
+            y += 42;
 
             // pied
             int fx = 0;
+            var footRow = new Panel { BackColor = Palette.Bg };
+            footRow.SetBounds(0, y, colW, 44);
             foreach (var def in new[] {
                 Tuple.Create<string, Action>("GitHub Actions ↗", delegate {
                     try { System.Diagnostics.Process.Start("https://github.com/Lemniscate-world/kuro-rules/actions"); } catch {} }),
@@ -1014,7 +1323,8 @@ namespace KuroPulse
             })
             {
                 var l = LinkBtn(def.Item1, def.Item2);
-                l.SetBounds(fx, y, l.PreferredWidth, 18);
+                l.SetBounds(fx, 2, l.PreferredWidth, 18);
+                footRow.Controls.Add(l);
                 fx += l.PreferredWidth + 14;
             }
             var stamp = new Label
@@ -1025,12 +1335,17 @@ namespace KuroPulse
                 AutoSize = true,
                 BackColor = Color.Transparent
             };
-            stamp.SetBounds(0, y + 22, colW, 16);
-            _content.Controls.Add(stamp);
-            y += 44;
+            stamp.SetBounds(0, 24, colW, 16);
+            footRow.Controls.Add(stamp);
+            _content.Controls.Add(footRow);
+            y += 50;
 
             _content.AutoScrollMinSize = new Size(colW, y + 10);
             _content.Recenter();
+            if (savedX > 0 || savedY > 0)
+            {
+                try { _content.AutoScrollPosition = new Point(savedX, savedY); } catch { }
+            }
         }
 
         private const string KuroRootConst = @"C:\Users\Utilisateur\Documents\kuro-rules";

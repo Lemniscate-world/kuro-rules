@@ -149,8 +149,11 @@ reports/
 SYNC_BACKUPS/
 docs/
 
-# canaux Discord privés
+# canaux Discord privï¿½s
 kuro_discord_channels.local.json
+
+# finances privees (R111 - jamais comiter)
+finances.local.json
 
 # artefacts generes
 apps/kuro-pulse/kuro.ico

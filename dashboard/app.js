@@ -365,7 +365,81 @@ async function loadRobotPanel() {
   }
 }
 
+function finCell(label, value, tone) {
+  return `<div style="flex:1 1 92px;border:1px solid var(--border);border-radius:6px;padding:.4rem .5rem">
+      <div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:.05em">${label}</div>
+      <div style="font-weight:600;font-size:.95rem;color:${tone}">${escapeHtml(value)}</div>
+    </div>`;
+}
+
+function finTone(status) {
+  if (status === "critical") return "#f85149";
+  if (status === "warning" || status === "incomplete") return "#58a6ff";
+  if (status === "healthy") return "#3fb950";
+  return "var(--muted)";
+}
+
+async function loadFinancePanel() {
+  let el = document.getElementById("kuro-finance");
+  if (!el) {
+    el = document.createElement("section");
+    el.id = "kuro-finance";
+    el.className = "panel";
+    el.style.cssText = "margin:0 0 1rem;padding:.8rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-raise)";
+    const robot = document.getElementById("kuro-robot");
+    if (robot && robot.parentElement) {
+      robot.insertAdjacentElement("afterend", el);
+    } else {
+      document.body.prepend(el);
+    }
+  }
+  try {
+    const [finRes, metRes] = await Promise.all([
+      fetch(`/api/finance?ts=${Date.now()}`),
+      fetch(`/api/metrics?ts=${Date.now()}`),
+    ]);
+    const f = await finRes.json();
+    const m = await metRes.json();
+    if (f.status === "unconfigured") {
+      el.innerHTML =
+        `<div><strong>Finance &amp; exécution</strong></div>` +
+        `<em style="color:var(--muted)">Copiez finances.local.example.json vers finances.local.json (gitigné, R111).</em>`;
+      return;
+    }
+    const trend = f.trend && f.trend.runway_delta_months != null ? f.trend.runway_delta_months : null;
+    const arrow = trend == null ? "" : trend >= 0.05 ? " ▲+" + trend.toFixed(1) : trend <= -0.05 ? " ▼" + trend.toFixed(1) : "";
+    const ue = f.unit_economics || { configured: false };
+    const avg = m.averages || {};
+    const pivots = (m.pivot_candidates || [])
+      .slice(0, 3)
+      .map((p) => `${p.name} · ${p.days_inactive} j`)
+      .join(", ");
+    el.innerHTML =
+      `<div style="display:flex;justify-content:space-between;margin-bottom:.4rem">` +
+      `<strong>Finance &amp; exécution</strong>` +
+      `<span style="color:var(--muted);font-size:.65rem">100% local · R111 · ${escapeHtml(f.currency || "")}</span></div>` +
+      `<div style="display:flex;gap:.5rem;flex-wrap:wrap;font-family:var(--font-mono,monospace);font-size:.72rem">` +
+      finCell("Runway", (f.runway_label || "?") + arrow, finTone(f.status)) +
+      finCell("Burn/mois", (f.burn_rate_monthly ?? "?"), "inherit") +
+      finCell("MRR", (f.mrr_monthly ?? "?"), "inherit") +
+      finCell("CAC", ue.configured ? (ue.cac ?? "—") : "—", "inherit") +
+      finCell("LTV", ue.configured ? (ue.ltv ?? "—") : "—", "#3fb950") +
+      finCell("LTV:CAC", ue.configured ? (ue.ltv_cac_ratio ?? "—") : "—", finTone(ue.configured ? ue.status : null)) +
+      finCell("Lead time moy.", avg.lead_time_days != null ? avg.lead_time_days + " j" : "—", "#58a6ff") +
+      finCell("Vélocité", (avg.velocity_per_week ?? "—") + " c/sem", "inherit") +
+      finCell("CI en échec", avg.ci_failure_rate != null ? Math.round(avg.ci_failure_rate * 100) + "%" : "—",
+        avg.ci_failure_rate > 0.15 ? "#f85149" : "inherit") +
+      `</div>` +
+      (pivots ? `<div style="margin-top:.4rem;color:#f85149;font-size:.7rem">Pivots possibles : ${escapeHtml(pivots)}</div>` : "");
+  } catch (_) {
+    el.innerHTML =
+      `<div><strong>Finance &amp; exécution</strong> <em style="color:var(--muted)">— API Kuro locale indisponible</em></div>`;
+  }
+}
+
 load();
 setInterval(load, 60000);
 setInterval(loadRobotPanel, 60000);
+setInterval(loadFinancePanel, 60000);
 loadRobotPanel();
+loadFinancePanel();

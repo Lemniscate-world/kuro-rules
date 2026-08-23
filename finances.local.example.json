@@ -1,0 +1,23 @@
+{
+  "currency": "USD",
+  "starting_cash": 100,
+  "months": [
+    {
+      "month": "2026-01",
+      "expenses": [{ "label": "exemple hebergement", "amount": 30 }],
+      "revenues": []
+    },
+    {
+      "month": "2026-02",
+      "expenses": [{ "label": "exemple domaine", "amount": 20 }],
+      "revenues": [{ "label": "exemple vente", "amount": 50 }]
+    }
+  ],
+  "acquisition": {
+    "monthly_marketing_spend": 30,
+    "new_customers_per_month": 3,
+    "arpu_monthly": 15,
+    "gross_margin_pct": 80,
+    "avg_customer_lifetime_months": 12
+  }
+}
