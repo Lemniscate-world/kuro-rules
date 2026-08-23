@@ -85,11 +85,12 @@ def parse_list_file(path: Path) -> list[str]:
     return entries
 
 
-def detect_git_repositories() -> list[Path]:
+def detect_git_repositories(docs_dir: Path | None = None) -> list[Path]:
+    root = docs_dir or DOCS_DIR
     excluded = set(parse_list_file(EXCLUDE_FILE))
     excluded.add(ROOT_DIR.name)
     repos: list[Path] = []
-    for child in DOCS_DIR.iterdir():
+    for child in root.iterdir():
         if child.is_dir() and child.name not in excluded and (child / ".git").exists():
             repos.append(child)
     return sorted(repos, key=lambda item: item.name.lower())
