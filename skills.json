@@ -1,0 +1,367 @@
+{
+  "generated_at": "2026-08-23T17:58:27+00:00",
+  "window_days": 90,
+  "repo_count": 43,
+  "skills": [
+    {
+      "name": "Python",
+      "pct": 90,
+      "kb": 62883,
+      "repos": 37,
+      "commits_90d": 319,
+      "ci_green_frac": 0.75,
+      "tests_frac": 0.59,
+      "new": false
+    },
+    {
+      "name": "JavaScript",
+      "pct": 65,
+      "kb": 8372,
+      "repos": 10,
+      "commits_90d": 233,
+      "ci_green_frac": 0.0,
+      "tests_frac": 0.5,
+      "new": false
+    },
+    {
+      "name": "TypeScript",
+      "pct": 55,
+      "kb": 2848,
+      "repos": 10,
+      "commits_90d": 192,
+      "ci_green_frac": 1.0,
+      "tests_frac": 0.5,
+      "new": false
+    },
+    {
+      "name": "GitHub Actions",
+      "pct": 50,
+      "kb": 0,
+      "repos": 15,
+      "commits_90d": 443,
+      "ci_green_frac": 0.67,
+      "tests_frac": 0.8,
+      "new": true
+    },
+    {
+      "name": "HTML",
+      "pct": 50,
+      "kb": 768,
+      "repos": 12,
+      "commits_90d": 402,
+      "ci_green_frac": 0.5,
+      "tests_frac": 0.58,
+      "new": false
+    },
+    {
+      "name": "CSS",
+      "pct": 45,
+      "kb": 299,
+      "repos": 11,
+      "commits_90d": 401,
+      "ci_green_frac": 0.67,
+      "tests_frac": 0.45,
+      "new": false
+    },
+    {
+      "name": "Pytest",
+      "pct": 40,
+      "kb": 0,
+      "repos": 11,
+      "commits_90d": 272,
+      "ci_green_frac": 0.67,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "NumPy",
+      "pct": 35,
+      "kb": 0,
+      "repos": 8,
+      "commits_90d": 262,
+      "ci_green_frac": 0.67,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "PyTorch",
+      "pct": 35,
+      "kb": 0,
+      "repos": 8,
+      "commits_90d": 229,
+      "ci_green_frac": 0.5,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "PowerShell",
+      "pct": 35,
+      "kb": 27,
+      "repos": 5,
+      "commits_90d": 255,
+      "ci_green_frac": 1.0,
+      "tests_frac": 0.8,
+      "new": false
+    },
+    {
+      "name": "Vite",
+      "pct": 30,
+      "kb": 0,
+      "repos": 8,
+      "commits_90d": 197,
+      "ci_green_frac": 1.0,
+      "tests_frac": 0.5,
+      "new": false
+    },
+    {
+      "name": "Docker",
+      "pct": 30,
+      "kb": 0,
+      "repos": 7,
+      "commits_90d": 252,
+      "ci_green_frac": 0.5,
+      "tests_frac": 0.71,
+      "new": false
+    },
+    {
+      "name": "Shell",
+      "pct": 30,
+      "kb": 137,
+      "repos": 7,
+      "commits_90d": 222,
+      "ci_green_frac": 0.5,
+      "tests_frac": 0.86,
+      "new": false
+    },
+    {
+      "name": "React",
+      "pct": 30,
+      "kb": 0,
+      "repos": 6,
+      "commits_90d": 187,
+      "ci_green_frac": 1.0,
+      "tests_frac": 0.5,
+      "new": false
+    },
+    {
+      "name": "Rust",
+      "pct": 30,
+      "kb": 128,
+      "repos": 6,
+      "commits_90d": 209,
+      "ci_green_frac": 1.0,
+      "tests_frac": 0.17,
+      "new": false
+    },
+    {
+      "name": "Vitest",
+      "pct": 30,
+      "kb": 0,
+      "repos": 2,
+      "commits_90d": 187,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Tailwind",
+      "pct": 20,
+      "kb": 0,
+      "repos": 6,
+      "commits_90d": 5,
+      "ci_green_frac": 1.0,
+      "tests_frac": 0.67,
+      "new": false
+    },
+    {
+      "name": "FastAPI",
+      "pct": 20,
+      "kb": 0,
+      "repos": 4,
+      "commits_90d": 49,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Pandas",
+      "pct": 20,
+      "kb": 0,
+      "repos": 4,
+      "commits_90d": 49,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "SciPy",
+      "pct": 20,
+      "kb": 0,
+      "repos": 4,
+      "commits_90d": 49,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Transformers",
+      "pct": 20,
+      "kb": 0,
+      "repos": 4,
+      "commits_90d": 24,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Plotly",
+      "pct": 20,
+      "kb": 0,
+      "repos": 2,
+      "commits_90d": 49,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Statsmodels",
+      "pct": 20,
+      "kb": 0,
+      "repos": 2,
+      "commits_90d": 49,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Streamlit",
+      "pct": 20,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 49,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "SQL",
+      "pct": 15,
+      "kb": 93,
+      "repos": 3,
+      "commits_90d": 14,
+      "ci_green_frac": null,
+      "tests_frac": 0.67,
+      "new": false
+    },
+    {
+      "name": "Selenium",
+      "pct": 15,
+      "kb": 0,
+      "repos": 2,
+      "commits_90d": 0,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Vercel",
+      "pct": 15,
+      "kb": 0,
+      "repos": 2,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Flask",
+      "pct": 15,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Kotlin",
+      "pct": 15,
+      "kb": 48,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "LangChain",
+      "pct": 15,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Next.js",
+      "pct": 15,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": 1.0,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Optuna",
+      "pct": 15,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "TensorFlow",
+      "pct": 15,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "scikit-learn",
+      "pct": 15,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 1.0,
+      "new": false
+    },
+    {
+      "name": "Electron",
+      "pct": 5,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 0,
+      "ci_green_frac": null,
+      "tests_frac": 0.0,
+      "new": false
+    },
+    {
+      "name": "Nginx",
+      "pct": 5,
+      "kb": 0,
+      "repos": 1,
+      "commits_90d": 5,
+      "ci_green_frac": null,
+      "tests_frac": 0.0,
+      "new": false
+    }
+  ]
+}
