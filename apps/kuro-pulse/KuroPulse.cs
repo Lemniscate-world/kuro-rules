@@ -315,11 +315,17 @@ namespace KuroPulse
 
             try
             {
-                // tuer l'éventuel listener périmé sur le port avant de relancer
-                var kill = System.Diagnostics.Process.Start("powershell",
-                    "-NoProfile -Command \"Get-NetTCPConnection -LocalPort 8767 -State Listen " +
-                    "-ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess " +
-                    "-Unique | ForEach-Object { Stop-Process -Id $_ -Force }\"");
+                // tuer l'éventuel listener périmé sur le port avant de relancer (fenêtre cachée)
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell",
+                    Arguments = "-NoProfile -Command \"Get-NetTCPConnection -LocalPort 8767 -State Listen " +
+                                "-ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess " +
+                                "-Unique | ForEach-Object { Stop-Process -Id $_ -Force }\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                var kill = System.Diagnostics.Process.Start(psi);
                 try { kill.WaitForExit(5000); } catch { }
             }
             catch { }

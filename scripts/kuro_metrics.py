@@ -61,6 +61,7 @@ def run_git(path: Path, *args: str) -> GitResult:
             encoding="utf-8",
             errors="replace",
             check=False,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
     except FileNotFoundError:
         return GitResult(False, "git not available")
