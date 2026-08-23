@@ -5,12 +5,12 @@
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-08-23 `a81e007` ci: build.yml en manuel uniquement (script build s | main | 0 (0 funcs) | 0 | 36 |  |
-| **NeuralDBG** | 2026-08-22 `b0122d0` feat(community): growth infrastructure (P1) — gree | main | 0 (0 funcs) | 0 | 14 |  |
+| **Metatron** | 2026-08-23 `69be135` fix(ci): scan SonarQube non bloquant - secret SONA | main | 0 (0 funcs) | 0 | 2 |  |
+| **NeuralDBG** | 2026-08-23 `8e666c1` fix(ci): retablit l'exclusion CHANGELOG.md dans le | main | 0 (0 funcs) | 0 | 19 |  |
+| **OpenQuant** | 2026-08-23 `d7bf12e` fix(critical): profondeur historique — la cause ra | main | 0 (0 funcs) | 0 | 43 |  |
 | **Helium** | 2026-08-21 `0430af5` feat(S1): CLI polish R9 compliant - no emojis, col | main | 0 (0 funcs) | 0 | 5 |  |
-| **Metatron** | 2026-08-21 `9db1875` chore: retrait GAD.md (retire du systeme Kuro) | main | 0 (0 funcs) | 0 | 1 |  |
 | **Neural-Agent** | 2026-08-08 `b5df6e1` model: v5 LoRA adapter retrained (93.7%) | master | 0 (0 funcs) | 0 | 2 |  |
-| **LifeTrack** | 2026-08-02 `98481cc` feat: adaptive challenges + local psychoanalysis + | master | 0 (0 funcs) | 0 | 30 |  |
+| **LifeTrack** | 2026-08-02 `98481cc` feat: adaptive challenges + local psychoanalysis + | master | 0 (0 funcs) | 0 | 24 |  |
 | **Aquarium** | 2026-07-19 `06db523` chore: gitignore private files (R76 compliance) | main | 0 (0 funcs) | 0 | 0 |  |
 | **NeuralDBG-Engine** | 2026-07-05 `a9d6b6e` docs: fix license from Proprietary to MIT | master | 0 (0 funcs) | 0 | 0 |  |
 | **TokenWise** | 2026-05-17 `0869408` fix: Replace Unicode arrow with ASCII for Windows  | master | 0 (0 funcs) | 0 | 0 |  |
@@ -35,4 +35,4 @@
 - **TokenWise** `0%` mais 0 commit 30j (dernier 2026-05-17) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-23T18:30:46.944486 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-23T23:45:41.711953 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
