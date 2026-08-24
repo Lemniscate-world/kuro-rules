@@ -212,6 +212,16 @@ def get_metrics() -> dict:
         return {"status": "error", "error": str(exc)}
 
 
+def get_strategy() -> dict:
+    """Digest stratégique : finance + exécution + OKR + pipeline + décisions."""
+    try:
+        import kuro_strategy
+
+        return kuro_strategy.build_payload()
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+
+
 def build_summary() -> str:
     st = get_status()
     conn = db()
@@ -305,6 +315,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, get_finance())
             elif path == "/api/metrics":
                 self._json(200, get_metrics())
+            elif path == "/api/strategy":
+                self._json(200, get_strategy())
             elif path in STATIC_FILES:
                 file_path = DASHBOARD_DIR / STATIC_FILES[path]
                 if not file_path.exists():

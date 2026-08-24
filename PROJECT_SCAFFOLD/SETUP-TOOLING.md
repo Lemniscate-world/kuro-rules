@@ -31,3 +31,24 @@ agent-reach doctor
 
 - [ ] `codebase-memory-mcp cli index_status` → projet présent
 - [ ] `agent-reach doctor` → ≥ 4 canaux verts
+
+## 3. Design web — ThreeUI Community (R112/R109)
+
+Pour toute création **web** (landing, produit, dashboard React) :
+
+```powershell
+npm install @designcodeio/threeui
+```
+
+```jsx
+import { AtTheHorizon } from "@designcodeio/threeui";
+import "@designcodeio/threeui/style.css";
+```
+
+- 50 composants Community MIT (React + Three.js/WebGL, variantes et controls inclus)
+- Catalogue live : https://threeui.com — source : https://github.com/MengTo/threeui
+- Composants full-document : copier les assets de
+  `node_modules/@designcodeio/threeui/lib-dist/assets/` vers le public/ de l'app
+- Ne convient PAS aux apps desktop C# (KuroPulse) ni au portfolio statique
+  (vanilla HTML) — réserver aux projets React/Vite
+

@@ -167,6 +167,46 @@ def fetch_exa(query: str) -> list[dict]:
         return []
 
 
+def fetch_competitors() -> list[dict]:
+    """Mouvements des concurrents suivis (strategy.local.json). Silencieux si absent (CI)."""
+    strategy_file = Path(__file__).resolve().parent.parent / "strategy.local.json"
+    try:
+        data = json.loads(strategy_file.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    out: list[dict] = []
+    for c in (data.get("competitors") or [])[:5]:
+        repo = c.get("github")
+        if not repo:
+            continue
+        try:
+            completed = subprocess.run(
+                ["gh", "api", f"repos/{repo}"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            if completed.returncode != 0:
+                continue
+            d = json.loads(completed.stdout)
+            stars = d.get("stargazers_count", 0)
+            pushed = str(d.get("pushed_at", ""))[:10]
+            name = c.get("name") or repo
+            out.append(
+                {
+                    "title": f"{name} ★{stars} — dernier push {pushed}",
+                    "url": d.get("html_url", f"https://github.com/{repo}"),
+                    "score": stars,
+                    "desc": (c.get("url") and f"site: {c['url']}") or (d.get("description") or "")[:80],
+                }
+            )
+        except Exception:
+            continue
+    return out
+
+
 def collect(token: str | None) -> list[tuple[str, list[dict]]]:
     sections: list[tuple[str, list[dict]]] = []
 
@@ -193,6 +233,7 @@ def collect(token: str | None) -> list[tuple[str, list[dict]]]:
                 seen_urls.add(item["url"])
                 exa_items.append(item)
     sections.append(("Exa — veille sémantique web", exa_items[:5]))
+    sections.append(("Concurrents suivis", fetch_competitors()))
 
     return [(name, items) for name, items in sections if items]
 

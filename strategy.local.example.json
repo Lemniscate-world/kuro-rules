@@ -1,0 +1,38 @@
+{
+  "objectives": [
+    {
+      "key": "interviews",
+      "label": "Interviews Mom Test / semaine",
+      "target": 3,
+      "metric": "pipeline.interviews_7d"
+    },
+    {
+      "key": "mrr",
+      "label": "MRR (USD)",
+      "target": 100,
+      "metric": "finance.mrr"
+    },
+    {
+      "key": "velocity",
+      "label": "Commits / semaine (moyenne repos)",
+      "target": 10,
+      "metric": "metrics.velocity"
+    },
+    {
+      "key": "exemple_manuel",
+      "label": "Objectif suivi à la main",
+      "target": 5,
+      "metric": "manual",
+      "current": 0
+    }
+  ],
+  "competitors": [
+    {
+      "name": "ExempleCorp",
+      "github": "org/exemple-repo",
+      "url": "https://exemple.com",
+      "keywords": ["mot-cle-1", "mot-cle-2"]
+    }
+  ],
+  "notes": "Objectifs hebdo réalistes. Ajuster les targets chaque mois (R90)."
+}
