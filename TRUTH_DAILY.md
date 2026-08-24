@@ -684,3 +684,34 @@ _Généré 2026-08-23T23:45:41.711953 | Script: `scripts/audit_truth_daily.py` |
 - **À surveiller pour `Aladin`** ← [s1dashu/ip-as-logo-skill ★4112](https://github.com/s1dashu/ip-as-logo-skill) (agent)
 - **À surveiller pour `Astral`** ← [wang2122/sprix-sage-router ★1756](https://github.com/wang2122/sprix-sage-router) (agent)
 - **À surveiller pour `Sagittarius`** ← [vvxw/deploy-vercel ★1299](https://github.com/vvxw/deploy-vercel) (deploy)
+
+## Signaux Radar + recommandations (semaine du 2026-08-24)
+
+**Hacker News**
+- [Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917) (499)
+- [I were 17, I'd learn how to build LLMs from scratch](https://twitter.com/paulg/status/2091544343589060625) (498)
+- [My agent.md to improve LLM-assisted code quality](https://fabiensanglard.net/agent.md/index.html) (391)
+- [Vomit: Clean up Claude 5's token output with a separate LLM](https://github.com/zachahn/vomit) (305)
+- [Extensible Software in the age of LLMs](https://jeremymorrell.dev/blog/extensible-software-in-the-age-of-llms/) (175)
+
+**GitHub — nouveaux repos qui montent**
+- [s1dashu/ip-as-logo-skill ★4114](https://github.com/s1dashu/ip-as-logo-skill) (4114) — _A compact Agent Skill for highly simplified, rounded, subtly neo-skeuomorphic IP mascot logos._
+- [MengTo/threeui ★3429](https://github.com/MengTo/threeui) (3429) — _Open-source ThreeUI Community catalog with live interactive components and complete Community source._
+- [wang2122/sprix-sage-router ★1756](https://github.com/wang2122/sprix-sage-router) (1756) — _Sprix AI at 屿智同行 — state-aware SELF/COLLABORATE/HANDOFF routing for A2A agent networks._
+- [b-nnett/grok-bot-0.18-reconstructed ★1605](https://github.com/b-nnett/grok-bot-0.18-reconstructed) (1605) — _Unofficial source-oriented reconstruction and extension of Grok Bot 0.18.0 for macOS_
+- [vvxw/deploy-vercel ★1299](https://github.com/vvxw/deploy-vercel) (1299) — _Install Command：npm install_
+- [duty1g/x64dbg-mcp-server ★1201](https://github.com/duty1g/x64dbg-mcp-server) (1201) — _x64dbg-MCP Server is a native MCP (Model Context Protocol) plugin for x64dbg that exposes the debugger's full _
+
+**arXiv cs.AI**
+- [Primal Acceleration of Newton's Method](http://arxiv.org/abs/2608.21359v1)
+- [VIALS: A Benchmark for Visual Interpretation of Artifacts in the Life Sciences](http://arxiv.org/abs/2608.21357v1)
+- [AI with Authority, from Application to Silicon](http://arxiv.org/abs/2608.21356v1)
+- [TurboBias 2.0: Streaming Context-Biasing for Production-Efficient ASR Systems](http://arxiv.org/abs/2608.21343v1)
+
+- **relancer avec `Odin`** ← [My agent.md to improve LLM-assisted code quality](https://fabiensanglard.net/agent.md/index.html) (mots : agent, code, llm)
+- **intégrer dans `Metatron`** ← [duty1g/x64dbg-mcp-server ★1201](https://github.com/duty1g/x64dbg-mcp-server) (mots : debugger, model)
+- **À surveiller pour `NeuralDBG`** ← [Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [Vomit: Clean up Claude 5's token output with a separate LLM](https://github.com/zachahn/vomit) (llm)
+- **À surveiller pour `Aladin`** ← [s1dashu/ip-as-logo-skill ★4114](https://github.com/s1dashu/ip-as-logo-skill) (agent)
+- **À surveiller pour `Astral`** ← [wang2122/sprix-sage-router ★1756](https://github.com/wang2122/sprix-sage-router) (agent)
+- **À surveiller pour `Sagittarius`** ← [vvxw/deploy-vercel ★1299](https://github.com/vvxw/deploy-vercel) (deploy)
