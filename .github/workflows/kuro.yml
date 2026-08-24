@@ -59,6 +59,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'ox-alpha:free' }}
+          KURO_AUTO_FIX: '1'
         run: |
           python kuro-rules/scripts/ci_guardian.py \
             --owners LambdaSection Lemniscate-world \
