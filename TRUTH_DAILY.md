@@ -36,3 +36,27 @@
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
 _Généré 2026-08-23T23:45:41.711953 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+## Signaux Radar + recommandations (semaine du 2026-08-24)
+
+**Hacker News**
+- [Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917) (417)
+- [Vomit: Clean up Claude 5's token output with a separate LLM](https://github.com/zachahn/vomit) (303)
+- [Extensible Software in the age of LLMs](https://jeremymorrell.dev/blog/extensible-software-in-the-age-of-llms/) (173)
+- [Launch HN: Speko (YC S26) – OpenRouter for Voice AI](https://speko.ai/) (118)
+- [Guess which of these LLM outputs is watermarked](https://sgoedecke.github.io/watermark-quiz/) (67)
+
+**GitHub — nouveaux repos qui montent**
+- [s1dashu/ip-as-logo-skill ★3910](https://github.com/s1dashu/ip-as-logo-skill) (3910) — _A compact Agent Skill for highly simplified, rounded, subtly neo-skeuomorphic IP mascot logos._
+- [MengTo/threeui ★2918](https://github.com/MengTo/threeui) (2918) — _Open-source ThreeUI Community catalog with live interactive components and complete Community source._
+- [wang2122/sprix-sage-router ★1413](https://github.com/wang2122/sprix-sage-router) (1413) — _Sprix AI at 屿智同行 — state-aware SELF/COLLABORATE/HANDOFF routing for A2A agent networks._
+- [vvxw/deploy-vercel ★1216](https://github.com/vvxw/deploy-vercel) (1216) — _Install Command：npm install_
+- [duty1g/x64dbg-mcp-server ★888](https://github.com/duty1g/x64dbg-mcp-server) (888) — _x64dbg-MCP Server is a native MCP (Model Context Protocol) plugin for x64dbg that exposes the debugger's full _
+- [ShadowAqueduct/watermark-remover ★760](https://github.com/ShadowAqueduct/watermark-remover) (760) — _Purge multi-vendor AI watermarks: clean Unicode text, apply statistical rewrite hooks, and clear C2PA plus met_
+
+- **intégrer dans `Metatron`** ← [duty1g/x64dbg-mcp-server ★888](https://github.com/duty1g/x64dbg-mcp-server) (mots : debugger, model)
+- **À surveiller pour `NeuralDBG`** ← [Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [Vomit: Clean up Claude 5's token output with a separate LLM](https://github.com/zachahn/vomit) (llm)
+- **À surveiller pour `Neural-Agent`** ← [Guess which of these LLM outputs is watermarked](https://sgoedecke.github.io/watermark-quiz/) (llm)
+- **À surveiller pour `Aladin`** ← [s1dashu/ip-as-logo-skill ★3910](https://github.com/s1dashu/ip-as-logo-skill) (agent)
+- **À surveiller pour `Astral`** ← [wang2122/sprix-sage-router ★1413](https://github.com/wang2122/sprix-sage-router) (agent)
+- **À surveiller pour `Sagittarius`** ← [vvxw/deploy-vercel ★1216](https://github.com/vvxw/deploy-vercel) (deploy)
