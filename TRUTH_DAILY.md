@@ -401,3 +401,34 @@ _Généré 2026-08-23T23:45:41.711953 | Script: `scripts/audit_truth_daily.py` |
 - **À surveiller pour `Aladin`** ← [s1dashu/ip-as-logo-skill ★4034](https://github.com/s1dashu/ip-as-logo-skill) (agent)
 - **À surveiller pour `Astral`** ← [wang2122/sprix-sage-router ★1754](https://github.com/wang2122/sprix-sage-router) (agent)
 - **À surveiller pour `Sagittarius`** ← [vvxw/deploy-vercel ★1278](https://github.com/vvxw/deploy-vercel) (deploy)
+
+## Signaux Radar + recommandations (semaine du 2026-08-24)
+
+**Hacker News**
+- [Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917) (417)
+- [Vomit: Clean up Claude 5's token output with a separate LLM](https://github.com/zachahn/vomit) (303)
+- [Extensible Software in the age of LLMs](https://jeremymorrell.dev/blog/extensible-software-in-the-age-of-llms/) (173)
+- [Launch HN: Speko (YC S26) – OpenRouter for Voice AI](https://speko.ai/) (118)
+- [Guess which of these LLM outputs is watermarked](https://sgoedecke.github.io/watermark-quiz/) (67)
+
+**GitHub — nouveaux repos qui montent**
+- [s1dashu/ip-as-logo-skill ★4053](https://github.com/s1dashu/ip-as-logo-skill) (4053) — _A compact Agent Skill for highly simplified, rounded, subtly neo-skeuomorphic IP mascot logos._
+- [MengTo/threeui ★3291](https://github.com/MengTo/threeui) (3291) — _Open-source ThreeUI Community catalog with live interactive components and complete Community source._
+- [wang2122/sprix-sage-router ★1754](https://github.com/wang2122/sprix-sage-router) (1754) — _Sprix AI at 屿智同行 — state-aware SELF/COLLABORATE/HANDOFF routing for A2A agent networks._
+- [vvxw/deploy-vercel ★1284](https://github.com/vvxw/deploy-vercel) (1284) — _Install Command：npm install_
+- [duty1g/x64dbg-mcp-server ★1123](https://github.com/duty1g/x64dbg-mcp-server) (1123) — _x64dbg-MCP Server is a native MCP (Model Context Protocol) plugin for x64dbg that exposes the debugger's full _
+- [b-nnett/grok-bot-0.18-reconstructed ★961](https://github.com/b-nnett/grok-bot-0.18-reconstructed) (961) — _Unofficial source-oriented reconstruction and extension of Grok Bot 0.18.0 for macOS_
+
+**arXiv cs.AI**
+- [Primal Acceleration of Newton's Method](http://arxiv.org/abs/2608.21359v1)
+- [VIALS: A Benchmark for Visual Interpretation of Artifacts in the Life Sciences](http://arxiv.org/abs/2608.21357v1)
+- [AI with Authority, from Application to Silicon](http://arxiv.org/abs/2608.21356v1)
+- [TurboBias 2.0: Streaming Context-Biasing for Production-Efficient ASR Systems](http://arxiv.org/abs/2608.21343v1)
+
+- **intégrer dans `Metatron`** ← [duty1g/x64dbg-mcp-server ★1123](https://github.com/duty1g/x64dbg-mcp-server) (mots : debugger, model)
+- **À surveiller pour `NeuralDBG`** ← [Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [Vomit: Clean up Claude 5's token output with a separate LLM](https://github.com/zachahn/vomit) (llm)
+- **À surveiller pour `Neural-Agent`** ← [Guess which of these LLM outputs is watermarked](https://sgoedecke.github.io/watermark-quiz/) (llm)
+- **À surveiller pour `Aladin`** ← [s1dashu/ip-as-logo-skill ★4053](https://github.com/s1dashu/ip-as-logo-skill) (agent)
+- **À surveiller pour `Astral`** ← [wang2122/sprix-sage-router ★1754](https://github.com/wang2122/sprix-sage-router) (agent)
+- **À surveiller pour `Sagittarius`** ← [vvxw/deploy-vercel ★1284](https://github.com/vvxw/deploy-vercel) (deploy)
