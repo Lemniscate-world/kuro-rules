@@ -21,6 +21,9 @@ Usage:
 import argparse
 import json
 import os
+import re
+import shutil
+import subprocess
 import sys
 import urllib.parse
 import urllib.request
@@ -140,6 +143,30 @@ def fetch_arxiv() -> list[dict]:
     return out
 
 
+def fetch_exa(query: str) -> list[dict]:
+    """Recherche sémantique Exa via mcporter (Agent Reach). Silencieux si absent (CI)."""
+    if shutil.which("mcporter") is None:
+        return []
+    try:
+        # mcporter est un .CMD sous Windows : passage par cmd.exe, et le code
+        # de sortie n'est pas fiable -> on parse le stdout quoi qu'il arrive.
+        completed = subprocess.run(
+            f'mcporter call exa.web_search_exa "query={query} 2026" numResults=3 --timeout 60000',
+            capture_output=True,
+            text=True,
+            timeout=90,
+            check=False,
+            shell=True,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        out: list[dict] = []
+        for m in re.finditer(r"Title: (.+)\nURL: (\S+)", completed.stdout or ""):
+            out.append({"title": m.group(1).strip(), "url": m.group(2).strip(), "score": 0})
+        return out
+    except Exception:
+        return []
+
+
 def collect(token: str | None) -> list[tuple[str, list[dict]]]:
     sections: list[tuple[str, list[dict]]] = []
 
@@ -157,6 +184,15 @@ def collect(token: str | None) -> list[tuple[str, list[dict]]]:
 
     sections.append(("GitHub — nouveaux repos qui montent", fetch_github(token)))
     sections.append(("arXiv cs.AI", fetch_arxiv()))
+
+    exa_items: list[dict] = []
+    seen_urls: set[str] = set()
+    for q in HN_QUERIES:
+        for item in fetch_exa(q):
+            if item["url"] not in seen_urls:
+                seen_urls.add(item["url"])
+                exa_items.append(item)
+    sections.append(("Exa — veille sémantique web", exa_items[:5]))
 
     return [(name, items) for name, items in sections if items]
 
