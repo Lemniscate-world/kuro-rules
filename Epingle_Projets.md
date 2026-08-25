@@ -68,7 +68,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **OpenQuant** |  44%  | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
+| **OpenQuant** |  49%  | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
 | Console | 0% | Prototypage | Environnement de développement d'outils de trading quantitatifs et algorithmiques. |
 
 **Objectif 2026 — 5 modèles/an :**

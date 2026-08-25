@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-08-23T23:45:42+00:00",
+  "generated_at": "2026-08-25T05:21:57+00:00",
   "window_days": 90,
   "repo_count": 17,
   "skills": [
     {
       "name": "Python",
       "pct": 55,
-      "kb": 2584,
+      "kb": 2657,
       "repos": 14,
       "commits_90d": 140,
       "ci_green_frac": 1.0,
@@ -106,7 +106,7 @@
     {
       "name": "PowerShell",
       "pct": 20,
-      "kb": 8,
+      "kb": 9,
       "repos": 3,
       "commits_90d": 105,
       "ci_green_frac": 1.0,
