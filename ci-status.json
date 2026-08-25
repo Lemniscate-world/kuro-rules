@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T08:43:38+00:00",
+  "generated_at": "2026-08-25T09:36:37+00:00",
   "overall": "green",
   "repos": [
     {
@@ -287,78 +287,16 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32823112069",
-          "updated_at": "2026-08-25T07:45:50Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32828120397",
+          "updated_at": "2026-08-25T08:44:23Z"
         },
         {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32823111384",
-          "updated_at": "2026-08-25T07:45:38Z"
-        }
-      ]
-    },
-    {
-      "name": "Lemniscate-world/LifeTrack",
-      "health": "green",
-      "workflows": [
-        {
-          "name": "CodeQL Setup",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32563719839",
-          "updated_at": "2026-08-22T09:01:25Z"
-        },
-        {
-          "name": "CI",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/30759070615",
-          "updated_at": "2026-08-02T17:32:49Z"
-        },
-        {
-          "name": "github_actions in /. - Update #1499386501",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/30708485672",
-          "updated_at": "2026-08-01T16:36:28Z"
-        },
-        {
-          "name": "npm_and_yarn in / for vite - Update #1479975442",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/30119726924",
-          "updated_at": "2026-07-24T19:10:42Z"
-        },
-        {
-          "name": "npm_and_yarn in / for vite - Update #1475895155",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/29988674581",
-          "updated_at": "2026-07-23T07:36:15Z"
-        },
-        {
-          "name": "cargo in /src-tauri - Update #1472054366",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/29849164318",
-          "updated_at": "2026-07-21T16:35:30Z"
-        },
-        {
-          "name": "cargo in /src-tauri - Update #1460546987",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/29350159420",
-          "updated_at": "2026-07-14T16:34:53Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32828119942",
+          "updated_at": "2026-08-25T08:44:23Z"
         }
       ]
     },
@@ -371,24 +309,24 @@
           "status": "in_progress",
           "conclusion": null,
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32828059824",
-          "updated_at": "2026-08-25T08:43:05Z"
-        },
-        {
-          "name": "Push on master",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32823109071",
-          "updated_at": "2026-08-25T07:46:48Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32832812264",
+          "updated_at": "2026-08-25T09:36:01Z"
         },
         {
           "name": "Kuro Rules Compliance",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32772006104",
-          "updated_at": "2026-08-24T20:06:47Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32828216115",
+          "updated_at": "2026-08-25T08:45:08Z"
+        },
+        {
+          "name": "Push on master",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32828117986",
+          "updated_at": "2026-08-25T08:45:43Z"
         },
         {
           "name": "Rules Audit",
@@ -403,7 +341,8 @@
   ],
   "no_ci": [
     "LambdaSection/.github",
-    "LambdaSection/Cesium"
+    "LambdaSection/Cesium",
+    "Lemniscate-world/LifeTrack"
   ],
   "actions": []
 }
