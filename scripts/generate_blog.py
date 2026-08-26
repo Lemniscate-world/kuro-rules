@@ -62,16 +62,16 @@ def collect_git_facts(name):
 def generate_daily_blog(dry_run=True):
     today = date.today().isoformat()
     projs = parse_epingle_projects()
-    # Find recent projects (last commit <=7j)
+    # Find recent projects (last commit <=7j) - dynamic window
     recent = []
+    from datetime import timedelta
+    cutoff = date.today() - timedelta(days=7)
     for p in projs:
         facts = collect_git_facts(p["name"])
-        if facts and facts["date"] >= "2026-08-14":  # last 7 days from 2026-08-21
-            # check if last commit within 7 days
+        if facts and facts.get("date"):
             try:
                 ld = date.fromisoformat(facts["date"][:10])
-                delta = (date.today() - ld).days
-                if delta <= 7:
+                if ld >= cutoff:
                     recent.append((p, facts))
             except:
                 pass
@@ -120,11 +120,15 @@ def generate_daily_blog(dry_run=True):
     lines.append("")
     daily_content = "\n".join(lines)
 
-    # 2. Per-project posts for recent
+    # 2. Per-project posts for recent - slug uses commit date for coherence
     per_project_paths = []
     for p, f in recent[:3]:
-        slug = f"{today}-{p['name'].lower().replace(' ', '-')}"
+        commit_date = f["date"][:10] if f.get("date") else today
+        slug = f"{commit_date}-{p['name'].lower().replace(' ', '-')}"
         path = BLOG_DIR / f"{slug}.md"
+        if path.exists():
+            # already published for this commit date, skip duplicate
+            continue
         plines = []
         plines.append("---")
         plines.append(f'title: "{p["name"]} — {f["date"]}"')
