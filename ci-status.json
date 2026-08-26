@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T09:42:54+00:00",
+  "generated_at": "2026-08-26T10:36:45+00:00",
   "overall": "red",
   "repos": [
     {
@@ -50,9 +50,9 @@
           "name": "Pre-commit",
           "status": "completed",
           "conclusion": "failure",
-          "attempt": 1,
+          "attempt": 2,
           "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886701",
-          "updated_at": "2026-08-26T08:53:26Z"
+          "updated_at": "2026-08-26T09:45:12Z"
         },
         {
           "name": "Codacy",
@@ -144,17 +144,17 @@
           "name": "kuro-rules-compliance",
           "status": "completed",
           "conclusion": "failure",
-          "attempt": 1,
+          "attempt": 2,
           "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32949765487",
-          "updated_at": "2026-08-26T08:49:50Z"
+          "updated_at": "2026-08-26T09:43:01Z"
         },
         {
           "name": "CI",
           "status": "completed",
           "conclusion": "failure",
-          "attempt": 1,
+          "attempt": 2,
           "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32949765457",
-          "updated_at": "2026-08-26T08:51:24Z"
+          "updated_at": "2026-08-26T09:44:33Z"
         },
         {
           "name": "Push on master",
@@ -421,16 +421,16 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32949364351",
-          "updated_at": "2026-08-26T08:45:49Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32954474759",
+          "updated_at": "2026-08-26T09:43:44Z"
         },
         {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32949364029",
-          "updated_at": "2026-08-26T08:45:46Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/32954474050",
+          "updated_at": "2026-08-26T09:43:50Z"
         }
       ]
     },
@@ -443,8 +443,16 @@
           "status": "in_progress",
           "conclusion": null,
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32954412714",
-          "updated_at": "2026-08-26T09:42:22Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32959062876",
+          "updated_at": "2026-08-26T10:36:04Z"
+        },
+        {
+          "name": "Push on master",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32954472133",
+          "updated_at": "2026-08-26T09:44:37Z"
         },
         {
           "name": "Kuro Rules Compliance",
@@ -461,14 +469,6 @@
           "attempt": 1,
           "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32949457263",
           "updated_at": "2026-08-26T08:46:17Z"
-        },
-        {
-          "name": "Push on master",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32949456652",
-          "updated_at": "2026-08-26T08:47:51Z"
         }
       ]
     }
@@ -481,20 +481,20 @@
     {
       "repo": "LambdaSection/NeuralDBG",
       "workflow": "Pre-commit",
-      "action": "rerun_triggered",
-      "detail": "relance jobs échoués (run 32949886701, tentative 1)"
+      "action": "issue_updated",
+      "detail": "issue #676 mise à jour"
     },
     {
       "repo": "Lemniscate-world/LifeTrack",
       "workflow": "kuro-rules-compliance",
-      "action": "rerun_triggered",
-      "detail": "relance jobs échoués (run 32949765487, tentative 1)"
+      "action": "issue_opened",
+      "detail": "issue #21"
     },
     {
       "repo": "Lemniscate-world/LifeTrack",
       "workflow": "CI",
-      "action": "rerun_triggered",
-      "detail": "relance jobs échoués (run 32949765457, tentative 1)"
+      "action": "issue_opened",
+      "detail": "issue #22"
     }
   ]
 }

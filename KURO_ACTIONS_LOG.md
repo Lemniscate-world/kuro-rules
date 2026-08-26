@@ -376,3 +376,7 @@ Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.
   - 2026-08-26T09:42Z | rerun_triggered (relance) | LambdaSection/NeuralDBG / Pre-commit | relance jobs échoués (run 32949886701, tentative 1)
   - 2026-08-26T09:42Z | rerun_triggered (relance) | Lemniscate-world/LifeTrack / kuro-rules-compliance | relance jobs échoués (run 32949765487, tentative 1)
   - 2026-08-26T09:42Z | rerun_triggered (relance) | Lemniscate-world/LifeTrack / CI | relance jobs échoués (run 32949765457, tentative 1)
+- 2026-08-26T10:36Z | scan red | 49 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T10:36Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T10:36Z | issue_opened (issue créée) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21
+  - 2026-08-26T10:36Z | issue_opened (issue créée) | Lemniscate-world/LifeTrack / CI | issue #22
