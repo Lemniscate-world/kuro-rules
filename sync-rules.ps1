@@ -110,6 +110,33 @@ foreach ($proj in $projects) {
         }
     }
 
+    # --- ALWAYS-ON: compliance workflow + manifest (enforcement CI, tous repos) ---
+    if (-not $DryRun) {
+        $wfDir = Join-Path $proj.Path ".github\workflows"
+        New-Item -ItemType Directory -Path $wfDir -Force | Out-Null
+        Copy-Item (Join-Path $RULES_DIR "templates\kuro-compliance.yml") (Join-Path $wfDir "kuro-compliance.yml") -Force
+
+        $agentsDst = Join-Path $proj.Path "AGENTS.md"
+        if (Test-Path $agentsDst) {
+            $sha256 = (Get-FileHash $agentsDst -Algorithm SHA256).Hash.ToLower()
+            $ruleCount = (Select-String -LiteralPath $agentsDst -Pattern '^- \*\*rule_').Count
+            $manifestObj = @{
+                syncedAt     = (Get-Date).ToUniversalTime().ToString("o")
+                ruleCount    = $ruleCount
+                agentsSha256 = $sha256
+                generator    = "sync-rules.ps1"
+            }
+            $kuroDir = Join-Path $proj.Path ".kuro"
+            New-Item -ItemType Directory -Path $kuroDir -Force | Out-Null
+            [System.IO.File]::WriteAllText(
+                (Join-Path $kuroDir "rules-manifest.json"),
+                ($manifestObj | ConvertTo-Json),
+                (New-Object System.Text.UTF8Encoding($false))
+            )
+            $projSynced += ".github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json"
+        }
+    }
+
     if ($projSynced.Count -gt 0) {
         Write-KuroLog "  SYNCED -> $($proj.Name) [$ownership] ($($projSynced -join ', '))" -Color Green
         $logEntries += "- $($proj.Name) [$ownership] : $($projSynced -join ', ')"
