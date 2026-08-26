@@ -1,5 +1,63 @@
 ﻿# Sync Log
 
+## 2026-08-26 08:44:33
+- AEther [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Aladin [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Aquarium [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Astral [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Automatons [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- BloomDB [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Charmed [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- datalint [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Dissect [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- EchoX [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Epure [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Flow-Regulator [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Helium [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Hermes [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Iroko [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Kapok [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Metatron [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Neural-Again [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Neural-Research [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- NeuralDBG [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- NeuroDose [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Nwt [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Odin [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Onlook [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- OpenMind [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- OpenQuant [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- POFS [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Project-Dirac [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Prompt2Model [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- QuSolve [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- SOGEXCO [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- SaasX [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Sagittarius [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- TokenWise [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Verbose [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- DevDemeterDAO [EXTERNAL] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- XP_Farming_System [EXTERNAL] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Damon [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Agent-Reach [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- codebase-memory-mcp [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Console [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- DevisPro [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Forma [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- GALT-Flatcoin-Concept [EXTERNAL] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- github-profile [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- KnowledgeOS [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- LifeStack [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- LifeTrack [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- Neural-Agent [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- NeuralDBG-Engine [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- NeuralPrune [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- OpenCMO [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- pytorch-fork [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- russel-agent [UNKNOWN] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- SOLARIS [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+- transformers-fork [OWNED] : .github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json
+
 ## 2026-08-26 08:15:23
 - AEther [UNKNOWN] : AGENTS.md
 - Aladin [UNKNOWN] : AGENTS.md

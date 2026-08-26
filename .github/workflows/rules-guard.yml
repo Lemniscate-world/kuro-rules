@@ -1,0 +1,73 @@
+# Kuro Central Rules Guard - audit quotidien de propagation des regles (R11/R105).
+# Enumere TOUS les repos (y compris nouveaux), detecte le drift AGENTS.md.
+# Avec KURO_GUARD_APPLY=true, resynchronise automatiquement le redirector.
+name: kuro-rules-guard
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Auto-corriger les repos en retard"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: kuro-rules-guard
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Audit des repos
+        id: audit
+        env:
+          GH_TOKEN: ${{ secrets.GUARD_TOKEN || secrets.GITHUB_TOKEN }}
+          KURO_GH_ORGS: ${{ vars.KURO_GH_ORGS }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.apply }}" = "true" ]; then
+            ARGS="--apply"
+          fi
+          if [ "${{ vars.KURO_GUARD_APPLY }}" = "true" ]; then
+            ARGS="--apply"
+          fi
+          python scripts/enforce_rules_ci.py remote $ARGS || echo "STALE_DETECTED=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload rapport
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-audit
+          path: reports/rules_audit_*.json
+          retention-days: 90
+
+      - name: Ouvrir une issue si drift detecte (sans auto-apply)
+        if: steps.audit.outputs.STALE_DETECTED == 'true' && vars.KURO_GUARD_APPLY != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const files = fs.readdirSync('reports').filter(f => f.startsWith('rules_audit_')).sort();
+            const report = JSON.parse(fs.readFileSync(`reports/${files.at(-1)}`, 'utf8'));
+            const stale = report.results.filter(r => String(r.status).startsWith(('stale')) || r.status === 'missing_agents');
+            const list = stale.map(r => `- ${r.repo}${r.ruleCount !== undefined ? ` (${r.ruleCount}/${r.expectedRuleCount} regles)` : ''}`).join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Rules guard : ${stale.length} repo(s) en retard - ${new Date().toISOString().slice(0,10)}`,
+              body: `La propagation des regles a derive.\n\nRepos concernes :\n${list}\n\nAction : lancer sync-rules.ps1, ou declencher ce workflow avec apply=true.`,
+              labels: ['kuro', 'governance']
+            });
