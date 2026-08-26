@@ -1,5 +1,65 @@
 ﻿# Sync Log
 
+## 2026-08-26 08:15:23
+- AEther [UNKNOWN] : AGENTS.md
+- Aladin [UNKNOWN] : AGENTS.md
+- Aquarium [UNKNOWN] : AGENTS.md
+- Astral [UNKNOWN] : AGENTS.md
+- Automatons [UNKNOWN] : AGENTS.md
+- BloomDB [OWNED] : AGENTS.md
+- Charmed [OWNED] : AGENTS.md
+- datalint [OWNED] : AGENTS.md
+- Dissect [UNKNOWN] : AGENTS.md
+- EchoX [UNKNOWN] : AGENTS.md
+- Epure [UNKNOWN] : AGENTS.md
+- Flow-Regulator [UNKNOWN] : AGENTS.md
+- Helium [UNKNOWN] : AGENTS.md
+- Hermes [UNKNOWN] : AGENTS.md
+- Iroko [UNKNOWN] : AGENTS.md
+- Kapok [UNKNOWN] : AGENTS.md
+- Neural-Again [UNKNOWN] : AGENTS.md
+- Neural-Research [OWNED] : AGENTS.md
+- NeuralDBG [UNKNOWN] : AGENTS.md
+- NeuroDose [UNKNOWN] : AGENTS.md
+- Nwt [UNKNOWN] : AGENTS.md
+- Odin [UNKNOWN] : AGENTS.md
+- Onlook [UNKNOWN] : AGENTS.md
+- OpenMind [UNKNOWN] : AGENTS.md
+- OpenQuant [OWNED] : AGENTS.md, copilot-instructions.md, AI_GUIDELINES.md
+- POFS [UNKNOWN] : AGENTS.md
+- Project-Dirac [OWNED] : AGENTS.md
+- Prompt2Model [UNKNOWN] : AGENTS.md
+- QuSolve [UNKNOWN] : AGENTS.md
+- SOGEXCO [UNKNOWN] : AGENTS.md
+- SaasX [UNKNOWN] : AGENTS.md
+- Sagittarius [UNKNOWN] : AGENTS.md
+- TokenWise [UNKNOWN] : AGENTS.md
+- Verbose [OWNED] : AGENTS.md
+- DevDemeterDAO [EXTERNAL] : AGENTS.md
+- XP_Farming_System [EXTERNAL] : AGENTS.md
+- Damon [UNKNOWN] : AGENTS.md
+- Agent-Reach [UNKNOWN] : AGENTS.md
+- codebase-memory-mcp [UNKNOWN] : AGENTS.md
+- Console [UNKNOWN] : AGENTS.md
+- DevisPro [UNKNOWN] : AGENTS.md
+- Forma [OWNED] : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- GALT-Flatcoin-Concept [EXTERNAL] : AGENTS.md
+- github-profile [OWNED] : AGENTS.md, copilot-instructions.md, AI_GUIDELINES.md
+- KnowledgeOS [UNKNOWN] : AGENTS.md
+- LifeStack [UNKNOWN] : AGENTS.md
+- LifeTrack [OWNED] : AGENTS.md, .cursorrules, .windsurfrules
+- Neural-Agent [UNKNOWN] : AGENTS.md
+- NeuralDBG-Engine [UNKNOWN] : AGENTS.md
+- NeuralPrune [UNKNOWN] : AGENTS.md
+- OpenCMO [UNKNOWN] : AGENTS.md
+- pytorch-fork [OWNED] : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+- russel-agent [UNKNOWN] : AGENTS.md
+- SOLARIS [OWNED] : AGENTS.md
+- transformers-fork [OWNED] : AGENTS.md, .cursorrules, copilot-instructions.md, .windsurfrules, AI_GUIDELINES.md
+
+## 2026-08-26 07:59:21
+- Metatron [UNKNOWN] : AGENTS.md
+
 ## 2026-06-07 14:36:57
 - AEther [UNKNOWN] : AGENTS.md
 - Aladin [UNKNOWN] : AGENTS.md
