@@ -1,13 +1,13 @@
-# TRUTH DAILY — 2026-08-25
+# TRUTH DAILY — 2026-08-26
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-08-24 `d98026b` fix(tests): e2e accepte plusieurs signaux + full-t | main | 0 (0 funcs) | 0 | 50 |  |
+| **OpenQuant** | 2026-08-25 `c49019c` feat(sécurité): badge MODE visible sur chaque noti | main | 0 (0 funcs) | 0 | 50 |  |
 | **Metatron** | 2026-08-23 `69be135` fix(ci): scan SonarQube non bloquant - secret SONA | main | 0 (0 funcs) | 0 | 2 |  |
-| **NeuralDBG** | 2026-08-23 `8e666c1` fix(ci): retablit l'exclusion CHANGELOG.md dans le | main | 0 (0 funcs) | 0 | 19 |  |
+| **NeuralDBG** | 2026-08-23 `8e666c1` fix(ci): retablit l'exclusion CHANGELOG.md dans le | main | 0 (0 funcs) | 0 | 18 |  |
 | **Helium** | 2026-08-21 `0430af5` feat(S1): CLI polish R9 compliant - no emojis, col | main | 0 (0 funcs) | 0 | 5 |  |
 | **Neural-Agent** | 2026-08-08 `b5df6e1` model: v5 LoRA adapter retrained (93.7%) | master | 0 (0 funcs) | 0 | 2 |  |
 | **LifeTrack** | 2026-08-02 `98481cc` feat: adaptive challenges + local psychoanalysis + | master | 0 (0 funcs) | 0 | 12 |  |
@@ -35,4 +35,4 @@
 - **TokenWise** `0%` mais 0 commit 30j (dernier 2026-05-17) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-25T05:21:57.025864 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-26T05:21:51.875986 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
