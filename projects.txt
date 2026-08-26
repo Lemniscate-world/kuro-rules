@@ -22,13 +22,10 @@ Helium
 Hermes
 Iroko
 Kapok
-KuroGuardian
 Metatron
 Neural-Again
 Neural-Research
 NeuralDBG
-NeuralDSL
-NeuralPaper
 NeuroDose
 Nwt
 Odin
@@ -44,7 +41,6 @@ SaasX
 Sagittarius
 TokenWise
 Verbose
-Constant_Yield
 DevDemeterDAO
 XP_Farming_System
 Damon
