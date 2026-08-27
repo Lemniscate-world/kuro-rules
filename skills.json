@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-27T09:41:33+00:00",
+  "generated_at": "2026-08-27T15:57:21+00:00",
   "window_days": 90,
   "repo_count": 17,
   "skills": [
@@ -8,7 +8,7 @@
       "pct": 55,
       "kb": 2763,
       "repos": 14,
-      "commits_90d": 155,
+      "commits_90d": 152,
       "ci_green_frac": 0.83,
       "tests_frac": 0.64,
       "new": false
@@ -18,7 +18,7 @@
       "pct": 35,
       "kb": 0,
       "repos": 14,
-      "commits_90d": 205,
+      "commits_90d": 202,
       "ci_green_frac": 0.67,
       "tests_frac": 0.64,
       "new": true
@@ -38,7 +38,7 @@
       "pct": 25,
       "kb": 224,
       "repos": 7,
-      "commits_90d": 112,
+      "commits_90d": 110,
       "ci_green_frac": 0.5,
       "tests_frac": 0.71,
       "new": false
@@ -48,7 +48,7 @@
       "pct": 25,
       "kb": 0,
       "repos": 6,
-      "commits_90d": 130,
+      "commits_90d": 129,
       "ci_green_frac": 0.5,
       "tests_frac": 1.0,
       "new": false
@@ -58,7 +58,7 @@
       "pct": 20,
       "kb": 261,
       "repos": 6,
-      "commits_90d": 110,
+      "commits_90d": 108,
       "ci_green_frac": 0.33,
       "tests_frac": 0.67,
       "new": false
@@ -68,7 +68,7 @@
       "pct": 20,
       "kb": 0,
       "repos": 4,
-      "commits_90d": 129,
+      "commits_90d": 128,
       "ci_green_frac": 0.0,
       "tests_frac": 1.0,
       "new": false
@@ -98,7 +98,7 @@
       "pct": 20,
       "kb": 0,
       "repos": 2,
-      "commits_90d": 74,
+      "commits_90d": 73,
       "ci_green_frac": null,
       "tests_frac": 1.0,
       "new": false
@@ -208,7 +208,7 @@
       "pct": 15,
       "kb": 61,
       "repos": 4,
-      "commits_90d": 60,
+      "commits_90d": 58,
       "ci_green_frac": 0.67,
       "tests_frac": 0.5,
       "new": false
@@ -278,7 +278,7 @@
       "pct": 10,
       "kb": 94,
       "repos": 3,
-      "commits_90d": 64,
+      "commits_90d": 62,
       "ci_green_frac": 0.0,
       "tests_frac": 0.33,
       "new": false

@@ -30,4 +30,4 @@
 - **Odin** `10%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-27T09:41:33.333469 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-27T15:57:21.310191 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
