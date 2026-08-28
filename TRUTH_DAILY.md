@@ -1,10 +1,11 @@
-# TRUTH DAILY — 2026-08-27
+# TRUTH DAILY — 2026-08-28
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
+| **OpenQuant** | 2026-08-28 `2914baf` fix: burst 100 trades -> symbol norm BTC/USD + coo | main | 0 (0 funcs) | 0 | 50 |  |
 | **Aquarium** | 2026-08-26 `6c917bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 |  |
 | **Astral** | 2026-08-26 `2ae3098` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
 | **Automatons** | 2026-08-26 `1105136` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
@@ -15,7 +16,6 @@
 | **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 4 |  |
 | **NeuralDBG** | 2026-08-26 `803a6bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 19 |  |
 | **NeuralDBG-Engine** | 2026-08-26 `ab63b0c` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 1 |  |
-| **OpenQuant** | 2026-08-26 `b8e8c24` fix: purge retail + brief honnête + digest Alpaca | main | 0 (0 funcs) | 0 | 50 |  |
 | **TokenWise** | 2026-08-26 `9a524c2` fix(compliance): untrack protected files (R76) [ku | master | 0 (0 funcs) | 0 | 2 |  |
 | **Metatron** | 2026-08-23 `69be135` fix(ci): scan SonarQube non bloquant - secret SONA | main | 0 (0 funcs) | 0 | 2 |  |
 | **AEther** | 2026-03-09 `b061374` docs: update README with comprehensive documentati | main | 0 (0 funcs) | 0 | 0 |  |
@@ -30,4 +30,4 @@
 - **Odin** `10%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-27T15:57:21.310191 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-28T16:59:03.902935 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
