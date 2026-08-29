@@ -54,6 +54,16 @@ ALERT if:
   - Kuro will track these automatically
 ```
 
+### 5. OpenQuant Robot Anti-Death (MANDATORY)
+```
+HEARTBEAT: episode/main.py:66 atomic tmp->replace, 60s interval, pid + timestamp
+WATCHDOG: robot/daemon_v2.py:1096 600s max (60s idéal), auto-restart si stale >120s
+HEALTH: /api/status (agent_api.py) + Alpaca $ + DeepSeek 1.76s, Discord chatter 30m
+LOGS: EPISODE_LOG_LEVEL=DEBUG, logs/openquant_*.log, Discord category portfolio auto
+COVERAGE: 70% general, 80% ML, 0% = BLOQUANT, pyramide 70/20/10 hermetic
+ALERT if: heartbeat stale >120s, 0 CLOSE 24h, 24 erreurs 24h, coverage <70%
+```
+
 ## AI Agent Responsibilities
 
 ### During Portfolio Updates (R85 + R86)
