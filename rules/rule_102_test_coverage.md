@@ -15,6 +15,16 @@ All Python machine learning projects MUST maintain a minimum test coverage of **
 | Export utilities | ≥ 90% | ≥ 80% |
 | **TOTAL** | **≥ 80%** | **≥ 70%** |
 
+## Test Pyramid (MANDATORY for OpenQuant)
+
+| Layer | % Tests | Source | Exemple |
+|---|---|---|---|
+| Unit (hermetic, no network) | 70% | `tests/unit/test_*.py` | `episode/memory.py`, `robot/risk_manager.py` |
+| Integration (mocked I/O) | 20% | `tests/integration/test_*.py` | `robot/daemon_v2.py` avec `Memory` fake |
+| E2E (paper -> trade) | 10% | `tests/e2e/test_*.py` | `auto_code` walkforward complet |
+
+Règles : `load_dotenv` mocké, `yfinance` mocké, `Alpaca` fake, `0% module = bloquant`.
+
 ## Mandatory Test Categories
 
 ### 1. Standalone Fallback Tests (CRITICAL)
