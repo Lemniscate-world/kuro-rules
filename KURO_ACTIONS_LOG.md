@@ -480,3 +480,7 @@ Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.
   - 2026-08-30T01:29Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
   - 2026-08-30T01:29Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
   - 2026-08-30T01:29Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T07:18Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T07:18Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T07:18Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T07:18Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
