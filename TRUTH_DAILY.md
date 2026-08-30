@@ -1,11 +1,11 @@
-# TRUTH DAILY — 2026-08-29
+# TRUTH DAILY — 2026-08-30
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-08-29 `1b707cf` feat(#17-item14): mémoire événements marché | main | 0 (0 funcs) | 0 | 50 |  |
+| **OpenQuant** | 2026-08-30 `9b9f65a` revert: untrack PLAN.md (R76 protected) | main | 0 (0 funcs) | 0 | 50 |  |
 | **Aquarium** | 2026-08-26 `6c917bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 |  |
 | **Astral** | 2026-08-26 `2ae3098` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
 | **Automatons** | 2026-08-26 `1105136` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
@@ -30,4 +30,4 @@
 - **Odin** `10%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-08-29T13:16:42.327247 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-30T10:09:55.871031 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
