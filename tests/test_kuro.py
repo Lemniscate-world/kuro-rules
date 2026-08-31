@@ -35,11 +35,15 @@ def test_cloud_candidates_vide_sans_cloud(monkeypatch):
     assert kuro_llm.cloud_candidates("http://x") == []
 
 
-def test_ask_ollama_puis_none_declenche_pas_erreur(monkeypatch):
+def test_ask_chaine_complete_openrouter_puis_deepseek_puis_ollama(monkeypatch):
     appels = []
 
     def fake_openrouter(prompt, system):
         appels.append("openrouter")
+        return None, "no-key"
+
+    def fake_deepseek(prompt, system):
+        appels.append("deepseek")
         return None, "no-key"
 
     def fake_ollama(prompt, system):
@@ -47,14 +51,38 @@ def test_ask_ollama_puis_none_declenche_pas_erreur(monkeypatch):
         return "ok", "ok"
 
     monkeypatch.setattr(kuro_llm, "_openrouter", fake_openrouter)
+    monkeypatch.setattr(kuro_llm, "_deepseek", fake_deepseek)
     monkeypatch.setattr(kuro_llm, "_ollama", fake_ollama)
     monkeypatch.delenv("DISCORD_WEBHOOK_URL", raising=False)
     assert kuro_llm.ask("test") == "ok"
-    assert appels == ["openrouter", "ollama"]
+    assert appels == ["openrouter", "deepseek", "ollama"]
+
+
+def test_ask_deepseek_repond_si_openrouter_echoue(monkeypatch):
+    appels = []
+
+    monkeypatch.setattr(kuro_llm, "_openrouter", lambda p, s: (None, "error"))
+    monkeypatch.setattr(
+        kuro_llm, "_deepseek",
+        lambda p, s: (appels.append("deepseek"), ("ok", "ok"))[1],
+    )
+    monkeypatch.setattr(kuro_llm, "_ollama", lambda p, s: (appels.append("ollama"), (None, "x"))[1])
+    monkeypatch.delenv("DISCORD_WEBHOOK_URL", raising=False)
+    assert kuro_llm.ask("test") == "ok"
+    assert appels == ["deepseek"]
+
+
+def test_deepseek_cle_absente_ne_consomme_pas_reseau(monkeypatch):
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    reseau = []
+    monkeypatch.setattr(kuro_llm, "_post", lambda *a, **k: reseau.append(1))
+    text, status = kuro_llm._deepseek("q", "s")
+    assert text is None and status == "no-key" and not reseau
 
 
 def test_ask_echec_total_alerte_throttle(monkeypatch, tmp_path):
     monkeypatch.setattr(kuro_llm, "_openrouter", lambda p, s: (None, "error"))
+    monkeypatch.setattr(kuro_llm, "_deepseek", lambda p, s: (None, "error"))
     monkeypatch.setattr(kuro_llm, "_ollama", lambda p, s: (None, "unreachable"))
     poste = []
     monkeypatch.setenv("DISCORD_WEBHOOK_URL", "http://wh")

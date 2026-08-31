@@ -24,7 +24,8 @@ Chaîne de moteurs (`scripts/kuro_llm.py`, zéro dépendance) :
 | Ordre | Moteur | État |
 |---|---|---|
 | 1 | **OpenRouter** — `stealth/ox-alpha` (modèle de raisonnement ; configurable via `$OPENROUTER_MODEL`) | ✅ Principal, actif |
-| 2 | **Ollama cloud** — uniquement modèles `:cloud`, auto-sélection avec fallback (403 abonnement / 410 retirés sautés). Actuel : `minimax-m3:cloud` | ✅ Fallback actif, gratuit sur le compte |
+| 2 | **DeepSeek** — deepseek-chat (fallback payant ; configurable via $DEEPSEEK_MODEL) | ✅ Fallback actif (clé ajoutée le 2026-08-31) |
+| 3 | **Ollama cloud** — uniquement modèles `:cloud`, auto-sélection avec fallback (403 abonnement / 410 retirés sautés). Actuel : `minimax-m3:cloud` | ✅ Dernier recours, gratuit sur le compte |
 
 Consommateurs : Advisor du Radar (analyse signaux → projets), diagnostic IA des
 issues Sentinel, endpoint `/api/ask` de l'API. Sans moteur, tout reste déterministe.

@@ -59,6 +59,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'ox-alpha:free' }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           KURO_AUTO_FIX: '1'
         run: |
           python kuro-rules/scripts/ci_guardian.py \
@@ -91,6 +92,7 @@ jobs:
           GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'ox-alpha:free' }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           OLLAMA_URL: ${{ vars.OLLAMA_URL || 'http://localhost:11434' }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'llama3' }}
         run: |

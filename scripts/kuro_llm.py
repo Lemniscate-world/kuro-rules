@@ -3,8 +3,9 @@
 
 Chaîne de moteurs :
     1. OpenRouter ($OPENROUTER_API_KEY, modèle $OPENROUTER_MODEL, défaut ox-alpha:free)
-    2. Ollama local ($OLLAMA_URL, défaut http://localhost:11434, $OLLAMA_MODEL, défaut llama3)
-    3. Aucun -> retourne None ; les appelants restent alors en mode déterministe.
+    2. DeepSeek ($DEEPSEEK_API_KEY, modèle $DEEPSEEK_MODEL, défaut deepseek-chat)
+    3. Ollama local ($OLLAMA_URL, défaut http://localhost:11434, $OLLAMA_MODEL, défaut llama3)
+    4. Aucun -> retourne None ; les appelants restent alors en mode déterministe.
 
 Usage:
     from kuro_llm import ask
@@ -23,6 +24,8 @@ if hasattr(sys.stdout, "reconfigure"):
 
 DEFAULT_OPENROUTER_MODEL = "stealth/ox-alpha"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
+DEFAULT_DEEPSEEK_BASE = "https://api.deepseek.com"
+DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
 DEFAULT_OLLAMA_URL = "http://localhost:11434"
 
 # Uniquement des modèles cloud Ollama (suffixe :cloud) — jamais les locaux.
@@ -81,6 +84,36 @@ def _openrouter(prompt: str, system: str) -> tuple[str | None, str]:
         if not text:
             # Modele de raisonnement : le contenu peut rester en 'reasoning'
             text = (msg.get("reasoning") or "").strip()
+        return (text, "ok") if text else (None, "empty")
+    except Exception:
+        return None, "bad-shape"
+
+
+def _deepseek(prompt: str, system: str) -> tuple[str | None, str]:
+    """Fallback payant : API DeepSeek (compatible OpenAI)."""
+    key = os.environ.get("DEEPSEEK_API_KEY")
+    if not key:
+        return None, "no-key"
+    base = os.environ.get("DEEPSEEK_BASE", DEFAULT_DEEPSEEK_BASE)
+    model = os.environ.get("DEEPSEEK_MODEL", DEFAULT_DEEPSEEK_MODEL)
+    data = _post(
+        f"{base}/chat/completions",
+        {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            "max_tokens": int(os.environ.get("DEEPSEEK_MAX_TOKENS", "2500")),
+            "temperature": 0.3,
+        },
+        {"Authorization": f"Bearer {key}"},
+        timeout=120,
+    )
+    if not data:
+        return None, "error"
+    try:
+        text = (data["choices"][0]["message"].get("content") or "").strip()
         return (text, "ok") if text else (None, "empty")
     except Exception:
         return None, "bad-shape"
@@ -184,13 +217,19 @@ def _alert_brain_down() -> None:
 
 
 def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.") -> str | None:
-    """Chaîne de moteurs : OpenRouter cloud d'abord, Ollama cloud en fallback."""
+    """Chaîne de moteurs : OpenRouter cloud d'abord, DeepSeek ensuite, Ollama cloud en dernier."""
     text, status = _openrouter(prompt, system)
     if text:
         print(f"kuro_llm: openrouter/{os.environ.get('OPENROUTER_MODEL', DEFAULT_OPENROUTER_MODEL)} ok")
         return text
     if status != "no-key":
         print(f"kuro_llm: openrouter indisponible ({status})")
+    text, status = _deepseek(prompt, system)
+    if text:
+        print(f"kuro_llm: deepseek/{os.environ.get('DEEPSEEK_MODEL', DEFAULT_DEEPSEEK_MODEL)} ok")
+        return text
+    if status != "no-key":
+        print(f"kuro_llm: deepseek indisponible ({status})")
     text, status = _ollama(prompt, system)
     if text:
         print("kuro_llm: fallback ollama cloud ok")
@@ -204,6 +243,8 @@ def available() -> str | None:
     """Nom du moteur dispo sans consommer d'appel."""
     if os.environ.get("OPENROUTER_API_KEY"):
         return "openrouter"
+    if os.environ.get("DEEPSEEK_API_KEY"):
+        return "deepseek"
     if cloud_candidates(os.environ.get("OLLAMA_URL", DEFAULT_OLLAMA_URL)):
         return "ollama-cloud"
     return None
