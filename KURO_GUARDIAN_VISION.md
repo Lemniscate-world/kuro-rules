@@ -29,9 +29,10 @@ Chaîne de moteurs (`scripts/kuro_llm.py`, zéro dépendance) :
 Consommateurs : Advisor du Radar (analyse signaux → projets), diagnostic IA des
 issues Sentinel, endpoint `/api/ask` de l'API. Sans moteur, tout reste déterministe.
 
-**Limite connue** : le robot distant (GitHub-hosted runner) n'a pas accès au daemon
-Ollama local -> il tourne en mode déterministe en CI. Pour un cerveau en CI :
-self-hosted runner sur le PC, activation OpenRouter, ou API ollama.com.
+**Limite levée (2026-08-31)** : le robot distant a désormais un cerveau. Le secret
+OPENROUTER_API_KEY est présent sur kuro-rules et kuro_llm.ask() essaie OpenRouter
+en premier, la chaîne fonctionne en CI sans Ollama local. Ollama cloud reste le
+fallback (utile seulement en local). Pas besoin de self-hosted runner.
 
 ## Composant à construire
 
