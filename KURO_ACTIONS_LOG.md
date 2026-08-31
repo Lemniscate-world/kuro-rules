@@ -372,3 +372,147 @@ Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.
 - 2026-08-26T06:51Z | scan green | 41 checks, 0 repo(s) rouge(s)
 - 2026-08-26T07:47Z | scan green | 41 checks, 0 repo(s) rouge(s)
 - 2026-08-26T08:44Z | scan green | 41 checks, 0 repo(s) rouge(s)
+- 2026-08-26T09:42Z | scan red | 49 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T09:42Z | rerun_triggered (relance) | LambdaSection/NeuralDBG / Pre-commit | relance jobs échoués (run 32949886701, tentative 1)
+  - 2026-08-26T09:42Z | rerun_triggered (relance) | Lemniscate-world/LifeTrack / kuro-rules-compliance | relance jobs échoués (run 32949765487, tentative 1)
+  - 2026-08-26T09:42Z | rerun_triggered (relance) | Lemniscate-world/LifeTrack / CI | relance jobs échoués (run 32949765457, tentative 1)
+- 2026-08-26T10:36Z | scan red | 49 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T10:36Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T10:36Z | issue_opened (issue créée) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21
+  - 2026-08-26T10:36Z | issue_opened (issue créée) | Lemniscate-world/LifeTrack / CI | issue #22
+- 2026-08-26T11:31Z | scan red | 50 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T11:31Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T11:31Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T11:31Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-26T12:54Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T12:54Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T12:54Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T12:54Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-26T13:56Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T13:56Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T13:56Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T13:56Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-26T14:48Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T14:48Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T14:48Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T14:48Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-26T16:18Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T16:18Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T16:18Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T16:18Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-26T18:16Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T18:16Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T18:16Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T18:16Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-26T20:36Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-26T20:36Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-26T20:36Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-26T20:36Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-27T00:30Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-27T00:30Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-27T00:30Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-27T00:30Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-27T09:41Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-27T09:41Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-27T09:41Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-27T09:41Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-27T10:57Z | scan red | 51 checks, 2 repo(s) rouge(s)
+  - 2026-08-27T10:57Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-27T10:57Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-27T10:57Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-27T15:57Z | scan red | 52 checks, 2 repo(s) rouge(s)
+  - 2026-08-27T15:57Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-27T15:57Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-27T15:57Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-27T20:57Z | scan red | 52 checks, 2 repo(s) rouge(s)
+  - 2026-08-27T20:57Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-27T20:57Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-27T20:57Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-28T05:11Z | scan red | 52 checks, 2 repo(s) rouge(s)
+  - 2026-08-28T05:11Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-28T05:11Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-28T05:11Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-28T16:58Z | scan red | 53 checks, 2 repo(s) rouge(s)
+  - 2026-08-28T16:58Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-28T16:58Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-28T16:58Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-28T17:38Z | scan red | 53 checks, 2 repo(s) rouge(s)
+  - 2026-08-28T17:38Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-28T17:38Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-28T17:38Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-28T18:33Z | scan red | 52 checks, 2 repo(s) rouge(s)
+  - 2026-08-28T18:33Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-28T18:33Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-28T18:33Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T01:30Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T01:30Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T01:30Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T01:30Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T08:43Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T08:43Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T08:43Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T08:43Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T11:23Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T11:23Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T11:23Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T11:23Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T13:16Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T13:16Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T13:16Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T13:16Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T14:12Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T14:12Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T14:12Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T14:12Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T17:47Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T17:47Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T17:47Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T17:47Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T20:32Z | scan red | 54 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T20:32Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T20:32Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T20:32Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-29T23:01Z | scan red | 56 checks, 2 repo(s) rouge(s)
+  - 2026-08-29T23:01Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-29T23:01Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-29T23:01Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T01:29Z | scan red | 56 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T01:29Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T01:29Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T01:29Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T07:18Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T07:18Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T07:18Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T07:18Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T10:09Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T10:09Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T10:09Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T10:09Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T13:09Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T13:09Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T13:09Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T13:09Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T17:42Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T17:42Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T17:42Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T17:42Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T20:42Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T20:42Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T20:42Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T20:42Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-30T23:16Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-30T23:16Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-30T23:16Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-30T23:16Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-31T01:29Z | scan red | 57 checks, 2 repo(s) rouge(s)
+  - 2026-08-31T01:29Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-31T01:29Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-31T01:29Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-31T07:33Z | scan red | 59 checks, 2 repo(s) rouge(s)
+  - 2026-08-31T07:33Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-31T07:33Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-31T07:33Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
+- 2026-08-31T15:55Z | scan red | 59 checks, 2 repo(s) rouge(s)
+  - 2026-08-31T15:55Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Pre-commit | issue #676 mise à jour
+  - 2026-08-31T15:55Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
+  - 2026-08-31T15:55Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
