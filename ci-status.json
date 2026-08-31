@@ -1,11 +1,19 @@
 {
-  "generated_at": "2026-08-31T07:33:38+00:00",
+  "generated_at": "2026-08-31T15:55:18+00:00",
   "overall": "red",
   "repos": [
     {
       "name": "LambdaSection/NeuralDBG",
       "health": "red",
       "workflows": [
+        {
+          "name": "Validation Pipeline (R108)",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33394810093",
+          "updated_at": "2026-08-31T13:04:31Z"
+        },
         {
           "name": "Scheduled",
           "status": "completed",
@@ -21,14 +29,6 @@
           "attempt": 1,
           "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33314696326",
           "updated_at": "2026-08-30T13:37:59Z"
-        },
-        {
-          "name": "Validation Pipeline (R108)",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33309064526",
-          "updated_at": "2026-08-30T11:31:46Z"
         },
         {
           "name": "Qodo Code Review",
@@ -477,16 +477,16 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33347755473",
-          "updated_at": "2026-08-31T01:30:45Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33368915214",
+          "updated_at": "2026-08-31T07:34:32Z"
         },
         {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33347754991",
-          "updated_at": "2026-08-31T01:30:46Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33368914658",
+          "updated_at": "2026-08-31T07:34:29Z"
         },
         {
           "name": "Scheduled",
@@ -507,8 +507,24 @@
           "status": "in_progress",
           "conclusion": null,
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33368852833",
-          "updated_at": "2026-08-31T07:33:00Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33411133040",
+          "updated_at": "2026-08-31T15:54:49Z"
+        },
+        {
+          "name": "kuro-rules-guard",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33381544009",
+          "updated_at": "2026-08-31T10:15:10Z"
+        },
+        {
+          "name": "Push on master",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33368912831",
+          "updated_at": "2026-08-31T07:35:20Z"
         },
         {
           "name": "Scheduled",
@@ -519,28 +535,12 @@
           "updated_at": "2026-08-31T03:05:44Z"
         },
         {
-          "name": "Push on master",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33347753264",
-          "updated_at": "2026-08-31T01:31:26Z"
-        },
-        {
           "name": "Kuro Rules Compliance",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
           "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33314759832",
           "updated_at": "2026-08-30T13:39:24Z"
-        },
-        {
-          "name": "kuro-rules-guard",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33304371270",
-          "updated_at": "2026-08-30T09:34:03Z"
         },
         {
           "name": "Rules Audit",

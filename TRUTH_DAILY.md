@@ -93,3 +93,35 @@ _Généré 2026-08-30T10:09:55.871031 | Script: `scripts/audit_truth_daily.py` |
 - **À surveiller pour `NeuralDBG-Engine`** ← [LLMs could control their host machines by exploiting inference engines](https://boydkane.com/essays/llms-could-control-their-host-machines-by-exploiting-inference-engines) (inference)
 - **À surveiller pour `Neural-Agent`** ← [Learning a Size-Weight Frontier for Synthetic-Augmented Inference](http://arxiv.org/abs/2608.28576v1) (inference, learning)
 - **À surveiller pour `Aladin`** ← [Logos: An Agent Harness on a Cross-Process Bus](http://arxiv.org/abs/2608.28553v1) (agent)
+
+## Signaux Radar + recommandations (semaine du 2026-08-31)
+
+**Hacker News**
+- [I accidentally turned LLM memory into program analysis](https://pwning.systems/posts/llm-memory-program-analysis/) (302)
+- [Show HN: We built open OpenRouter that turns usage into a better model](https://github.com/experientiallabs/experiential) (220)
+- [LLMs could control their host machines by exploiting inference engines](https://boydkane.com/essays/llms-could-control-their-host-machines-by-exploiting-inference-engines) (193)
+- [Changes to Sourcehut's terms of service regarding LLMs](https://sourcehut.org/blog/2026-08-27-tos-changes-and-llms/) (125)
+- [Show HN: How much of Hacker News is about AI?](https://hnstats.com) (74)
+
+**GitHub — nouveaux repos qui montent**
+- [sapientinc/PRAXIST ★5432](https://github.com/sapientinc/PRAXIST) (5432) — _Autonomous research system for measurable, computer-executable research._
+- [HEJustinSun/my-girlfriend-jingtian-latex ★4184](https://github.com/HEJustinSun/my-girlfriend-jingtian-latex) (4184)
+- [XiaoDuoYa/codex-with-chatgpt ★1740](https://github.com/XiaoDuoYa/codex-with-chatgpt) (1740) — _ChatGPT thinks. Codex works. Use ChatGPT as the planning brain while keeping the Codex harness._
+- [MetaMask-AI/metamask-desktop ★1228](https://github.com/MetaMask-AI/metamask-desktop) (1228) — _🌐 🔌 The MetaMask desktop app enables browsing Ethereum blockchain enabled websites_
+- [Nanako0129/sepia ★1181](https://github.com/Nanako0129/sepia) (1181) — _De-AI writing skill for any Agent Skills-compatible agent (77+ via the Skills CLI), with native plugins for Cl_
+- [wide-trace/open-higgsfield ★1130](https://github.com/wide-trace/open-higgsfield) (1130) — _A studio for image and video generation — one prompt bar, each model’s own settings, and every finished run in_
+
+**arXiv cs.AI**
+- [Aero Hand Open: A Simulation-Ready Tendon-Driven Hand for Dexterous Manipulation Learning](http://arxiv.org/abs/2608.28578v1)
+- [Learning a Size-Weight Frontier for Synthetic-Augmented Inference](http://arxiv.org/abs/2608.28576v1)
+- [Blog: Survey of Optimizers](http://arxiv.org/abs/2608.28557v1)
+- [Logos: An Agent Harness on a Cross-Process Bus](http://arxiv.org/abs/2608.28553v1)
+
+- **relancer avec `POFS`** ← [sapientinc/PRAXIST ★5432](https://github.com/sapientinc/PRAXIST) (mots : research, system)
+- **relancer avec `Prompt2Model`** ← [wide-trace/open-higgsfield ★1130](https://github.com/wide-trace/open-higgsfield) (mots : model, prompt)
+- **relancer avec `Odin`** ← [Show HN: We built open OpenRouter that turns usage into a better model](https://github.com/experientiallabs/experiential) (mots : model, open)
+- **relancer avec `NeuroDose`** ← [Nanako0129/sepia ★1181](https://github.com/Nanako0129/sepia) (mots : agent, via)
+- **À surveiller pour `NeuralDBG`** ← [I accidentally turned LLM memory into program analysis](https://pwning.systems/posts/llm-memory-program-analysis/) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [LLMs could control their host machines by exploiting inference engines](https://boydkane.com/essays/llms-could-control-their-host-machines-by-exploiting-inference-engines) (inference)
+- **À surveiller pour `Neural-Agent`** ← [Learning a Size-Weight Frontier for Synthetic-Augmented Inference](http://arxiv.org/abs/2608.28576v1) (inference, learning)
+- **À surveiller pour `Aladin`** ← [Logos: An Agent Harness on a Cross-Process Bus](http://arxiv.org/abs/2608.28553v1) (agent)
