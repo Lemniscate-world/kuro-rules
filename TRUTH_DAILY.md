@@ -1,38 +1,78 @@
-# TRUTH DAILY — 2026-08-26
+# TRUTH DAILY — 2026-08-31
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
-> **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
+> **Projects scannés:** 59 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-08-25 `c49019c` feat(sécurité): badge MODE visible sur chaque noti | main | 0 (0 funcs) | 0 | 50 |  |
-| **Metatron** | 2026-08-23 `69be135` fix(ci): scan SonarQube non bloquant - secret SONA | main | 0 (0 funcs) | 0 | 2 |  |
-| **NeuralDBG** | 2026-08-23 `8e666c1` fix(ci): retablit l'exclusion CHANGELOG.md dans le | main | 0 (0 funcs) | 0 | 18 |  |
-| **Helium** | 2026-08-21 `0430af5` feat(S1): CLI polish R9 compliant - no emojis, col | main | 0 (0 funcs) | 0 | 5 |  |
-| **Neural-Agent** | 2026-08-08 `b5df6e1` model: v5 LoRA adapter retrained (93.7%) | master | 0 (0 funcs) | 0 | 2 |  |
-| **LifeTrack** | 2026-08-02 `98481cc` feat: adaptive challenges + local psychoanalysis + | master | 0 (0 funcs) | 0 | 12 |  |
-| **Aquarium** | 2026-07-19 `06db523` chore: gitignore private files (R76 compliance) | main | 0 (0 funcs) | 0 | 0 |  |
-| **NeuralDBG-Engine** | 2026-07-05 `a9d6b6e` docs: fix license from Proprietary to MIT | master | 0 (0 funcs) | 0 | 0 |  |
-| **TokenWise** | 2026-05-17 `0869408` fix: Replace Unicode arrow with ASCII for Windows  | master | 0 (0 funcs) | 0 | 0 |  |
-| **Astral** | 2026-04-05 `745874d` Initial commit for Astral MVP (Standalone) -- Pivo | main | 0 (0 funcs) | 0 | 0 |  |
-| **AEther** | 2026-03-09 `b061374` docs: update README with comprehensive documentati | main | 0 (0 funcs) | 0 | 0 |  |
-| **EchoX** | 2026-03-07 `2737bd6` feat: Establish initial Tauri application structur | main | 0 (0 funcs) | 0 | 0 |  |
-| **Dissect** | 2026-03-03 `1aff5ec` ci: enhance CI workflow with security scans and im | main | 0 (0 funcs) | 0 | 0 |  |
-| **Verbose** | 2026-01-12 `222af9f` Enhance features list | main | 0 (0 funcs) | 0 | 0 |  |
-| **DataLint** | 2025-12-25 `925ca42` feat(validators): add check_correlations for multi | main | 0 (0 funcs) | 0 | 0 |  |
-| **Automatons** | 2025-12-19 `a4332a8` Updates | main | 0 (0 funcs) | 0 | 0 |  |
-| **Odin** | 2024-12-26 `aceee58` Resize Observer loop completed with undelivered no | main | 0 (0 funcs) | 0 | 0 |  |
+| **bodydouble** | — `—` no commits | master | 0 (0 funcs) | 0 | 0 | ! |
+| **driftscape** | — `—` no commits | master | 0 (0 funcs) | 0 | 0 | ! |
+| **kuro** | 2026-08-31 `71deb19` chore: untrack private PLAN.md (R76) | master | 0 (0 funcs) | 0 | 4 |  |
+| **OpenQuant** | 2026-08-31 `ea9fa3a` chore(robot): travail nocturne auto-code (6 candid | main | 70 (229 funcs) | 0 | 124 | ! |
+| **LifeTrack** | 2026-08-30 `d8ef0fb` style(principles): couleurs par dimension Chaos -  | master | 0 (0 funcs) | 0 | 126 | ! |
+| **Agent-Reach** | 2026-08-26 `a2bc185` chore(rules): synchro redirector 52 regles + workf | main | 33 (288 funcs) | 0 | 4 | ! |
+| **Aquarium** | 2026-08-26 `6c917bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 | ! |
+| **Astral** | 2026-08-26 `2ae3098` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 | ! |
+| **Automatons** | 2026-08-26 `1105136` fix(compliance): untrack protected files (R76) [ku | main | 3 (20 funcs) | 0 | 2 | ! |
+| **BloomDB** | 2026-08-26 `8db155b` fix(compliance): untrack protected files (R76) [ku | main | 1 (10 funcs) | 0 | 2 | ! |
+| **Charmed** | 2026-08-26 `4cca39b` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 | ! |
+| **codebase-memory-mcp** | 2026-08-26 `0a2f976` chore(rules): synchro redirector 52 regles + workf | main | 13 (28 funcs) | 0 | 2 | ! |
+| **Console** | 2026-08-26 `781285f` chore(rules): synchro redirector 52 regles + workf | main | 9 (25 funcs) | 0 | 1 | ! |
+| **Damon** | 2026-08-26 `e83511f` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 1 | ! |
+| **DevisPro** | 2026-08-26 `88a6bfe` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 2 | ! |
+| **Dissect** | 2026-08-26 `9f6ff08` fix(compliance): untrack protected files (R76) [ku | main | 10 (79 funcs) | 0 | 2 | ! |
+| **EchoX** | 2026-08-26 `a1fa54c` fix(compliance): untrack protected files (R76) [ku | main | 7 (59 funcs) | 0 | 2 | ! |
+| **Forma** | 2026-08-26 `41ea6b6` v0.3.3: Fallback LLM Ollama automatique + logs ASC | master | 47 (91 funcs) | 0 | 6 | ! |
+| **GALT-Flatcoin-Concept** | 2026-08-26 `ffd963e` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 | ! |
+| **github-profile** | 2026-08-26 `d78aae6` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 | ! |
+| **Helium** | 2026-08-26 `05c19c8` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 6 | ! |
+| **KnowledgeOS** | 2026-08-26 `c7977ec` chore(rules): synchro redirector 52 regles + workf | master | 4 (98 funcs) | 0 | 6 | ! |
+| **LifeStack** | 2026-08-26 `a7571f6` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 1 | ! |
+| **Metatron** | 2026-08-26 `b6615b6` docs: README v2 debugger/tuteur + CI tests multi-o | feat/debugger-pivot | 0 (0 funcs) | 0 | 12 | ! |
+| **Neural-Again** | 2026-08-26 `69dcc72` fix(compliance): untrack protected files (R76) [ku | main | 14 (95 funcs) | 0 | 2 | ! |
+| **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 11 (92 funcs) | 0 | 4 | ! |
+| **Neural-Research** | 2026-08-26 `2bca4ff` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 | ! |
+| **NeuralDBG** | 2026-08-26 `803a6bfe` chore(rules): synchro redirector 52 regles + workf | main | 48 (57 funcs) | 0 | 19 | ! |
+| **NeuralDBG-Engine** | 2026-08-26 `ab63b0c` chore(rules): synchro redirector 52 regles + workf | master | 6 (45 funcs) | 0 | 1 | ! |
+| **NeuralPrune** | 2026-08-26 `6da8b96` chore(rules): synchro redirector 52 regles + workf | master | 1 (6 funcs) | 0 | 1 | ! |
+| **NeuroDose** | 2026-08-26 `f8efc6b` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 | ! |
+| **Odin** | 2026-08-26 `a10b3eed` chore(rules): synchro redirector 52 regles + workf | main | 5 (45 funcs) | 0 | 1 | ! |
+| **OpenCMO** | 2026-08-26 `99d9980` chore(rules): synchro redirector 52 regles + workf | master | 19 (81 funcs) | 0 | 6 | ! |
+| **Project-Dirac** | 2026-08-26 `1830d1f` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 | ! |
+| **SaasX** | 2026-08-26 `cd786f4` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 3 | ! |
+| **TokenWise** | 2026-08-26 `9a524c2` fix(compliance): untrack protected files (R76) [ku | master | 2 (13 funcs) | 0 | 2 | ! |
+| **transformers-fork** | 2026-08-26 `01cf6b4` chore(rules): synchro redirector 52 regles + workf | main | 1002 (441 funcs) | 0 | 1 | ! |
+| **Verbose** | 2026-08-26 `06ec918` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 | ! |
+| **pytorch-fork** | 2026-07-02 `51953798` test: add gradient health tests (gh#177116) | test/mps-gradient-corruption-detection | 1412 (869 funcs) | 0 | 0 | ! |
+| **DevDemeterDAO** | 2026-06-07 `84ad00b` chore(session): add sync_summary.py for R43 Word b | docs/11-unified-dev-roadmap | 0 (0 funcs) | 0 | 0 | ! |
+| **russel-agent** | 2026-06-05 `614f455` feat: Phases 1-12 â€” Portage Windows + SpiderCach | pr/win-portability-spidercache | 70 (308 funcs) | 0 | 0 | ! |
+| **XP_Farming_System** | 2026-05-27 `de5e7ba` chore: add repository hygiene guardrails | chore/2-repository-hygiene | 0 (0 funcs) | 0 | 0 | ! |
+| **SOLARIS** | 2026-05-23 `fd3ba0b` Refactor code structure for improved readability a | feat/solaris-physical-critic | 2 (30 funcs) | 0 | 0 | ! |
+| **Hermes** | 2026-05-05 `731069d` docs: sync Epingle - Kuro 5% daemon MVP functional | validation/landing-deploy | 0 (0 funcs) | 0 | 0 | ! |
+| **Epure** | 2026-05-02 `fce188d` feat(dxf): ameliorations qualite complete | feature/dxf-finalization | 29 (198 funcs) | 0 | 0 | ! |
+| **Sagittarius** | 2026-04-07 `be05d3f` feat: automated L2 validation + job market scrapin | Jacques-Gad-Sagittarius | 0 (0 funcs) | 0 | 0 | ! |
+| **AEther** | 2026-03-21 `f549a7d` feat: Sync 53 Strict AI Rules including PR Analysi | feat/setup-kuro-rules | 1 (8 funcs) | 0 | 0 | ! |
+| **Datalint** | 2026-03-21 `6b3e4f0` feat: Sync 53 Strict AI Rules including PR Analysi | ceo/rule-sync-finalize-h-plan | 5 (13 funcs) | 0 | 0 | ! |
+| **Iroko** | 2026-03-21 `2079e51` feat: Sync 53 Strict AI Rules including PR Analysi | codex/rule-parity-cleanup | 0 (0 funcs) | 0 | 0 | ! |
+| **Kapok** | 2026-03-21 `02b8fa8` feat: Sync 53 Strict AI Rules including PR Analysi | ceo/kapok-phase-1-validation | 0 (0 funcs) | 0 | 0 | ! |
+| **Aladin** | — (no git) | — | 0 | 0 | — | — |
+| **Flow-Regulator** | — (no git) | — | 0 | 0 | — | — |
+| **Nwt** | — (no git) | — | 0 | 0 | — | — |
+| **Onlook** | — (no git) | — | 0 | 0 | — | — |
+| **OpenMind** | — (no git) | — | 0 | 0 | — | — |
+| **POFS** | — (no git) | — | 0 | 0 | — | — |
+| **Prompt2Model** | — (no git) | — | 0 | 0 | — | — |
+| **QuSolve** | — (no git) | — | 0 | 0 | — | — |
+| **SOGEXCO** | — (no git) | — | 0 | 0 | — | — |
 
 ## Verite vs Epingle
 
-- **AEther** `7%` mais 0 commit 30j (dernier 2026-03-09) -> verifier statut Actif
-- **Astral** `15%` mais 0 commit 30j (dernier 2026-04-05) -> verifier statut Actif
-- **Automatons** `0%` mais 0 commit 30j (dernier 2025-12-19) -> verifier statut Actif
-- **DataLint** `15%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
-- **Dissect** `30%` mais 0 commit 30j (dernier 2026-03-03) -> verifier statut Actif
-- **EchoX** `22%` mais 0 commit 30j (dernier 2026-03-07) -> verifier statut Actif
-- **Odin** `10%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
-- **TokenWise** `0%` mais 0 commit 30j (dernier 2026-05-17) -> verifier statut Actif
-- **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
+- **AEther** `7%` mais 0 commit 30j (dernier 2026-03-21) -> verifier statut Actif
+- **Datalint** `15%` mais 0 commit 30j (dernier 2026-03-21) -> verifier statut Actif
+- **DevDemeterDAO** `Externe` mais 0 commit 30j (dernier 2026-06-07) -> verifier statut Actif
+- **Epure** `15%` mais 0 commit 30j (dernier 2026-05-02) -> verifier statut Actif
+- **Hermes** `λ-4` mais 0 commit 30j (dernier 2026-05-05) -> verifier statut Actif
+- **Sagittarius** `λ-9` mais 0 commit 30j (dernier 2026-04-07) -> verifier statut Actif
+- **XP_Farming_System** `Externe` mais 0 commit 30j (dernier 2026-05-27) -> verifier statut Actif
 
-_Généré 2026-08-26T05:21:51.875986 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-08-31T16:29:11.250578 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_

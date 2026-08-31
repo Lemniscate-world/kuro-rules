@@ -198,10 +198,12 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="just generate report")
     ap.add_argument("--apply", action="store_true", help="also update Epingle (currently no-op, manual)")
     ap.add_argument("--output", default=str(TRUTH_REPORT), help="path for truth report")
+    ap.add_argument("--full", action="store_true",
+                    help="count tests/LOC (heavy). Without it, quick mode reports 0 tests.")
     args = ap.parse_args()
 
     print("=== Daily Truth Audit ===")
-    facts = scan_all()
+    facts = scan_all(quick=not args.full)
     print(f"  Scanned {len(facts)} projets")
 
     out_path = Path(args.output).expanduser()

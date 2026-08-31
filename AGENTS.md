@@ -20,7 +20,7 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_105_multirepo_governance**: RULE 105: Multi-Repo & Monorepo Governance â€” MANDATORY
 - **rule_106_plan_roadmap_split**: RULE 106: Private Plan + Public Roadmap Split â€” MANDATORY
 - **rule_107_upstream_pr_strategy**: RULE 107: Upstream PR Strategy â€” Credibility Through Merged Contributions
-- **rule_108_design_language**: RULE 108: Design Language â€” Â« Ledger Brutal Â» (LifeTrack & dÃ©rivÃ©s)
+- **rule_108_design_language**: RULE 108: Design Language â€” Â« Quiet Precision Â» (LifeTrack & dÃ©rivÃ©s)
 - **rule_108_validation_pipeline**: RULE 108: Validation Pipeline â€” Progressive Gates (MANDATORY)
 - **rule_109_adaptive_design**: RULE 109: Adaptive Design Systems â€” identitÃ© par produit, socle universel
 - **rule_110_blogging**: RULE 110: Blogging & Contenu Public â€” le systÃ¨me d'Ã©criture lambda-Section

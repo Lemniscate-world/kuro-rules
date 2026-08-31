@@ -81,7 +81,7 @@ jobs:
       - name: Audit truth quotidien (git log + tests)
         if: env.KURO_FULL == 'true'
         run: |
-          python kuro-rules/scripts/audit_truth_daily.py --dry-run --output kuro-rules/TRUTH_DAILY.md
+          python kuro-rules/scripts/audit_truth_daily.py --dry-run --full --output kuro-rules/TRUTH_DAILY.md
           cat kuro-rules/TRUTH_DAILY.md | head -n 30
 
       - name: Kuro Radar (veille net, lundi uniquement)
