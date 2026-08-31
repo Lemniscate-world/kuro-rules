@@ -1,11 +1,19 @@
 {
-  "generated_at": "2026-08-31T15:55:18+00:00",
+  "generated_at": "2026-08-31T21:21:13+00:00",
   "overall": "red",
   "repos": [
     {
       "name": "LambdaSection/NeuralDBG",
       "health": "red",
       "workflows": [
+        {
+          "name": "Kuro Rules Compliance",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33411199693",
+          "updated_at": "2026-08-31T15:55:39Z"
+        },
         {
           "name": "Validation Pipeline (R108)",
           "status": "completed",
@@ -21,14 +29,6 @@
           "attempt": 1,
           "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33354633333",
           "updated_at": "2026-08-31T03:42:30Z"
-        },
-        {
-          "name": "Kuro Rules Compliance",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33314696326",
-          "updated_at": "2026-08-30T13:37:59Z"
         },
         {
           "name": "Qodo Code Review",
@@ -477,16 +477,16 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33368915214",
-          "updated_at": "2026-08-31T07:34:32Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33411201448",
+          "updated_at": "2026-08-31T15:56:11Z"
         },
         {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33368914658",
-          "updated_at": "2026-08-31T07:34:29Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33411200344",
+          "updated_at": "2026-08-31T15:56:14Z"
         },
         {
           "name": "Scheduled",
@@ -507,8 +507,32 @@
           "status": "in_progress",
           "conclusion": null,
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33411133040",
-          "updated_at": "2026-08-31T15:54:49Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33440846131",
+          "updated_at": "2026-08-31T21:20:34Z"
+        },
+        {
+          "name": "Kuro Rules Compliance",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33419069431",
+          "updated_at": "2026-08-31T17:21:10Z"
+        },
+        {
+          "name": "Rules Audit",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33419069404",
+          "updated_at": "2026-08-31T17:21:08Z"
+        },
+        {
+          "name": "Push on master",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33419068963",
+          "updated_at": "2026-08-31T17:22:43Z"
         },
         {
           "name": "kuro-rules-guard",
@@ -519,36 +543,12 @@
           "updated_at": "2026-08-31T10:15:10Z"
         },
         {
-          "name": "Push on master",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33368912831",
-          "updated_at": "2026-08-31T07:35:20Z"
-        },
-        {
           "name": "Scheduled",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
           "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33352630356",
           "updated_at": "2026-08-31T03:05:44Z"
-        },
-        {
-          "name": "Kuro Rules Compliance",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33314759832",
-          "updated_at": "2026-08-30T13:39:24Z"
-        },
-        {
-          "name": "Rules Audit",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/32949457263",
-          "updated_at": "2026-08-26T08:46:17Z"
         }
       ]
     }
