@@ -42,16 +42,16 @@
 | **NeuralDBG-Engine** |  47%  | Actif | Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. |
 | **Neural-Agent** |  65%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
 | **Aladin** | 40% | Actif | Architecture Transformer & recherche LLM. |
-| **Astral** |  15%  | En Pause | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
-| **DataLint** |  15%  | En Pause | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
-| **Odin** |  10%  | En Pause | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. |
+| **Astral** |  20%  | En Pause | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
+| **DataLint** |  5%  | En Pause | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
+| **Odin** |  0%  | En Pause | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. |
 | **NeuroDose** |  15%  | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
 | **Aquarium** |  20%  | Prototypage | IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. |
 | **Damon** | 0% | Nouveau | OS Amélioré basé sur Arch Linux. |
 | **Metatron** |  25%  | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
-| **TokenWise** | 0% | En Pause | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
+| **TokenWise** |  5%  | En Pause | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
 | **Prompt2Model** | 0% | Validation | Génération automatique de modèles ML à partir de descriptions textuelles. Phase validation Mom Test. |
-| **Automatons** | 0% | En Pause | Agent orchestration and automation framework. |
+| **Automatons** |  5%  | En Pause | Agent orchestration and automation framework. |
 | **Onlook** | 0% | Prototypage | Visual monitoring / observability tool. |
 | **Verbose** | 0% | En Pause | Logging / communication tool. |
 | Vault | — | Outil | Base de connaissances personnelle (Obsidian). |
@@ -84,7 +84,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **EchoX** |  22%  | En Pause | SRS avec forgetting curves (PyQt6). Validation L1 complète ($23.9B marché), GUI desktop opérationnelle. 6 tests. Structure Tauri initialisée. |
+| **EchoX** |  27%  | En Pause | SRS avec forgetting curves (PyQt6). Validation L1 complète ($23.9B marché), GUI desktop opérationnelle. 6 tests. Structure Tauri initialisée. |
 | **Flow-Regulator** | 5% | Actif | Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode. |
 | Charmed |  0%  | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
 | Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
@@ -144,7 +144,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Dissect** |  30%  | En Pause | Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. |
+| **Dissect** |  35%  | En Pause | Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. |
 | BloomDB |  0%  | Prototypage | Base de données pour stockage et gestion de données probabilistes. |
 | Algoritmi | 0% | Prototypage | Dérivé de Dissect, centré sur la visualisation des algorithmes. |
 
@@ -186,7 +186,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **AEther** | 7% | En Pause | Minkowski Space-Time Visualizer, orienté exploration d'autres espaces-temps. 1 test. Branch: feat/setup-kuro-rules. |
+| **AEther** |  0%  | En Pause | Minkowski Space-Time Visualizer, orienté exploration d'autres espaces-temps. 1 test. Branch: feat/setup-kuro-rules. |
 | Logical Calculus | 0% | Recherche | Nouveau système de calcul infinitésimal basé sur la logique et le calcul de Newton. Formalisation en cours. |
 | Math. Theorization of Linguistics | 0% | Recherche | Mathématisation du langage par théorie de Shannon, espaces de probabilités linguistiques. |
 | Project-Dirac | 0% | Prototypage | Physics-inspired computational model. |
