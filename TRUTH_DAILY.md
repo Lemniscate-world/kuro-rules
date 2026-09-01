@@ -25,9 +25,9 @@
 
 ## Verite vs Epingle
 
-- **AEther** `7%` mais 0 commit 30j (dernier 2026-03-09) -> verifier statut Actif
-- **DataLint** `15%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
-- **Odin** `10%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
+- **AEther** `0%` mais 0 commit 30j (dernier 2026-03-09) -> verifier statut Actif
+- **DataLint** `5%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
+- **Odin** `0%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-09-01T09:38:47.260077 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-09-01T16:23:57.246136 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
