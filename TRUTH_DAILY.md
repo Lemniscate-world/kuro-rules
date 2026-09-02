@@ -1,4 +1,4 @@
-# TRUTH DAILY — 2026-09-01
+# TRUTH DAILY — 2026-09-02
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
@@ -26,8 +26,8 @@
 ## Verite vs Epingle
 
 - **AEther** `0%` mais 0 commit 30j (dernier 2026-03-09) -> verifier statut Actif
-- **DataLint** `5%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
+- **DataLint** `0%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
 - **Odin** `0%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-09-01T16:23:57.246136 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-09-02T09:10:05.214820 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_

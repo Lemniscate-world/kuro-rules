@@ -49,9 +49,9 @@
 | **Aquarium** |  20%  | Prototypage | IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. |
 | **Damon** | 0% | Nouveau | OS Amélioré basé sur Arch Linux. |
 | **Metatron** |  25%  | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
-| **TokenWise** |  10%  | En Pause | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
+| **TokenWise** |  15%  | En Pause | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
 | **Prompt2Model** | 0% | Validation | Génération automatique de modèles ML à partir de descriptions textuelles. Phase validation Mom Test. |
-| **Automatons** |  10%  | En Pause | Agent orchestration and automation framework. |
+| **Automatons** |  15%  | En Pause | Agent orchestration and automation framework. |
 | **Onlook** | 0% | Prototypage | Visual monitoring / observability tool. |
 | **Verbose** | 0% | En Pause | Logging / communication tool. |
 | Vault | — | Outil | Base de connaissances personnelle (Obsidian). |
