@@ -1,11 +1,11 @@
-# TRUTH DAILY — 2026-09-03
+# TRUTH DAILY — 2026-09-04
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-08-31 `3c70530` docs: sous-plan strictement rattaché PLAN.md:12 (R | main | 67 (210 funcs) | 0 | 50 |  |
+| **OpenQuant** | 2026-08-31 `3c70530` docs: sous-plan strictement rattaché PLAN.md:12 (R | main | 67 (266 funcs) | 0 | 50 |  |
 | **Aquarium** | 2026-08-26 `6c917bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 |  |
 | **Astral** | 2026-08-26 `2ae3098` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
 | **Automatons** | 2026-08-26 `1105136` fix(compliance): untrack protected files (R76) [ku | main | 3 (20 funcs) | 0 | 2 |  |
@@ -14,7 +14,7 @@
 | **Helium** | 2026-08-26 `05c19c8` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 6 |  |
 | **LifeTrack** | 2026-08-26 `4c5ad2d` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 50 |  |
 | **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 11 (92 funcs) | 0 | 4 |  |
-| **NeuralDBG** | 2026-08-26 `803a6bf` chore(rules): synchro redirector 52 regles + workf | main | 48 (190 funcs) | 0 | 19 |  |
+| **NeuralDBG** | 2026-08-26 `803a6bf` chore(rules): synchro redirector 52 regles + workf | main | 48 (60 funcs) | 0 | 19 |  |
 | **NeuralDBG-Engine** | 2026-08-26 `ab63b0c` chore(rules): synchro redirector 52 regles + workf | master | 6 (45 funcs) | 0 | 1 |  |
 | **TokenWise** | 2026-08-26 `9a524c2` fix(compliance): untrack protected files (R76) [ku | master | 2 (13 funcs) | 0 | 2 |  |
 | **Metatron** | 2026-08-23 `69be135` fix(ci): scan SonarQube non bloquant - secret SONA | main | 0 (0 funcs) | 0 | 2 |  |
@@ -30,4 +30,4 @@
 - **Odin** `0%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-09-03T09:16:39.880508 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-09-04T09:09:39.455933 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
