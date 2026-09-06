@@ -1,11 +1,19 @@
 {
-  "generated_at": "2026-09-06T00:39:59+00:00",
+  "generated_at": "2026-09-06T05:36:23+00:00",
   "overall": "red",
   "repos": [
     {
       "name": "LambdaSection/NeuralDBG",
       "health": "red",
       "workflows": [
+        {
+          "name": "Scheduled",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34013090517",
+          "updated_at": "2026-09-06T05:06:21Z"
+        },
         {
           "name": "Kuro Rules Compliance",
           "status": "completed",
@@ -21,14 +29,6 @@
           "attempt": 1,
           "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33959942996",
           "updated_at": "2026-09-05T10:12:36Z"
-        },
-        {
-          "name": "Scheduled",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/33354633333",
-          "updated_at": "2026-08-31T03:42:30Z"
         },
         {
           "name": "Qodo Code Review",
@@ -335,8 +335,8 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/LambdaSection/Metatron/actions/runs/33354105118",
-          "updated_at": "2026-08-31T03:32:51Z"
+          "url": "https://github.com/LambdaSection/Metatron/actions/runs/34012797914",
+          "updated_at": "2026-09-06T04:59:15Z"
         },
         {
           "name": "Build",
@@ -477,16 +477,16 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33996897195",
-          "updated_at": "2026-09-05T22:48:03Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/34001885885",
+          "updated_at": "2026-09-06T00:40:46Z"
         },
         {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/33996897133",
-          "updated_at": "2026-09-05T22:48:07Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/34001885663",
+          "updated_at": "2026-09-06T00:40:53Z"
         },
         {
           "name": "Scheduled",
@@ -507,16 +507,24 @@
           "status": "in_progress",
           "conclusion": null,
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34001855320",
-          "updated_at": "2026-09-06T00:39:27Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34014381560",
+          "updated_at": "2026-09-06T05:35:55Z"
+        },
+        {
+          "name": "Scheduled",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34011732792",
+          "updated_at": "2026-09-06T04:33:35Z"
         },
         {
           "name": "Push on master",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33996896263",
-          "updated_at": "2026-09-05T22:49:00Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34001884791",
+          "updated_at": "2026-09-06T00:41:26Z"
         },
         {
           "name": "Kuro Rules Compliance",
@@ -533,14 +541,6 @@
           "attempt": 1,
           "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33953866979",
           "updated_at": "2026-09-05T07:55:44Z"
-        },
-        {
-          "name": "Rules Audit",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/33419069404",
-          "updated_at": "2026-08-31T17:21:08Z"
         }
       ]
     }
