@@ -31,3 +31,33 @@
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
 _Généré 2026-09-06T09:01:09.903780 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+## Signaux Radar + recommandations (semaine du 2026-09-07)
+
+**Hacker News**
+- [I trained a small transformer in 1.5hrs and it beats many LLMs](https://mvakde.github.io/blog/44-on-arc-1/) (668)
+- [LLMs as a Cognitive Virus](https://arxiv.org/abs/2609.03344) (378)
+- [Porting my 1993 Amiga game to Godot, with an LLM reading the 68000 assembly](https://babyloniantwins.com/blog/porting-a-1993-amiga-game-to-godot/) (377)
+- [Show HN: TERMy – A fast terminal assistant that does not use LLMs](https://github.com/gioblu/NPC-Forge/blob/main/docs/development.md) (209)
+- [“Next-token predictor” is the wrong mental model for LLMs](https://gmcgoldr.github.io/2026/09/04/llm-next-token-predictors.html) (159)
+
+**GitHub — nouveaux repos qui montent**
+- [lnkiai/m3e-canvas ★4279](https://github.com/lnkiai/m3e-canvas) (4279) — _Sketch Material 3 Expressive screens in the browser and turn them into vibe-coding prompts._
+- [anthropics/commerce-agents ★2210](https://github.com/anthropics/commerce-agents) (2210) — _Reference blueprint for building shopping and merchant agents with Claude. Examples in retail, commerce, telec_
+- [ashemag/human-atlas ★1346](https://github.com/ashemag/human-atlas) (1346) — _Open-source 3D anatomy explorer: 2,234 selectable BodyParts3D meshes, system layers, search, and exploded view_
+- [Rion-Wu-tech/wechat-intelligence-hub ★1013](https://github.com/Rion-Wu-tech/wechat-intelligence-hub) (1013) — _Local-first WeChat intelligence system with a read-only CLI, Codex skills, searchable chat history, daily brie_
+- [pierrenade/short-video-generator-AI ★862](https://github.com/pierrenade/short-video-generator-AI) (862) — _Free open-source project designed for turning youtube-viedos into viral short videos. Highlight detection, sub_
+- [anthropics/fermats-last-theorem ★843](https://github.com/anthropics/fermats-last-theorem) (843)
+
+**arXiv cs.AI**
+- [Compile by Training: Turning Natural-Language Specifications into Local Neural Functions](http://arxiv.org/abs/2609.04199v1)
+- [Clean Engineering, Unstable Measurement: A Preregistered Reliability Failure of Black-Box LLM Observers on Shared Endpoints](http://arxiv.org/abs/2609.04198v1)
+- [ESPO: Error-Structured Prompt Optimization via Diagnose, Diversify, and Stabilize](http://arxiv.org/abs/2609.04197v1)
+- [One Editor, Many Edits: A Unified Training-Free Framework for Diverse Video Editing](http://arxiv.org/abs/2609.04190v1)
+
+- **intégrer dans `Metatron`** ← [Compile by Training: Turning Natural-Language Specifications into Local Neural Functions](http://arxiv.org/abs/2609.04199v1) (mots : language, neural, training)
+- **intégrer dans `Astral`** ← [“Next-token predictor” is the wrong mental model for LLMs](https://gmcgoldr.github.io/2026/09/04/llm-next-token-predictors.html) (mots : model, next)
+- **relancer avec `Odin`** ← [ESPO: Error-Structured Prompt Optimization via Diagnose, Diversify, and Stabilize](http://arxiv.org/abs/2609.04197v1) (mots : prompt, via)
+- **intégrer dans `Automatons`** ← [One Editor, Many Edits: A Unified Training-Free Framework for Diverse Video Editing](http://arxiv.org/abs/2609.04190v1) (mots : framework, training)
+- **À surveiller pour `NeuralDBG`** ← [Porting my 1993 Amiga game to Godot, with an LLM reading the 68000 assembly](https://babyloniantwins.com/blog/porting-a-1993-amiga-game-to-godot/) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [anthropics/commerce-agents ★2210](https://github.com/anthropics/commerce-agents) (agents)
+- **À surveiller pour `Neural-Agent`** ← [Clean Engineering, Unstable Measurement: A Preregistered Reliability Failure of Black-Box LLM Observers on Shared Endpoints](http://arxiv.org/abs/2609.04198v1) (llm)
