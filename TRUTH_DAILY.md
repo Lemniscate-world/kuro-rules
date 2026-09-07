@@ -61,3 +61,32 @@ _Généré 2026-09-06T09:01:09.903780 | Script: `scripts/audit_truth_daily.py` |
 - **À surveiller pour `NeuralDBG`** ← [Porting my 1993 Amiga game to Godot, with an LLM reading the 68000 assembly](https://babyloniantwins.com/blog/porting-a-1993-amiga-game-to-godot/) (llm)
 - **À surveiller pour `NeuralDBG-Engine`** ← [anthropics/commerce-agents ★2210](https://github.com/anthropics/commerce-agents) (agents)
 - **À surveiller pour `Neural-Agent`** ← [Clean Engineering, Unstable Measurement: A Preregistered Reliability Failure of Black-Box LLM Observers on Shared Endpoints](http://arxiv.org/abs/2609.04198v1) (llm)
+
+## Signaux Radar + recommandations (semaine du 2026-09-07)
+
+**Hacker News**
+- [I trained a small transformer in 1.5hrs and it beats many LLMs](https://mvakde.github.io/blog/44-on-arc-1/) (668)
+- [Your intellectual fly is open when you use an LLM to author a post (2025)](https://bcantrill.dtrace.org/2025/12/05/your-intellectual-fly-is-open/) (624)
+- [LLMs as a Cognitive Virus](https://arxiv.org/abs/2609.03344) (384)
+- [Porting my 1993 Amiga game to Godot, with an LLM reading the 68000 assembly](https://babyloniantwins.com/blog/porting-a-1993-amiga-game-to-godot/) (377)
+- [Show HN: TERMy – A fast terminal assistant that does not use LLMs](https://github.com/gioblu/NPC-Forge/blob/main/docs/development.md) (210)
+
+**GitHub — nouveaux repos qui montent**
+- [lnkiai/m3e-canvas ★4385](https://github.com/lnkiai/m3e-canvas) (4385) — _Sketch Material 3 Expressive screens in the browser and turn them into vibe-coding prompts._
+- [anthropics/commerce-agents ★2265](https://github.com/anthropics/commerce-agents) (2265) — _Reference blueprint for building shopping and merchant agents with Claude. Examples in retail, commerce, telec_
+- [ashemag/human-atlas ★1494](https://github.com/ashemag/human-atlas) (1494) — _Open-source 3D anatomy explorer: 2,234 selectable BodyParts3D meshes, system layers, search, and exploded view_
+- [Rion-Wu-tech/wechat-intelligence-hub ★1358](https://github.com/Rion-Wu-tech/wechat-intelligence-hub) (1358) — _Local-first WeChat intelligence system with a read-only CLI, Codex skills, searchable chat history, daily brie_
+- [pierrenade/short-video-generator-AI ★1027](https://github.com/pierrenade/short-video-generator-AI) (1027) — _Free open-source project designed for turning youtube-viedos into viral short videos. Highlight detection, sub_
+- [anthropics/fermats-last-theorem ★863](https://github.com/anthropics/fermats-last-theorem) (863)
+
+**arXiv cs.AI**
+- [Diffusion TV: Experiencing Diffusion Models through Tangible, Embodied Interaction](http://arxiv.org/abs/2609.05404v1)
+- [RegionFed: Federated Learning for Personalized Query Understanding in Heterogeneous Retail Environments](http://arxiv.org/abs/2609.05403v1)
+- [A Deep Generative Model for Synthesizing Labeled Wireless Signals](http://arxiv.org/abs/2609.05396v1)
+- [Multi-Step Tool-Calling over Korean Open Public APIs: A Benchmark and a Data-Synthesis Recipe](http://arxiv.org/abs/2609.05395v1)
+
+- **relancer avec `Odin`** ← [Your intellectual fly is open when you use an LLM to author a post (2025)](https://bcantrill.dtrace.org/2025/12/05/your-intellectual-fly-is-open/) (mots : llm, open)
+- **intégrer dans `Astral`** ← [Multi-Step Tool-Calling over Korean Open Public APIs: A Benchmark and a Data-Synthesis Recipe](http://arxiv.org/abs/2609.05395v1) (mots : data, multi)
+- **À surveiller pour `NeuralDBG`** ← [Porting my 1993 Amiga game to Godot, with an LLM reading the 68000 assembly](https://babyloniantwins.com/blog/porting-a-1993-amiga-game-to-godot/) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [anthropics/commerce-agents ★2265](https://github.com/anthropics/commerce-agents) (agents)
+- **À surveiller pour `Neural-Agent`** ← [A Deep Generative Model for Synthesizing Labeled Wireless Signals](http://arxiv.org/abs/2609.05396v1) (model)
