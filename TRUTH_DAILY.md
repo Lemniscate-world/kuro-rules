@@ -1,11 +1,11 @@
-# TRUTH DAILY — 2026-09-09
+# TRUTH DAILY — 2026-09-10
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-09-08 `33e8477` fix: test ml_engine import | main | 83 (242 funcs) | 0 | 50 |  |
+| **OpenQuant** | 2026-09-09 `7891fc2` fix(trading): resolution du crash ValueError sur l | main | 83 (242 funcs) | 0 | 50 |  |
 | **Aquarium** | 2026-08-26 `6c917bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 |  |
 | **Astral** | 2026-08-26 `2ae3098` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
 | **Automatons** | 2026-08-26 `1105136` fix(compliance): untrack protected files (R76) [ku | main | 3 (20 funcs) | 0 | 2 |  |
@@ -13,7 +13,7 @@
 | **EchoX** | 2026-08-26 `a1fa54c` fix(compliance): untrack protected files (R76) [ku | main | 5 (48 funcs) | 0 | 2 |  |
 | **Helium** | 2026-08-26 `05c19c8` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 6 |  |
 | **LifeTrack** | 2026-08-26 `4c5ad2d` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 50 |  |
-| **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 11 (92 funcs) | 0 | 2 |  |
+| **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 11 (92 funcs) | 0 | 1 |  |
 | **NeuralDBG** | 2026-08-26 `803a6bf` chore(rules): synchro redirector 52 regles + workf | main | 48 (60 funcs) | 0 | 15 |  |
 | **NeuralDBG-Engine** | 2026-08-26 `ab63b0c` chore(rules): synchro redirector 52 regles + workf | master | 6 (45 funcs) | 0 | 1 |  |
 | **TokenWise** | 2026-08-26 `9a524c2` fix(compliance): untrack protected files (R76) [ku | master | 2 (13 funcs) | 0 | 2 |  |
@@ -30,4 +30,4 @@
 - **Odin** `0%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-09-09T09:17:14.011538 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-09-10T09:15:11.643057 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
