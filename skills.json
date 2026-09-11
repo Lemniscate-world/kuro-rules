@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-10T09:15:12+00:00",
+  "generated_at": "2026-09-11T09:13:13+00:00",
   "window_days": 90,
   "repo_count": 17,
   "skills": [
     {
       "name": "Python",
       "pct": 55,
-      "kb": 3114,
+      "kb": 3132,
       "repos": 14,
       "commits_90d": 147,
       "ci_green_frac": 0.83,
