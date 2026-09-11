@@ -25,15 +25,22 @@ TRUTH_ENRICH = True
 
 CSS = """\
   :root {
-    --paper: #faf9f5; --ink: #161513; --muted: #5f5b52;
-    --hair: #d9d6cc; --zebra: #f1efe8; --hover: #eae7dd;
+    --paper: #faf9f6; --surface: #ffffff; --ink: #141312; --muted: #57534e; --subtle: #78716c;
+    --hair: #e5e3dc; --zebra: #f6f5f0; --hover: #eeece5;
     --serif: Georgia, 'Times New Roman', serif;
     --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, Menlo, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+    /* R108 rampe typographique : planchere anti-slop (>=11px fonctionnel, >=12px meta) */
+    --fs-micro: 0.8125rem; /* 13px - titres de micro-blocs, labels */
+    --fs-meta: 0.75rem;    /* 12px - colophon, footer, meta, badges */
+    --fs-body: 0.875rem;   /* 14px - corps secondaire */
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
-  body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.55; padding: 2.5rem 1.25rem 4rem; max-width: 1060px; margin: 0 auto; }
-  .over { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* R108 : plancher de lisibilite applique aux tokens fonctionnels. */
+  .badge, th, .stat-label, .ci-head, .qs-title, .footer { line-height: 1.35; }
+
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.6; padding: 2.5rem 1.25rem 4.5rem; max-width: 1060px; margin: 0 auto; -webkit-font-smoothing: antialiased; }
+  .over { font-family: var(--mono); font-size: var(--fs-meta); letter-spacing: 0.04em; color: var(--muted); }
   h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.4rem); letter-spacing: -0.01em; line-height: 1.05; margin: 0.35rem 0 0.4rem; }
   .standfirst { color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
   .rule { border: 0; border-top: 2px solid var(--ink); margin: 1.2rem 0 0; }
@@ -42,50 +49,62 @@ CSS = """\
   .index-nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
   .index-nav a:hover { border-bottom-color: var(--ink); }
   .index-nav .sep { color: var(--hair); margin: 0 0.45em; }
-  .toolbar { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 0.6rem; }
-  .colophon { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+  .toolbar { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 0.8rem; }
+  .colophon { font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); }
   .colophon a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
   .colophon a:hover { border-bottom-color: var(--ink); }
-  .filter input { width: min(340px, 100%); padding: 0.45rem 0.6rem; border: 1px solid var(--ink); background: transparent; font-family: var(--mono); font-size: 0.8rem; color: var(--ink); }
-  .filter input::placeholder { color: var(--muted); }
-  .stats { display: flex; flex-wrap: wrap; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); margin-bottom: 1rem; }
-  .stat { padding: 0.7rem 1.4rem 0.7rem 0; margin-right: 1.4rem; border-right: 1px solid var(--hair); }
-  .stat:last-child { border-right: 0; margin-right: 0; }
-  .stat-val { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; line-height: 1.15; }
-  .stat-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-  h2 { font-family: var(--serif); font-size: 1.35rem; margin: 2.6rem 0 0.15rem; display: flex; align-items: baseline; gap: 0.6rem; }
-  h2 .no { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; }
-  h2 .count { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); font-weight: 400; }
+  .filter input { width: min(340px, 100%); padding: 0.5rem 0.75rem; border: 1px solid var(--hair); border-radius: 6px; background: var(--surface); font-family: var(--mono); font-size: 0.8rem; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: border-color 150ms ease; }
+  .filter input:focus { outline: none; border-color: var(--ink); }
+  .filter input::placeholder { color: var(--subtle); }
+  .stats { display: flex; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--hair); border-radius: 6px; padding: 0.6rem 0; margin-bottom: 1.2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .stat { padding: 0.4rem 1.4rem; border-right: 1px solid var(--hair); }
+  .stat:last-child { border-right: 0; }
+  .stat-val { font-family: var(--mono); font-size: 1.4rem; font-weight: 500; line-height: 1.15; color: var(--ink); }
+  .stat-label { font-family: var(--mono); font-size: var(--fs-meta); letter-spacing: 0.1em; color: var(--muted); }
+  .ci-box { background: var(--surface); border: 1px solid rgba(20,19,18,0.07); border-radius: 6px; padding: 1rem 1.3rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .ci-head { font-family: var(--mono); font-size: var(--fs-meta); font-weight: 600; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.4rem; }
+  .ci-box p { font-family: var(--mono); font-size: var(--fs-body); color: var(--muted); margin: 0.2rem 0; }
+  .ci-box a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .ci-box a:hover { border-bottom-color: var(--ink); }
+  .ci-box .ok { color: #047857; font-weight: 600; }
+  .ci-box .fail { color: #b91c1c; font-weight: 600; }
+  h2 { font-family: var(--serif); font-size: 1.35rem; letter-spacing: -0.01em; margin: 2.6rem 0 0.15rem; display: flex; align-items: baseline; gap: 0.6rem; }
+  h2 .no { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; }
+  h2 .count { font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); font-weight: 400; }
   .section-theme { font-style: italic; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.7rem; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
-  th { font-family: var(--mono); font-weight: 500; text-align: left; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--ink); }
-  td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; background: var(--surface); border: 1px solid rgba(20,19,18,0.08); border-radius: 6px; overflow: hidden; }
+  th { font-family: var(--mono); font-weight: 600; text-align: left; font-size: var(--fs-meta); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--hair); background: var(--surface); }
+  td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
   tr:nth-child(even) td { background: var(--zebra); }
   tr:hover td { background: var(--hover); }
   .proj-name { white-space: nowrap; font-weight: 600; }
   .proj-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; }
   .proj-name a:hover { border-bottom-color: var(--ink); }
-  .proj-desc { color: var(--muted); font-size: 0.8rem; max-width: 420px; }
-  .badge { display: inline-block; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--ink); padding: 0.08rem 0.45rem; white-space: nowrap; background: transparent; color: var(--ink); }
-  .bar { display: inline-block; vertical-align: middle; height: 10px; width: 90px; border: 1px solid var(--ink); position: relative; background: transparent; }
-  .bar-fill { position: absolute; top: 0; left: 0; bottom: 0; background: var(--ink); }
-  .pct { font-family: var(--mono); font-size: 0.72rem; margin-left: 0.5rem; color: var(--muted); }
-  .notice { border: 1px solid var(--ink); padding: 1rem 1.2rem; margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: baseline; justify-content: space-between; }
+  .proj-desc { color: var(--muted); font-size: var(--fs-body); max-width: 440px; }
+  .badge { display: inline-block; font-family: var(--mono); font-size: var(--fs-meta); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--hair); border-radius: 4px; padding: 0.1rem 0.45rem; white-space: nowrap; background: var(--surface); color: var(--ink); }
+  .badge-actif { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+  .badge-validation { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+  .badge-proto { background: #fefce8; color: #854d0e; border-color: #fde047; }
+  .badge-recherche { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
+  .badge-nouveau { background: #f8fafc; color: #334155; border-color: #cbd5e1; }
+  .badge-archive { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+  .badge-outil { background: #f5f5f4; color: #57534e; border-color: #d6d3d1; }
+  .bar { display: inline-block; vertical-align: middle; height: 7px; width: 84px; border-radius: 4px; background: #e5e3dc; overflow: hidden; position: relative; }
+  .bar-fill { position: absolute; top: 0; left: 0; bottom: 0; background: var(--ink); border-radius: 4px; }
+  .pct { font-family: var(--mono); font-size: var(--fs-meta); margin-left: 0.5rem; color: var(--muted); display: inline-block; min-width: 2.4rem; }
+  .notice { background: var(--surface); border: 1px solid rgba(20,19,18,0.07); border-radius: 6px; padding: 1.1rem 1.3rem; margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: baseline; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
   .notice strong { font-family: var(--serif); font-size: 1.02rem; }
   .notice p { color: var(--muted); font-size: 0.82rem; max-width: 52ch; }
   .notice a { color: var(--ink); font-family: var(--mono); font-size: 0.78rem; border-bottom: 1px solid var(--ink); text-decoration: none; white-space: nowrap; }
-  .footer { margin-top: 3.5rem; padding-top: 0.8rem; border-top: 1px solid var(--ink); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+  .footer { margin-top: 3.5rem; padding-top: 0.8rem; border-top: 1px solid var(--hair); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); }
   .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
   .footer a:hover { border-bottom-color: var(--ink); }
   a { color: inherit; }
-  .quickstarts { margin: 0.4rem 0 1.2rem; }
-  .quickstart { border: 1px solid var(--hair); border-left: 3px solid var(--ink); padding: 0.6rem 0.9rem; margin-bottom: 0.5rem; font-family: var(--mono); font-size: 0.78rem; background: var(--zebra); }
-  .quickstart .qs-title { display: block; color: var(--muted); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
-  .quickstart a { color: var(--ink); border-bottom: 1px solid var(--hair); }
-  .quickstart a:hover { border-bottom-color: var(--ink); }
-  .quickstarts { margin: 0.4rem 0 1.2rem; }
-  .quickstart { border: 1px solid var(--hair); border-left: 3px solid var(--ink); padding: 0.6rem 0.9rem; margin-bottom: 0.5rem; font-family: var(--mono); font-size: 0.78rem; background: var(--zebra); }
-  .quickstart .qs-title { display: block; color: var(--muted); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .quickstarts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.75rem; margin: 0.8rem 0 1.5rem; }
+  .quickstart { background: var(--surface); border: 1px solid rgba(20,19,18,0.07); border-radius: 6px; padding: 0.8rem 1rem; font-family: var(--mono); font-size: 0.78rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .quickstart .qs-title { display: block; color: var(--muted); font-size: var(--fs-meta); letter-spacing: 0.04em; margin-bottom: 0.35rem; font-weight: 600; }
+  .quickstart code { background: var(--zebra); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid var(--hair); font-size: var(--fs-body); }
   .quickstart a { color: var(--ink); border-bottom: 1px solid var(--hair); }
   .quickstart a:hover { border-bottom-color: var(--ink); }
   @media (max-width: 700px) { .proj-desc { display: none; } td { padding: 0.5rem 0.4rem; } }
@@ -267,7 +286,7 @@ def ci_panel_html(ci):
     for r in repos:
         failing = [w["name"] for w in r["workflows"] if w["conclusion"] == "failure"]
         mark = "✓" if r["health"] == "green" else "✕"
-        cls = "ok" if r["health"] == "green" else ""
+        cls = "ok" if r["health"] == "green" else "fail"
         detail = ", ".join(failing) if failing else f"{len(r['workflows'])} checks"
         actions_url = f"https://github.com/{r['name']}/actions"
         lines.append(
@@ -354,15 +373,6 @@ def generate(sections, output_path, updated_date):
         lines.append('<nav class="index-nav">' + '<span class="sep">/</span>'.join(nav_links) + '</nav>')
         lines.append('')
     lines.append('<div class="toolbar"><div class="filter"><input type="text" id="filter" placeholder="Filtrer par nom, statut, description..." oninput="filterProjects(this.value)"></div><span class="colophon">' + str(total) + ' lignes</span></div>')
-    # Utilite immediate (DESIGN.md: Quoi, prouve comment, je l'essaie comment ?)
-    lines.append('<div class="quickstarts">')
-    lines.append('  <div class="quickstart"><span class="qs-title">NeuralDBG v1.3 - debugger causal PyTorch · PyPI</span>')
-    lines.append('    <code>pip install neuraldbg</code> &nbsp; <a href="https://pypi.org/project/neuraldbg/">PyPI</a> · <a href="https://github.com/LambdaSection/NeuralDBG">source</a>')
-    lines.append('  </div>')
-    lines.append('  <div class="quickstart"><span class="qs-title">LifeTrack v0.3.2 - habit tracker desktop (Tauri)</span>')
-    lines.append('    <a href="https://github.com/Lemniscate-world/LifeTrack/releases">Telecharger (Windows MSI/NSIS)</a> · <a href="https://github.com/Lemniscate-world/LifeTrack">source</a>')
-    lines.append('  </div>')
-    lines.append('</div>')
     # Utilite immediate (DESIGN.md: Quoi, prouve comment, je l'essaie comment ?)
     lines.append('<div class="quickstarts">')
     lines.append('  <div class="quickstart"><span class="qs-title">NeuralDBG v1.3 — debugger causal PyTorch · PyPI</span>')
@@ -528,10 +538,10 @@ def generate_section_worlds(sections, updated_date, base_dir: Path):
         avg = sum(p["pct"] for p in sec["projects"]) // proj_count if proj_count else 0
         clean_name = sec["name"].replace("&#955;", "λ").replace("&mdash;", "—")
         idx_lines.append(f'<a class="world-card" href="s-{sid}/">')
-        idx_lines.append(f'  <div style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);letter-spacing:0.14em;">S-{sid.upper()}</div>')
+        idx_lines.append(f'  <div style="font-family:var(--mono);font-size:var(--fs-meta);color:var(--muted);letter-spacing:0.12em;">S-{sid.upper()}</div>')
         idx_lines.append(f'  <div style="font-family:var(--serif);font-size:1.15rem;font-weight:700;margin:0.2rem 0 0.3rem;">{clean_name}</div>')
         if tagline:
-            idx_lines.append(f'  <div style="color:var(--muted);font-size:0.78rem;font-style:italic;">{tagline}</div>')
+            idx_lines.append(f'  <div style="color:var(--muted);font-size:var(--fs-body);font-style:italic;">{tagline}</div>')
         idx_lines.append(f'  <div style="margin-top:0.55rem;font-family:var(--mono);font-size:0.72rem;color:var(--ink);">{proj_count} projets · {avg}% moyen</div>')
         idx_lines.append('</a>')
     idx_lines.append('</div>')
