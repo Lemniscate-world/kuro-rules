@@ -6,20 +6,21 @@ reminders uniques/recurrents, boards workspace, events calendrier, listes course
 Endpoint protege par OAuth2, setup desktop : Claude Settings > Connectors > Add custom
 connector avec https://mcp.any.do/sse, ou ChatGPT Settings > Plugins > + MCP server.
 
-Ce script ne parle pas encore SSE tout seul (OAuth manuel requis). Il fait le lien
-deterministe cote Kuro :
-  --export : convertit pipeline.local.json next_steps + kuro_strategy decisions
-             en tasks_anydo.json importable / copiable dans Claude avec le connecteur.
-  --push   : experimental, exige ANYDO_TOKEN (bearer OAuth). POST tasks une par une.
-             Sans token : affiche la marche a suivre, ne casse jamais.
+Deux sens :
+  --export : Kuro -> fichier (pipeline next_steps + decisions strategie -> tasks_anydo.json).
+  --pull   : Any.do -> Kuro (lit taches/listes via MCP SSE, rattache chaque note au
+             projet Epingle le plus proche, propose actions + signale les orphelines).
+  --push   : experimental, exige ANYDO_TOKEN (bearer OAuth). Sans token : guide, jamais fatal.
 
 Usage:
   python scripts/kuro_anydo.py --export [--out tasks_anydo.json]
-  ANYDO_TOKEN=xxx python scripts/kuro_anydo.py --push --dry-run
+  ANYDO_TOKEN=xxx python scripts/kuro_anydo.py --pull [--out-pull pull_anydo.json]
 """
 import argparse
 import json
+import re
 import sys
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -83,6 +84,181 @@ def cmd_export(out: Path):
         print(f" - [{t['source']}] {t['title']}")
 
 
+STOPWORDS = {
+    "les", "des", "une", "pour", "avec", "dans", "sur", "est", "the", "and",
+    "for", "with", "that", "this", "from", "into", "your", "les", "aux",
+    "faire", "plus", "tout", "tous", "comme", "par", "pas", "sont",
+}
+
+
+def _tok(text: str) -> set[str]:
+    return {t for t in re.findall(r"[a-z0-9]{4,}", text.lower())} - STOPWORDS
+
+
+def mcp_sse_endpoint(token: str, timeout: int = 20) -> str | None:
+    """GET /sse, lit le premier evenement 'endpoint' -> URL POST JSON-RPC."""
+    req = urllib.request.Request(
+        MCP_URL,
+        headers={"Authorization": f"Bearer {token}", "Accept": "text/event-stream",
+                 "User-Agent": "Kuro/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            event = None
+            for i, raw in enumerate(resp):
+                if i > 200:
+                    break
+                line = raw.decode("utf-8", errors="replace").strip()
+                if line.startswith("event:"):
+                    event = line[6:].strip()
+                elif line.startswith("data:") and event == "endpoint":
+                    return urllib.parse.urljoin(MCP_URL, line[5:].strip())
+                elif line.startswith("data:") and event is None and line[5:].strip().startswith("/"):
+                    return urllib.parse.urljoin(MCP_URL, line[5:].strip())
+    except Exception as e:
+        print(f"MCP SSE inaccessible : {e}")
+    return None
+
+
+def mcp_rpc(url: str, token: str, method: str, params: dict | None = None, rid: int = 1) -> dict | None:
+    """POST JSON-RPC, accepte reponse JSON ou flux SSE."""
+    body = {"jsonrpc": "2.0", "id": rid, "method": method}
+    if params is not None:
+        body["params"] = params
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode(), method="POST",
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
+                 "Accept": "application/json, text/event-stream", "User-Agent": "Kuro/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+    except Exception as e:
+        print(f"MCP {method} echec : {e}")
+        return None
+    try:
+        return json.loads(raw)
+    except Exception:
+        pass
+    for line in raw.splitlines():  # reponse SSE : cherche data: {json}
+        line = line.strip()
+        if line.startswith("data:"):
+            try:
+                obj = json.loads(line[5:].strip())
+                if isinstance(obj, dict) and ("result" in obj or "error" in obj):
+                    return obj
+            except Exception:
+                continue
+    return None
+
+
+def mcp_fetch_tasks(token: str) -> tuple[list[dict], list[dict]]:
+    """Handshake MCP + tools/list + appel du premier outil de lecture plausible."""
+    url = mcp_sse_endpoint(token)
+    if not url:
+        return [], []
+    mcp_rpc(url, token, "initialize", {"protocolVersion": "2024-11-05",
+             "capabilities": {}, "clientInfo": {"name": "Kuro", "version": "1.0"}}, rid=1)
+    tools_resp = mcp_rpc(url, token, "tools/list", {}, rid=2) or {}
+    tools = ((tools_resp.get("result") or {}).get("tools")) or []
+    print(f"MCP : {len(tools)} outil(s) exposes")
+    for t in tools:
+        print(f" - {t.get('name')} : {(t.get('description') or '')[:90]}")
+    tasks: list[dict] = []
+    for t in tools:
+        name = (t.get("name") or "").lower()
+        if "task" in name and any(k in name for k in ("list", "get", "all", "search", "query")):
+            r = mcp_rpc(url, token, "tools/call", {"name": t.get("name"), "arguments": {}}, rid=3) or {}
+            content = ((r.get("result") or {}).get("content")) or []
+            for c in content:
+                txt = c.get("text", "") if isinstance(c, dict) else ""
+                try:
+                    val = json.loads(txt)
+                    items = val if isinstance(val, list) else val.get("tasks", val.get("items", []))
+                    for it in items if isinstance(items, list) else []:
+                        if isinstance(it, dict):
+                            tasks.append(it)
+                except Exception:
+                    if txt.strip():
+                        tasks.append({"title": txt.strip()[:200]})
+            break
+    return tasks, tools
+
+
+def match_projects(tasks: list[dict]) -> dict:
+    """Rattache chaque note Any.do au(x) projet(s) Epingle + propositions."""
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from generate_portfolio import parse_epingle
+        secs = parse_epingle(ROOT / "Epingle_Projets.md")
+    except Exception as e:
+        return {"error": f"Epingle illisible : {e}"}
+    projects = []
+    for s in secs:
+        for p in s["projects"]:
+            if p["status"].lower().startswith("archive"):
+                continue
+            projects.append({"name": p["name"], "status": p["status"], "pct": p["pct"],
+                             "toks": _tok(f"{p['name']} {p['desc']}")})
+    attached, orphans = [], []
+    hit_count: dict[str, int] = {}
+    for t in tasks:
+        title = str(t.get("title") or t.get("name") or "")
+        ctx = f"{t.get('list') or t.get('board') or ''} {title}"
+        sig = _tok(ctx)
+        scored = []
+        for pr in projects:
+            overlap = sig & pr["toks"]
+            if pr["name"].lower() in ctx.lower():
+                scored.append((10, pr, overlap))
+            elif len(overlap) >= 2:
+                scored.append((len(overlap), pr, overlap))
+        scored.sort(key=lambda x: -x[0])
+        if scored:
+            best = scored[0][1]
+            hit_count[best["name"]] = hit_count.get(best["name"], 0) + 1
+            attached.append({"task": title[:120], "list": str(t.get("list") or t.get("board") or ""),
+                             "project": best["name"], "status": best["status"],
+                             "proposal": f"Suivre dans {best['name']} ({best['status']}) — "
+                                         f"ajouter au pipeline si insight actionnable."})
+        else:
+            orphans.append({"task": title[:120], "list": str(t.get("list") or t.get("board") or ""),
+                            "proposal": "Orpheline : classer (Mom Test ? idee produit ?) ou archiver."})
+    uncovered = [p["name"] for p in projects
+                 if p["name"] not in hit_count and "actif" in p["status"].lower()][:10]
+    return {"attached": attached, "orphans": orphans,
+            "uncovered_active": uncovered, "tasks_seen": len(tasks)}
+
+
+def cmd_pull(out: Path):
+    import os
+    token = os.environ.get("ANYDO_TOKEN", "")
+    if not token:
+        print("ANYDO_TOKEN absent — lecture impossible.")
+        print(f"1. Connecte Claude : Settings > Connectors > Add custom > {MCP_URL}")
+        print("2. Obtiens un bearer OAuth Any.do, puis : ANYDO_TOKEN=xxx python scripts/kuro_anydo.py --pull")
+        print("3. Sans connexion : --export reste utilisable (sens Kuro -> Any.do).")
+        return 0
+    tasks, tools = mcp_fetch_tasks(token)
+    if not tasks:
+        print("Aucune tache lue (outil de lecture non trouve ou liste vide).")
+        print("Outils decouverts ci-dessus — adapte le filtre dans mcp_fetch_tasks().")
+        return 0
+    report = match_projects(tasks)
+    report["generated_at"] = datetime.now(timezone.utc).isoformat()
+    report["tools"] = [t.get("name") for t in tools]
+    out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Lues : {report['tasks_seen']} tache(s) -> {out}")
+    print(f"Rattachees : {len(report['attached'])} · Orphelines : {len(report['orphans'])}")
+    for a in report["attached"][:10]:
+        print(f" - [{a['project']}] {a['task']}")
+    for o in report["orphans"][:10]:
+        print(f" - [?] {o['task']} -> {o['proposal']}")
+    if report["uncovered_active"]:
+        print("Actifs sans note : " + ", ".join(report["uncovered_active"]))
+    return 0
+
+
 def cmd_push(dry_run: bool):
     import os
     token = os.environ.get("ANYDO_TOKEN", "")
@@ -117,10 +293,14 @@ def cmd_push(dry_run: bool):
 def main():
     ap = argparse.ArgumentParser(description="Bridge Kuro <-> Any.do MCP")
     ap.add_argument("--export", action="store_true")
+    ap.add_argument("--pull", action="store_true")
     ap.add_argument("--push", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--out", type=Path, default=ROOT / "tasks_anydo.json")
+    ap.add_argument("--out-pull", type=Path, default=ROOT / "pull_anydo.json")
     a = ap.parse_args()
+    if a.pull:
+        return cmd_pull(a.out_pull)
     if a.push:
         return cmd_push(a.dry_run)
     return cmd_export(a.out)

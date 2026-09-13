@@ -20,6 +20,7 @@ ITEMS = [
     ("5", "Finance (burn/MRR/runway)", [PY, str(ROOT / "kuro_finance.py")]),
     ("6", "Investisseurs (dry-run)", [PY, str(ROOT / "kuro_investor_digest.py"), "--dry-run"]),
     ("7", "Any.do export (pipeline -> taches)", [PY, str(ROOT / "kuro_anydo.py"), "--export"]),
+    ("8", "Any.do pull (notes -> projets + propositions)", [PY, str(ROOT / "kuro_anydo.py"), "--pull"]),
     ("q", "Quitter", None),
 ]
 
