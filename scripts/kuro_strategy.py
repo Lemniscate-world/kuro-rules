@@ -151,36 +151,104 @@ def okr_progress(objectives: list[dict], finance: dict, metrics: dict, pipeline:
 
 # ---------- règles de décision (déterministes) ----------
 
-def decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict) -> list[str]:
-    out: list[str] = []
+def keyed_decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict) -> list[tuple[str, str]]:
+    """Mêmes règles que decisions(), avec une clé stable par règle (suivi NEW/OPEN/RESOLVED)."""
+    out: list[tuple[str, str]] = []
     runway = finance.get("runway_months")
     if runway is not None and runway < 3:
-        out.append(
+        out.append((
+            "runway",
             "Runway critique (< 3 mois) : priorité absolue revenus — lancer les "
-            "interviews R2 vers des clients payants avant toute nouvelle feature"
-        )
+            "interviews R2 vers des clients payants avant toute nouvelle feature",
+        ))
     if pipeline.get("interviews_7d", 0) == 0:
-        out.append("Pipeline vide cette semaine : planifier au moins 1 interview Mom Test (R2)")
+        out.append(("pipeline_empty", "Pipeline vide cette semaine : planifier au moins 1 interview Mom Test (R2)"))
     for o in okrs:
         if o["current"] is not None and not o["hit"] and (o["pct"] or 0) < 50:
-            out.append(f"OKR '{o['label']}' sous 50% ({o['current']}/{o['target']}) : plan d'action cette semaine")
+            out.append((f"okr:{o['key']}",
+                        f"OKR '{o['label']}' sous 50% ({o['current']}/{o['target']}) : plan d'action cette semaine"))
     avg = (metrics.get("averages") or {}).get("velocity_per_week") or 0
     if avg < 1:
-        out.append("Vélocité moyenne < 1 commit/semaine : choisir UN projet focus et livrer")
+        out.append(("velocity", "Vélocité moyenne < 1 commit/semaine : choisir UN projet focus et livrer"))
     if ci and ci.get("failures"):
-        out.append(f"CI : {ci['failures']} check(s) en échec — le guardian diagnostique, corrige la cause racine")
+        out.append(("ci", f"CI : {ci['failures']} check(s) en échec — le guardian diagnostique, corrige la cause racine"))
     return out
+
+
+def decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict) -> list[str]:
+    return [text for _, text in keyed_decisions(finance, metrics, ci, okrs, pipeline)]
+
+
+DECISIONS_FILE = ROOT_DIR / "strategy_decisions.local.json"  # local, gitigné (R111/R113)
+RESOLVED_KEEP_DAYS = 30
+RESOLVED_SHOW_DAYS = 7
+
+
+def track_decisions(keyed: list[tuple[str, str]], path: Path | None = None) -> tuple[list[dict], list[dict]]:
+    """Persiste l'état des décisions. Retourne (ouvertes, résolues_récentes).
+
+    Statuts : NEW (vue 1re fois aujourd'hui), OPEN (toujours vraie, age en jours),
+    RESOLVED (a disparu -> action appliquée ou condition retombée).
+    """
+    from datetime import date as _date
+    store_path = path or DECISIONS_FILE
+    today = _date.today().isoformat()
+    try:
+        store = json.loads(store_path.read_text(encoding="utf-8"))
+        if not isinstance(store, dict):
+            store = {}
+    except Exception:
+        store = {}
+    current = {k: t for k, t in keyed}
+    opened: list[dict] = []
+    for key, text in keyed:
+        entry = store.get(key, {})
+        first = entry.get("first_seen", today)
+        store[key] = {"first_seen": first, "last_seen": today, "text": text,
+                      "status": "OPEN", "resolved_at": None}
+        try:
+            age = (_date.fromisoformat(today) - _date.fromisoformat(first)).days
+        except ValueError:
+            age = 0
+        opened.append({"key": key, "text": text, "status": "NEW" if first == today and not entry else "OPEN",
+                       "age_days": age, "first_seen": first})
+    resolved: list[dict] = []
+    for key, entry in list(store.items()):
+        if key in current or not isinstance(entry, dict):
+            continue
+        if entry.get("status") != "RESOLVED":
+            entry["status"] = "RESOLVED"
+            entry["resolved_at"] = today
+        try:
+            gone = (_date.fromisoformat(today) - _date.fromisoformat(entry.get("resolved_at") or today)).days
+            first = entry.get("first_seen", today)
+            age = (_date.fromisoformat(entry.get("resolved_at") or today) - _date.fromisoformat(first)).days
+        except ValueError:
+            gone, age = 0, 0
+        if gone > RESOLVED_KEEP_DAYS:
+            del store[key]
+            continue
+        if gone <= RESOLVED_SHOW_DAYS:
+            resolved.append({"key": key, "text": entry.get("text", key), "status": "RESOLVED",
+                             "age_days": age, "resolved_at": entry.get("resolved_at")})
+    try:
+        store_path.write_text(json.dumps(store, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+    return opened, resolved
 
 
 # ---------- rendu ----------
 
-def build_payload() -> dict[str, Any]:
+def build_payload(track: bool = True) -> dict[str, Any]:
     strategy = _load(STRATEGY_FILE)
     finance = collect_finance()
     metrics = collect_metrics()
     ci = collect_ci()
     pipeline = collect_pipeline()
     okrs = okr_progress(strategy.get("objectives", []) or [], finance, metrics, pipeline)
+    keyed = keyed_decisions(finance, metrics, ci, okrs, pipeline)
+    opened, resolved = track_decisions(keyed) if track else ([{"key": k, "text": t, "status": "OPEN", "age_days": 0} for k, t in keyed], [])
     return {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "finance": {
@@ -202,7 +270,8 @@ def build_payload() -> dict[str, Any]:
             "last_insight": (pipeline.get("last") or {}).get("insight"),
             "next_steps": [e.get("next_step") for e in pipeline.get("next_steps", []) if e.get("next_step")],
         },
-        "decisions": decisions(finance, metrics, ci, okrs, pipeline),
+        "decisions": opened,
+        "resolved": resolved,
     }
 
 
@@ -229,9 +298,18 @@ def render(payload: dict[str, Any]) -> str:
         lines.append(f"    Prochain pas : {ns}")
     if payload["decisions"]:
         lines.append("  Décisions à prendre :")
-        lines += [f"    → {d}" for d in payload["decisions"]]
+        for d in payload["decisions"]:
+            if isinstance(d, dict):
+                mark = "[NEW]" if d.get("status") == "NEW" else f"[J{d.get('age_days', 0)}]"
+                lines.append(f"    → {mark} {d.get('text')}")
+            else:
+                lines.append(f"    → {d}")
     else:
         lines.append("  Aucune décision urgente — tout est dans les clous.")
+    for r in payload.get("resolved") or []:
+        text = r.get("text") if isinstance(r, dict) else r
+        when = f" (le {r.get('resolved_at')})" if isinstance(r, dict) and r.get("resolved_at") else ""
+        lines.append(f"    ✓ résolue{when} : {text}")
     return "\n".join(lines)
 
 

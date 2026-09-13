@@ -58,7 +58,13 @@ def collect_tasks() -> list[dict]:
         import kuro_strategy
         payload = kuro_strategy.build_payload()
         for d in payload.get("decisions", [])[:8]:
-            tasks.append({"title": d[:120], "source": "strategy.decision", "date": "", "due": ""})
+            if isinstance(d, dict):
+                mark = "NEW" if d.get("status") == "NEW" else f"J{d.get('age_days', 0)}"
+                tasks.append({"title": d.get("text", "")[:120], "source": "strategy.decision",
+                              "date": "", "due": "", "status": d.get("status"),
+                              "age_days": d.get("age_days", 0), "tag": mark})
+            else:
+                tasks.append({"title": d[:120], "source": "strategy.decision", "date": "", "due": ""})
     except Exception:
         pass
     # dedup sur titre

@@ -158,6 +158,8 @@ finances.local.json
 # strategie privee (R113 - jamais comiter)
 strategy.local.json
 pipeline.local.json
+strategy_decisions.local.json
+pull_anydo.json
 
 # artefacts generes
 apps/kuro-pulse/kuro.ico
