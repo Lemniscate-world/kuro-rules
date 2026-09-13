@@ -244,9 +244,8 @@ FAILURE_SIGNATURES: list[tuple[str, str, str, str]] = [
     (
         r"flake8\.{10,}|F401|F841|E501.*line too long",
         "Dette de lint flake8 (imports/variables morts, lignes longues)",
-        "Corriger les imports/variables morts listés, ou per-file-ignores documenté "
-        "dans .flake8 pour la dette legacy",
-        "",
+        "ruff check --fix (F401/F841) ou corriger les imports/variables morts listés",
+        "lint_dead",
     ),
     (
         r"error:.*\[.*\]$|mypy\.{10,}",
@@ -343,11 +342,12 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
     """Applique une réparation sûre et pousse sur la branche par défaut.
 
     Classes supportées : formatting (black/isort épinglés au repo),
-    protected_files (détache du tracking). Toute autre classe = no-op.
+    protected_files (détache du tracking), lint_dead (ruff F401/F841).
+    Toute autre classe = diagnostic seul + proposition DeepSeek via ai_diagnose().
     """
     result = {"klass": klass, "action": "autofix_skipped", "detail": ""}
-    if klass not in ("formatting", "protected_files"):
-        result["detail"] = f"classe {klass} non auto-réparable"
+    if klass not in ("formatting", "protected_files", "lint_dead"):
+        result["detail"] = f"classe {klass} non auto-réparable — voir ai_diagnose() (DeepSeek si cle dispo)"
         return result
     if dry_run:
         result["action"] = "autofix_would_run"
@@ -411,6 +411,23 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                 return result
             for f in tracked[:5]:
                 _git(repo_dir, "rm", "--cached", "--", f)
+        elif klass == "lint_dead":
+            # F401 imports morts / F841 variables mortes : ruff --fix, sinon rien.
+            # Pas de suppression aveugle sans ruff : on refuse plutot que casser.
+            ruff = shutil.which("ruff")
+            if not ruff:
+                pip_ok = subprocess.run(
+                    ["pip", "install", "-q", "ruff"],
+                    capture_output=True, text=True, timeout=180,
+                )
+                ruff = shutil.which("ruff")
+                if pip_ok.returncode != 0 or not ruff:
+                    result["detail"] = "ruff indisponible (pip install ruff echoue) — fix manuel requis"
+                    return result
+            subprocess.run(
+                [ruff, "check", "--fix", "--select", "F401,F841", "."],
+                cwd=repo_dir, capture_output=True, timeout=300, check=False,
+            )
 
         status = _git(repo_dir, "status", "--porcelain")[1].strip()
         if not status:
@@ -424,6 +441,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
         message = {
             "formatting": "style(ci-guardian): auto-format black/isort (versions épinglées du repo)",
             "protected_files": "fix(R76): retire les fichiers protégés du tracking git",
+            "lint_dead": "fix(ci-guardian): ruff --fix F401/F841 imports/variables morts",
         }.get(klass, "fix(ci-guardian): auto-réparation")
         _git(repo_dir, "commit", "-m", message)
         branch_ok, branch_out = _git(repo_dir, "rev-parse", "--abbrev-ref", "HEAD")
