@@ -1,4 +1,4 @@
-# TRUTH DAILY — 2026-09-12
+# TRUTH DAILY — 2026-09-13
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
 > **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
@@ -12,7 +12,7 @@
 | **Dissect** | 2026-08-26 `9f6ff08` fix(compliance): untrack protected files (R76) [ku | main | 10 (79 funcs) | 0 | 2 |  |
 | **EchoX** | 2026-08-26 `a1fa54c` fix(compliance): untrack protected files (R76) [ku | main | 5 (48 funcs) | 0 | 2 |  |
 | **Helium** | 2026-08-26 `05c19c8` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 6 |  |
-| **LifeTrack** | 2026-08-26 `4c5ad2d` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 50 |  |
+| **LifeTrack** | 2026-08-26 `4c5ad2d` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 49 |  |
 | **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 11 (92 funcs) | 0 | 1 |  |
 | **NeuralDBG** | 2026-08-26 `803a6bf` chore(rules): synchro redirector 52 regles + workf | main | 48 (60 funcs) | 0 | 15 |  |
 | **NeuralDBG-Engine** | 2026-08-26 `ab63b0c` chore(rules): synchro redirector 52 regles + workf | master | 6 (45 funcs) | 0 | 1 |  |
@@ -30,4 +30,4 @@
 - **Odin** `0%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
 - **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-09-12T08:54:52.931456 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+_Généré 2026-09-13T09:49:47.702440 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
