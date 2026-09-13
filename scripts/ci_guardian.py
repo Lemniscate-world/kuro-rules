@@ -236,6 +236,18 @@ FAILURE_SIGNATURES: list[tuple[str, str, str, str]] = [
         "protected_files",
     ),
     (
+        r"Fichier protege tracke \(R76\): git rm --cached (\S+)",
+        "Fichier protégé (R76) suivi par git (message FR du workflow compliance)",
+        "git rm --cached <fichier> + .gitignore, commit, push",
+        "protected_files",
+    ),
+    (
+        r"error\s+'(\w+)' is not defined\s+no-undef",
+        "ESLint no-undef : import inutilisé ou symbole non défini",
+        "Retirer l'import inutilisé (ex: React avec le nouveau JSX transform) ou déclarer le symbole",
+        "",
+    ),
+    (
         r"(?:would reformat|reformatted) .*\.py|black\.{10,}",
         "Dette de formatage (black/isort)",
         "pre-commit run black,isort --all-files (ou black . && isort .), commit, push",
@@ -406,6 +418,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                 )
         elif klass == "protected_files":
             tracked = re.findall(r"Protected file tracked: (\S+)", log_text)
+            tracked += re.findall(r"Fichier protege tracke \(R76\): git rm --cached (\S+)", log_text)
             if not tracked:
                 result["detail"] = "aucun fichier protégé identifiable dans le log"
                 return result

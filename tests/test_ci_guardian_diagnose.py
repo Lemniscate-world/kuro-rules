@@ -62,6 +62,22 @@ def test_dependance_manquante():
     assert "pendance" in diag["cause"]
 
 
+def test_fichier_protege_fr_autofixable():
+    log = "##[error]Fichier protege tracke (R76): git rm --cached SESSION_SUMMARY.md"
+    diag = classify_failure(log)
+    assert diag is not None
+    assert diag["klass"] == "protected_files"
+    assert diag["detail"] == "SESSION_SUMMARY.md"
+
+
+def test_eslint_no_undef_diagnostic_seul():
+    log = "/home/runner/work/x/DraggableHabitRow.tsx\n  26:16  error  'React' is not defined  no-undef"
+    diag = classify_failure(log)
+    assert diag is not None
+    assert "no-undef" in diag["cause"]
+    assert not diag["auto_fixable"]
+
+
 def test_log_inconnu_retourne_none():
     assert classify_failure("") is None
     assert classify_failure("tout va bien, rien a signaler") is None
