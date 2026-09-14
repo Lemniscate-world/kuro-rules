@@ -77,6 +77,14 @@ def resolve_token(cli_token: str | None) -> str | None:
     return None
 
 
+PRIVATE_TOKEN_ENV = "KURO_PRIVATE_TOKEN"
+
+
+def extra_token() -> str | None:
+    """Token elargi (repos prives). Absent = couverture publique seulement."""
+    return os.environ.get(PRIVATE_TOKEN_ENV) or None
+
+
 def discover_repos(owner: str, token: str | None) -> list[str]:
     """Tous les repos actifs du compte (forks/archivés/désactivés exclus)."""
     status, data = api("GET", f"/users/{owner}/repos?per_page=100&sort=pushed", token)
@@ -90,6 +98,18 @@ def discover_repos(owner: str, token: str | None) -> list[str]:
         for r in data
         if not r.get("archived") and not r.get("fork") and not r.get("disabled")
     )
+
+
+def discover_all(owners: list[str], token: str | None) -> dict[str, str | None]:
+    """Decouverte token principal + KURO_PRIVATE_TOKEN. Retourne {repo: token}."""
+    found: dict[str, str | None] = {}
+    for tok in [t for t in (token, extra_token()) if t]:
+        for owner in owners:
+            for repo in discover_repos(owner, tok):
+                found.setdefault(repo, tok)
+    if extra_token():
+        print(f"  Token prive actif : {len(found)} repos visibles au total")
+    return found
 
 
 def default_branch(repo: str, token: str | None) -> str | None:
@@ -573,12 +593,13 @@ def remediate(repo: str, run: dict, token: str | None, dry_run: bool) -> dict:
     return action
 
 
-def guard(repos: list[str], token: str | None, dry_run: bool) -> dict:
+def guard(repos: list[str] | dict[str, str | None], token: str | None, dry_run: bool) -> dict:
     report_repos = []
     no_ci = []
     actions = []
-    for repo in repos:
-        runs = latest_workflow_runs(repo, token)
+    items = repos.items() if isinstance(repos, dict) else [(r, token) for r in repos]
+    for repo, tok in items:
+        runs = latest_workflow_runs(repo, tok)
         if not runs:
             no_ci.append(repo)
             continue
@@ -598,7 +619,7 @@ def guard(repos: list[str], token: str | None, dry_run: bool) -> dict:
             )
             if conclusion == "failure":
                 health = "red"
-                actions.append(remediate(repo, run, token, dry_run))
+                actions.append(remediate(repo, run, tok, dry_run))
         report_repos.append({"name": repo, "health": health, "workflows": workflows})
     overall = "red" if any(r["health"] == "red" for r in report_repos) else "green"
     report_repos.sort(key=lambda r: (r["health"] != "red", r["name"]))
@@ -663,13 +684,13 @@ def main() -> int:
     args = parser.parse_args()
 
     token = resolve_token(args.token)
-    repos = args.repos if args.repos else []
+    repos: list | dict = args.repos if args.repos else []
     if not repos:
-        for owner in args.owners:
-            found = discover_repos(owner, token)
-            print(f"DISCOVER {owner}: {len(found)} repos actifs")
-            repos.extend(found)
+        found = discover_all(args.owners, token)
+        print(f"DISCOVER {len(found)} repos actifs ({', '.join(args.owners)})")
+        repos = found
 
+    previous = load_previous_status(args.output)
     report = guard(repos, token, args.dry_run)
 
     if args.output:
@@ -696,7 +717,7 @@ def main() -> int:
         print(f"  ACTION: {act['repo']} / {act['workflow']} -> {act['action']} ({act['detail']})")
     if not args.dry_run:
         write_actions_log(Path(args.actions_log) if args.actions_log else None, report)
-    notify_discord(report)
+    notify_discord(report, previous)
     return 0
 
 
@@ -743,9 +764,38 @@ def write_actions_log(path: Path | None, report: dict) -> None:
             pass
 
 
-def notify_discord(report: dict) -> None:
+def fail_keys(report: dict) -> set:
+    """Ensemble (repo, workflow) en echec — base de dedup des alertes."""
+    return {(r.get("name", ""), w.get("name", ""))
+            for r in report.get("repos", []) if isinstance(r, dict)
+            for w in r.get("workflows", []) if isinstance(w, dict)
+            and w.get("conclusion") == "failure"}
+
+
+def load_previous_status(path: str | None) -> dict:
+    if not path:
+        return {}
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def should_alert(report: dict, previous: dict | None = None) -> bool:
+    """True si alerte due : rouge/actions ET échecs differents du rapport precedent."""
+    if report.get("overall") != "red" and not report.get("actions"):
+        return False
+    if previous and fail_keys(previous) == fail_keys(report) and fail_keys(report):
+        return False
+    return True
+
+
+def notify_discord(report: dict, previous: dict | None = None) -> None:
     """Alerte Discord si des checks sont rouges ou si des actions ont été tentées."""
-    if report["overall"] != "red" and not report["actions"]:
+    if not should_alert(report, previous):
+        if report.get("overall") == "red":
+            print("Discord : mêmes échecs que le rapport précédent — alerte non repostée")
         return
     webhook = os.environ.get("DISCORD_WEBHOOK_URL")
     if not webhook:

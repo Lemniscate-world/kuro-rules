@@ -5,7 +5,35 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
-from ci_guardian import classify_failure  # noqa: E402
+from ci_guardian import classify_failure, fail_keys, should_alert  # noqa: E402
+
+
+def _report(fails):
+    repos = {}
+    for repo, wf in fails:
+        repos.setdefault(repo, []).append({"name": wf, "conclusion": "failure"})
+    return {"overall": "red", "actions": [],
+            "repos": [{"name": r, "workflows": w} for r, w in repos.items()]}
+
+
+def test_should_alert_premier_rapport_rouge():
+    assert should_alert(_report([("o/r", "CI")]), None) is True
+    assert should_alert(_report([("o/r", "CI")]), {}) is True
+
+
+def test_should_alert_silence_si_memes_echecs():
+    r = _report([("o/r", "CI")])
+    assert should_alert(r, _report([("o/r", "CI")])) is False
+
+
+def test_should_alert_si_nouvel_echec():
+    assert should_alert(_report([("o/r", "CI"), ("o/r2", "Lint")]),
+                        _report([("o/r", "CI")])) is True
+    assert should_alert(_report([]), _report([("o/r", "CI")])) is True
+
+
+def test_should_alert_vert_sans_actions_silencieux():
+    assert should_alert({"overall": "green", "actions": [], "repos": []}, None) is False
 
 
 def test_secret_sonar_manquant():
