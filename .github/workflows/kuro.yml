@@ -144,7 +144,7 @@ jobs:
         run: |
           if [ "$(date -u +%u)" = "1" ]; then
             python kuro-rules/scripts/kuro_strategy.py --discord || true
-            python kuro-rules/scripts/kuro_anydo.py --export --out kuro-rules/tasks_anydo.json || true
+            python kuro-rules/scripts/kuro_anydo.py --export --out kuro-rules/tasks_anydo.json
           else
             echo "Pas lundi — strategie/Any.do sautes"
           fi

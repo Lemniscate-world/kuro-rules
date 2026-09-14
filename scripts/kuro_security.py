@@ -99,15 +99,26 @@ def harden_repo(repo: str, token: str) -> dict:
     else:
         out["alerts_enabled"] = f"HTTP {st}: {data.get('message', '')[:60]}"
 
-    st2, data2, _ = api_retry("GET", f"/repos/{repo}/dependabot/alerts?state=open&per_page=100", token, tries=2)
-    if st2 == 200 and isinstance(data2, list):
-        out["open_alerts"] = len(data2)
-    elif st2 == 404:
-        # Dependabot non active = inconnu, pas 0. Ne pas masquer.
-        out["open_alerts"] = "unknown (Dependabot off/404)"
-    else:
-        out["open_alerts"] = f"n/a (HTTP {st2})"
+    out["open_alerts"] = count_open_alerts(repo, token)
     return out
+
+
+def count_open_alerts(repo: str, token: str, pages: int = 10):
+    """Compte TOUTES les alertes ouvertes (pagination, 100/page)."""
+    total = 0
+    for page in range(1, pages + 1):
+        st, data, _ = api_retry(
+            "GET", f"/repos/{repo}/dependabot/alerts?state=open&per_page=100&page={page}",
+            token, tries=2)
+        if st == 404 and page == 1:
+            # Dependabot non active = inconnu, pas 0. Ne pas masquer.
+            return "unknown (Dependabot off/404)"
+        if st != 200 or not isinstance(data, list):
+            return f"n/a (HTTP {st})" if page == 1 else total
+        total += len(data)
+        if len(data) < 100:
+            break
+    return total
 
 
 def main() -> int:

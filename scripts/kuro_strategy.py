@@ -184,57 +184,77 @@ RESOLVED_KEEP_DAYS = 30
 RESOLVED_SHOW_DAYS = 7
 
 
-def track_decisions(keyed: list[tuple[str, str]], path: Path | None = None) -> tuple[list[dict], list[dict]]:
-    """Persiste l'état des décisions. Retourne (ouvertes, résolues_récentes).
-
-    Statuts : NEW (vue 1re fois aujourd'hui), OPEN (toujours vraie, age en jours),
-    RESOLVED (a disparu -> action appliquée ou condition retombée).
-    """
-    from datetime import date as _date
-    store_path = path or DECISIONS_FILE
-    today = _date.today().isoformat()
+def _load_store() -> dict:
     try:
-        store = json.loads(store_path.read_text(encoding="utf-8"))
-        if not isinstance(store, dict):
-            store = {}
+        store = json.loads(DECISIONS_FILE.read_text(encoding="utf-8"))
+        return store if isinstance(store, dict) else {}
     except Exception:
-        store = {}
-    current = {k: t for k, t in keyed}
+        return {}
+
+
+def _save_store(store: dict) -> None:
+    try:
+        DECISIONS_FILE.write_text(json.dumps(store, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _days_between(a: str, b: str) -> int:
+    from datetime import date as _date
+    try:
+        return (_date.fromisoformat(a) - _date.fromisoformat(b)).days
+    except ValueError:
+        return 0
+
+
+def _mark_opened(store: dict, keyed: list[tuple[str, str]], today: str) -> list[dict]:
     opened: list[dict] = []
     for key, text in keyed:
-        entry = store.get(key, {})
-        first = entry.get("first_seen", today)
+        prev = store.get(key, {})
+        if prev.get("status") == "RESOLVED":
+            prev = {}  # reouverte : repart en NEW
+        first = prev.get("first_seen", today)
         store[key] = {"first_seen": first, "last_seen": today, "text": text,
                       "status": "OPEN", "resolved_at": None}
-        try:
-            age = (_date.fromisoformat(today) - _date.fromisoformat(first)).days
-        except ValueError:
-            age = 0
-        opened.append({"key": key, "text": text, "status": "NEW" if first == today and not entry else "OPEN",
-                       "age_days": age, "first_seen": first})
+        opened.append({"key": key, "text": text,
+                       "status": "NEW" if first == today else "OPEN",
+                       "age_days": _days_between(today, first), "first_seen": first})
+    return opened
+
+
+def _mark_resolved(store: dict, current: set[str], today: str) -> list[dict]:
     resolved: list[dict] = []
-    for key, entry in list(store.items()):
+    for key in list(store):
+        entry = store[key]
         if key in current or not isinstance(entry, dict):
             continue
         if entry.get("status") != "RESOLVED":
             entry["status"] = "RESOLVED"
             entry["resolved_at"] = today
-        try:
-            gone = (_date.fromisoformat(today) - _date.fromisoformat(entry.get("resolved_at") or today)).days
-            first = entry.get("first_seen", today)
-            age = (_date.fromisoformat(entry.get("resolved_at") or today) - _date.fromisoformat(first)).days
-        except ValueError:
-            gone, age = 0, 0
+        gone = _days_between(today, entry.get("resolved_at") or today)
         if gone > RESOLVED_KEEP_DAYS:
             del store[key]
             continue
         if gone <= RESOLVED_SHOW_DAYS:
             resolved.append({"key": key, "text": entry.get("text", key), "status": "RESOLVED",
-                             "age_days": age, "resolved_at": entry.get("resolved_at")})
-    try:
-        store_path.write_text(json.dumps(store, indent=2, ensure_ascii=False), encoding="utf-8")
-    except Exception:
-        pass
+                             "age_days": _days_between(entry.get("resolved_at") or today,
+                                                       entry.get("first_seen", today)),
+                             "resolved_at": entry.get("resolved_at")})
+    return resolved
+
+
+def track_decisions(keyed: list[tuple[str, str]]) -> tuple[list[dict], list[dict]]:
+    """Persiste l'état des décisions. Retourne (ouvertes, résolues_récentes).
+
+    Statuts : NEW (first_seen == aujourd'hui), OPEN (toujours vraie, age en jours),
+    RESOLVED (a disparu -> action appliquée ou condition retombée).
+    """
+    from datetime import date as _date
+    today = _date.today().isoformat()
+    store = _load_store()
+    opened = _mark_opened(store, keyed, today)
+    resolved = _mark_resolved(store, dict(keyed).keys(), today)
+    _save_store(store)
     return opened, resolved
 
 
@@ -286,31 +306,47 @@ def render(payload: dict[str, Any]) -> str:
         "  OKR:",
     ]
     for o in payload["okr"]:
-        cur_s = "—" if o["current"] is None else o["current"]
-        mark = "✓" if o["hit"] else "✗"
-        pct_s = f" ({o['pct']}%)" if o["pct"] is not None else ""
-        lines.append(f"    {mark} {o['label']}: {cur_s}/{o['target']}{pct_s}")
+        lines.append(_fmt_okr(o))
     p = payload["pipeline"]
     lines.append(f"  Pipeline : {p['total']} entrée(s) · {p['interviews_7d']} interview(s) 7j")
     if p["last_insight"]:
         lines.append(f"    Dernière insight : {p['last_insight']}")
     for ns in p["next_steps"]:
         lines.append(f"    Prochain pas : {ns}")
-    if payload["decisions"]:
-        lines.append("  Décisions à prendre :")
-        for d in payload["decisions"]:
-            if isinstance(d, dict):
-                mark = "[NEW]" if d.get("status") == "NEW" else f"[J{d.get('age_days', 0)}]"
-                lines.append(f"    → {mark} {d.get('text')}")
-            else:
-                lines.append(f"    → {d}")
-    else:
-        lines.append("  Aucune décision urgente — tout est dans les clous.")
-    for r in payload.get("resolved") or []:
-        text = r.get("text") if isinstance(r, dict) else r
-        when = f" (le {r.get('resolved_at')})" if isinstance(r, dict) and r.get("resolved_at") else ""
-        lines.append(f"    ✓ résolue{when} : {text}")
+    lines.extend(_fmt_decisions(payload.get("decisions") or []))
+    lines.extend(_fmt_resolved(payload.get("resolved") or []))
     return "\n".join(lines)
+
+
+def _fmt_okr(o: dict) -> str:
+    cur_s = "—" if o["current"] is None else o["current"]
+    mark = "✓" if o["hit"] else "✗"
+    pct_s = f" ({o['pct']}%)" if o["pct"] is not None else ""
+    return f"    {mark} {o['label']}: {cur_s}/{o['target']}{pct_s}"
+
+
+def _fmt_decisions(decisions: list) -> list[str]:
+    if not decisions:
+        return ["  Aucune décision urgente — tout est dans les clous."]
+    lines = ["  Décisions à prendre :"]
+    for d in decisions:
+        if isinstance(d, dict):
+            mark = "[NEW]" if d.get("status") == "NEW" else f"[J{d.get('age_days', 0)}]"
+            lines.append(f"    → {mark} {d.get('text')}")
+        else:
+            lines.append(f"    → {d}")
+    return lines
+
+
+def _fmt_resolved(resolved: list) -> list[str]:
+    lines = []
+    for r in resolved:
+        if isinstance(r, dict):
+            when = f" (le {r.get('resolved_at')})" if r.get("resolved_at") else ""
+            lines.append(f"    ✓ résolue{when} : {r.get('text')}")
+        else:
+            lines.append(f"    ✓ résolue : {r}")
+    return lines
 
 
 def post_discord(text: str) -> bool:

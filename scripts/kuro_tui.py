@@ -27,7 +27,7 @@ ITEMS = [
 
 def run(cmd):
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False)
         out = (r.stdout or "") + ("\n" + r.stderr if r.stderr else "")
         print(out[-6000:] or "(vide)")
     except Exception as e:
@@ -41,8 +41,10 @@ def main():
             print(f" {key}. {label}")
         try:
             choice = input("> ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
+        except EOFError:
             break
+        except KeyboardInterrupt:
+            return 130
         for key, label, cmd in ITEMS:
             if choice == key:
                 if cmd is None:

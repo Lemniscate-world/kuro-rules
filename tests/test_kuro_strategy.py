@@ -68,6 +68,35 @@ def test_decisions_aucune_si_vert():
     assert d == []
 
 
+def test_track_new_reste_new_le_meme_jour(tmp_path, monkeypatch):
+    monkeypatch.setattr(ks, "DECISIONS_FILE", tmp_path / "dec.json")
+    first, _ = ks.track_decisions([("a", "Texte A")])
+    assert first[0]["status"] == "NEW"
+    second, _ = ks.track_decisions([("a", "Texte A")])
+    assert second[0]["status"] == "NEW"
+    assert second[0]["age_days"] == 0
+
+
+def test_track_resolved_puis_reouverture(tmp_path, monkeypatch):
+    import json
+    from datetime import date, timedelta
+    store = tmp_path / "dec.json"
+    monkeypatch.setattr(ks, "DECISIONS_FILE", store)
+    ks.track_decisions([("a", "Texte A"), ("b", "Texte B")])
+    # Simule le lendemain : "a" devient OPEN avec age, "b" disparait -> RESOLVED
+    raw = json.loads(store.read_text(encoding="utf-8"))
+    yesterday = (date.today() - timedelta(days=1)).isoformat()
+    for v in raw.values():
+        v["first_seen"] = yesterday
+    store.write_text(json.dumps(raw), encoding="utf-8")
+    opened, resolved = ks.track_decisions([("a", "Texte A")])
+    assert [(d["key"], d["status"], d["age_days"]) for d in opened] == [("a", "OPEN", 1)]
+    assert [(r["key"], r["status"]) for r in resolved] == [("b", "RESOLVED")]
+    reopened, still = ks.track_decisions([("a", "Texte A"), ("b", "Texte B v2")])
+    assert {d["key"]: d["status"] for d in reopened} == {"a": "OPEN", "b": "NEW"}
+    assert still == []
+
+
 def test_render_contient_les_sections():
     payload = ks.build_payload.__wrapped__() if hasattr(ks.build_payload, "__wrapped__") else None
     sample = {

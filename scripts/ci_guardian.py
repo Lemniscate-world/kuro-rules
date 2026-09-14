@@ -254,10 +254,16 @@ FAILURE_SIGNATURES: list[tuple[str, str, str, str]] = [
         "formatting",
     ),
     (
-        r"flake8\.{10,}|F401|F841|E501.*line too long",
-        "Dette de lint flake8 (imports/variables morts, lignes longues)",
-        "ruff check --fix (F401/F841) ou corriger les imports/variables morts listés",
+        r"F401|F841",
+        "Imports/variables morts flake8 (F401/F841)",
+        "ruff check --fix --select F401,F841",
         "lint_dead",
+    ),
+    (
+        r"E501.*line too long",
+        "Lignes trop longues flake8 (E501, non auto-repare)",
+        "Decouper les lignes > 88 chars (black formate, mais ne coupe pas les chaines)",
+        "",
     ),
     (
         r"error:.*\[.*\]$|mypy\.{10,}",
@@ -344,6 +350,7 @@ def _git(repo_dir: Path, *args: str) -> tuple[bool, str]:
         text=True,
         timeout=120,
         check=False,
+        shell=False,  # argv statique, jamais de shell (audit opengrep)
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     ok = completed.returncode == 0
@@ -397,6 +404,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                 capture_output=True,
                 text=True,
                 timeout=300,
+                shell=False,  # argv statique, jamais de shell
             )
             if pip_ok.returncode != 0:
                 result["detail"] = f"pip install black=={pins['black']} impossible"
@@ -407,6 +415,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                 capture_output=True,
                 timeout=600,
                 check=False,
+                shell=False,
             )
             if "isort" in pins:
                 subprocess.run(
@@ -415,6 +424,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                     capture_output=True,
                     timeout=300,
                     check=False,
+                    shell=False,
                 )
         elif klass == "protected_files":
             tracked = re.findall(r"Protected file tracked: (\S+)", log_text)
@@ -431,7 +441,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
             if not ruff:
                 pip_ok = subprocess.run(
                     ["pip", "install", "-q", "ruff"],
-                    capture_output=True, text=True, timeout=180,
+                    capture_output=True, text=True, timeout=180, shell=False,
                 )
                 ruff = shutil.which("ruff")
                 if pip_ok.returncode != 0 or not ruff:
@@ -439,7 +449,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                     return result
             subprocess.run(
                 [ruff, "check", "--fix", "--select", "F401,F841", "."],
-                cwd=repo_dir, capture_output=True, timeout=300, check=False,
+                cwd=repo_dir, capture_output=True, timeout=300, check=False, shell=False,
             )
 
         status = _git(repo_dir, "status", "--porcelain")[1].strip()
