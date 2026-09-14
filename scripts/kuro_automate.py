@@ -73,7 +73,11 @@ def main():
 
     load_dotenv()
     (ROOT / "logs").mkdir(exist_ok=True)
-    write = a.full and not a.dry_run  # --dry-run gagne toujours sur --full
+    sys.path.insert(0, str(SCRIPTS))
+    import kuro_proposals as _P
+    write = (a.full and not a.dry_run) and not _P.vacances()
+    if _P.vacances():
+        print("mode vacances : lecture seule forcee")
     print(f"=== KURO AUTOMATE daily={a.daily} weekly={a.weekly} write={write} ===")
 
     fails = 0

@@ -33,13 +33,19 @@ from ci_guardian import (  # noqa: E402
     api,
     auto_fix,
     classify_failure,
-    discover_repos,
+    discover_all,
     fetch_failed_log,
     rerun_failed_jobs,
 )
 
+import kuro_proposals as P  # noqa: E402
+
 SAFE_KLASSES = {"formatting", "protected_files", "lint_dead"}
 PROTECTED_REFS = {"main", "master"}
+AUTO_LABEL = "kuro-auto"
+VALIDE_LABEL = "valide"
+MERGE_MAX_ADD = 400
+TRUSTED_MERGE_AUTHORS = {"Lemniscate-world", "github-actions[bot]"}
 MARKER = "<!-- kuro-pr-agent -->"
 
 
@@ -83,55 +89,212 @@ def already_commented(repo: str, number: int, run_id: int | None, token: str) ->
 
 
 def post_comment(repo: str, number: int, body: str, token: str) -> bool:
+    if not P.budget_use("comment"):
+        print("  budget commentaires epuise pour aujourd'hui")
+        return False
     st, _ = api("POST", f"/repos/{repo}/issues/{number}/comments", token, {"body": body})
     return st in (200, 201)
 
 
-def fixable_push(repo: str, klass: str, detail: str, log: str, token: str,
-                 head: str, fork: bool, write: bool) -> str:
-    """Push autofix sur la branche PR, ou raison du refus."""
+def pr_labels(pr: dict) -> set:
+    return {l.get("name") for l in (pr.get("labels") or [])
+            if isinstance(l, dict) and l.get("name")}
+
+
+def ensure_label(repo: str, name: str, color: str, token: str) -> None:
+    st, _ = api("GET", f"/repos/{repo}/labels/{name}", token)
+    if st != 200:
+        api("POST", f"/repos/{repo}/labels", token,
+            {"name": name, "color": color, "description": "Pilotage Kuro (Discord)"})
+
+
+def add_pr_label(repo: str, number: int, name: str, token: str) -> bool:
+    st, _ = api("POST", f"/repos/{repo}/issues/{number}/labels", token, {"labels": [name]})
+    return st in (200, 201)
+
+
+def pr_files_stat(repo: str, number: int, token: str) -> str:
+    st, data = api("GET", f"/repos/{repo}/pulls/{number}/files?per_page=10", token)
+    if st != 200 or not isinstance(data, list) or not data:
+        return ""
+    added = sum(f.get("additions", 0) for f in data if isinstance(f, dict))
+    deleted = sum(f.get("deletions", 0) for f in data if isinstance(f, dict))
+    names = ", ".join(f.get("filename", "") for f in data[:3] if isinstance(f, dict))
+    more = f" +{len(data) - 3} fichiers" if len(data) > 3 else ""
+    return f"+{added}/-{deleted} : {names}{more}"
+
+
+def pr_commands(repo: str, pr: dict, token: str) -> list:
+    out = []
+    st, data = api("GET", f"/repos/{repo}/issues/{pr.get('number')}/comments?per_page=30", token)
+    if st != 200 or not isinstance(data, list):
+        return out
+    for c in data:
+        if not isinstance(c, dict):
+            continue
+        author = ((c.get("user") or {}).get("login") or "")
+        if not author or author.endswith("[bot]"):
+            continue
+        m = re.match(r"/(valide|relance|diagnostic)\s*(\S+)?", (c.get("body") or "").strip())
+        if m:
+            out.append({"id": c.get("id"), "author": author,
+                        "cmd": m.group(1), "arg": m.group(2) or ""})
+    return out
+
+
+def graphql(token: str, query: str, variables: dict) -> dict:
+    req = urllib.request.Request(
+        "https://api.github.com/graphql",
+        data=json.dumps({"query": query, "variables": variables}).encode(),
+        method="POST",
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
+                 "User-Agent": "Kuro/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8", errors="replace"))
+            return data if isinstance(data, dict) else {}
+    except Exception as e:
+        print(f"GraphQL echec : {e}")
+        return {}
+
+
+def fixable_push(repo: str, pr: dict, klass: str, detail: str, log: str, token: str,
+                 write: bool, allowed: bool) -> str:
+    """Push autofix sur la branche PR si label kuro-auto/valide, sinon P-ID d'attente."""
+    head = (pr.get("head") or {}).get("ref", "?")
+    number = pr.get("number")
     if klass not in SAFE_KLASSES:
         return "classe non auto-reparable"
+    fork = bool(((pr.get("head") or {}).get("repo") or {}).get("fork"))
     if fork:
         return "fork : push refuse, commentaire seul"
+    if not allowed:
+        pid = P.add(f"{repo}#{number}", f"[{klass}] {detail[:80]}",
+                    f"En attente du label `{AUTO_LABEL}` sur la PR (validez depuis Discord).",
+                    [f"https://github.com/{repo}/pull/{number}"])
+        return f"proposition {pid} (label {AUTO_LABEL} requis)"
     if not write:
         return f"dry-run : {klass} serait pousse sur {head}"
+    if not P.budget_use("autofix_push"):
+        return "budget autofix du jour epuise (3/j)"
     res = auto_fix(repo, klass, detail, log, token, False, head_branch=head)
     return res.get("detail", res.get("action", "?"))
 
 
-def propose(repo: str, pr: dict, check: dict, run_id: int | None, token: str, write: bool) -> str:
-    """Diagnostic LLM en commentaire (dedup par run), ou raison."""
+def propose(repo: str, pr: dict, check: dict, diag: dict | None,
+            run_id: int | None, token: str, write: bool) -> str:
+    """P-ID + diagnostic LLM en commentaire (dedup par run)."""
     number = pr.get("number")
+    cause = (diag or {}).get("cause", "cause inconnue") if diag else "cause inconnue"
+    fix = (diag or {}).get("fix", "") if diag else ""
+    files = pr_files_stat(repo, number, token)
+    pid = P.add(f"{repo}#{number}/{check.get('name')}", f"{check.get('name')} : {cause[:80]}",
+                f"{fix[:300]} | Fichiers : {files}",
+                [check.get("html_url", ""), f"https://github.com/{repo}/pull/{number}"])
     if run_id and already_commented(repo, number, run_id, token):
-        return "proposition deja postee pour ce run"
-    diag = ai_diagnose(repo, run_id, token) if run_id else None
+        return f"proposition {pid} deja postee pour ce run"
+    text = ai_diagnose(repo, run_id, token) if run_id else None
     body = (
         f"{MARKER} run={run_id}\n"
-        f"**Kuro PR-agent** — `{check.get('name')}` en echec sur `{pr.get('head', {}).get('ref')}`.\n\n"
-        f"{diag or '_Diagnostic LLM indisponible (cerveau down) — diagnostic deterministe a venir._'}\n\n"
-        f"[Voir le run]({check.get('html_url', '')})"
+        f"**Kuro PR-agent {pid}** — `{check.get('name')}` en echec.\n\n"
+        f"Cause : {cause}\n\n"
+        f"{text or '_Diagnostic LLM indisponible — diagnostic deterministe seul._'}\n\n"
+        f"Fichiers : {files or 'n/a'}\n\n"
+        f"[Voir le run]({check.get('html_url', '')}) · "
+        f"Validez avec `/valide {pid}` (auteur PR) ou le label `{AUTO_LABEL}`."
     )
     if not write:
-        return "dry-run : proposition non postee"
-    return "proposition postee" if post_comment(repo, number, body, token) else "post commentaire impossible"
+        return f"dry-run : {pid} non postee"
+    return f"{pid} postee" if post_comment(repo, number, body, token) else f"{pid} : post impossible"
 
 
-def process_check(repo: str, pr: dict, check: dict, token: str, write: bool) -> str:
-    head = (pr.get("head") or {}).get("ref", "?")
+def handle_commands(repo: str, pr: dict, token: str, write: bool) -> list[str]:
+    """Execute UNE commande /valide /relance /diagnostic (auteur PR, sauf diagnostic)."""
+    lines, number = [], pr.get("number")
+    author = ((pr.get("user") or {}).get("login") or "")
+    for cmd in pr_commands(repo, pr, token):
+        key = f"cmd:{repo}#{number}:{cmd['id']}"
+        if P.seen(key):
+            continue
+        if cmd["cmd"] == "diagnostic":
+            if not write:
+                lines.append("diagnostic : dry-run, ignore");
+            else:
+                failing = failing_checks(repo, (pr.get("head") or {}).get("sha", ""), token)
+                rid = run_id_from_url((failing[0].get("html_url", "") if failing else ""))
+                text = ai_diagnose(repo, rid, token) if rid else None
+                ok = post_comment(repo, number, f"{MARKER}\n**Diagnostic** :\n\n{text or 'rien a diagnostiquer.'}", token)
+                lines.append(f"diagnostic -> {'poste' if ok else 'echec post'}")
+            P.mark_seen(key)
+            break
+        if cmd["author"] != author:
+            continue  # /valide et /relance reserves a l'auteur de la PR
+        if cmd["cmd"] == "relance":
+            rid = None
+            failing = failing_checks(repo, (pr.get("head") or {}).get("sha", ""), token)
+            if failing:
+                rid = run_id_from_url(failing[0].get("html_url", ""))
+            if rid and write and rerun_failed_jobs(repo, rid, token):
+                lines.append(f"relance -> run {rid} relance")
+            else:
+                lines.append("relance -> impossible (dry-run ou aucun run)")
+            P.mark_seen(key)
+            break
+        if cmd["cmd"] == "valide":
+            pid = cmd["arg"]
+            if write and P.set_status(pid, "valide"):
+                ensure_label(repo, AUTO_LABEL, "0e8a16", token)
+                add_pr_label(repo, number, AUTO_LABEL, token)
+                post_comment(repo, number, f"{MARKER}\n{pid} validee : label `{AUTO_LABEL}` pose, l'agent applique au prochain cycle.", token)
+                lines.append(f"valide -> {pid} validee")
+            else:
+                lines.append(f"valide -> {pid} inconnue ou dry-run")
+            P.mark_seen(key)
+            break
+    return lines
+
+
+def maybe_automerge(repo: str, pr: dict, token: str, write: bool) -> str | None:
+    """Auto-merge garde : label valide + tout vert + petite diff + auteur de confiance."""
+    labels = pr_labels(pr)
+    if VALIDE_LABEL not in labels and AUTO_LABEL not in labels:
+        return None
+    if "do-not-merge" in labels:
+        return "merge refuse (do-not-merge)"
+    author = ((pr.get("user") or {}).get("login") or "")
+    if author not in TRUSTED_MERGE_AUTHORS:
+        return f"merge refuse (auteur {author or '?'} non approuve)"
+    if (pr.get("additions") or 0) > MERGE_MAX_ADD:
+        return f"merge refuse (diff +{pr.get('additions')} > {MERGE_MAX_ADD})"
+    failing = failing_checks(repo, (pr.get("head") or {}).get("sha", ""), token)
+    if failing:
+        return f"merge refuse ({len(failing)} check(s) rouges)"
+    if not write:
+        return "dry-run : merge envisageable (tout vert + label)"
+    if not P.budget_use("merge"):
+        return "merge refuse (budget 1/j epuise)"
+    node = pr.get("node_id", "")
+    res = graphql(token, "mutation($id: ID!) { enablePullRequestAutoMerge("
+                  "input: {pullRequestId: $id, mergeMethod: SQUASH}) { clientMutationId } }",
+                  {"pullRequestId": node})
+    if res.get("data", {}).get("enablePullRequestAutoMerge") is not None:
+        return "auto-merge active (squash)"
+    return "auto-merge impossible (etat GitHub)"
+
+
+def process_check(repo: str, pr: dict, check: dict, token: str, write: bool, allowed: bool) -> str:
     run_id = run_id_from_url(check.get("html_url", ""))
     log = fetch_failed_log(repo, run_id, token) if run_id else ""
     diag = classify_failure(log) if log else None
     if diag and diag.get("klass") in SAFE_KLASSES:
-        fork = bool(((pr.get("head") or {}).get("repo") or {}).get("fork"))
-        outcome = fixable_push(repo, diag["klass"], diag.get("detail", ""), log, token, head, fork, write)
+        outcome = fixable_push(repo, pr, diag["klass"], diag.get("detail", ""), log, token, write, allowed)
         return f"{check.get('name')} [{diag['klass']}] -> {outcome}"
     if diag is None and run_id and run_attempt(repo, run_id, token) <= 1:
         if not write:
             return f"{check.get('name')} [inconnu] -> dry-run : relance envisagee"
         ok = rerun_failed_jobs(repo, run_id, token)
         return f"{check.get('name')} [inconnu] -> {'relance' if ok else 'relance impossible'}"
-    outcome = propose(repo, pr, check, run_id, token, write)
+    outcome = propose(repo, pr, check, diag, run_id, token, write)
     cause = (diag or {}).get("cause", "cause inconnue") if diag else "cause inconnue"
     return f"{check.get('name')} [{cause[:60]}] -> {outcome}"
 
@@ -141,13 +304,19 @@ def process_pr(repo: str, pr: dict, token: str, write: bool) -> list[str]:
     tag = f"{repo}#{pr.get('number')} ({head})"
     if head in PROTECTED_REFS:
         return [f"{tag} : branche protegee, ignore"]
-    failing = failing_checks(repo, pr.get("head", {}).get("sha", ""), token)
+    labels = pr_labels(pr)
+    allowed = AUTO_LABEL in labels or VALIDE_LABEL in labels
+    lines = [f"{tag}{' [AUTO]' if allowed else ''}"]
+    lines.extend(f"  $ {c}" for c in handle_commands(repo, pr, token, write))
+    failing = failing_checks(repo, (pr.get("head") or {}).get("sha", ""), token)
     if not failing:
-        return [f"{tag} : verte"]
-    lines = [f"{tag} : {len(failing)} check(s) rouge(s)"]
+        auto = maybe_automerge(repo, pr, token, write)
+        lines.append(f"  verte" + (f" -> {auto}" if auto else ""))
+        return lines
+    lines.append(f"  {len(failing)} check(s) rouge(s)")
     for check in failing[:3]:
         try:
-            lines.append(f"  - {process_check(repo, pr, check, token, write)}")
+            lines.append(f"  - {process_check(repo, pr, check, token, write, allowed)}")
         except Exception as e:
             lines.append(f"  - {check.get('name')} : erreur agent ({e})")
     return lines
@@ -183,22 +352,28 @@ def main() -> int:
     if not token:
         print("GH_TOKEN absent — lecture seule GitHub impossible")
         return 0
-    write = a.write
+    write = a.write and not P.vacances()
+    if P.vacances():
+        print("mode vacances : lecture seule forcee")
     print(f"=== KURO PR-AGENT write={write} ===")
     lines: list[str] = []
     seen = 0
-    for owner in a.owners:
-        for repo in discover_repos(owner, token):
-            for pr in open_prs(repo, token):
-                if seen >= a.max_prs:
-                    break
-                seen += 1
-                lines.extend(process_pr(repo, pr, token, write))
+    found = discover_all(a.owners, token)
+    for repo, tok in sorted(found.items()):
+        for pr in open_prs(repo, tok):
             if seen >= a.max_prs:
                 break
+            seen += 1
+            lines.extend(process_pr(repo, pr, tok, write))
+        if seen >= a.max_prs:
+            break
     print("\n".join(lines) or "Aucune PR ouverte.")
     if write:
-        post_discord(lines)
+        pend = P.pending()
+        if pend:
+            lines.append(f"-- {len(pend)} proposition(s) en attente : " +
+                         ", ".join(f"{p['id']} [{p['status']}]" for p in pend[:8]))
+        post_discord([P.polish_fr("\n".join(lines))])
     else:
         print("(dry-run : rien pousse ni poste)")
     return 0
