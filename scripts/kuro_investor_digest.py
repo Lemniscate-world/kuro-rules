@@ -81,14 +81,25 @@ def build_report(epingle: Path, ci_status_path: Path, log_path: Path) -> str:
 
     acts = week_actions(log_path)
     acts_line = f"Système : {acts} intervention(s) automatique(s) cette semaine"
+    # Securite dynamique depuis security-status.json (fini le 15/15 en dur)
+    sec_value = "état non mesuré (lancer kuro_security.py)"
+    try:
+        sec = json.loads((ROOT / "security-status.json").read_text(encoding="utf-8"))
+        prot, tot = sec.get("protected", "?"), sec.get("total", "?")
+        known = sec.get("open_alerts_known", "?")
+        unk = len(sec.get("unknown", []) or [])
+        extra = f" + {unk} inconnues (Dependabot off)" if unk else ""
+        sec_value = f"{prot}/{tot} protégés · {known} alertes connues{extra}"
+    except Exception:
+        pass
 
     lines = [
-        "📊 **λ lambda-Section — Point investisseurs**",
+        "Point lambda-Section — Investisseurs",
         f"_Semaine du {datetime.now(timezone.utc).strftime('%d/%m/%Y')}_",
         "",
         f"• **Portefeuille** : {st['total']} projets · {st['active']} actifs · avancement moyen {st['avg']}%",
         f"• **Fiabilité** : {ci_line}",
-        f"• **Sécurité** : 15/15 dépôts sous surveillance automatique des vulnérabilités",
+        f"• **Sécurité** : {sec_value}",
         f"• **{acts_line}**",
         "",
         "**Projets les plus avancés** :",

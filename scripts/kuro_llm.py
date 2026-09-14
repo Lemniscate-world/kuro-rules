@@ -2,7 +2,7 @@
 """kuro_llm.py — client LLM unifié pour l'intelligence Kuro (zéro dépendance).
 
 Chaîne de moteurs :
-    1. OpenRouter ($OPENROUTER_API_KEY, modèle $OPENROUTER_MODEL, défaut ox-alpha:free)
+    1. OpenRouter ($OPENROUTER_API_KEY, modèle $OPENROUTER_MODEL, défaut google/gemma-4-31b-it:free)
     2. DeepSeek ($DEEPSEEK_API_KEY, modèle $DEEPSEEK_MODEL, défaut deepseek-chat)
     3. Ollama local ($OLLAMA_URL, défaut http://localhost:11434, $OLLAMA_MODEL, défaut llama3)
     4. Aucun -> retourne None ; les appelants restent alors en mode déterministe.
@@ -22,7 +22,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-DEFAULT_OPENROUTER_MODEL = "stealth/ox-alpha"
+DEFAULT_OPENROUTER_MODEL = "google/gemma-4-31b-it:free"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_DEEPSEEK_BASE = "https://api.deepseek.com"
 DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
@@ -175,7 +175,14 @@ def _ollama(prompt: str, system: str) -> tuple[str | None, str]:
 
 
 def _alert_brain_down() -> None:
-    """Discord : cerveau indisponible (1 fois / 24h max)."""
+    """Discord : cerveau indisponible (cycle complet uniquement, 1 fois / 24h max).
+
+    La sentinelle 30min tourne sur VM fraiche (/tmp vide) : sans ce garde, chaque
+    run re-poste l'alerte. KURO_FULL vaut 'false' en sentinelle, 'true' en cycle
+    complet, absent en local (alerte autorisee).
+    """
+    if os.environ.get("KURO_FULL") == "false":
+        return
     webhook = os.environ.get("DISCORD_WEBHOOK_URL")
     if not webhook:
         return
@@ -194,8 +201,13 @@ def _alert_brain_down() -> None:
         "embeds": [
             {
                 "title": "[ALERTE] Cerveau LLM indisponible",
-                "description": "OpenRouter et Ollama cloud injoignables. "
-                "Le robot continue en mode déterministe.",
+                "description": (
+                    f"OpenRouter ({os.environ.get('OPENROUTER_MODEL', DEFAULT_OPENROUTER_MODEL)}) "
+                    "et Ollama cloud injoignables. "
+                    + ("DeepSeek : cle absente — `gh secret set DEEPSEEK_API_KEY --repo Lemniscate-world/kuro-rules`. "
+                       if not os.environ.get("DEEPSEEK_API_KEY") else "DeepSeek : cle presente mais appel en echec. ")
+                    + "Le robot continue en mode déterministe."
+                ),
                 "color": 16098851,
             }
         ],

@@ -236,16 +236,33 @@ FAILURE_SIGNATURES: list[tuple[str, str, str, str]] = [
         "protected_files",
     ),
     (
+        r"Fichier protege tracke \(R76\): git rm --cached (\S+)",
+        "Fichier protégé (R76) suivi par git (message FR du workflow compliance)",
+        "git rm --cached <fichier> + .gitignore, commit, push",
+        "protected_files",
+    ),
+    (
+        r"error\s+'(\w+)' is not defined\s+no-undef",
+        "ESLint no-undef : import inutilisé ou symbole non défini",
+        "Retirer l'import inutilisé (ex: React avec le nouveau JSX transform) ou déclarer le symbole",
+        "",
+    ),
+    (
         r"(?:would reformat|reformatted) .*\.py|black\.{10,}",
         "Dette de formatage (black/isort)",
         "pre-commit run black,isort --all-files (ou black . && isort .), commit, push",
         "formatting",
     ),
     (
-        r"flake8\.{10,}|F401|F841|E501.*line too long",
-        "Dette de lint flake8 (imports/variables morts, lignes longues)",
-        "Corriger les imports/variables morts listés, ou per-file-ignores documenté "
-        "dans .flake8 pour la dette legacy",
+        r"F401|F841",
+        "Imports/variables morts flake8 (F401/F841)",
+        "ruff check --fix --select F401,F841",
+        "lint_dead",
+    ),
+    (
+        r"E501.*line too long",
+        "Lignes trop longues flake8 (E501, non auto-repare)",
+        "Decouper les lignes > 88 chars (black formate, mais ne coupe pas les chaines)",
         "",
     ),
     (
@@ -333,21 +350,25 @@ def _git(repo_dir: Path, *args: str) -> tuple[bool, str]:
         text=True,
         timeout=120,
         check=False,
+        shell=False,  # argv statique, jamais de shell (audit opengrep)
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     ok = completed.returncode == 0
     return ok, (completed.stdout + completed.stderr).strip()
 
 
-def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_run: bool) -> dict:
-    """Applique une réparation sûre et pousse sur la branche par défaut.
+def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_run: bool,
+             head_branch: str | None = None) -> dict:
+    """Applique une réparation sûre et pousse sur head_branch (ou la branche par défaut).
 
     Classes supportées : formatting (black/isort épinglés au repo),
-    protected_files (détache du tracking). Toute autre classe = no-op.
+    protected_files (détache du tracking), lint_dead (ruff F401/F841).
+    Toute autre classe = diagnostic seul + proposition DeepSeek via ai_diagnose().
+    L'appelant ne doit jamais passer main/master en head_branch pour une PR.
     """
     result = {"klass": klass, "action": "autofix_skipped", "detail": ""}
-    if klass not in ("formatting", "protected_files"):
-        result["detail"] = f"classe {klass} non auto-réparable"
+    if klass not in ("formatting", "protected_files", "lint_dead"):
+        result["detail"] = f"classe {klass} non auto-réparable — voir ai_diagnose() (DeepSeek si cle dispo)"
         return result
     if dry_run:
         result["action"] = "autofix_would_run"
@@ -360,7 +381,10 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
     workdir = Path(tempfile.mkdtemp(prefix="kuro-autofix-"))
     try:
         url = f"https://x-access-token:{token}@github.com/{repo}.git"
-        ok, out = _git(workdir, "clone", "--depth", "5", "--quiet", url, str(workdir / "repo"))
+        clone_args = ["clone", "--depth", "5", "--quiet"]
+        if head_branch:
+            clone_args += ["--branch", head_branch]
+        ok, out = _git(workdir, *clone_args, url, str(workdir / "repo"))
         if not ok:
             result["detail"] = f"clone impossible: {out[:200]}"
             return result
@@ -385,6 +409,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                 capture_output=True,
                 text=True,
                 timeout=300,
+                shell=False,  # argv statique, jamais de shell
             )
             if pip_ok.returncode != 0:
                 result["detail"] = f"pip install black=={pins['black']} impossible"
@@ -395,6 +420,7 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                 capture_output=True,
                 timeout=600,
                 check=False,
+                shell=False,
             )
             if "isort" in pins:
                 subprocess.run(
@@ -403,14 +429,33 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
                     capture_output=True,
                     timeout=300,
                     check=False,
+                    shell=False,
                 )
         elif klass == "protected_files":
             tracked = re.findall(r"Protected file tracked: (\S+)", log_text)
+            tracked += re.findall(r"Fichier protege tracke \(R76\): git rm --cached (\S+)", log_text)
             if not tracked:
                 result["detail"] = "aucun fichier protégé identifiable dans le log"
                 return result
             for f in tracked[:5]:
                 _git(repo_dir, "rm", "--cached", "--", f)
+        elif klass == "lint_dead":
+            # F401 imports morts / F841 variables mortes : ruff --fix, sinon rien.
+            # Pas de suppression aveugle sans ruff : on refuse plutot que casser.
+            ruff = shutil.which("ruff")
+            if not ruff:
+                pip_ok = subprocess.run(
+                    ["pip", "install", "-q", "ruff"],
+                    capture_output=True, text=True, timeout=180, shell=False,
+                )
+                ruff = shutil.which("ruff")
+                if pip_ok.returncode != 0 or not ruff:
+                    result["detail"] = "ruff indisponible (pip install ruff echoue) — fix manuel requis"
+                    return result
+            subprocess.run(
+                [ruff, "check", "--fix", "--select", "F401,F841", "."],
+                cwd=repo_dir, capture_output=True, timeout=300, check=False, shell=False,
+            )
 
         status = _git(repo_dir, "status", "--porcelain")[1].strip()
         if not status:
@@ -424,14 +469,16 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
         message = {
             "formatting": "style(ci-guardian): auto-format black/isort (versions épinglées du repo)",
             "protected_files": "fix(R76): retire les fichiers protégés du tracking git",
+            "lint_dead": "fix(ci-guardian): ruff --fix F401/F841 imports/variables morts",
         }.get(klass, "fix(ci-guardian): auto-réparation")
         _git(repo_dir, "commit", "-m", message)
         branch_ok, branch_out = _git(repo_dir, "rev-parse", "--abbrev-ref", "HEAD")
         branch = branch_out.strip() if branch_ok else "main"
-        push_ok, push_out = _git(repo_dir, "push", "origin", f"HEAD:{branch}")
+        target = head_branch or branch
+        push_ok, push_out = _git(repo_dir, "push", "origin", f"HEAD:{target}")
         if push_ok:
             result["action"] = "autofix_pushed"
-            result["detail"] = f"poussé sur {branch}: {message}"
+            result["detail"] = f"poussé sur {target}: {message}"
         else:
             result["action"] = "autofix_push_failed"
             result["detail"] = push_out[:200]
