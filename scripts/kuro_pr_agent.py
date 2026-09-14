@@ -88,6 +88,68 @@ def already_commented(repo: str, number: int, run_id: int | None, token: str) ->
     return any(isinstance(c, dict) and needle in (c.get("body") or "") for c in data)
 
 
+def review_comments(repo: str, number: int, token: str) -> list:
+    """Commentaires inline de revue postes par des bots (Qodo, Sourcery, CodeRabbit...)."""
+    st, data = api("GET", f"/repos/{repo}/pulls/{number}/comments?per_page=100", token)
+    if st != 200 or not isinstance(data, list):
+        return []
+    out = []
+    for c in data:
+        if not isinstance(c, dict):
+            continue
+        author = ((c.get("user") or {}).get("login") or "")
+        if not author.endswith("[bot]") or author in ("github-actions[bot]", "dependabot[bot]"):
+            continue
+        if MARKER in (c.get("body") or ""):
+            continue
+        out.append(c)
+    return out
+
+
+def parse_suggestions(body: str) -> list:
+    """Extrait les blocs ```suggestion -> [lignes de remplacement]."""
+    return [m.group(1).strip("\n").splitlines()
+            for m in re.finditer(r"```suggestion[^\n]*\n(.*?)```", body or "", re.DOTALL)
+            if m.group(1).strip()]
+
+
+def suggestion_range(comment: dict) -> tuple:
+    """Lignes 1-indexees ciblees : (debut, fin), (0, 0) si inexploitable."""
+    start = comment.get("start_line") or comment.get("original_start_line") or \
+        comment.get("line") or comment.get("original_line") or 0
+    end = comment.get("line") or comment.get("original_line") or start
+    try:
+        start, end = int(start), int(end)
+    except (TypeError, ValueError):
+        return 0, 0
+    if start < 1 or end < start:
+        return 0, 0
+    return start, end
+
+
+def apply_suggestion(repo_dir: Path, path: str, start: int, end: int, code: list) -> bool:
+    """Remplace les lignes [start..end] par le bloc suggestion. False si inapplicable."""
+    target = repo_dir / path
+    if not code or start < 1 or end < start or target.suffix != ".py":
+        return False
+    try:
+        if target.resolve().parent != repo_dir.resolve() and \
+                repo_dir.resolve() not in target.resolve().parents:
+            return False
+        lines = target.read_text(encoding="utf-8").splitlines()
+    except Exception:
+        return False
+    if end > len(lines):
+        return False
+    new_text = "\n".join(lines[:start - 1] + code + lines[end:]) + "\n"
+    try:
+        compile(new_text, str(target), "exec")
+        target.write_text(new_text, encoding="utf-8")
+    except Exception:
+        return False
+    return True
+
+
 def post_comment(repo: str, number: int, body: str, token: str) -> bool:
     if not P.budget_use("comment"):
         print("  budget commentaires epuise pour aujourd'hui")
@@ -282,6 +344,67 @@ def maybe_automerge(repo: str, pr: dict, token: str, write: bool) -> str | None:
     return "auto-merge impossible (etat GitHub)"
 
 
+def apply_review_fixes(repo: str, pr: dict, token: str, write: bool, allowed: bool) -> list[str]:
+    """Applique les blocs suggestion des bots (Qodo/Sourcery/Rabbit) ou les propose."""
+    from ci_guardian import _git
+    import shutil
+    import tempfile
+    number, head = pr.get("number"), (pr.get("head") or {}).get("ref", "?")
+    comments = [c for c in review_comments(repo, number, token)
+                if parse_suggestions(c.get("body") or "")]
+    if not comments:
+        others = review_comments(repo, number, token)
+        if others and write:
+            pid = P.add(f"{repo}#{number}", f"{len(others)} remarque(s) bot sans suggestion",
+                        "Avis a lire : " + "; ".join(
+                            f"{(c.get('user') or {}).get('login')}:{c.get('path')}" for c in others[:5]),
+                        [f"https://github.com/{repo}/pull/{number}/files"])
+            return [f"revue bots : {len(others)} remarque(s) -> proposition {pid}"]
+        return []
+    if not allowed:
+        pid = P.add(f"{repo}#{number}", f"{len(comments)} suggestion(s) bot en attente",
+                    f"En attente du label `{AUTO_LABEL}` pour appliquer.",
+                    [f"https://github.com/{repo}/pull/{number}/files"])
+        return [f"revue bots : {len(comments)} suggestion(s) -> proposition {pid} (label requis)"]
+    if not write:
+        return [f"revue bots : dry-run, {len(comments)} suggestion(s) applicables"]
+    if not P.budget_use("review_fix"):
+        return ["revue bots : budget review_fix epuise (2/j)"]
+    workdir = Path(tempfile.mkdtemp(prefix="kuro-review-"))
+    try:
+        url = f"https://x-access-token:{token}@github.com/{repo}.git"
+        ok, out = _git(workdir, "clone", "--depth", "5", "--quiet",
+                       "--branch", head, url, str(workdir / "repo"))
+        if not ok:
+            return [f"revue bots : clone impossible ({out[:80]})"]
+        rd = workdir / "repo"
+        applied, skipped = [], []
+        for c in comments[:3]:
+            path = c.get("path") or "?"
+            start, end = suggestion_range(c)
+            codes = parse_suggestions(c.get("body") or "")
+            ok_all = bool(codes) and all(apply_suggestion(rd, path, start, end, code) for code in codes)
+            (applied if ok_all else skipped).append(path)
+        if not applied:
+            return [f"revue bots : {len(skipped)} suggestion(s) inapplicables tel quel -> relire a la main"]
+        _git(rd, "config", "user.name", "github-actions[bot]")
+        _git(rd, "config", "user.email", "github-actions[bot]@users.noreply.github.com")
+        _git(rd, "add", "-A")
+        _git(rd, "commit", "-m", f"fix(review): applique {len(applied)} suggestion(s) bot ({', '.join(applied[:3])})")
+        ok, out = _git(rd, "push", "origin", f"HEAD:{head}")
+        if not ok:
+            return [f"revue bots : push impossible ({out[:80]})"]
+        pid = P.add(f"{repo}#{number}", f"{len(applied)} suggestion(s) bot appliquee(s)",
+                    f"Fichiers : {', '.join(applied[:5])}" +
+                    (f" | ignores : {', '.join(skipped[:3])}" if skipped else ""),
+                    [f"https://github.com/{repo}/pull/{number}/files"])
+        P.set_status(pid, "applique")
+        msg = f"revue bots : {pid} appliquee ({', '.join(applied[:3])})"
+        return [msg + (f" | a relire : {', '.join(skipped[:3])}" if skipped else "")]
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+
+
 def process_check(repo: str, pr: dict, check: dict, token: str, write: bool, allowed: bool) -> str:
     run_id = run_id_from_url(check.get("html_url", ""))
     log = fetch_failed_log(repo, run_id, token) if run_id else ""
@@ -308,6 +431,10 @@ def process_pr(repo: str, pr: dict, token: str, write: bool) -> list[str]:
     allowed = AUTO_LABEL in labels or VALIDE_LABEL in labels
     lines = [f"{tag}{' [AUTO]' if allowed else ''}"]
     lines.extend(f"  $ {c}" for c in handle_commands(repo, pr, token, write))
+    try:
+        lines.extend(f"  ~ {c}" for c in apply_review_fixes(repo, pr, token, write, allowed))
+    except Exception as e:
+        lines.append(f"  ~ revue bots : erreur agent ({e})")
     failing = failing_checks(repo, (pr.get("head") or {}).get("sha", ""), token)
     if not failing:
         auto = maybe_automerge(repo, pr, token, write)

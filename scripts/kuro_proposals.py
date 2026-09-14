@@ -30,7 +30,7 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = Path(__file__).resolve().parent.parent
 STORE = ROOT / "proposals.local.json"
 VACANCES_FLAG = ROOT / "vacances.flag"
-BUDGETS = {"autofix_push": 3, "merge": 1, "revert_pr": 1, "comment": 20}
+BUDGETS = {"autofix_push": 3, "merge": 1, "revert_pr": 1, "comment": 20, "review_fix": 2}
 ASCII_MAP = {"✓": "OK", "✗": "KO", "→": "->", "·": "-", "—": "-", "–": "-"}
 
 
