@@ -128,9 +128,11 @@ foreach ($proj in $projects) {
             }
             $kuroDir = Join-Path $proj.Path ".kuro"
             New-Item -ItemType Directory -Path $kuroDir -Force | Out-Null
+            # "\n" final obligatoire : sans lui, end-of-file-fixer casse Pre-commit
+            # a chaque synchro dans tous les repos.
             [System.IO.File]::WriteAllText(
                 (Join-Path $kuroDir "rules-manifest.json"),
-                ($manifestObj | ConvertTo-Json),
+                (($manifestObj | ConvertTo-Json) + "`n"),
                 (New-Object System.Text.UTF8Encoding($false))
             )
             $projSynced += ".github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json"
