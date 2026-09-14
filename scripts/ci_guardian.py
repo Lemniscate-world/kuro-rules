@@ -357,12 +357,14 @@ def _git(repo_dir: Path, *args: str) -> tuple[bool, str]:
     return ok, (completed.stdout + completed.stderr).strip()
 
 
-def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_run: bool) -> dict:
-    """Applique une réparation sûre et pousse sur la branche par défaut.
+def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_run: bool,
+             head_branch: str | None = None) -> dict:
+    """Applique une réparation sûre et pousse sur head_branch (ou la branche par défaut).
 
     Classes supportées : formatting (black/isort épinglés au repo),
     protected_files (détache du tracking), lint_dead (ruff F401/F841).
     Toute autre classe = diagnostic seul + proposition DeepSeek via ai_diagnose().
+    L'appelant ne doit jamais passer main/master en head_branch pour une PR.
     """
     result = {"klass": klass, "action": "autofix_skipped", "detail": ""}
     if klass not in ("formatting", "protected_files", "lint_dead"):
@@ -379,7 +381,10 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
     workdir = Path(tempfile.mkdtemp(prefix="kuro-autofix-"))
     try:
         url = f"https://x-access-token:{token}@github.com/{repo}.git"
-        ok, out = _git(workdir, "clone", "--depth", "5", "--quiet", url, str(workdir / "repo"))
+        clone_args = ["clone", "--depth", "5", "--quiet"]
+        if head_branch:
+            clone_args += ["--branch", head_branch]
+        ok, out = _git(workdir, *clone_args, url, str(workdir / "repo"))
         if not ok:
             result["detail"] = f"clone impossible: {out[:200]}"
             return result
@@ -469,10 +474,11 @@ def auto_fix(repo: str, klass: str, detail: str, log_text: str, token: str, dry_
         _git(repo_dir, "commit", "-m", message)
         branch_ok, branch_out = _git(repo_dir, "rev-parse", "--abbrev-ref", "HEAD")
         branch = branch_out.strip() if branch_ok else "main"
-        push_ok, push_out = _git(repo_dir, "push", "origin", f"HEAD:{branch}")
+        target = head_branch or branch
+        push_ok, push_out = _git(repo_dir, "push", "origin", f"HEAD:{target}")
         if push_ok:
             result["action"] = "autofix_pushed"
-            result["detail"] = f"poussé sur {branch}: {message}"
+            result["detail"] = f"poussé sur {target}: {message}"
         else:
             result["action"] = "autofix_push_failed"
             result["detail"] = push_out[:200]

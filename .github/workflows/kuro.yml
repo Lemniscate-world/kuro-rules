@@ -69,6 +69,19 @@ jobs:
             --actions-log kuro-rules/KURO_ACTIONS_LOG.md
           cp lemniscate-world/ci-status.json kuro-rules/ci-status.json
 
+      - name: Agent PR (autofix sur + propositions, cycle complet)
+        if: env.KURO_FULL == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free' }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python kuro-rules/scripts/kuro_pr_agent.py \
+            --owners LambdaSection Lemniscate-world \
+            --max-prs 5 --write
+
       - name: Sécurité (vulnérabilités + auto-fixes, cycle complet)
         if: env.KURO_FULL == 'true'
         env:

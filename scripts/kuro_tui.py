@@ -21,6 +21,7 @@ ITEMS = [
     ("6", "Investisseurs (dry-run)", [PY, str(ROOT / "kuro_investor_digest.py"), "--dry-run"]),
     ("7", "Any.do export (pipeline -> taches)", [PY, str(ROOT / "kuro_anydo.py"), "--export"]),
     ("8", "Any.do pull (notes -> projets + propositions)", [PY, str(ROOT / "kuro_anydo.py"), "--pull"]),
+    ("9", "Agent PR (revue dry-run)", [PY, str(ROOT / "kuro_pr_agent.py"), "--max-prs", "5"]),
     ("q", "Quitter", None),
 ]
 
