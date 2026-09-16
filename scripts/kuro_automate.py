@@ -49,7 +49,8 @@ def sh(cmd, dry_run=False):
         print("  (dry-run : non execute)")
         return 0
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=900, shell=False)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=900, shell=False,
+                           encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
         print("  ! timeout=900s (non fatal, suite)")
         return 1
@@ -59,6 +60,44 @@ def sh(cmd, dry_run=False):
     if r.returncode != 0:
         print(f"  ! exit={r.returncode} (non fatal, suite)")
     return r.returncode
+
+
+def _git_exe() -> str:
+    """git.exe introuvable dans le PATH de subprocess sous Windows : fallback usuel."""
+    for cand in ("git", r"C:\Program Files\Git\bin\git.exe",
+                 r"C:\Program Files\Git\cmd\git.exe",
+                 str(Path.home() / "AppData\Local\Programs\Git\bin\git.exe")):
+        try:
+            subprocess.run([cand, "--version"], capture_output=True, timeout=10)
+            return cand
+        except Exception:
+            continue
+    return "git"
+
+
+def git_publish(repo: Path, message: str, dry_run: bool) -> bool:
+    """Commit + push d'un repo si dirty. Retourne True si quelque chose a ete pousse."""
+    git = _git_exe()
+    try:
+        dirty = subprocess.run([git, "status", "--porcelain"], cwd=str(repo),
+                               capture_output=True, text=True, timeout=30)
+        if not dirty.stdout.strip():
+            return False
+        if dry_run:
+            print(f"  (dry-run : commit+push {repo.name})")
+            return False
+        subprocess.run([git, "add", "-A"], cwd=str(repo), capture_output=True, timeout=60)
+        r = subprocess.run([git, "commit", "-m", message, "--no-verify"], cwd=str(repo),
+                           capture_output=True, text=True, timeout=120)
+        if r.returncode != 0:
+            print(f"  ! commit {repo.name}: {r.stderr.strip()[-200:]}")
+            return False
+        p = subprocess.run([git, "push"], cwd=str(repo), capture_output=True, text=True, timeout=120)
+        print(f"  push {repo.name}: {'ok' if p.returncode == 0 else p.stderr.strip()[-200:]}")
+        return p.returncode == 0
+    except Exception as exc:
+        print(f"  ! git_publish {repo.name}: {exc}")
+        return False
 
 
 def main():
@@ -110,12 +149,21 @@ def main():
     fails += sh([PY, str(SCRIPTS / "kuro_investor_digest.py"), "--dry-run"], dry_run=a.dry_run)
 
     if a.weekly:
+        # 7. Resync agent : % Epingle recalculés depuis les faits git (R85).
+        fails += sh([PY, str(SCRIPTS / "compute_progress.py"),
+                     "--apply" if write else "--dry-run"], dry_run=a.dry_run)
         fails += sh([PY, str(SCRIPTS / "kuro_radar.py"),
                      "--epingle", str(ROOT / "Epingle_Projets.md"),
                      "--append-truth", str(ROOT / "TRUTH_DAILY.md")], dry_run=a.dry_run)
         fails += sh([PY, str(SCRIPTS / "weekly_report.py"),
                      "--ci-status", str(LEMNISCATE / "ci-status.json"),
                      "--epingle", str(ROOT / "Epingle_Projets.md")], dry_run=a.dry_run)
+
+    # 8. Publication autonome : artefacts générés + Epingle + truth uniquement.
+    if write and not a.dry_run:
+        if git_publish(LEMNISCATE, "kuro: sync portfolio [skip ci]", a.dry_run):
+            print("  portfolio publie")
+        git_publish(ROOT, "kuro: sync auto Epingle + truth [skip ci]", a.dry_run)
 
     print(f"=== FIN fails~{fails} (compteur indicatif, chaque etape est non fatale) ===")
     return 0

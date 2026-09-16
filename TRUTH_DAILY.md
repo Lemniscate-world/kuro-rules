@@ -1,74 +1,111 @@
-# TRUTH DAILY — 2026-09-13
+# TRUTH DAILY — 2026-09-16
 
 > **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.
-> **Projects scannés:** 17 | **Source:** `~/Documents` + `Epingle_Projets.md`
+> **Projects scannés:** 62 | **Source:** `~/Documents` + `Epingle_Projets.md`
 
 | Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |
 |--------|---------------|---------|-------|-----|-----|-------|
-| **OpenQuant** | 2026-09-10 `7d64911` test: isolate post_positions_update_empty from rea | main | 83 (242 funcs) | 0 | 50 |  |
-| **Aquarium** | 2026-08-26 `6c917bf` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 1 |  |
-| **Astral** | 2026-08-26 `2ae3098` fix(compliance): untrack protected files (R76) [ku | main | 0 (0 funcs) | 0 | 2 |  |
-| **Automatons** | 2026-08-26 `1105136` fix(compliance): untrack protected files (R76) [ku | main | 3 (20 funcs) | 0 | 2 |  |
-| **Dissect** | 2026-08-26 `9f6ff08` fix(compliance): untrack protected files (R76) [ku | main | 10 (79 funcs) | 0 | 2 |  |
-| **EchoX** | 2026-08-26 `a1fa54c` fix(compliance): untrack protected files (R76) [ku | main | 5 (48 funcs) | 0 | 2 |  |
-| **Helium** | 2026-08-26 `05c19c8` chore(rules): synchro redirector 52 regles + workf | main | 0 (0 funcs) | 0 | 6 |  |
-| **LifeTrack** | 2026-08-26 `4c5ad2d` chore(rules): synchro redirector 52 regles + workf | master | 0 (0 funcs) | 0 | 49 |  |
-| **Neural-Agent** | 2026-08-26 `0f72256` chore(rules): synchro redirector 52 regles + workf | master | 11 (92 funcs) | 0 | 1 |  |
-| **NeuralDBG** | 2026-08-26 `803a6bf` chore(rules): synchro redirector 52 regles + workf | main | 48 (60 funcs) | 0 | 15 |  |
-| **NeuralDBG-Engine** | 2026-08-26 `ab63b0c` chore(rules): synchro redirector 52 regles + workf | master | 6 (45 funcs) | 0 | 1 |  |
-| **TokenWise** | 2026-08-26 `9a524c2` fix(compliance): untrack protected files (R76) [ku | master | 2 (13 funcs) | 0 | 2 |  |
-| **Metatron** | 2026-08-23 `69be135` fix(ci): scan SonarQube non bloquant - secret SONA | main | 0 (0 funcs) | 0 | 2 |  |
-| **AEther** | 2026-03-09 `b061374` docs: update README with comprehensive documentati | main | 0 (0 funcs) | 0 | 0 |  |
-| **Verbose** | 2026-01-12 `222af9f` Enhance features list | main | 0 (0 funcs) | 0 | 0 |  |
-| **DataLint** | 2025-12-25 `925ca42` feat(validators): add check_correlations for multi | main | 2 (0 funcs) | 0 | 0 |  |
-| **Odin** | 2024-12-26 `aceee58` Resize Observer loop completed with undelivered no | main | 0 (0 funcs) | 0 | 0 |  |
+| **AEther** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Agent-Reach** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Aquarium** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Astral** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Automatons** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **BloomDB** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **bodydouble** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Charmed** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **codebase-memory-mcp** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Console** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Damon** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Datalint** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **DevDemeterDAO** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **DevisPro** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Dissect** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **driftscape** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **EchoX** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Epure** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Forma** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **GALT-Flatcoin-Concept** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **github-profile** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Haki** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Helium** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Hermes** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Iroko** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Kapok** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **KnowledgeOS** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **kuro** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **LifeStack** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **LifeTrack** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Metatron** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Metatron-clean** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Neural-Again** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Neural-Agent** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Neural-Research** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **NeuralDBG** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **NeuralDBG-Engine** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **NeuralPrune** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **NeuroDose** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Oblivion** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Odin** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **OpenCMO** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **OpenQuant** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Project-Dirac** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **pytorch-fork** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **russel-agent** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **SaasX** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Sagittarius** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **SOLARIS** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **TokenWise** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **transformers-fork** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Verbose** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **XP_Farming_System** | — `—` no commits | — | 0 (0 funcs) | 0 | 0 |  |
+| **Aladin** | — (no git) | — | 0 | 0 | — | — |
+| **Flow-Regulator** | — (no git) | — | 0 | 0 | — | — |
+| **Nwt** | — (no git) | — | 0 | 0 | — | — |
+| **Onlook** | — (no git) | — | 0 | 0 | — | — |
+| **OpenMind** | — (no git) | — | 0 | 0 | — | — |
+| **POFS** | — (no git) | — | 0 | 0 | — | — |
+| **Prompt2Model** | — (no git) | — | 0 | 0 | — | — |
+| **QuSolve** | — (no git) | — | 0 | 0 | — | — |
+| **SOGEXCO** | — (no git) | — | 0 | 0 | — | — |
 
 ## Verite vs Epingle
 
-- **AEther** `0%` mais 0 commit 30j (dernier 2026-03-09) -> verifier statut Actif
-- **DataLint** `0%` mais 0 commit 30j (dernier 2025-12-25) -> verifier statut Actif
-- **Odin** `0%` mais 0 commit 30j (dernier 2024-12-26) -> verifier statut Actif
-- **Verbose** `0%` mais 0 commit 30j (dernier 2026-01-12) -> verifier statut Actif
 
-_Généré 2026-09-13T09:49:47.702440 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
-## Signaux Radar + recommandations (semaine du 2026-09-14)
+_Généré 2026-09-16T17:10:57.989782 | Script: `scripts/audit_truth_daily.py` | Prochain: `generate_portfolio.py`_
+## Signaux Radar + recommandations (semaine du 2026-09-16)
 
 **Hacker News**
-- [Show HN: LLM Attention Visualization](https://ishamf.dev/p/llm-attention-visualizer/) (175)
-- [Multi-Agents LLM Financial Trading Framework](https://github.com/TauricResearch/TradingAgents) (120)
-- [Training a 3.8B LLM to 0.384 CORE for $998](https://hugovergnes.github.io/little-lm-3-8b/) (120)
-- [Show HN: Godot and Rust based multiplexer (terminal panes and more)](https://github.com/godot-pty/gpty) (95)
-- [LLMs are real, AI is fake](https://pluralistic.net/2026/09/12/god-in-the-box/) (75)
+- [Why I'm still bearish on LLMs after Navier-Stokes](https://dank.systems/posts/2026-09-15-ai-bear.html) (391)
+- [PS5 Linux lead quits: "a bunch of noobs using LLMs" that "they don't understand"](https://frvr.com/blog/news/ps5-linux-lead-quits-as-open-source-projects-have-become-a-bunch-of-noobs-using-llms-that-they-dont-even-understand/) (261)
+- [Learning Programming in an Age of LLMs](https://blog.ploeh.dk/2026/09/16/on-learning-programming-in-an-age-of-llms/) (170)
+- [How much of F-Droid is LLM generated?](https://tintotint.eu/whacky-corner/f-droid_slop/) (141)
+- [OpenArch – PyTorch implementations of modern LLM architectures](https://github.com/anuj0456/OpenArch) (139)
 
 **GitHub — nouveaux repos qui montent**
-- [openai/NavierStokesAndEuler ★1861](https://github.com/openai/NavierStokesAndEuler) (1861) — _Lean certificates accompanying Navier-Stokes and Euler results_
-- [Edge0-AI/Edge0 ★1618](https://github.com/Edge0-AI/Edge0) (1618)
-- [Vincentwei1021/anything2explainer ★1193](https://github.com/Vincentwei1021/anything2explainer) (1193) — _Topic in, narrated explainer video out. A Claude Code / Codex skill that turns any topic into a black-canvas m_
-- [gazijarin/itsgiving ★818](https://github.com/gazijarin/itsgiving) (818) — _Express yourself in meetings (with memes, of course)._
-- [sumimakito/Mac-Duo ★803](https://github.com/sumimakito/Mac-Duo) (803) — _Wish you could bring the iPhone Duo effect to your MacBook?_
-- [SpaceDudem/text-humanizer ★734](https://github.com/SpaceDudem/text-humanizer) (734) — _text-humanizer is an open-source project designed to convert text generated by AI to its "humanized" version. _
+- [Chuloo/mural ★1211](https://github.com/Chuloo/mural) (1211) — _The language app you eventually delete. A native iPhone companion for learning through conversation._
+- [ai-sucks-butt/ai-sucks-butt ★1038](https://github.com/ai-sucks-butt/ai-sucks-butt) (1038) — _If you think AI sucks, star the repo._
+- [sumimakito/Mac-Duo ★936](https://github.com/sumimakito/Mac-Duo) (936) — _Wish you could bring the iPhone Duo effect to your MacBook?_
+- [yifanzhang-pro/recurrent-looped-tranformer ★853](https://github.com/yifanzhang-pro/recurrent-looped-tranformer) (853) — _Official Project Page for Recurrent Looped Transformer (RLT)_
+- [kruzovic7/ai-data-extractor ★825](https://github.com/kruzovic7/ai-data-extractor) (825) — _Free open-source extractor for AI coding assistant chat histories. Supports Claude Code, Cursor, Windsurf, Aid_
+- [zjwzcx/Awesome-Astra-Embodied-AI ★758](https://github.com/zjwzcx/Awesome-Astra-Embodied-AI) (758) — _GPT-6 Astra for embodied AI and robotics._
 
-- **intégrer dans `OpenQuant`** ← [Multi-Agents LLM Financial Trading Framework](https://github.com/TauricResearch/TradingAgents) (mots : llm, trading)
-- **intégrer dans `Aladin`** ← [Training a 3.8B LLM to 0.384 CORE for $998](https://hugovergnes.github.io/little-lm-3-8b/) (mots : llm, training)
-- **À surveiller pour `NeuralDBG`** ← [Show HN: LLM Attention Visualization](https://ishamf.dev/p/llm-attention-visualizer/) (llm)
+**arXiv cs.AI**
+- [Agentic Societies Need a Social Harness](http://arxiv.org/abs/2609.17527v1)
+- [ScienceBuddy: Recursive-in-Recursive Self-Improvement for Interactive Scientific Agents](http://arxiv.org/abs/2609.17523v1)
+- [PhysStream: Streaming Physics-Grounded Video Generation with Structured Scene Memory and Fine-Grained Motion Control](http://arxiv.org/abs/2609.17521v1)
+- [When Should LLMs Abstain? Chain-of-Self-Questioning for Selective Risk Control](http://arxiv.org/abs/2609.17516v1)
 
-## Signaux Radar + recommandations (semaine du 2026-09-14)
+- **relancer avec `Odin`** ← [kruzovic7/ai-data-extractor ★825](https://github.com/kruzovic7/ai-data-extractor) (mots : code, open)
+- **relancer avec `Metatron`** ← [Chuloo/mural ★1211](https://github.com/Chuloo/mural) (mots : language, learning)
+- **À surveiller pour `NeuralDBG`** ← [How much of F-Droid is LLM generated?](https://tintotint.eu/whacky-corner/f-droid_slop/) (llm)
+- **À surveiller pour `NeuralDBG-Engine`** ← [OpenArch – PyTorch implementations of modern LLM architectures](https://github.com/anuj0456/OpenArch) (llm)
+- **À surveiller pour `Neural-Agent`** ← [ScienceBuddy: Recursive-in-Recursive Self-Improvement for Interactive Scientific Agents](http://arxiv.org/abs/2609.17523v1) (agents)
 
-**Hacker News**
-- [Show HN: LLM Attention Visualization](https://ishamf.dev/p/llm-attention-visualizer/) (175)
-- [Multi-Agents LLM Financial Trading Framework](https://github.com/TauricResearch/TradingAgents) (120)
-- [Training a 3.8B LLM to 0.384 CORE for $998](https://hugovergnes.github.io/little-lm-3-8b/) (120)
-- [Show HN: Godot and Rust based multiplexer (terminal panes and more)](https://github.com/godot-pty/gpty) (95)
-- [LLMs are real, AI is fake](https://pluralistic.net/2026/09/12/god-in-the-box/) (75)
-
-**GitHub — nouveaux repos qui montent**
-- [openai/NavierStokesAndEuler ★1871](https://github.com/openai/NavierStokesAndEuler) (1871) — _Lean certificates accompanying Navier-Stokes and Euler results_
-- [Edge0-AI/Edge0 ★1643](https://github.com/Edge0-AI/Edge0) (1643)
-- [Vincentwei1021/anything2explainer ★1247](https://github.com/Vincentwei1021/anything2explainer) (1247) — _Topic in, narrated explainer video out. A Claude Code / Codex skill that turns any topic into a black-canvas m_
-- [gazijarin/itsgiving ★826](https://github.com/gazijarin/itsgiving) (826) — _Express yourself in meetings (with memes, of course)._
-- [sumimakito/Mac-Duo ★822](https://github.com/sumimakito/Mac-Duo) (822) — _Wish you could bring the iPhone Duo effect to your MacBook?_
-- [SpaceDudem/text-humanizer ★743](https://github.com/SpaceDudem/text-humanizer) (743) — _text-humanizer is an open-source project designed to convert text generated by AI to its "humanized" version. _
-
-- **intégrer dans `OpenQuant`** ← [Multi-Agents LLM Financial Trading Framework](https://github.com/TauricResearch/TradingAgents) (mots : llm, trading)
-- **intégrer dans `Aladin`** ← [Training a 3.8B LLM to 0.384 CORE for $998](https://hugovergnes.github.io/little-lm-3-8b/) (mots : llm, training)
-- **À surveiller pour `NeuralDBG`** ← [Show HN: LLM Attention Visualization](https://ishamf.dev/p/llm-attention-visualizer/) (llm)
+- **Neural-Agent** : Intégrer Chain-of-Self-Questioning pour améliorer la gestion des risques lors de l'auto-correction ← arXiv cs.AI "When Should LLMs Abstain? Chain-of-Self-Questioning for Selective Risk Control".  
+- **Aladin** : Explorer Recurrent Looped Transformer (RLT) pour optimiser l'architecture Transformer ← GitHub "recurrent-looped-tranformer".  
+- **NeuralDBG** : Ajouter des fonctionnalités de streaming pour le débogage en temps réel ← arXiv cs.AI "PhysStream: Streaming Physics-Grounded Video Generation".  
+- **LifeTrack** : Intégrer des fonctionnalités de suivi cognitif inspirées de NeuroDose pour enrichir l'analyse des habitudes ← Projet interne NeuroDose.  
+- **Prompt2Model** : Valider l'approche avec ScienceBuddy pour améliorer la génération de modèles ML ← arXiv cs.AI "ScienceBuddy: Recursive-in-Recursive Self-Improvement".  
+- **Damon** : Étudier les critiques sur l'utilisation des LLMs dans les projets open source pour éviter les pièges ← Hacker News "PS5 Linux lead quits: 'a bunch of noobs using LLMs'".  
+- **Metatron** : Inspirer le raisonnement abductif avec des concepts de "Social Harness" pour les sociétés agentiques ← arXiv cs.AI "Agentic Societies Need a Social Harness".  
+- **Charmed** : Explorer la création d'une application de conversation pour l'apprentissage des langues, inspirée de Mural ← GitHub "Chuloo/mural".
