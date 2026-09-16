@@ -222,8 +222,9 @@ def main() -> int:
     if a.weekly:
         text = weekly_summary()
         print(text)
-        if a.discord:
-            post_discord("Pilotage hebdo", [polish_fr(text)])
+        if a.discord and not post_discord("Pilotage hebdo", [polish_fr(text)]):
+            print("post Discord impossible (webhook absent ou rejete)")
+            return 1
         return 0
     items = pending()
     if not items:

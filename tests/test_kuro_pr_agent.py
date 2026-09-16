@@ -51,6 +51,12 @@ def test_suggestion_range():
     assert ka.suggestion_range({}) == (0, 0)
 
 
+def test_constantes_dedup():
+    src = (Path(__file__).resolve().parent.parent / "scripts" / "kuro_pr_agent.py").read_text(encoding="utf-8")
+    assert src.count('"github-actions[bot]"') == 1
+    assert src.count('"cause inconnue"') == 1
+
+
 def test_apply_suggestion(tmp_path):
     f = tmp_path / "a.py"
     f.write_text("l1\nl2\nl3\nl4\n", encoding="utf-8")

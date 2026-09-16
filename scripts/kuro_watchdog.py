@@ -41,6 +41,7 @@ def _load() -> dict:
 
 def _save(store: dict) -> None:
     try:
+        # NOSONAR (python:S2083) : STORE est une constante du module, aucune entree utilisateur.
         STORE.write_text(json.dumps(store, indent=1, ensure_ascii=False), encoding="utf-8")
     except Exception:
         pass
@@ -141,8 +142,8 @@ def main() -> int:
     a = ap.parse_args()
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
     if not token:
-        print("GH_TOKEN absent — surveillance impossible")
-        return 0
+        print("GH_TOKEN absent — surveillance impossible (secret a configurer)")
+        return 1
     write = a.write and not P.vacances()
     if P.vacances():
         print("mode vacances : lecture seule forcee")
