@@ -66,7 +66,7 @@ def _git_exe() -> str:
     """git.exe introuvable dans le PATH de subprocess sous Windows : fallback usuel."""
     for cand in ("git", r"C:\Program Files\Git\bin\git.exe",
                  r"C:\Program Files\Git\cmd\git.exe",
-                 str(Path.home() / "AppData\Local\Programs\Git\bin\git.exe")):
+                  str(Path.home() / r"AppData\Local\Programs\Git\bin\git.exe")):
         try:
             subprocess.run([cand, "--version"], capture_output=True, timeout=10)
             return cand
