@@ -51,10 +51,16 @@ def test_suggestion_range():
     assert ka.suggestion_range({}) == (0, 0)
 
 
-def test_constantes_dedup():
-    src = (Path(__file__).resolve().parent.parent / "scripts" / "kuro_pr_agent.py").read_text(encoding="utf-8")
-    assert src.count('"github-actions[bot]"') == 1
-    assert src.count('"cause inconnue"') == 1
+def _agent_src():
+    return (Path(__file__).resolve().parent.parent / "scripts" / "kuro_pr_agent.py").read_text(encoding="utf-8")
+
+
+def test_constante_bot_unique():
+    assert _agent_src().count('"github-actions[bot]"') == 1
+
+
+def test_constante_cause_unique():
+    assert _agent_src().count('"cause inconnue"') == 1
 
 
 def test_apply_suggestion(tmp_path):

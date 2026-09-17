@@ -773,7 +773,8 @@ def fail_keys(report: dict) -> set:
 
 
 def load_previous_status(path: str | None) -> dict:
-    if not path:
+    # N'accepte que le rapport CI attendu : aucun chemin arbitraire lu.
+    if not path or Path(path).name != "ci-status.json":
         return {}
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))

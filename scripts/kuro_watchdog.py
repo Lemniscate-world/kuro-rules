@@ -41,8 +41,8 @@ def _load() -> dict:
 
 def _save(store: dict) -> None:
     try:
-        # NOSONAR (python:S2083) : STORE est une constante du module, aucune entree utilisateur.
-        STORE.write_text(json.dumps(store, indent=1, ensure_ascii=False), encoding="utf-8")
+        # Chemin constant du module, aucune entree utilisateur (faux positif S2083).
+        STORE.write_text(json.dumps(store, indent=1, ensure_ascii=False), encoding="utf-8")  # NOSONAR
     except Exception:
         pass
 
