@@ -160,6 +160,9 @@ strategy.local.json
 pipeline.local.json
 strategy_decisions.local.json
 pull_anydo.json
+proposals.local.json
+watchdog.local.json
+vacances.flag
 
 # artefacts generes
 apps/kuro-pulse/kuro.ico

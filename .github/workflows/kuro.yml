@@ -41,7 +41,7 @@ jobs:
 
       - name: Tests (pytest)
         run: |
-          python -m pip install pytest -q
+          python -m pip install --only-binary :all: -q pytest
           python -m pytest kuro-rules/tests -q
 
       - name: Clone repos into ~/Documents (source de vérité)
@@ -81,6 +81,14 @@ jobs:
           python kuro-rules/scripts/kuro_pr_agent.py \
             --owners LambdaSection Lemniscate-world \
             --max-prs 5 --write
+
+      - name: Watchdog post-merge (cycle complet)
+        if: env.KURO_FULL == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_SYNC_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python kuro-rules/scripts/kuro_watchdog.py --write --max 10
 
       - name: Sécurité (vulnérabilités + auto-fixes, cycle complet)
         if: env.KURO_FULL == 'true'
@@ -158,8 +166,9 @@ jobs:
           if [ "$(date -u +%u)" = "1" ]; then
             python kuro-rules/scripts/kuro_strategy.py --discord || true
             python kuro-rules/scripts/kuro_anydo.py --export --out kuro-rules/tasks_anydo.json
+            python kuro-rules/scripts/kuro_proposals.py --weekly --discord || true
           else
-            echo "Pas lundi — strategie/Any.do sautes"
+            echo "Pas lundi — strategie/Any.do/pilotage sautes"
           fi
 
       - name: Rapport hebdo Discord (lundi uniquement)

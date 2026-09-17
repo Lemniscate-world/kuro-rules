@@ -22,6 +22,8 @@ ITEMS = [
     ("7", "Any.do export (pipeline -> taches)", [PY, str(ROOT / "kuro_anydo.py"), "--export"]),
     ("8", "Any.do pull (notes -> projets + propositions)", [PY, str(ROOT / "kuro_anydo.py"), "--pull"]),
     ("9", "Agent PR (revue dry-run)", [PY, str(ROOT / "kuro_pr_agent.py"), "--max-prs", "5"]),
+    ("10", "Propositions en attente", [PY, str(ROOT / "kuro_proposals.py"), "--pending"]),
+    ("11", "Vacances on/off/statut", [PY, str(ROOT / "kuro_proposals.py"), "--vacances", "statut"]),
     ("q", "Quitter", None),
 ]
 
