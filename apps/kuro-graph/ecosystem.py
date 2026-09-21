@@ -8,15 +8,16 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
-OWNED_ORG_MARKERS = (
-    "github.com/Lemniscate-world/",
-    "github.com/Lemniscate-SHA-256/",
-    "github.com/pbakaus/",
+OWNED_ORGS = (
+    "lemniscate-world",
+    "lemniscate-sha-256",
+    "pbakaus",
 )
 
-EXTERNAL_ORG_MARKERS = (
-    "github.com/Demeter-Financial-Labs/",
+EXTERNAL_ORGS = (
+    "demeter-financial-labs",
 )
 
 PILOT_REPOS = ("LifeTrack", "Forma")
@@ -24,19 +25,37 @@ PILOT_REPOS = ("LifeTrack", "Forma")
 DOCUMENTS = Path.home() / "Documents"
 
 
-def classify_remote(remote_url: str) -> str:
-    """Pure : OWNED / EXTERNAL / UNKNOWN. Jamais d'exception."""
+def split_github(remote_url: str) -> tuple[str, str]:
+    """Retourne (host, path). Supporte https:// et scp-like git@...:... ."""
     url = (remote_url or "").strip()
-    if not url:
+    if url.lower().startswith("git@github.com:"):
+        return "github.com", "/" + url.split(":", 1)[1]
+    try:
+        parts = urlparse(url)
+    except Exception:
+        return "", ""
+    if not parts.netloc or not parts.path:
+        return "", ""
+    return parts.netloc.lower(), parts.path
+
+
+def classify_remote(remote_url: str) -> str:
+    """Pure : OWNED / EXTERNAL / UNKNOWN. Parse host+org, pas de substring.
+
+    Le substring matching acceptait les leurres
+    (evil.com/?x=github.com/Lemniscate-world/) : CodeQL a raison.
+    """
+    host, path = split_github(remote_url)
+    if host != "github.com" or not path:
         return "UNKNOWN"
-    for marker in OWNED_ORG_MARKERS:
-        if marker in url:
-            return "OWNED"
-    for marker in EXTERNAL_ORG_MARKERS:
-        if marker in url:
-            return "EXTERNAL"
-    if "github.com" in url:
+    segs = [s for s in path.strip("/").split("/") if s]
+    if not segs:
         return "UNKNOWN"
+    org = segs[0].lower()
+    if org in OWNED_ORGS:
+        return "OWNED"
+    if org in EXTERNAL_ORGS:
+        return "EXTERNAL"
     return "UNKNOWN"
 
 

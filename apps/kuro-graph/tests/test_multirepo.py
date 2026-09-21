@@ -22,6 +22,15 @@ def test_classify_remote_external_unknown():
     assert eco.classify_remote("") == "UNKNOWN"
 
 
+def test_classify_remote_rejects_spoof():
+    # CodeQL : le substring matching acceptait ces leurres.
+    assert eco.classify_remote("https://evil.com/?x=github.com/Lemniscate-world/") == "UNKNOWN"
+    assert eco.classify_remote("https://evilgithub.com/Lemniscate-world/x.git") == "UNKNOWN"
+    assert eco.classify_remote("https://github.com.evil.com/Lemniscate-world/x.git") == "UNKNOWN"
+    assert eco.classify_remote("git@github.com:Lemniscate-world/LifeTrack.git") == "OWNED"
+    assert eco.classify_remote("https://github.com/lemniscate-world/lower.git") == "OWNED"
+
+
 def test_sync_scope_guard():
     assert eco.sync_scope("OWNED") == "full"
     assert eco.sync_scope("EXTERNAL") == "redirector-only"
