@@ -88,10 +88,13 @@ def route_radar(state: dict[str, Any]) -> str:
     return "archive"
 
 
+DRAFT_STEP = "radar:draft"
+
+
 def node_draft(state: dict[str, Any]) -> dict[str, Any]:
     steps = dict(state.get("steps", {}))
     kept = [s for s in state.get("radar_signals", []) if s.get("llm_label") == "keep"]
-    steps["radar:draft"] = {"ok": True, "detail": f"draft for {len(kept)} signals, no Discord without write=True"}
+    steps[DRAFT_STEP] = {"ok": True, "detail": f"draft for {len(kept)} signals, no Discord without write=True"}
     out = {**state, "steps": steps, "radar_decision": "draft"}
     if not state.get("write") or state.get("dry_run", True):
         return out
@@ -99,19 +102,19 @@ def node_draft(state: dict[str, Any]) -> dict[str, Any]:
         import utils as guards
 
         if guards.vacances_on():
-            steps["radar:draft"] = {"ok": True, "detail": "skipped Discord: vacances"}
+            steps[DRAFT_STEP] = {"ok": True, "detail": "skipped Discord: vacances"}
             return {**out, "steps": steps}
         if not guards.is_approved(state):
-            steps["radar:draft"] = {"ok": True, "detail": "skipped Discord: human approval missing"}
+            steps[DRAFT_STEP] = {"ok": True, "detail": "skipped Discord: human approval missing"}
             return {**out, "steps": steps}
         import kuro_proposals as proposals
 
         lines = [f"{s.get('title', '')[:140]} — {s.get('url', '')}" for s in kept[:5]]
         ok = proposals.post_discord("Veille Kuro-graph", lines)
-        steps["radar:draft"] = {"ok": True, "detail": f"Discord post={ok} for {len(kept)} signals"}
+        steps[DRAFT_STEP] = {"ok": True, "detail": f"Discord post={ok} for {len(kept)} signals"}
         return {**out, "steps": steps}
     except Exception as exc:
-        steps["radar:draft"] = {"ok": False, "detail": f"Discord error: {exc}"[:500]}
+        steps[DRAFT_STEP] = {"ok": False, "detail": f"Discord error: {exc}"[:500]}
         out2 = {**out, "steps": steps}
         out2["fails"] = int(out2.get("fails", 0)) + 1
         return out2

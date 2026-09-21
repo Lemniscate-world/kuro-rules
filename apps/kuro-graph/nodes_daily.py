@@ -6,6 +6,7 @@ Chaque noeud ne fait qu'une chose (SRP), ne leve jamais d'exception
 
 from __future__ import annotations
 
+import importlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -23,92 +24,39 @@ def _record(state: dict[str, Any], name: str, ok: bool, detail: str = "") -> dic
     return {**state, "steps": steps, "fails": fails}
 
 
-def node_doctor(state: dict[str, Any]) -> dict[str, Any]:
+def _safe_call(state: dict[str, Any], name: str, flag: str, modname: str, **kwargs) -> dict[str, Any]:
+    """Appelle modname.main() sans jamais lever : echec explicite dans l'etat (R7)."""
     try:
-        import kuro_doctor as doc
-
-        rc = doc.main(fix=False)
-        ok = rc in (None, 0)
-        out = _record(state, "doctor", ok, f"rc={rc}")
-        out["doctor_ok"] = ok
-        return out
-    except SystemExit as exc:
-        ok = exc.code in (None, 0)
-        out = _record(state, "doctor", ok, f"SystemExit code={exc.code}")
-        out["doctor_ok"] = ok
-        return out
+        rc = importlib.import_module(modname).main(**kwargs)
+    except SystemExit as exc:  # NOSONAR S5754 - contrat noeud : capter l'exit, pas le propager
+        rc = exc.code
     except Exception as exc:
-        out = _record(state, "doctor", False, f"error: {exc}")
-        out["doctor_ok"] = False
+        out = _record(state, name, False, f"error: {exc}")
+        out[flag] = False
         return out
+    ok = rc in (None, 0)
+    out = _record(state, name, ok, f"rc={rc}")
+    out[flag] = ok
+    return out
+
+
+def node_doctor(state: dict[str, Any]) -> dict[str, Any]:
+    return _safe_call(state, "doctor", "doctor_ok", "kuro_doctor", fix=False)
 
 
 def node_truth(state: dict[str, Any]) -> dict[str, Any]:
     # Si doctor KO, on continue en lecture seule mais on le trace.
     # Le HALT dur est reserve au graphe validation, pas au daily.
-    try:
-        import audit_truth_daily as truth
-
-        # audit_truth_daily.main() lit argv ; on l'appelle en mode
-        # programmatique minimal via sa fonction run() si dispo.
-        if hasattr(truth, "run") and False:  # garde-fou : ne pas deviner l'API
-            pass
-        rc = truth.main()
-        ok = rc in (None, 0)
-        out = _record(state, "truth", ok, f"rc={rc}")
-        out["truth_ok"] = ok
-        return out
-    except SystemExit as exc:
-        ok = exc.code in (None, 0)
-        out = _record(state, "truth", ok, f"SystemExit code={exc.code}")
-        out["truth_ok"] = ok
-        return out
-    except Exception as exc:
-        out = _record(state, "truth", False, f"error: {exc}")
-        out["truth_ok"] = False
-        return out
+    return _safe_call(state, "truth", "truth_ok", "audit_truth_daily")
 
 
 def node_portfolio(state: dict[str, Any]) -> dict[str, Any]:
-    try:
-        import generate_portfolio as portfolio
-
-        rc = portfolio.main()
-        ok = rc in (None, 0)
-        out = _record(state, "portfolio", ok, f"rc={rc}")
-        out["portfolio_ok"] = ok
-        return out
-    except SystemExit as exc:
-        ok = exc.code in (None, 0)
-        out = _record(state, "portfolio", ok, f"SystemExit code={exc.code}")
-        out["portfolio_ok"] = ok
-        return out
-    except Exception as exc:
-        out = _record(state, "portfolio", False, f"error: {exc}")
-        out["portfolio_ok"] = False
-        return out
+    return _safe_call(state, "portfolio", "portfolio_ok", "generate_portfolio")
 
 
 def node_strategy(state: dict[str, Any]) -> dict[str, Any]:
-    # Lecture seule par defaut : kuro_strategy.main() sans --discord.
-    # L'envoi Discord reste derriere write=True et sera ajoute en Q4 (human-in-loop).
-    try:
-        import kuro_strategy as strategy
-
-        rc = strategy.main()
-        ok = rc in (None, 0)
-        out = _record(state, "strategy", ok, f"rc={rc}")
-        out["strategy_ok"] = ok
-        return out
-    except SystemExit as exc:
-        ok = exc.code in (None, 0)
-        out = _record(state, "strategy", ok, f"SystemExit code={exc.code}")
-        out["strategy_ok"] = ok
-        return out
-    except Exception as exc:
-        out = _record(state, "strategy", False, f"error: {exc}")
-        out["strategy_ok"] = False
-        return out
+    # Lecture seule : kuro_strategy.main() sans --discord.
+    return _safe_call(state, "strategy", "strategy_ok", "kuro_strategy")
 
 
 def should_publish(state: dict[str, Any]) -> str:

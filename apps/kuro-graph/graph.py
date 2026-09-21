@@ -57,10 +57,10 @@ def _wrap_daily():
 
 
 def build_daily_graph(checkpointer=None):
-    END, StateGraph = _require_langgraph()
+    END, state_graph = _require_langgraph()
     d = _wrap_daily()
 
-    g = StateGraph(dict)
+    g = state_graph(dict)
     g.add_node("doctor", d["doctor"])
     g.add_node("truth", d["truth"])
     g.add_node("portfolio", d["portfolio"])
@@ -78,11 +78,11 @@ def build_daily_graph(checkpointer=None):
 
 
 def build_validation_graph(checkpointer=None):
-    END, StateGraph = _require_langgraph()
+    END, state_graph = _require_langgraph()
     import nodes_validation as v
     import utils as u
 
-    g = StateGraph(dict)
+    g = state_graph(dict)
     for stage in v.GATES:
         g.add_node(stage, u.timed(v.make_stage_node(stage)))
     g.set_entry_point(v.GATES[0])
@@ -104,11 +104,11 @@ def build_validation_graph(checkpointer=None):
 
 
 def build_radar_graph(checkpointer=None):
-    END, StateGraph = _require_langgraph()
+    END, state_graph = _require_langgraph()
     import nodes_radar as r
     import utils as u
 
-    g = StateGraph(dict)
+    g = state_graph(dict)
     g.add_node("collect", u.timed(r.node_collect))
     g.add_node("score", u.timed(r.node_score))
     g.add_node("draft", u.timed(r.node_draft))
@@ -124,11 +124,11 @@ def build_radar_graph(checkpointer=None):
 
 
 def build_multirepo_graph(checkpointer=None):
-    END, StateGraph = _require_langgraph()
+    END, state_graph = _require_langgraph()
     import nodes_multirepo as m
     import utils as u
 
-    g = StateGraph(dict)
+    g = state_graph(dict)
     g.add_node("fanout", u.timed(m.node_fanout))
     g.add_node("impact", u.timed(m.node_impact))
     g.set_entry_point("fanout")
@@ -139,7 +139,7 @@ def build_multirepo_graph(checkpointer=None):
     return g.compile()
 
 
-def main() -> int:
+def _parse_args():
     ap = argparse.ArgumentParser(description="Kuro graphs POC")
     ap.add_argument("--daily", action="store_true")
     ap.add_argument("--validation", action="store_true")
@@ -151,25 +151,29 @@ def main() -> int:
     ap.add_argument("--approve", action="store_true", help="validation humaine explicite")
     ap.add_argument("--thread-id", default="", help="id de reprise checkpoint")
     ap.add_argument("--checkpoint", default="", help="chemin sqlite checkpoints")
-    args = ap.parse_args()
+    return ap.parse_args()
+
+
+def _init_state(args):
+    import utils as u
+
     dry_run = bool(args.dry_run and not args.no_dry_run)
     write = bool(args.full and not dry_run)
     state = new_state(write=write, dry_run=dry_run)
     state["human_approved"] = bool(args.approve and write and not dry_run)
     state["thread_id"] = str(args.thread_id or "")
     state["state_version"] = STATE_VERSION
-
-    import utils as u
-
     ckpt_path = u.checkpoint_path(args.checkpoint or None)
     # Reprise : si thread-id existe, on repart de l'etat sauvegarde.
     if state["thread_id"]:
         prev = u.load_checkpoint(ckpt_path, state["thread_id"])
         if isinstance(prev, dict) and prev.get("state_version") == STATE_VERSION:
-            merged = {**prev, "write": write, "dry_run": dry_run,
-                      "human_approved": state["human_approved"], "thread_id": state["thread_id"]}
-            state = merged
+            state = {**prev, "write": write, "dry_run": dry_run,
+                     "human_approved": state["human_approved"], "thread_id": state["thread_id"]}
+    return state, ckpt_path
 
+
+def _pick_graph(args):
     which = "daily"
     if args.validation:
         which = "validation"
@@ -179,35 +183,51 @@ def main() -> int:
         which = "multirepo"
     elif not args.daily:
         which = "daily"
-
     builders = {"daily": build_daily_graph, "validation": build_validation_graph,
                 "radar": build_radar_graph, "multirepo": build_multirepo_graph}
     try:
-        saver = _checkpointer(state["thread_id"])
-        app = builders[which](checkpointer=saver)
+        saver = _checkpointer()
+        return which, builders[which](checkpointer=saver)
     except RuntimeError as exc:
         print(str(exc))
-        return 2
+        return which, None
+
+
+def _invoke(app, state):
+    if state.get("thread_id"):
+        config = {"configurable": {"thread_id": state["thread_id"]}}
+        try:
+            return app.invoke(state, config=config)
+        except Exception:
+            pass
+    return app.invoke(state)
+
+
+def _report(which, state, result, ckpt_path):
+    import utils as u
+
+    summary = u.merge_metrics(result)
+    print(f"graph={which} halted={result.get('halted')} fails={result.get('fails')} steps={sorted(result.get('steps', {}).keys())}")
+    print(f"metrics durations={summary['durations']} retries={summary['retries']}")
+    if state.get("thread_id"):
+        ok = u.save_checkpoint(ckpt_path, state["thread_id"], result)
+        print(f"checkpoint thread={state['thread_id']} saved={ok} path={ckpt_path}")
     try:
         init_metrics = dict(state.get("validation_results", {}))
     except Exception:
         init_metrics = {}
-    if state["thread_id"]:
-        config = {"configurable": {"thread_id": state["thread_id"]}}
-        try:
-            result = app.invoke(state, config=config)
-        except Exception:
-            result = app.invoke(state)
-    else:
-        result = app.invoke(state)
-    summary = u.merge_metrics(result)
-    print(f"graph={which} halted={result.get('halted')} fails={result.get('fails')} steps={sorted(result.get('steps', {}).keys())}")
-    print(f"metrics durations={summary['durations']} retries={summary['retries']}")
-    if state["thread_id"]:
-        ok = u.save_checkpoint(ckpt_path, state["thread_id"], result)
-        print(f"checkpoint thread={state['thread_id']} saved={ok} path={ckpt_path}")
     if init_metrics:
         print(f"init_metrics_keys={sorted(init_metrics.keys())}")
+
+
+def main() -> int:
+    args = _parse_args()
+    state, ckpt_path = _init_state(args)
+    which, app = _pick_graph(args)
+    if app is None:
+        return 2
+    result = _invoke(app, state)
+    _report(which, state, result, ckpt_path)
     return 0
 
 

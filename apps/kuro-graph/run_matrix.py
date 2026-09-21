@@ -136,6 +136,19 @@ def default_out() -> Path:
     return logs / "kuro-graph-run-matrix.json"
 
 
+def resolve_out(arg: str, default: Path) -> Path:
+    """Confine --out dans le repo : refuse le path traversal (S8707)."""
+    if not arg:
+        return default
+    root = GRAPH.parents[1].resolve()
+    candidate = (root / arg).resolve() if not Path(arg).is_absolute() else Path(arg).resolve()
+    try:
+        candidate.relative_to(root)
+    except Exception:
+        raise ValueError(f"--out doit rester dans le repo: {arg}")
+    return candidate
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Harnais Q8 : batch de runs kuro-graph")
     ap.add_argument("--runs", type=int, default=5)
@@ -146,7 +159,11 @@ def main() -> int:
         print("runs doit etre entre 1 et 30")
         return 2
     report = run_batch(args.runs)
-    out = Path(args.out) if args.out else default_out()
+    try:
+        out = resolve_out(args.out, default_out())
+    except ValueError as exc:
+        print(str(exc))
+        return 2
     existing = []
     if args.append and out.exists():
         try:
