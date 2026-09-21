@@ -1,4 +1,4 @@
-# RULE 101: Tensor Operations and Test Suite Warning Governance
+# RULE 114: Tensor Operations and Test Suite Warning Governance
 
 ## Rule
 

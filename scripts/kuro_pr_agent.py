@@ -67,6 +67,64 @@ def failing_checks(repo: str, sha: str, token: str) -> list:
     return [c for c in data.get("check_runs", []) if c.get("conclusion") == "failure"]
 
 
+def check_annotations(repo: str, check_id: int | None, token: str) -> list:
+    """Annotations GitHub d'un check-run : fichier, ligne, message.
+
+    C'est la source de detail quand il n'y a pas de log Actions
+    (checks externes : SonarCloud, pre-commit.ci...).
+    """
+    if not check_id:
+        return []
+    st, data = api("GET", f"/repos/{repo}/check-runs/{check_id}/annotations?per_page=50", token)
+    if st != 200 or not isinstance(data, list):
+        return []
+    out = []
+    for a in data:
+        if not isinstance(a, dict):
+            continue
+        line = a.get("start_line") or a.get("line") or 0
+        try:
+            line = int(line)
+        except (TypeError, ValueError):
+            line = 0
+        out.append({"path": a.get("path") or "?",
+                    "line": line,
+                    "level": a.get("annotation_level") or "notice",
+                    "message": (a.get("message") or "")[:200]})
+    return out
+
+
+# Explications deterministes des checks externes les plus frequents.
+# (cause, correctif) — le detail chiffré vient des annotations quand il y en a.
+EXTERNAL_EXPLAINERS: dict[str, tuple[str, str]] = {
+    "sonar": (
+        "Quality Gate Sonar : bugs, failles, code smells, duplications ou couverture du nouveau code",
+        "Onglet Checks de la PR -> details SonarCloud : corriger les issues Bloquant/Critique, "
+        "couvrir le nouveau code (>= 80 %), supprimer les blocs dupliques, puis push (re-analyse auto).",
+    ),
+    "pre-commit": (
+        "Hooks pre-commit en echec (formatage, lint, fins de fichier)",
+        "En local : pre-commit run --all-files, corriger ce qui remonte, commit, push. "
+        "Logs complets : onglet Checks de la PR -> details du check.",
+    ),
+}
+
+
+def explain_external(check_name: str) -> tuple | None:
+    """(cause, correctif) si le nom du check est un externe connu, sinon None."""
+    name = (check_name or "").lower()
+    for key, expl in EXTERNAL_EXPLAINERS.items():
+        if key in name:
+            return expl
+    return None
+
+
+def format_annotations(notes: list, limit: int = 3) -> str:
+    """'fichier:ligne message ; ...' — compact pour Discord et commentaires."""
+    return "; ".join(f"{n.get('path')}:{n.get('line')} {(n.get('message') or '')[:120]}"
+                     for n in notes[:limit])
+
+
 def run_id_from_url(url: str) -> int | None:
     m = re.search(r"/runs/(\d+)/", url or "")
     return int(m.group(1)) if m else None
@@ -246,22 +304,35 @@ def fixable_push(repo: str, pr: dict, klass: str, detail: str, log: str, token: 
 
 
 def propose(repo: str, pr: dict, check: dict, diag: dict | None,
-            run_id: int | None, token: str, write: bool) -> str:
+            run_id: int | None, token: str, write: bool,
+            files: str = "", notes: list | None = None) -> str:
     """P-ID + diagnostic LLM en commentaire (dedup par run)."""
     number = pr.get("number")
     cause = (diag or {}).get("cause", _UNKNOWN_CAUSE) if diag else _UNKNOWN_CAUSE
     fix = (diag or {}).get("fix", "") if diag else ""
-    files = pr_files_stat(repo, number, token)
+    if not files:
+        files = pr_files_stat(repo, number, token)
+    notes = notes or []
+    detail = f"{fix[:300]} | Fichiers : {files}"
+    if notes:
+        detail += f" | Annotations : {format_annotations(notes)}"
     pid = P.add(f"{repo}#{number}/{check.get('name')}", f"{check.get('name')} : {cause[:80]}",
-                f"{fix[:300]} | Fichiers : {files}",
+                detail,
                 [check.get("html_url", ""), f"https://github.com/{repo}/pull/{number}"])
     if run_id and already_commented(repo, number, run_id, token):
         return f"proposition {pid} deja postee pour ce run"
     text = ai_diagnose(repo, run_id, token) if run_id else None
+    notes_block = ""
+    if notes:
+        notes_block = ("Annotations du check :\n" +
+                       "\n".join(f"- `{n.get('path')}:{n.get('line')}` "
+                                 f"({n.get('level')}) {(n.get('message') or '')[:200]}"
+                                 for n in notes[:5]) + "\n\n")
     body = (
         f"{MARKER} run={run_id}\n"
         f"**Kuro PR-agent {pid}** — `{check.get('name')}` en echec.\n\n"
         f"Cause : {cause}\n\n"
+        f"{notes_block}"
         f"{text or '_Diagnostic LLM indisponible — diagnostic deterministe seul._'}\n\n"
         f"Fichiers : {files or 'n/a'}\n\n"
         f"[Voir le run]({check.get('html_url', '')}) · "
@@ -432,20 +503,45 @@ def apply_review_fixes(repo: str, pr: dict, token: str, write: bool, allowed: bo
 
 
 def process_check(repo: str, pr: dict, check: dict, token: str, write: bool, allowed: bool) -> str:
+    name = check.get("name", "?")
     run_id = run_id_from_url(check.get("html_url", ""))
     log = fetch_failed_log(repo, run_id, token) if run_id else ""
     diag = classify_failure(log) if log else None
+    notes: list = []
+    if diag is None:
+        # Pas de log Actions (check externe ou log inaccessible) : annotations + explication.
+        notes = check_annotations(repo, check.get("id"), token)
+        output = check.get("output") if isinstance(check.get("output"), dict) else {}
+        summary = ((output.get("summary") or "") + " " + (output.get("title") or "")).strip()
+        expl = explain_external(name)
+        if expl or notes or summary:
+            cause, fix = expl or (
+                "Echec sans log accessible (check externe ou permissions du token)",
+                "Onglet Checks de la PR -> details du check, corriger ce qui est pointe, push.",
+            )
+            bits = []
+            if summary:
+                bits.append(summary[:200])
+            if notes:
+                bits.append(f"{len(notes)} annotation(s) : {format_annotations(notes)}")
+            if bits:
+                cause = cause + " — " + " ; ".join(bits)
+            diag = {"cause": cause, "fix": fix}
     if diag and diag.get("klass") in SAFE_KLASSES:
         outcome = fixable_push(repo, pr, diag["klass"], diag.get("detail", ""), log, token, write, allowed)
-        return f"{check.get('name')} [{diag['klass']}] -> {outcome}"
+        return f"{name} [{diag['klass']}] -> {outcome}"
     if diag is None and run_id and run_attempt(repo, run_id, token) <= 1:
         if not write:
-            return f"{check.get('name')} [inconnu] -> dry-run : relance envisagee"
+            return f"{name} [inconnu] -> dry-run : relance envisagee"
         ok = rerun_failed_jobs(repo, run_id, token)
-        return f"{check.get('name')} [inconnu] -> {'relance' if ok else 'relance impossible'}"
-    outcome = propose(repo, pr, check, diag, run_id, token, write)
+        return f"{name} [inconnu] -> {'relance' if ok else 'relance impossible'}"
+    files = pr_files_stat(repo, pr.get("number"), token)
+    outcome = propose(repo, pr, check, diag, run_id, token, write, files=files, notes=notes)
     cause = (diag or {}).get("cause", _UNKNOWN_CAUSE) if diag else _UNKNOWN_CAUSE
-    return f"{check.get('name')} [{cause[:60]}] -> {outcome}"
+    suffix = f" | fichiers: {files}" if files else ""
+    if notes:
+        suffix += f" | {len(notes)} annotation(s): {format_annotations(notes, 2)}"
+    return f"{name} [{cause[:60]}] -> {outcome}{suffix}"
 
 
 def process_pr(repo: str, pr: dict, token: str, write: bool) -> list[str]:

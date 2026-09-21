@@ -113,3 +113,56 @@ def test_render_contient_les_sections():
     assert "Pipeline" in text
     assert "Runway critique" in text
     assert payload is None  # build_payload n'est pas wrappé, garde-fou du test
+
+
+def test_plan_compliance_detecte_sans_plan(tmp_path):
+    (tmp_path / "RepoA" / ".git").mkdir(parents=True)
+    (tmp_path / "RepoB" / ".git").mkdir(parents=True)
+    (tmp_path / "RepoB" / "PLAN.md").write_text("# plan\n", encoding="utf-8")
+    (tmp_path / "NotaRepo").mkdir()
+    out = ks.plan_compliance(tmp_path)
+    assert out["total"] == 2
+    assert out["sans_plan"] == ["RepoA"]
+    assert out["actifs_sans_cap"] == []  # velocite inconnue en test -> pas d'exigence
+
+
+def test_plan_compliance_actifs_sans_cap(tmp_path, monkeypatch):
+    (tmp_path / "Actif" / ".git").mkdir(parents=True)
+    (tmp_path / "Actif" / "PLAN.md").write_text("# plan\n", encoding="utf-8")
+    import kuro_metrics
+    monkeypatch.setattr(kuro_metrics, "build_payload",
+                        lambda **k: {"projects": [{"name": "Actif", "velocity_per_week": 3.0}]})
+    out = ks.plan_compliance(tmp_path)
+    assert out["actifs_sans_cap"] == ["Actif"]
+
+
+def test_campaign_guerre_bataille_gate():
+    metrics = {"averages": {"velocity_per_week": 2.0},
+               "projects": [{"name": "Top", "velocity_per_week": 4.0, "ci_failures": 1}],
+               "pivot_candidates": []}
+    okrs = [{"key": "m", "label": "MRR", "target": 100, "current": 10.0, "pct": 10, "hit": False}]
+    camp = ks.campaign(metrics, okrs, {"last": None}, {"sans_plan": ["X"]})
+    assert "MRR" in camp["guerre"]
+    assert "Top" in camp["bataille"]
+    assert "CI en echec" in camp["gate_necessite"]
+    assert "R105" in camp["gate_consequences"]
+    assert "sans PLAN" in camp["arene"]
+
+
+def test_decisions_plans_et_render_campagne():
+    d = ks.decisions(FINANCE, METRICS, {"overall": "green", "total": 10, "failures": 0}, [],
+                     {"interviews_7d": 2},
+                     {"sans_plan": ["A", "B"], "actifs_sans_cap": ["C"]})
+    assert any("sans PLAN.md" in x for x in d)
+    assert any("sans sous-plan" in x for x in d)
+    text = ks.render({
+        "generated_at": "2026-09-20T10:00:00+02:00",
+        "finance": {"cash": 0, "burn": 1, "mrr": 0, "runway_label": "x", "status": "s"},
+        "execution": {"velocity": 1, "lead_time": 2, "ci": {"total": 1, "failures": 0}},
+        "okr": [], "pipeline": {"total": 0, "interviews_7d": 0, "last_insight": None, "next_steps": []},
+        "decisions": [],
+        "campaign": {"guerre": "G", "bataille": "B", "arene": "A",
+                     "gate_necessite": "N", "gate_consequences": "C"},
+        "plans": {"sans_plan": ["A"], "actifs_sans_cap": []},
+    })
+    assert "Campagne" in text and "Gate" in text and "sans PLAN.md" in text

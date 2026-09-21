@@ -140,12 +140,21 @@ def main():
     if not write:
         guardian.append("--dry-run")
     fails += sh(guardian, dry_run=a.dry_run)
+    # 5b. Discovery R113 : poll traffic 14j quotidien (fenetre glissante, non sondee = perdue)
+    fails += sh([PY, str(SCRIPTS / "discovery_poll.py")], dry_run=a.dry_run)
     # 6. Strategie + Any.do + finance + investisseurs (jamais destructifs)
     fails += sh([PY, str(SCRIPTS / "kuro_strategy.py")], dry_run=a.dry_run)
     if write:
         fails += sh([PY, str(SCRIPTS / "kuro_strategy.py"), "--discord"], dry_run=a.dry_run)
     fails += sh([PY, str(SCRIPTS / "kuro_anydo.py"), "--export"], dry_run=a.dry_run)
     fails += sh([PY, str(SCRIPTS / "kuro_finance.py")], dry_run=a.dry_run)
+    # Rappels d'abonnements -> Discord (renouvellements a J-3 puis le jour J)
+    if write:
+        fails += sh([PY, str(SCRIPTS / "kuro_reminders.py")], dry_run=a.dry_run)
+    # Finance -> Discord privé (montants autorisés, confirmation R111 du 2026-09-18)
+    if write:
+        fails += sh([PY, str(SCRIPTS / "kuro_finance_report.py"), "--full", "--discord"],
+                    dry_run=a.dry_run)
     fails += sh([PY, str(SCRIPTS / "kuro_investor_digest.py"), "--dry-run"], dry_run=a.dry_run)
 
     if a.weekly:
@@ -158,6 +167,9 @@ def main():
         fails += sh([PY, str(SCRIPTS / "weekly_report.py"),
                      "--ci-status", str(LEMNISCATE / "ci-status.json"),
                      "--epingle", str(ROOT / "Epingle_Projets.md")], dry_run=a.dry_run)
+        # Digest Discovery hebdo -> Discord (delta vues/clones + referrers, correlation R99)
+        if write:
+            fails += sh([PY, str(SCRIPTS / "discovery_poll.py"), "--discord"], dry_run=a.dry_run)
 
     # 8. Publication autonome : artefacts générés + Epingle + truth uniquement.
     if write and not a.dry_run:

@@ -119,3 +119,76 @@ def test_maybe_automerge_refus_sans_reseau(monkeypatch):
     assert ka.maybe_automerge("o/r", stranger, "t", True).startswith("merge refuse (auteur")
     ok = dict(base, labels=[{"name": "valide"}])
     assert ka.maybe_automerge("o/r", ok, "t", False) == "dry-run : merge envisageable (tout vert + label)"
+
+
+def test_explain_external_connus_et_inconnu():
+    cause, fix = ka.explain_external("SonarCloud Code Analysis")
+    assert "Quality Gate" in cause and "SonarCloud" in fix
+    cause, fix = ka.explain_external("SonarQube")
+    assert "Quality Gate" in cause
+    cause, fix = ka.explain_external("pre-commit")
+    assert "pre-commit run" in fix
+    assert ka.explain_external("Build") is None
+    assert ka.explain_external("") is None
+
+
+def test_check_annotations_parse_et_echec(monkeypatch):
+    data = [
+        {"path": "a.py", "start_line": 12, "annotation_level": "failure", "message": "x" * 300},
+        {"path": None, "line": "bad", "message": None},
+        "bruit",
+    ]
+    monkeypatch.setattr(ka, "api", lambda *a, **k: (200, data))
+    out = ka.check_annotations("o/r", 99, "t")
+    assert out[0] == {"path": "a.py", "line": 12, "level": "failure", "message": "x" * 200}
+    assert out[1]["line"] == 0 and len(out) == 2
+    assert ka.check_annotations("o/r", None, "t") == []
+    monkeypatch.setattr(ka, "api", lambda *a, **k: (500, None))
+    assert ka.check_annotations("o/r", 99, "t") == []
+
+
+def test_format_annotations_compact():
+    notes = [{"path": "a.py", "line": 1, "message": "m1"},
+             {"path": "b.py", "line": 2, "message": "m2"},
+             {"path": "c.py", "line": 3, "message": "m3"}]
+    assert ka.format_annotations(notes) == "a.py:1 m1; b.py:2 m2; c.py:3 m3"
+    assert ka.format_annotations(notes, limit=2) == "a.py:1 m1; b.py:2 m2"
+    assert ka.format_annotations([]) == ""
+
+
+def _api_sonar(url: str):
+    if "annotations" in url:
+        return (200, [{"path": "src/x.py", "start_line": 42,
+                       "annotation_level": "warning", "message": "Duplicated block"}])
+    if "/pulls/7/files" in url:
+        return (200, [{"filename": "src/x.py", "additions": 10, "deletions": 2}])
+    return (404, None)
+
+
+def _pr_sonar():
+    return {"number": 7, "head": {"ref": "fix/y", "sha": "abc", "repo": {"fork": False}}}
+
+
+def _check_sonar():
+    return {"id": 123, "name": "SonarCloud Code Analysis", "conclusion": "failure",
+            "html_url": "https://sonarcloud.io/project/issues?id=x"}
+
+
+def test_process_check_sonar_explique_sans_cause_inconnue(monkeypatch, tmp_path):
+    monkeypatch.setattr(ka.P, "STORE", tmp_path / "p.json")
+    monkeypatch.setattr(ka, "api", lambda m, url, *a, **k: _api_sonar(url))
+    line = ka.process_check("o/r", _pr_sonar(), _check_sonar(), "t", False, False)
+    assert "Quality Gate" in line
+    assert "cause inconnue" not in line
+    assert "fichiers: +10/-2 : src/x.py" in line
+    assert "1 annotation(s): src/x.py:42 Duplicated block" in line
+    assert line.startswith("SonarCloud Code Analysis [Quality Gate")
+
+
+def test_process_check_externe_inconnu_garde_garde_fou(monkeypatch, tmp_path):
+    monkeypatch.setattr(ka.P, "STORE", tmp_path / "p.json")
+    monkeypatch.setattr(ka, "api", lambda *a, **k: (404, None))
+    check = {"id": 9, "name": "MysteryCheck", "conclusion": "failure",
+             "html_url": "https://example.com/checks/9"}
+    line = ka.process_check("o/r", _pr_sonar(), check, "t", False, False)
+    assert "cause inconnue" in line  # aucun log, ni annotation, ni explication : garde-fou garde
