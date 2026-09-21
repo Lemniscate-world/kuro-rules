@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>&#955; lambda-Section — Registre des projets</title>
+<meta name="description" content="Portfolio lambda-Section — 60 projets, 14 sections actives, studio AI / Quant / Biohacking. Registre auto-genere depuis Epingle_Projets.md">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:title" content="λ lambda-Section — Registre des projets">
+<meta property="og:description" content="60 projets · 14 sections actives · Registre factuel auto-genere">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lemniscate-world.github.io/Lemniscate-world/">
+<meta property="og:image" content="https://lemniscate-world.github.io/Lemniscate-world/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://lemniscate-world.github.io/Lemniscate-world/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>  :root {
+    --paper: #faf9f6; --surface: #ffffff; --ink: #141312; --muted: #57534e; --subtle: #78716c;
+    --hair: #e5e3dc; --zebra: #f6f5f0; --hover: #eeece5;
+    --serif: Georgia, 'Times New Roman', serif;
+    --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+    /* R108 rampe typographique : planchere anti-slop (>=11px fonctionnel, >=12px meta) */
+    --fs-micro: 0.8125rem; /* 13px - titres de micro-blocs, labels */
+    --fs-meta: 0.75rem;    /* 12px - colophon, footer, meta, badges */
+    --fs-body: 0.875rem;   /* 14px - corps secondaire */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* R108 : plancher de lisibilite applique aux tokens fonctionnels. */
+  .badge, th, .stat-label, .ci-head, .qs-title, .footer { line-height: 1.35; }
+
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.6; padding: 2.5rem 1.25rem 4.5rem; max-width: 1060px; margin: 0 auto; -webkit-font-smoothing: antialiased; }
+  .over { font-family: var(--mono); font-size: var(--fs-meta); letter-spacing: 0.04em; color: var(--muted); }
+  h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.4rem); letter-spacing: -0.01em; line-height: 1.05; margin: 0.35rem 0 0.4rem; }
+  .standfirst { color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
+  .rule { border: 0; border-top: 2px solid var(--ink); margin: 1.2rem 0 0; }
+  .rule-thin { border: 0; border-top: 1px solid var(--ink); margin-top: 3px; margin-bottom: 1.4rem; }
+  .index-nav { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 1.6rem; line-height: 2.1; }
+  .index-nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .index-nav a:hover { border-bottom-color: var(--ink); }
+  .index-nav .sep { color: var(--hair); margin: 0 0.45em; }
+  .toolbar { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 0.8rem; }
+  .colophon { font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); }
+  .colophon a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .colophon a:hover { border-bottom-color: var(--ink); }
+  .filter input { width: min(340px, 100%); padding: 0.5rem 0.75rem; border: 1px solid var(--hair); border-radius: 6px; background: var(--surface); font-family: var(--mono); font-size: 0.8rem; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: border-color 150ms ease; }
+  .filter input:focus { outline: none; border-color: var(--ink); }
+  .filter input::placeholder { color: var(--subtle); }
+  .stats { display: flex; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--hair); border-radius: 6px; padding: 0.6rem 0; margin-bottom: 1.2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .stat { padding: 0.4rem 1.4rem; border-right: 1px solid var(--hair); }
+  .stat:last-child { border-right: 0; }
+  .stat-val { font-family: var(--mono); font-size: 1.4rem; font-weight: 500; line-height: 1.15; color: var(--ink); }
+  .stat-label { font-family: var(--mono); font-size: var(--fs-meta); letter-spacing: 0.1em; color: var(--muted); }
+  .ci-box { background: var(--surface); border: 1px solid rgba(20,19,18,0.07); border-radius: 6px; padding: 1rem 1.3rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .ci-head { font-family: var(--mono); font-size: var(--fs-meta); font-weight: 600; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.4rem; }
+  .ci-box p { font-family: var(--mono); font-size: var(--fs-body); color: var(--muted); margin: 0.2rem 0; }
+  .ci-box a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .ci-box a:hover { border-bottom-color: var(--ink); }
+  .ci-box .ok { color: #047857; font-weight: 600; }
+  .ci-box .fail { color: #b91c1c; font-weight: 600; }
+  h2 { font-family: var(--serif); font-size: 1.35rem; letter-spacing: -0.01em; margin: 2.6rem 0 0.15rem; display: flex; align-items: baseline; gap: 0.6rem; }
+  h2 .no { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; }
+  h2 .count { font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); font-weight: 400; }
+  .section-theme { font-style: italic; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.7rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; background: var(--surface); border: 1px solid rgba(20,19,18,0.08); border-radius: 6px; overflow: hidden; }
+  th { font-family: var(--mono); font-weight: 600; text-align: left; font-size: var(--fs-meta); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--hair); background: var(--surface); }
+  td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  tr:nth-child(even) td { background: var(--zebra); }
+  tr:hover td { background: var(--hover); }
+  .proj-name { white-space: nowrap; font-weight: 600; }
+  .proj-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; }
+  .proj-name a:hover { border-bottom-color: var(--ink); }
+  .proj-desc { color: var(--muted); font-size: var(--fs-body); max-width: 440px; }
+  .badge { display: inline-block; font-family: var(--mono); font-size: var(--fs-meta); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--hair); border-radius: 4px; padding: 0.1rem 0.45rem; white-space: nowrap; background: var(--surface); color: var(--ink); }
+  .badge-actif { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+  .badge-validation { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+  .badge-proto { background: #fefce8; color: #854d0e; border-color: #fde047; }
+  .badge-recherche { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
+  .badge-nouveau { background: #f8fafc; color: #334155; border-color: #cbd5e1; }
+  .badge-archive { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+  .badge-outil { background: #f5f5f4; color: #57534e; border-color: #d6d3d1; }
+  .bar { display: inline-block; vertical-align: middle; height: 7px; width: 84px; border-radius: 4px; background: #e5e3dc; overflow: hidden; position: relative; }
+  .bar-fill { position: absolute; top: 0; left: 0; bottom: 0; background: var(--ink); border-radius: 4px; }
+  .pct { font-family: var(--mono); font-size: var(--fs-meta); margin-left: 0.5rem; color: var(--muted); display: inline-block; min-width: 2.4rem; }
+  .notice { background: var(--surface); border: 1px solid rgba(20,19,18,0.07); border-radius: 6px; padding: 1.1rem 1.3rem; margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: baseline; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .notice strong { font-family: var(--serif); font-size: 1.02rem; }
+  .notice p { color: var(--muted); font-size: 0.82rem; max-width: 52ch; }
+  .notice a { color: var(--ink); font-family: var(--mono); font-size: 0.78rem; border-bottom: 1px solid var(--ink); text-decoration: none; white-space: nowrap; }
+  .footer { margin-top: 3.5rem; padding-top: 0.8rem; border-top: 1px solid var(--hair); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-family: var(--mono); font-size: var(--fs-meta); color: var(--muted); }
+  .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair); }
+  .footer a:hover { border-bottom-color: var(--ink); }
+  a { color: inherit; }
+  .quickstarts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.75rem; margin: 0.8rem 0 1.5rem; }
+  .quickstart { background: var(--surface); border: 1px solid rgba(20,19,18,0.07); border-radius: 6px; padding: 0.8rem 1rem; font-family: var(--mono); font-size: 0.78rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .quickstart .qs-title { display: block; color: var(--muted); font-size: var(--fs-meta); letter-spacing: 0.04em; margin-bottom: 0.35rem; font-weight: 600; }
+  .quickstart code { background: var(--zebra); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid var(--hair); font-size: var(--fs-body); }
+  .quickstart a { color: var(--ink); border-bottom: 1px solid var(--hair); }
+  .quickstart a:hover { border-bottom-color: var(--ink); }
+  @media (max-width: 700px) { .proj-desc { display: none; } td { padding: 0.5rem 0.4rem; } }
+</style>
+</head>
+<body>
+
+<p class="over">Studio indépendant — AI · Quant · Biohacking</p>
+<h1>&#955; lambda-Section</h1>
+<p class="standfirst">Registre des projets — 60 projets en 14 sections. Chaque ligne est vérifiée contre l&rsquo;activité Git réelle, pas contre des intentions.</p>
+
+<hr class="rule">
+<hr class="rule-thin">
+
+<div class="stats">
+  <div class="stat"><div class="stat-val">16</div><div class="stat-label">Actifs</div></div>
+  <div class="stat"><div class="stat-val">3</div><div class="stat-label">Validation</div></div>
+  <div class="stat"><div class="stat-val">19</div><div class="stat-label">Prototypage</div></div>
+  <div class="stat"><div class="stat-val">5</div><div class="stat-label">Recherche</div></div>
+  <div class="stat"><div class="stat-val">1</div><div class="stat-label">Nouveau</div></div>
+  <div class="stat"><div class="stat-val">5</div><div class="stat-label">Archives</div></div>
+  <div class="stat"><div class="stat-val">11</div><div class="stat-label">Autres</div></div>
+</div>
+<p class="colophon" style="margin:0.7rem 0 1.6rem;">Relevé du 18 Septembre 2026 · <a href="https://github.com/Lemniscate-world/kuro-rules/blob/master/Epingle_Projets.md">source : Epingle_Projets.md</a> · <a href="https://github.com/Lemniscate-world/Lemniscate-world">profil GitHub</a> · <a href="blog/">blog</a> · <a href="sections/">mondes</a></p>
+
+<nav class="index-nav"><a href="#lambda-section-1-mdash-user-lambda-enter-real-ai">λ-Section-1 — User Lambda Enter Real AI</a><span class="sep">/</span><a href="#lambda-section-2-mdash-quant-search">λ-Section-2 — Quant-Search</a><span class="sep">/</span><a href="#lambda-section-3-mdash-hackin-life">λ-Section-3 — Hackin Life</a><span class="sep">/</span><a href="#lambda-section-4-mdash-g-s-solutions">λ-Section-4 — G&S Solutions</a><span class="sep">/</span><a href="#lambda-section-5-mdash-eclipse">λ-Section-5 — Eclipse</a><span class="sep">/</span><a href="#lambda-section-7-mdash-helium-chain">λ-Section-7 — Helium Chain</a><span class="sep">/</span><a href="#lambda-section-8-mdash-ai8-algorithmic-intelligence-8">λ-Section-8 — AI8 (Algorithmic Intelligence 8)</a><span class="sep">/</span><a href="#lambda-section-9-mdash-network-euler">λ-Section-9 — Network Euler</a><span class="sep">/</span><a href="#lambda-section-11-mdash-saas-x">λ-Section-11 — SaaS X</a><span class="sep">/</span><a href="#lambda-section-12-mdash-hypatia">λ-Section-12 — Hypatia</a><span class="sep">/</span><a href="#lambda-section-13-mdash-dexter-pwn">λ-Section-13 — Dexter.pwn</a><span class="sep">/</span><a href="#lambda-section-14-mdash-charles">λ-Section-14 — Charles</a><span class="sep">/</span><a href="#lambda-section-15-mdash-xcad">λ-Section-15 — XCAD</a><span class="sep">/</span><a href="#projets-tiers-mdash-externes-demeter-labs">Projets Tiers — Externes (Demeter Labs)</a></nav>
+
+<div class="toolbar"><div class="filter"><input type="text" id="filter" placeholder="Filtrer par nom, statut, description..." oninput="filterProjects(this.value)"></div><span class="colophon">60 lignes</span></div>
+<div class="quickstarts">
+  <div class="quickstart"><span class="qs-title">NeuralDBG v1.3 — debugger causal PyTorch · PyPI</span>
+    <code>pip install neuraldbg</code> &nbsp; <a href="https://pypi.org/project/neuraldbg/">PyPI</a> · <a href="https://github.com/LambdaSection/NeuralDBG">source</a>
+  </div>
+  <div class="quickstart"><span class="qs-title">LifeTrack v0.3.2 — habit tracker desktop (Tauri)</span>
+    <a href="https://github.com/Lemniscate-world/LifeTrack/releases">Telecharger (Windows MSI/NSIS)</a> · <a href="https://github.com/Lemniscate-world/LifeTrack">source</a>
+  </div>
+</div>
+
+<!-- &#955;-Section-1 &mdash; User Lambda Enter Real AI -->
+<h2 id="lambda-section-1-mdash-user-lambda-enter-real-ai"><span class="no">01</span>λ-Section-1 — User Lambda Enter Real AI<span class="count">· 21</span></h2>
+<p class="section-theme">AI, Réseaux de Neurones</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="neuraldbg actif debugger causal pour pytorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 prs upstream (bug-002 varlen_attn, bug-006 svdvals, bug-008 normalize). pr gate system déployé (6 gates). v1.3.2 sur pypi. engine 45 tests. neural-agent pipeline cpu validé. merge rate upstream: 0% — objectif: 1ère pr mergée. [git:2026-09-09 2f581e3e &quot;fix: restore valid neuraldbg pre-commit ...&quot;]"><td class="proj-name"><a href="https://github.com/LambdaSection/NeuralDBG" target="_blank" rel="noopener">NeuralDBG</a></td><td><span class="bar"><span class="bar-fill" style="width:52%"></span></span><span class="pct">52%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Debugger causal pour PyTorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 PRs upstream (BUG-002 varlen_attn, BUG-006 svdvals, BUG-008 normalize). PR Gate system déployé (6 gates). v1.3.2 sur PyPI. Engine 45 tests. Neural-Agent pipeline CPU validé. Merge rate upstream: 0% — objectif: 1ère PR mergée. [git:2026-09-09 2f581e3e "fix: restore valid NeuralDBG pre-commit ..."]</td></tr>
+<tr data-search="neuraldbg-engine actif moteur causal propriétaire. v1.0.0 packagé (github packages). 45 tests (api contract, gradient, activation, data, coupling, full pipeline). drop-in upgrade pour neuraldbg. [git:2026-09-01 1a55ece &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=NeuralDBG-Engine+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">NeuralDBG-Engine</a></td><td><span class="bar"><span class="bar-fill" style="width:22%"></span></span><span class="pct">22%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. [git:2026-09-01 1a55ece "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="neural-agent actif agent auto-correcteur pour entraînement rn. 87 tests, pipeline cpu validé (tiny-gpt2 + lora, 5 steps). règle mha wired. modèle pas encore entraîné (kaggle notebook prêt). boucle fermée : neuraldbg → diagnostic → fix. [git:2026-09-01 7a16c4e &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Neural-Agent+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Neural-Agent</a></td><td><span class="bar"><span class="bar-fill" style="width:30%"></span></span><span class="pct">30%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. [git:2026-09-01 7a16c4e "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="aladin actif architecture transformer & recherche llm."><td class="proj-name"><a href="https://github.com/search?q=Aladin+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Aladin</a></td><td><span class="bar"><span class="bar-fill" style="width:40%"></span></span><span class="pct">40%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Architecture Transformer & recherche LLM.</td></tr>
+<tr data-search="astral en pause multi-repo intelligence avec client hindsight. data gravity moat implémenté, next.js mvp. [git:2026-09-01 20d56bf &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/LambdaSection/Astral" target="_blank" rel="noopener">Astral</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. [git:2026-09-01 20d56bf "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="datalint en pause gouvernance kuro-rules + validation ml. 4 tests. alignement sync-rules.ps1 avec projects.txt, workspace audit. r105 (multi-repo) + r87 (ownership) déployées. 54 projets scannés. [git:2026-03-21 6b3e4f0 &quot;feat: sync 53 strict ai rules including ...&quot;]"><td class="proj-name"><a href="https://github.com/LambdaSection/DataLint" target="_blank" rel="noopener">DataLint</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. [git:2026-03-21 6b3e4f0 "feat: Sync 53 Strict AI Rules including ..."]</td></tr>
+<tr data-search="odin en pause fork/customisation d'open interpreter — exécution locale de code (python, js, shell) via llm. 1 test. dernier merge upstream: pr #1686. [git:2026-09-01 4b6077c5 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/LambdaSection/Odin" target="_blank" rel="noopener">Odin</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. [git:2026-09-01 4b6077c5 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="neurodose actif cognitive supplement tracker & visualizer. optimisation santé cognitive via modélisation pharmacocinétique. [git:2026-09-01 5627877 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/NeuroDose" target="_blank" rel="noopener">NeuroDose</a></td><td><span class="bar"><span class="bar-fill" style="width:20%"></span></span><span class="pct">20%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. [git:2026-09-01 5627877 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="aquarium prototypage ide visuel (tauri) pour neuraldbg. mvp livré, dormant. export json + 14 tests aquarium. [git:2026-09-01 594b0e1 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/LambdaSection/Aquarium" target="_blank" rel="noopener">Aquarium</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. [git:2026-09-01 594b0e1 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="damon nouveau os amélioré basé sur arch linux. [git:2026-09-01 65ac2b2 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Damon+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Damon</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">Nouveau</span></td><td class="proj-desc">OS Amélioré basé sur Arch Linux. [git:2026-09-01 65ac2b2 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="metatron prototypage multi-language debugger with abductive reasoning. motto : « buy time ». [git:2026-09-01 092e731 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/LambdaSection/Metatron" target="_blank" rel="noopener">Metatron</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Multi-language debugger with abductive reasoning. Motto : « Buy time ». [git:2026-09-01 092e731 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="tokenwise en pause analyse et réduction du coût par tokens utilisés. phase validation mom test. [git:2026-09-01 0d791e3 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=TokenWise+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">TokenWise</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. [git:2026-09-01 0d791e3 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="prompt2model validation génération automatique de modèles ml à partir de descriptions textuelles. phase validation mom test."><td class="proj-name"><a href="https://github.com/search?q=Prompt2Model+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Prompt2Model</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-validation">Validation</span></td><td class="proj-desc">Génération automatique de modèles ML à partir de descriptions textuelles. Phase validation Mom Test.</td></tr>
+<tr data-search="automatons en pause agent orchestration and automation framework. [git:2026-09-01 e35d6b8 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Automatons+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Automatons</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Agent orchestration and automation framework. [git:2026-09-01 e35d6b8 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="onlook prototypage visual monitoring / observability tool."><td class="proj-name"><a href="https://github.com/search?q=Onlook+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Onlook</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Visual monitoring / observability tool.</td></tr>
+<tr data-search="verbose en pause logging / communication tool. [git:2026-09-01 9855f93 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Verbose+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Verbose</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Logging / communication tool. [git:2026-09-01 9855f93 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="vault outil base de connaissances personnelle (obsidian). [git:2026-09-14 43b9c04 &quot;initial commit...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Vault+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Vault</a></td><td>&mdash;</td><td><span class="badge badge-outil">Outil</span></td><td class="proj-desc">Base de connaissances personnelle (Obsidian). [git:2026-09-14 43b9c04 "Initial commit..."]</td></tr>
+<tr data-search="neural-again archive dsl pour réseaux de neurones. obsolète, remplacé par keras/pytorch + code gen. [git:2026-09-01 3b1f1aa &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><span style="color:var(--muted)"><a href="https://github.com/search?q=Neural-Again+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener" style="color:var(--muted)">Neural-Again</a></span></td><td>&mdash;</td><td><span class="badge badge-archive">Archive</span></td><td class="proj-desc">DSL pour réseaux de neurones. Obsolète, remplacé par Keras/PyTorch + code gen. [git:2026-09-01 3b1f1aa "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="neural-research archive recherches avancées sur les architectures neuronales. [git:2026-09-01 116a2e3 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><span style="color:var(--muted)"><a href="https://github.com/search?q=Neural-Research+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener" style="color:var(--muted)">Neural-Research</a></span></td><td>&mdash;</td><td><span class="badge badge-archive">Archive</span></td><td class="proj-desc">Recherches avancées sur les architectures neuronales. [git:2026-09-01 116a2e3 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="neuraldsl archive domain specific language for neural networks."><td class="proj-name"><span style="color:var(--muted)"><a href="https://github.com/search?q=NeuralDSL+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener" style="color:var(--muted)">NeuralDSL</a></span></td><td>&mdash;</td><td><span class="badge badge-archive">Archive</span></td><td class="proj-desc">Domain Specific Language for neural networks.</td></tr>
+<tr data-search="neuralpaper archive drafts and research for neural network papers."><td class="proj-name"><span style="color:var(--muted)"><a href="https://github.com/search?q=NeuralPaper+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener" style="color:var(--muted)">NeuralPaper</a></span></td><td>&mdash;</td><td><span class="badge badge-archive">Archive</span></td><td class="proj-desc">Drafts and research for neural network papers.</td></tr>
+</table>
+
+<!-- &#955;-Section-2 &mdash; Quant-Search -->
+<h2 id="lambda-section-2-mdash-quant-search"><span class="no">02</span>λ-Section-2 — Quant-Search<span class="count">· 2</span></h2>
+<p class="section-theme">Trading Algorithmique, Modélisation Mathématique de Marchés</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="openquant actif trading quantitatif avec mirofish (swarm llm). 18+ fichiers de test, backtest harness + 1-year gold validation, newsapi integre. v0.3.0-kuro. phase 4 backtest complete. [git:2026-09-18 9611f34 &quot;feat(edge): boucle fermee #26 - filtre u...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/OpenQuant" target="_blank" rel="noopener">OpenQuant</a></td><td><span class="bar"><span class="bar-fill" style="width:54%"></span></span><span class="pct">54%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. [git:2026-09-18 9611f34 "feat(edge): boucle fermee #26 - filtre u..."]</td></tr>
+<tr data-search="console prototypage environnement de développement d'outils de trading quantitatifs et algorithmiques. [git:2026-09-01 c230a85 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Console+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Console</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Environnement de développement d'outils de trading quantitatifs et algorithmiques. [git:2026-09-01 c230a85 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+</table>
+
+<!-- &#955;-Section-3 &mdash; Hackin Life -->
+<h2 id="lambda-section-3-mdash-hackin-life"><span class="no">03</span>λ-Section-3 — Hackin Life<span class="count">· 5</span></h2>
+<p class="section-theme">Biohacking, Nootropiques, Sport, Discipline par Biologie</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="echox en pause srs avec forgetting curves (pyqt6). validation l1 complète ($23.9b marché), gui desktop opérationnelle. 6 tests. structure tauri initialisée. [git:2026-09-01 a944eed &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/EchoX" target="_blank" rel="noopener">EchoX</a></td><td><span class="bar"><span class="bar-fill" style="width:7%"></span></span><span class="pct">7%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">SRS avec forgetting curves (PyQt6). Validation L1 complète ($23.9B marché), GUI desktop opérationnelle. 6 tests. Structure Tauri initialisée. [git:2026-09-01 a944eed "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="flow-regulator actif environnement de productivité premium avec pomodoro adaptatif, binaural beats, contrôle philips hue et focus mode."><td class="proj-name"><a href="https://github.com/Lemniscate-world/Flow-Regulator" target="_blank" rel="noopener">Flow-Regulator</a></td><td><span class="bar"><span class="bar-fill" style="width:5%"></span></span><span class="pct">5%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode.</td></tr>
+<tr data-search="charmed pivot projet réveil spotify arrêté (viabilité remise en cause). phase recherche nouveau problème. [git:2026-09-01 b8bb4db &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Charmed" target="_blank" rel="noopener">Charmed</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-recherche">Pivot</span></td><td class="proj-desc">Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. [git:2026-09-01 b8bb4db "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="thanatos prototypage application mobile mixant entraînements arts martiaux et callisthénie."><td class="proj-name"><a href="https://github.com/search?q=Thanatos+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Thanatos</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Application mobile mixant entraînements arts martiaux et callisthénie.</td></tr>
+<tr data-search="lifetrack actif desktop habit tracker (tauri v2 + react 19 + typescript). 559 tests, 14 types de donnees, ui pastel. ollama ai local (deep analysis), 7-location auto-backup (dropbox/onedrive/google drive), urge surfing, habit stacking, mood tracking, n=1 experiments. multi-os: windows msi + nsis. v0.3.2. [git:2026-09-18 be97b00 &quot;fix(chaos): anti-doublons principes (id ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/LifeTrack" target="_blank" rel="noopener">LifeTrack</a></td><td><span class="bar"><span class="bar-fill" style="width:55%"></span></span><span class="pct">55%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. [git:2026-09-18 be97b00 "fix(chaos): anti-doublons principes (id ..."]</td></tr>
+</table>
+
+<!-- &#955;-Section-4 &mdash; G&S Solutions -->
+<h2 id="lambda-section-4-mdash-g-s-solutions"><span class="no">04</span>λ-Section-4 — G&S Solutions<span class="count">· 6</span></h2>
+<p class="section-theme">Fintech</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="hermes validation outil de coordination des livraisons pour commerçants du grand lomé, togo. landing page + pipeline automation (r84). branch: validation/landing-deploy. [git:2026-09-01 4b16956 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Hermes" target="_blank" rel="noopener">Hermes</a></td><td><span class="bar"><span class="bar-fill" style="width:5%"></span></span><span class="pct">5%</span></td><td><span class="badge badge-validation">Validation</span></td><td class="proj-desc">Outil de coordination des livraisons pour commerçants du Grand Lomé, Togo. Landing page + pipeline automation (R84). Branch: validation/landing-deploy. [git:2026-09-01 4b16956 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="g&s solutions actif fintech en phase de mindmapping."><td class="proj-name"><a href="https://github.com/search?q=G&S Solutions+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">G&S Solutions</a></td><td><span class="bar"><span class="bar-fill" style="width:6%"></span></span><span class="pct">6%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Fintech en phase de mindmapping.</td></tr>
+<tr data-search="iroko prototypage fintech. [git:2026-09-01 a47ff4f &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Iroko+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Iroko</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Fintech. [git:2026-09-01 a47ff4f "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="kapok prototypage insurtech. [git:2026-09-01 121c7cb &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=Kapok+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Kapok</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Insurtech. [git:2026-09-01 121c7cb "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="sogexco prototypage accounting/business solution pour client sogexco."><td class="proj-name"><a href="https://github.com/search?q=SOGEXCO+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">SOGEXCO</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Accounting/Business solution pour client SOGEXCO.</td></tr>
+<tr data-search="epure actif cabinet d'ingénierie hybride ia (togo, west africa). services de conception augmentés par ia. frontend + backend + cad service + electron. stack: react, typescript, python, freecad. [git:2026-09-01 98689d0 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Epure" target="_blank" rel="noopener">Epure</a></td><td><span class="bar"><span class="bar-fill" style="width:30%"></span></span><span class="pct">30%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Cabinet d'Ingénierie Hybride IA (Togo, West Africa). Services de conception augmentés par IA. Frontend + backend + CAD service + Electron. Stack: React, TypeScript, Python, FreeCAD. [git:2026-09-01 98689d0 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+</table>
+
+<!-- &#955;-Section-5 &mdash; Eclipse -->
+<h2 id="lambda-section-5-mdash-eclipse"><span class="no">05</span>λ-Section-5 — Eclipse<span class="count">· 1</span></h2>
+<p class="section-theme">Ingénierie Informatique Aérospatiale</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="bad bunny prototypage bibliothèque pour simulation de propulseurs de fusées en rust."><td class="proj-name"><a href="https://github.com/search?q=Bad Bunny+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Bad Bunny</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Bibliothèque pour simulation de propulseurs de fusées en Rust.</td></tr>
+</table>
+
+<!-- &#955;-Section-7 &mdash; Helium Chain -->
+<h2 id="lambda-section-7-mdash-helium-chain"><span class="no">06</span>λ-Section-7 — Helium Chain<span class="count">· 2</span></h2>
+<p class="section-theme">Blockchain, Crypto, Finance Décentralisée</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="helium actif blockchain rust avec 4 crates (libp2p, wireguard, firecracker). architecture mvp complète, poc scripts prêts. recherches stratégiques intégrées. [git:2026-09-01 7c2f742 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Helium" target="_blank" rel="noopener">Helium</a></td><td><span class="bar"><span class="bar-fill" style="width:23%"></span></span><span class="pct">23%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. Recherches stratégiques intégrées. [git:2026-09-01 7c2f742 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="pofs prototypage proof of stake / file system research."><td class="proj-name"><a href="https://github.com/search?q=POFS+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">POFS</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Proof of Stake / File System research.</td></tr>
+</table>
+
+<!-- &#955;-Section-8 &mdash; AI8 (Algorithmic Intelligence 8) -->
+<h2 id="lambda-section-8-mdash-ai8-algorithmic-intelligence-8"><span class="no">07</span>λ-Section-8 — AI8 (Algorithmic Intelligence 8)<span class="count">· 3</span></h2>
+<p class="section-theme">Algorithmes, Structures de Données</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="dissect en pause outil d'audit et de visualisation de l'orchestration des agents ia. 9 tests, branch: main. [git:2026-09-01 5d9a753 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Dissect" target="_blank" rel="noopener">Dissect</a></td><td><span class="bar"><span class="bar-fill" style="width:10%"></span></span><span class="pct">10%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. [git:2026-09-01 5d9a753 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="bloomdb prototypage base de données pour stockage et gestion de données probabilistes. [git:2026-09-01 f106d64 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=BloomDB+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">BloomDB</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Base de données pour stockage et gestion de données probabilistes. [git:2026-09-01 f106d64 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="algoritmi prototypage dérivé de dissect, centré sur la visualisation des algorithmes."><td class="proj-name"><a href="https://github.com/search?q=Algoritmi+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Algoritmi</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Dérivé de Dissect, centré sur la visualisation des algorithmes.</td></tr>
+</table>
+
+<!-- &#955;-Section-9 &mdash; Network Euler -->
+<h2 id="lambda-section-9-mdash-network-euler"><span class="no">08</span>λ-Section-9 — Network Euler<span class="count">· 3</span></h2>
+<p class="section-theme">Gestion d'entreprise, Automatisations, DevOps</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="sagittarius validation mlops & ai agent assistant for devops. validation l2 complète (40 jobs scrapés, burnout 60%). branch active: jacques-gad-sagittarius. [git:2026-09-01 a220ac4 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Sagittarius" target="_blank" rel="noopener">Sagittarius</a></td><td><span class="bar"><span class="bar-fill" style="width:3%"></span></span><span class="pct">3%</span></td><td><span class="badge badge-validation">Validation</span></td><td class="proj-desc">MLOps & AI Agent Assistant for DevOps. Validation L2 complète (40 jobs scrapés, burnout 60%). Branch active: Jacques-Gad-Sagittarius. [git:2026-09-01 a220ac4 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="kuroguardian actif daemon mvp fonctionnel (python + watchdog + sqlite). surveillance 24/7 session_summary.md, parser auto, alertes inactivité, 21 projets indexés. branch: master, commit récent: project health alerting."><td class="proj-name"><a href="https://github.com/Lemniscate-world/KuroGuardian" target="_blank" rel="noopener">KuroGuardian</a></td><td><span class="bar"><span class="bar-fill" style="width:8%"></span></span><span class="pct">8%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Daemon MVP fonctionnel (Python + watchdog + SQLite). Surveillance 24/7 SESSION_SUMMARY.md, parser auto, alertes inactivité, 21 projets indexés. Branch: master, commit récent: project health alerting.</td></tr>
+<tr data-search="lambda-esn prototypage réseau social d'entreprise privé, slack personnalisé."><td class="proj-name"><a href="https://github.com/search?q=lambda-ESN+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">lambda-ESN</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Réseau social d'entreprise privé, Slack personnalisé.</td></tr>
+</table>
+
+<!-- &#955;-Section-11 &mdash; SaaS X -->
+<h2 id="lambda-section-11-mdash-saas-x"><span class="no">09</span>λ-Section-11 — SaaS X<span class="count">· 1</span></h2>
+<p class="section-theme">Création Automatisée et Rapide avec Gestion de SaaS</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="saasx recherche recherches et implémentations en cours. [git:2026-09-01 63fab8d &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/search?q=SaasX+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">SaasX</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-recherche">Recherche</span></td><td class="proj-desc">Recherches et implémentations en cours. [git:2026-09-01 63fab8d "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+</table>
+
+<!-- &#955;-Section-12 &mdash; Hypatia -->
+<h2 id="lambda-section-12-mdash-hypatia"><span class="no">10</span>λ-Section-12 — Hypatia<span class="count">· 4</span></h2>
+<p class="section-theme">Recherches Avancées en Physique & Mathématiques</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="aether en pause minkowski space-time visualizer, orienté exploration d'autres espaces-temps. 1 test. branch: feat/setup-kuro-rules. [git:2026-09-01 26b6059 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/AEther" target="_blank" rel="noopener">AEther</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">En Pause</span></td><td class="proj-desc">Minkowski Space-Time Visualizer, orienté exploration d'autres espaces-temps. 1 test. Branch: feat/setup-kuro-rules. [git:2026-09-01 26b6059 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="logical calculus recherche nouveau système de calcul infinitésimal basé sur la logique et le calcul de newton. formalisation en cours."><td class="proj-name"><a href="https://github.com/search?q=Logical Calculus+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Logical Calculus</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-recherche">Recherche</span></td><td class="proj-desc">Nouveau système de calcul infinitésimal basé sur la logique et le calcul de Newton. Formalisation en cours.</td></tr>
+<tr data-search="math. theorization of linguistics recherche mathématisation du langage par théorie de shannon, espaces de probabilités linguistiques."><td class="proj-name"><a href="https://github.com/search?q=Math. Theorization of Linguistics+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Math. Theorization of Linguistics</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-recherche">Recherche</span></td><td class="proj-desc">Mathématisation du langage par théorie de Shannon, espaces de probabilités linguistiques.</td></tr>
+<tr data-search="project-dirac prototypage physics-inspired computational model. [git:2026-09-01 7adcfb6 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Project-Dirac" target="_blank" rel="noopener">Project-Dirac</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Physics-inspired computational model. [git:2026-09-01 7adcfb6 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+</table>
+
+<!-- &#955;-Section-13 &mdash; Dexter.pwn -->
+<h2 id="lambda-section-13-mdash-dexter-pwn"><span class="no">11</span>λ-Section-13 — Dexter.pwn<span class="count">· 1</span></h2>
+<p class="section-theme">Hacking Éthique, CTFs, Découverte de Failles Zero Day</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="sybil recherche exploration des failles de réseaux de neurones."><td class="proj-name"><a href="https://github.com/search?q=Sybil+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Sybil</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-recherche">Recherche</span></td><td class="proj-desc">Exploration des failles de réseaux de neurones.</td></tr>
+</table>
+
+<!-- &#955;-Section-14 &mdash; Charles -->
+<h2 id="lambda-section-14-mdash-charles"><span class="no">12</span>λ-Section-14 — Charles<span class="count">· 5</span></h2>
+<p class="section-theme">BeatMaking, Art, Poésie, NFTs, Expériences Audio-Visuelles</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="openmind actif application de journaling windows (winui 3) avec analyse ia via ollama, exports multiples et packaging msix."><td class="proj-name"><a href="https://github.com/Lemniscate-world/OpenMind" target="_blank" rel="noopener">OpenMind</a></td><td><span class="bar"><span class="bar-fill" style="width:15%"></span></span><span class="pct">15%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Application de journaling Windows (WinUI 3) avec analyse IA via Ollama, exports multiples et packaging MSIX.</td></tr>
+<tr data-search="audio room visualizer prototypage visualiser la musique dans l'espace, en 3d/2d/projections."><td class="proj-name"><a href="https://github.com/search?q=Audio Room Visualizer+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Audio Room Visualizer</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Visualiser la musique dans l'espace, en 3D/2D/projections.</td></tr>
+<tr data-search="interpoem prototypage plateforme d'immersion du lecteur dans un poème (musique, 3d, vr, art digital)."><td class="proj-name"><a href="https://github.com/search?q=Interpoem+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Interpoem</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Plateforme d'immersion du lecteur dans un poème (musique, 3D, VR, art digital).</td></tr>
+<tr data-search="charles prototypage production musicale par code et électronique avancée (supercollider, plugins fl studio)."><td class="proj-name"><a href="https://github.com/Lemniscate-world/Charles" target="_blank" rel="noopener">Charles</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Production musicale par code et électronique avancée (SuperCollider, plugins FL Studio).</td></tr>
+<tr data-search="journaux archive archive of personal journaling / log system."><td class="proj-name"><span style="color:var(--muted)"><a href="https://github.com/search?q=Journaux+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener" style="color:var(--muted)">Journaux</a></span></td><td>&mdash;</td><td><span class="badge badge-archive">Archive</span></td><td class="proj-desc">Archive of personal journaling / log system.</td></tr>
+</table>
+
+<!-- &#955;-Section-15 &mdash; XCAD -->
+<h2 id="lambda-section-15-mdash-xcad"><span class="no">13</span>λ-Section-15 — XCAD<span class="count">· 2</span></h2>
+<p class="section-theme">CAD, Génie Civil et Électromécanique</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="epure prototypage — [git:2026-09-01 98689d0 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/Epure" target="_blank" rel="noopener">Epure</a></td><td><span class="bar"><span class="bar-fill" style="width:15%"></span></span><span class="pct">15%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">— [git:2026-09-01 98689d0 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="mori prototypage architecture biomimétique."><td class="proj-name"><a href="https://github.com/search?q=Mori+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Mori</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-proto">Prototypage</span></td><td class="proj-desc">Architecture biomimétique.</td></tr>
+</table>
+
+<!-- Projets Tiers &mdash; Externes (Demeter Labs) -->
+<h2 id="projets-tiers-mdash-externes-demeter-labs"><span class="no">14</span>Projets Tiers — Externes (Demeter Labs)<span class="count">· 4</span></h2>
+<p class="section-theme">Missions externes, non-proprietaire</p>
+<table>
+<tr><th>Projet</th><th>Progression</th><th>Statut</th><th>Description</th></tr>
+<tr data-search="devdemeterdao actif governance framework pour demeter labs. sécurité hardened (eoa→multisig, vevotingpowercondition). [git:2026-09-01 f6f6ace &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/DevDemeterDAO" target="_blank" rel="noopener">DevDemeterDAO</a></td><td><span class="bar"><span class="bar-fill" style="width:10%"></span></span><span class="pct">10%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Governance framework pour Demeter Labs. Sécurité hardened (EOA→multisig, VeVotingPowerCondition). [git:2026-09-01 f6f6ace "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="xp_farming_system actif gamified contribution tracking pour demeter labs. [git:2026-09-01 7917e03 &quot;chore: fix pre-commit remove kuro audit ...&quot;]"><td class="proj-name"><a href="https://github.com/Lemniscate-world/XP_Farming_System" target="_blank" rel="noopener">XP_Farming_System</a></td><td><span class="bar"><span class="bar-fill" style="width:10%"></span></span><span class="pct">10%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">Gamified contribution tracking pour Demeter Labs. [git:2026-09-01 7917e03 "chore: fix pre-commit remove kuro audit ..."]</td></tr>
+<tr data-search="constant_yield actif defi protocol pour demeter labs. audit sécurité et modularyieldtokenizer en cours."><td class="proj-name"><a href="https://github.com/Lemniscate-world/Constant_Yield" target="_blank" rel="noopener">Constant_Yield</a></td><td><span class="bar"><span class="bar-fill" style="width:18%"></span></span><span class="pct">18%</span></td><td><span class="badge badge-actif">Actif</span></td><td class="proj-desc">DeFi protocol pour Demeter Labs. Audit sécurité et ModularYieldTokenizer en cours.</td></tr>
+<tr data-search="nwt externe nw_wrld modules workspace (third-party)."><td class="proj-name"><a href="https://github.com/search?q=Nwt+user%3ALemniscate-world+user%3ALambdaSection&type=repositories" target="_blank" rel="noopener">Nwt</a></td><td><span class="bar"><span class="bar-fill" style="width:0%"></span></span><span class="pct">0%</span></td><td><span class="badge badge-nouveau">Externe</span></td><td class="proj-desc">nw_wrld Modules Workspace (Third-party).</td></tr>
+</table>
+
+<div class="notice" id="discord">
+  <div><strong>Communauté Discord lambda-Section</strong><br><p style="color:var(--muted);font-size:0.82rem;max-width:52ch;">Salons par projet, updates factuelles. Lien d&rsquo;invitation à configurer dans Epingle_Projets.md (clé&nbsp;: discord_invite).</p></div>
+</div>
+
+<script>function filterProjects(q){q=q.toLowerCase();document.querySelectorAll("tr[data-search]").forEach(function(r){r.style.display=r.getAttribute("data-search").indexOf(q)>-1?"":"none";});} </script>
+
+<div class="footer">
+  <p>&#955; lambda-Section &copy; 2026</p>
+  <p>Compilé depuis Epingle_Projets.md · <a href="https://github.com/Lemniscate-world/kuro-rules">kuro-rules</a> · <a href="https://github.com/Lemniscate-world">GitHub</a></p>
+</div>
+
+</body>
+</html>

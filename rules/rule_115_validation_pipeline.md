@@ -1,4 +1,4 @@
-# RULE 108: Validation Pipeline — Progressive Gates (MANDATORY)
+# RULE 115: Validation Pipeline — Progressive Gates (MANDATORY)
 
 ## Purpose
 NeuralDBG must prove it is NOT overfitted to its training data. The only way to do this is through a **progressive, gated validation pipeline** where each stage must pass before the next begins. No stage can be skipped. No result can be hand-waved.

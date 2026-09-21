@@ -13,7 +13,7 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_07_08_09_10_11_12_13_15_16_17**: PLANNING, ROADMAP & CORE BEHAVIOUR RULES - Full Detail
 - **rule_100_session_compliance**: RULE 100: Session Compliance â€” VÃ©rification Obligatoire en DÃ©but de Session
 - **rule_101_file_integrity_guard**: RULE 101: File Integrity Guard â€” Protection des fichiers privÃ©s
-- **rule_101_tensor_and_pytest_safety**: RULE 101: Tensor Operations and Test Suite Warning Governance
+- **rule_101_tensor_and_pytest_safety**: voir rule_114 (renuméroté, doublon R101 corrigé le 2026-09-20)
 - **rule_102_test_coverage**: RULE 102: ML Project Test Coverage â€” Mandatory Standards
 - **rule_103_profile_readme_sync**: RULE 103: Profile README Sync â€” MANDATORY
 - **rule_104_auto_issues_tracking**: RULE 104: Auto-Issues & Tracking â€” CrÃ©ation Obligatoire d'Issues pour Chaque Action
@@ -21,7 +21,7 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_106_plan_roadmap_split**: RULE 106: Private Plan + Public Roadmap Split â€” MANDATORY
 - **rule_107_upstream_pr_strategy**: RULE 107: Upstream PR Strategy â€” Credibility Through Merged Contributions
 - **rule_108_design_language**: RULE 108: Design Language â€” Â« Quiet Precision Â» (LifeTrack & dÃ©rivÃ©s)
-- **rule_108_validation_pipeline**: RULE 108: Validation Pipeline â€” Progressive Gates (MANDATORY)
+- **rule_108_validation_pipeline**: voir rule_115 (renuméroté, doublon R108 corrigé le 2026-09-20)
 - **rule_109_adaptive_design**: RULE 109: Adaptive Design Systems â€” identitÃ© par produit, socle universel
 - **rule_110_blogging**: RULE 110: Blogging & Contenu Public â€” le systÃ¨me d'Ã©criture lambda-Section
 - **rule_111_finance_local**: RULE 111: Local Finance Data â€” donnÃ©es financiÃ¨res 100% locales â€” MANDATORY
@@ -56,4 +56,7 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_96_community_posts**: RULE 96: Community Post Protocol (Reddit + Discord)
 - **rule_97_launch_planning**: RULE 97: Launch Planning Master Template
 - **rule_98_prelaunch_verification**: RULE 98: Pre-Launch MVP Verification Protocol
-- **rule_99_acquisition_tracker**: RULE 99: Acquisition Tracker â€” MÃ©moire des Posts Marketing
+- **rule_99_acquisition_tracker**: RULE 99: Acquisition Tracker — Mémoire des Posts Marketing
+- **rule_113_github_discovery**: RULE 113: GitHub Discovery Protocol — Mesure & Métadonnées
+- **rule_114_tensor_and_pytest_safety**: RULE 114: Tensor Operations and Test Suite Warning Governance (ex-R101 doublon, renuméroté le 2026-09-20)
+- **rule_115_validation_pipeline**: RULE 115: Validation Pipeline — Progressive Gates (MANDATORY) (ex-R108 doublon, renuméroté le 2026-09-20)

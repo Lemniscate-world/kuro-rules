@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-14T09:39:35+00:00",
+  "generated_at": "2026-09-14T13:36:02+00:00",
   "overall": "red",
   "repos": [
     {
-      "name": "LambdaSection/NeuralDBG",
+      "name": "Lemniscate-world/kuro-rules",
       "health": "red",
       "workflows": [
         {
@@ -11,182 +11,48 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34759050676",
-          "updated_at": "2026-09-13T13:09:45Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34835155732",
+          "updated_at": "2026-09-14T10:50:34Z"
         },
         {
-          "name": "Validation Pipeline (R108)",
+          "name": "Rules Audit",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34754107755",
-          "updated_at": "2026-09-13T11:20:31Z"
-        },
-        {
-          "name": "Scheduled",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34684425532",
-          "updated_at": "2026-09-12T08:54:50Z"
-        },
-        {
-          "name": "Qodo Code Review",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886763",
-          "updated_at": "2026-08-26T08:51:44Z"
-        },
-        {
-          "name": "Build",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886745",
-          "updated_at": "2026-08-26T08:52:10Z"
-        },
-        {
-          "name": "CI",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886744",
-          "updated_at": "2026-08-26T08:53:50Z"
-        },
-        {
-          "name": "Security Scans (Bandit, Safety & Trivy)",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886712",
-          "updated_at": "2026-08-26T08:51:45Z"
-        },
-        {
-          "name": "Pre-commit",
-          "status": "completed",
-          "conclusion": "failure",
-          "attempt": 2,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886701",
-          "updated_at": "2026-08-26T09:45:12Z"
-        },
-        {
-          "name": "Codacy",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886690",
-          "updated_at": "2026-08-26T09:02:21Z"
-        },
-        {
-          "name": "kuro-rules-compliance",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886674",
-          "updated_at": "2026-08-26T08:51:15Z"
-        },
-        {
-          "name": "Code Quality Review",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886672",
-          "updated_at": "2026-08-26T08:53:32Z"
-        },
-        {
-          "name": "Code Quality: Push on main",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949886004",
-          "updated_at": "2026-08-26T08:52:33Z"
-        },
-        {
-          "name": "Push on main",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949885971",
-          "updated_at": "2026-08-26T08:53:07Z"
-        },
-        {
-          "name": "pages build and deployment",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32949885203",
-          "updated_at": "2026-08-26T08:52:04Z"
-        },
-        {
-          "name": "Code Quality: Scheduled",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/32814809906",
-          "updated_at": "2026-08-25T05:57:00Z"
-        }
-      ]
-    },
-    {
-      "name": "Lemniscate-world/LifeTrack",
-      "health": "red",
-      "workflows": [
-        {
-          "name": "Scheduled",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/34558466333",
-          "updated_at": "2026-09-11T03:32:18Z"
-        },
-        {
-          "name": "github_actions in /. - Update #1549899233",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/33533152269",
-          "updated_at": "2026-09-01T16:40:33Z"
-        },
-        {
-          "name": "kuro-rules-compliance",
-          "status": "completed",
-          "conclusion": "failure",
-          "attempt": 2,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32949765487",
-          "updated_at": "2026-08-26T09:43:01Z"
-        },
-        {
-          "name": "CI",
-          "status": "completed",
-          "conclusion": "failure",
-          "attempt": 2,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32949765457",
-          "updated_at": "2026-08-26T09:44:33Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34835155669",
+          "updated_at": "2026-09-14T10:50:32Z"
         },
         {
           "name": "Push on master",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32949761355",
-          "updated_at": "2026-08-26T08:51:38Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34835155160",
+          "updated_at": "2026-09-14T10:51:47Z"
         },
         {
-          "name": "CodeQL Setup",
+          "name": "Kuro",
+          "status": "completed",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34831750638",
+          "updated_at": "2026-09-14T10:11:42Z"
+        },
+        {
+          "name": "kuro-rules-guard",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32563719839",
-          "updated_at": "2026-08-22T09:01:25Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34827578960",
+          "updated_at": "2026-09-14T09:22:34Z"
         },
         {
-          "name": "github_actions in /. - Update #1499386501",
+          "name": "Scheduled",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/30708485672",
-          "updated_at": "2026-08-01T16:36:28Z"
+          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34682632436",
+          "updated_at": "2026-09-12T08:13:01Z"
         }
       ]
     },
@@ -349,6 +215,132 @@
       ]
     },
     {
+      "name": "LambdaSection/NeuralDBG",
+      "health": "green",
+      "workflows": [
+        {
+          "name": "Validation Pipeline (R108)",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34841936461",
+          "updated_at": "2026-09-14T12:11:44Z"
+        },
+        {
+          "name": "Pre-commit",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778426",
+          "updated_at": "2026-09-14T11:00:06Z"
+        },
+        {
+          "name": "Qodo Code Review",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778395",
+          "updated_at": "2026-09-14T10:58:54Z"
+        },
+        {
+          "name": "Codacy",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778381",
+          "updated_at": "2026-09-14T11:08:58Z"
+        },
+        {
+          "name": "Code Quality Review",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778369",
+          "updated_at": "2026-09-14T10:59:57Z"
+        },
+        {
+          "name": "CI",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778340",
+          "updated_at": "2026-09-14T11:00:55Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778336",
+          "updated_at": "2026-09-14T10:58:27Z"
+        },
+        {
+          "name": "Security Scans (Bandit, Safety & Trivy)",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778333",
+          "updated_at": "2026-09-14T10:58:50Z"
+        },
+        {
+          "name": "Kuro Rules Compliance",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778324",
+          "updated_at": "2026-09-14T10:58:18Z"
+        },
+        {
+          "name": "kuro-rules-compliance",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835778308",
+          "updated_at": "2026-09-14T10:58:10Z"
+        },
+        {
+          "name": "Code Quality: Push on main",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835777601",
+          "updated_at": "2026-09-14T10:59:35Z"
+        },
+        {
+          "name": "Push on main",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835777599",
+          "updated_at": "2026-09-14T11:00:11Z"
+        },
+        {
+          "name": "pages build and deployment",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34835777261",
+          "updated_at": "2026-09-14T10:59:00Z"
+        },
+        {
+          "name": "Code Quality: Scheduled",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34684426306",
+          "updated_at": "2026-09-12T08:54:27Z"
+        },
+        {
+          "name": "Scheduled",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/LambdaSection/NeuralDBG/actions/runs/34684425532",
+          "updated_at": "2026-09-12T08:54:50Z"
+        }
+      ]
+    },
+    {
       "name": "LambdaSection/NeuralPaper",
       "health": "green",
       "workflows": [
@@ -461,16 +453,16 @@
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/34804110682",
-          "updated_at": "2026-09-14T03:54:24Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/34829152731",
+          "updated_at": "2026-09-14T09:40:50Z"
         },
         {
           "name": "pages build and deployment",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/34804110187",
-          "updated_at": "2026-09-14T03:54:03Z"
+          "url": "https://github.com/Lemniscate-world/Lemniscate-world/actions/runs/34829152205",
+          "updated_at": "2026-09-14T09:40:23Z"
         },
         {
           "name": "Scheduled",
@@ -491,56 +483,64 @@
       ]
     },
     {
-      "name": "Lemniscate-world/kuro-rules",
+      "name": "Lemniscate-world/LifeTrack",
       "health": "green",
       "workflows": [
         {
-          "name": "Kuro",
-          "status": "in_progress",
-          "conclusion": null,
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34829089125",
-          "updated_at": "2026-09-14T09:39:03Z"
-        },
-        {
-          "name": "kuro-rules-guard",
+          "name": "CI",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34827578960",
-          "updated_at": "2026-09-14T09:22:34Z"
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/34833138648",
+          "updated_at": "2026-09-14T10:27:18Z"
+        },
+        {
+          "name": "kuro-rules-compliance",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/34833138635",
+          "updated_at": "2026-09-14T10:26:02Z"
         },
         {
           "name": "Push on master",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34804109524",
-          "updated_at": "2026-09-14T03:54:45Z"
-        },
-        {
-          "name": "Kuro Rules Compliance",
-          "status": "completed",
-          "conclusion": "success",
-          "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34759096259",
-          "updated_at": "2026-09-13T13:10:44Z"
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/34833137538",
+          "updated_at": "2026-09-14T10:32:19Z"
         },
         {
           "name": "Scheduled",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34682632436",
-          "updated_at": "2026-09-12T08:13:01Z"
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/34558466333",
+          "updated_at": "2026-09-11T03:32:18Z"
         },
         {
-          "name": "Rules Audit",
+          "name": "github_actions in /. - Update #1549899233",
           "status": "completed",
           "conclusion": "success",
           "attempt": 1,
-          "url": "https://github.com/Lemniscate-world/kuro-rules/actions/runs/34578173891",
-          "updated_at": "2026-09-11T08:14:15Z"
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/33533152269",
+          "updated_at": "2026-09-01T16:40:33Z"
+        },
+        {
+          "name": "CodeQL Setup",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/32563719839",
+          "updated_at": "2026-08-22T09:01:25Z"
+        },
+        {
+          "name": "github_actions in /. - Update #1499386501",
+          "status": "completed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/Lemniscate-world/LifeTrack/actions/runs/30708485672",
+          "updated_at": "2026-08-01T16:36:28Z"
         }
       ]
     }
@@ -551,22 +551,10 @@
   ],
   "actions": [
     {
-      "repo": "LambdaSection/NeuralDBG",
-      "workflow": "Pre-commit",
-      "action": "issue_updated",
-      "detail": "issue #676 mise à jour"
-    },
-    {
-      "repo": "Lemniscate-world/LifeTrack",
-      "workflow": "kuro-rules-compliance",
-      "action": "issue_updated",
-      "detail": "issue #21 mise à jour"
-    },
-    {
-      "repo": "Lemniscate-world/LifeTrack",
-      "workflow": "CI",
-      "action": "issue_updated",
-      "detail": "issue #22 mise à jour"
+      "repo": "Lemniscate-world/kuro-rules",
+      "workflow": "Kuro",
+      "action": "rerun_would_trigger",
+      "detail": "dry-run: rerun run 34831750638"
     }
   ]
 }

@@ -25,7 +25,7 @@ if hasattr(sys.stdout, "reconfigure"):
 DEFAULT_OPENROUTER_MODEL = "google/gemma-4-31b-it:free"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_DEEPSEEK_BASE = "https://api.deepseek.com"
-DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
+DEFAULT_DEEPSEEK_MODEL = "deepseek-flash"
 DEFAULT_OLLAMA_URL = "http://localhost:11434"
 
 # Uniquement des modèles cloud Ollama (suffixe :cloud) — jamais les locaux.
@@ -113,7 +113,12 @@ def _deepseek(prompt: str, system: str) -> tuple[str | None, str]:
     if not data:
         return None, "error"
     try:
-        text = (data["choices"][0]["message"].get("content") or "").strip()
+        msg = data["choices"][0]["message"]
+        text = (msg.get("content") or "").strip()
+        if not text:
+            # Modeles raisonnants (v4-pro) : la reponse reste en reasoning_content
+            # si max_tokens trop bas pour finir le raisonnement.
+            text = (msg.get("reasoning_content") or msg.get("reasoning") or "").strip()
         return (text, "ok") if text else (None, "empty")
     except Exception:
         return None, "bad-shape"
