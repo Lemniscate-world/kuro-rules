@@ -1,0 +1,36 @@
+{
+  "channels": {
+    "NeuroDose": "#neurodose",
+    "Hermes": "#hermes",
+    "Epure": "#epure",
+    "Helium": "#helium",
+    "OpenQuant": "#open-quant-search",
+    "Sybil": "#sybil",
+    "Metatron": "#metatron",
+    "Console": "#console",
+    "Thanatos": "#thanatos",
+    "Iroko": "#iroko",
+    "Kapok": "#kapok",
+    "SOGEXCO": "#sogexco",
+    "BloomDB": "#bloomdb",
+    "SaasX": "#saasx",
+    "Interpoem": "#interpoem",
+    "Charles": "#charles"
+  },
+  "categories": {
+    "&#955;-Section-12 &mdash; Hypatia": "λ-12 Hypatian",
+    "&#955;-Section-11 &mdash; SaaS X": "λ-11 SaasX",
+    "&#955;-Section-8 &mdash; AI8 (Algorithmic Intelligence 8)": "λ-8 AI8",
+    "&#955;-Section-13 &mdash; Dexter.pwn": "λ-13 Dexter.pwn",
+    "&#955;-Section-5 &mdash; Eclipse": "λ-4 Eclipse Aerospatial",
+    "&#955;-Section-3 &mdash; Hackin Life": "λ-5 Hackin'Life",
+    "&#955;-Section-2 &mdash; Quant-Search": "λ-2  Quant-Search",
+    "&#955;-Section-15 &mdash; XCAD": "λ-15 XCAD",
+    "&#955;-Section-4 &mdash; G&S Solutions": "λ-3 G&S Solutions",
+    "&#955;-Section-7 &mdash; Helium Chain": "λ-7 Helium Chain",
+    "&#955;-Section-1 &mdash; User Lambda Enter Real AI": "λ-1 ERA (Enter Real AI)",
+    "&#955;-Section-9 &mdash; Network Euler": "λ-9 NetworkEuler",
+    "&#955;-Section-14 &mdash; Charles": "λ-14 SOUND VISUAL"
+  },
+  "_note": "Ambiguites a trancher a la main (voir sortie adopt)."
+}

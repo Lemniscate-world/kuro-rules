@@ -1,0 +1,91 @@
+{
+  "generated_at": "2026-09-28T07:16:29.646679+00:00",
+  "mcp_endpoint": "https://mcp.any.do/sse",
+  "usage": "Connecter Claude (Settings > Connectors > https://mcp.any.do/sse) puis coller les titres, ex: '@Any.do ajoute [titre] avec rappel lundi 10h'",
+  "tasks": [
+    {
+      "title": "Suivi vendredi — montrer maquette",
+      "source": "pipeline.next_step",
+      "date": "2026-08-24",
+      "due": ""
+    },
+    {
+      "title": "Fix anti-doublons puis bouton tout-cocher 1-tap, valider reprise du cochage 7j",
+      "source": "pipeline.next_step",
+      "date": "2026-09-17",
+      "due": ""
+    },
+    {
+      "title": "Runway critique (< 3 mois) : priorité absolue revenus — lancer les interviews R2 vers des clients payants avant toute no",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 15,
+      "tag": "J15"
+    },
+    {
+      "title": "Pipeline vide cette semaine : planifier au moins 1 interview Mom Test (R2)",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "NEW",
+      "age_days": 0,
+      "tag": "NEW"
+    },
+    {
+      "title": "OKR 'Interviews Mom Test / semaine' sous 50% (0.0/3.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 15,
+      "tag": "J15"
+    },
+    {
+      "title": "OKR 'Premier revenu MRR (USD) — palier 1' sous 50% (0.0/10.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 15,
+      "tag": "J15"
+    },
+    {
+      "title": "OKR 'MRR palier 2 (USD) — activé après palier 1' sous 50% (0.0/100.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 15,
+      "tag": "J15"
+    },
+    {
+      "title": "OKR 'Commits / semaine (moyenne repos actifs)' sous 50% (1.17/10.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 15,
+      "tag": "J15"
+    },
+    {
+      "title": "CI : 1 check(s) en échec — le guardian diagnostique, corrige la cause racine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 15,
+      "tag": "J15"
+    },
+    {
+      "title": "Plans : 40 repos sans PLAN.md (AEther, Agent-Reach, Aquarium, Astral, Automatons…) — ecrire la carte avant le pick, sino",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 8,
+      "tag": "J8"
+    }
+  ]
+}

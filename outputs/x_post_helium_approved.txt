@@ -1,0 +1,7 @@
+Helium : partage GPU entre pairs de confiance, sans intermediaire. Tunnel chiffre + microVM + credits locaux, MIT.
+
+Tunnel 3ms, VM bootee en <1min, 2 transactions reglees, install 1 commande.
+
+https://github.com/HeliumXChain/Helium
+
+#Helium #P2P #GPU

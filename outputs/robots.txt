@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://lemniscate-world.github.io/Lemniscate-world/sitemap.xml

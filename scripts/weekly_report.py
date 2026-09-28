@@ -89,6 +89,7 @@ def db_epingle_divergence(epingle: Path) -> list[str]:
         db_rows = {
             r[0].lower(): r[1]
             for r in conn.execute("SELECT lower(name), progress_pct FROM projects")
+            if r[1] is not None
         }
         conn.close()
     except Exception as exc:
@@ -110,7 +111,7 @@ def db_epingle_divergence(epingle: Path) -> list[str]:
             if key in seen or key not in db_rows:
                 continue
             seen.add(key)
-            diff = abs(db_rows[key] - p["pct"])
+            diff = abs(int(db_rows[key]) - p["pct"])
             if diff >= 15:
                 out.append(f"- {p['name']}: daemon {db_rows[key]}% vs Epingle {p['pct']}% (écart {diff}pts)")
     return out

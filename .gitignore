@@ -63,6 +63,8 @@ dashboard/dashboard-data.json
 
 # Coverage directory used by tools like istanbul
 coverage/
+.coverage
+.coverage.*
 *.lcov
 
 # nyc test coverage
@@ -160,6 +162,11 @@ strategy.local.json
 pipeline.local.json
 strategy_decisions.local.json
 pull_anydo.json
+proposals.local.json
+watchdog.local.json
+vacances.flag
+cowork_last_pick.local.json
+coverage.local.json
 
 # artefacts generes
 apps/kuro-pulse/kuro.ico
