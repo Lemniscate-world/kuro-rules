@@ -47,7 +47,6 @@ OpenQuant
 Project-Dirac
 SOLARIS
 SaasX
-Sagittarius
 TokenWise
 Verbose
 bodydouble
@@ -58,3 +57,4 @@ kuro
 pytorch-fork
 russel-agent
 transformers-fork
+Sybil

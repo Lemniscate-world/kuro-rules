@@ -1,6 +1,6 @@
 # Épinglé Projets — Portfolio lambda-Section
 
-> **Dernière mise à jour** : 2026-09-20 (onboarding Horcruxe Labs, projects.txt régénéré : 52 projets, daemon anti-skip 32→61 indexés, R80/R85)
+> **Dernière mise à jour** : 2026-09-21 (14 projets réintégrés au total : +8 sans-remote OWNED présumés — Oblivion, Haki, KnowledgeOS, DevisPro, OpenCMO, bodydouble, driftscape, LifeStack — R80/R85/R87)
 > **Source** : `~/Documents/kuro-rules/Epingle_Projets.md`
 > **Méthode** : Audit live — git log + tests vérifiés (R85 + R86)
 
@@ -19,7 +19,6 @@
 | **Constant_Yield** | Externe | Protocol milestone / audit | Mensuel | Demeter Labs |
 | **XP_Farming_System** | Externe | Contribution tracking release | Mensuel | Demeter Labs |
 | **Hermes** | λ-4 | Validation terrain update | Mensuel | Commerçants Lomé |
-| **Sagittarius** | λ-9 | MLOps validation deliverable | Mensuel | Externe (B2B) |
 
 ---
 
@@ -59,6 +58,12 @@
 | Neural-Research |  0%  | Archive | Recherches avancées sur les architectures neuronales. |
 | NeuralDSL | 0% | Archive | Domain Specific Language for neural networks. |
 | NeuralPaper | 0% | Archive | Drafts and research for neural network papers. |
+| **Metatron-clean** | 30% | Actif | Debugger IA qui explique les erreurs en langage clair et suit les régressions. CLI npm, 13 commits 30j. |
+| **NeuralPrune** | 5% | En Pause | Diagnostic de pruning PyTorch non-destructif (neurones morts, redondance, quantification). |
+| **github-profile** | — | Outil | README de profil de l'organisation (vitrine portfolio et dashboard). |
+| **Oblivion** | 35% | Actif | IDE Tauri + Monaco à 0 FCFA (routeur multi-providers avec fallback auto, moteur de contexte). 14 commits 30j, 6 fichiers de test. |
+| Haki | 0% | Archive | Renommé **Oblivion** le 2026-09-21 (même vision IDE 0 FCFA). Voir Oblivion. |
+| **KnowledgeOS** | 5% | En Pause | « GitHub for the Mind » — graphe de connaissances versionné, offline-first, tuteur IA. |
 
 ---
 
@@ -89,6 +94,8 @@
 | Charmed |  5%  | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
 | Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
 | **LifeTrack** |  60%  | Actif | Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. |
+| **bodydouble** | 5% | En Pause | Body doubling libre (alternative Focusmate sans abonnement) : file d'attente + visio WebRTC P2P. MVP. |
+| LifeStack | 0% | Prototypage | Scaffold vide — périmètre à définir. |
 
 > **Note** : NeuroDose est listé dans λ-Section-1 (AI). Son axe biohacking est couvert par le même projet.
 
@@ -106,6 +113,8 @@
 | Kapok |  5%  | Prototypage | Insurtech. |
 | SOGEXCO | 0% | Prototypage | Accounting/Business solution pour client SOGEXCO. |
 | **Epure** |  35%  | Actif | Cabinet d'Ingénierie Hybride IA (Togo, West Africa). Services de conception augmentés par IA. Frontend + backend + CAD service + Electron. Stack: React, TypeScript, Python, FreeCAD. |
+| **Forma** | 55% | Actif | Système agentique de traitement des sinistres assurance (Vision + OCR, RAG sur contrats, validation humaine). v0.12.1, 200+ fichiers de test, 25 commits 30j. |
+| **DevisPro** | 5% | En Pause | Devis et factures en 60 secondes pour artisans (PDF, envoi WhatsApp). |
 
 ---
 
@@ -134,6 +143,7 @@
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
 | **Helium** |  28%  | Actif | Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. Recherches stratégiques intégrées. |
+| **GALT-Flatcoin-Concept** | 5% | Prototypage | Concept de flatcoin DeFi (whitepaper draft, stability engine, tranches). 8 docs de conception. |
 | POFS | 0% | Prototypage | Proof of Stake / File System research. |
 
 ---
@@ -156,7 +166,6 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Sagittarius** |  8%  | Validation | MLOps & AI Agent Assistant for DevOps. Validation L2 complète (40 jobs scrapés, burnout 60%). Branch active: Jacques-Gad-Sagittarius. |
 | **KuroGuardian** | 8% | Actif | Daemon MVP fonctionnel (Python + watchdog + SQLite). Surveillance 24/7 SESSION_SUMMARY.md, parser auto, alertes inactivité, 21 projets indexés. Branch: master, commit récent: project health alerting. |
 | lambda-ESN | 0% | Prototypage | Réseau social d'entreprise privé, Slack personnalisé. |
 
@@ -177,6 +186,7 @@
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
 | SaasX |  5%  | Recherche | Recherches et implémentations en cours. |
+| **OpenCMO** | 5% | En Pause | Alternative open source auto-hébergeable à un « AI CMO » SaaS (agents marketing/SEO, Ollama local). 19 fichiers de test. |
 
 ---
 
@@ -187,9 +197,10 @@
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
 | **AEther** |  5%  | En Pause | Minkowski Space-Time Visualizer, orienté exploration d'autres espaces-temps. 1 test. Branch: feat/setup-kuro-rules. |
-| Logical Calculus | 0% | Recherche | Nouveau système de calcul infinitésimal basé sur la logique et le calcul de Newton. Formalisation en cours. |
-| Math. Theorization of Linguistics | 0% | Recherche | Mathématisation du langage par théorie de Shannon, espaces de probabilités linguistiques. |
+| Logical Calculus | 0% | Recherche | Nouveau système de calcul infinitésimal basé sur la logique et le calcul de Newton. Formalisation en cours. → labo Horcruxe 002-calcul-logique. |
+| Math. Theorization of Linguistics | 0% | Recherche | Mathématisation du langage par théorie de Shannon, espaces de probabilités linguistiques. → labo Horcruxe 003-linguistique-mathematique. |
 | Project-Dirac |  5%  | Prototypage | Physics-inspired computational model. |
+| **SOLARIS** | 5% | En Pause | Critique physique neuro-symbolique (PDB, raisonneur symbolique, prédicteur neuronal). Phases 1-2 validées. |
 
 ---
 
@@ -214,6 +225,7 @@
 | Interpoem | 0% | Prototypage | Plateforme d'immersion du lecteur dans un poème (musique, 3D, VR, art digital). |
 | Charles | 0% | Prototypage | Production musicale par code et électronique avancée (SuperCollider, plugins FL Studio). |
 | Journaux | 0% | Archive | Archive of personal journaling / log system. |
+| **driftscape** | 5% | Prototypage | Soundscape adaptatif 100 % local (Rust + Tauri, synthèse 44,1 kHz). Code non commité. |
 
 ---
 
@@ -223,8 +235,9 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| Epure |  20%  | Prototypage | — |
 | Mori | 0% | Prototypage | Architecture biomimétique. |
+
+> Note : Epure est suivi dans λ-Section-4 (G&S Solutions) — voir tableau principal (R80 anti-duplicat).
 
 ---
 

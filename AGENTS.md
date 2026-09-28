@@ -60,3 +60,4 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_113_github_discovery**: RULE 113: GitHub Discovery Protocol — Mesure & Métadonnées
 - **rule_114_tensor_and_pytest_safety**: RULE 114: Tensor Operations and Test Suite Warning Governance (ex-R101 doublon, renuméroté le 2026-09-20)
 - **rule_115_validation_pipeline**: RULE 115: Validation Pipeline — Progressive Gates (MANDATORY) (ex-R108 doublon, renuméroté le 2026-09-20)
+- **rule_118_kuro_marketing**: RULE 118: Marketing via Kuro - Tout Passe par la Pipeline

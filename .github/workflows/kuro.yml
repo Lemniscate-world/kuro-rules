@@ -106,6 +106,11 @@ jobs:
           python kuro-rules/scripts/audit_truth_daily.py --dry-run --full --output kuro-rules/TRUTH_DAILY.md
           cat kuro-rules/TRUTH_DAILY.md | head -n 30
 
+      - name: Gate Epingle completeness (R85/R116, non-bloquant)
+        if: env.KURO_FULL == 'true'
+        run: |
+          python kuro-rules/scripts/check_epingle_completeness.py --warn-only
+
       - name: Kuro Radar (veille net, lundi uniquement)
         if: github.event_name == 'schedule'
         env:
@@ -152,6 +157,11 @@ jobs:
         run: |
           python kuro-rules/scripts/generate_blog.py --apply
 
+      - name: Drafts X top-velocite (R94-v2, drafts only)
+        if: env.KURO_FULL == 'true'
+        run: |
+          python kuro-rules/scripts/gen_x_posts.py --apply --top 3
+
       - name: Gate design Impeccable (rapport séparé)
         if: env.KURO_FULL == 'true'
         run: |
@@ -196,7 +206,7 @@ jobs:
           cd kuro-rules
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add TRUTH_DAILY.md Epingle_Projets.md KURO_ACTIONS_LOG.md ci-status.json skills.json security-status.json tasks_anydo.json || true
+          git add TRUTH_DAILY.md Epingle_Projets.md KURO_ACTIONS_LOG.md ci-status.json skills.json security-status.json tasks_anydo.json outputs/x_post_*.md || true
           if ! git diff --cached --quiet; then
             git commit -m "kuro: audit quotidien $(date +%Y-%m-%d) [skip ci]"
             git pull --rebase origin master || true

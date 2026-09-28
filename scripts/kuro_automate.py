@@ -156,6 +156,13 @@ def main():
         fails += sh([PY, str(SCRIPTS / "kuro_finance_report.py"), "--full", "--discord"],
                     dry_run=a.dry_run)
     fails += sh([PY, str(SCRIPTS / "kuro_investor_digest.py"), "--dry-run"], dry_run=a.dry_run)
+    # 6b. Discord : alignement salons à chaque run (manquants+topics, jamais rename/delete).
+    # Quotidien = dry-run (lecture seule) ; --full = crée manquants + fixe topics (retire-ours/rename exclus).
+    fails += sh([PY, str(SCRIPTS / "discord_autosync.py"), "--apply" if write else "--dry-run"],
+                dry_run=a.dry_run)
+    # 6c. Placement idées : route Epingle sans dossier (dry-run quotidien, apply manuel).
+    fails += sh([PY, str(SCRIPTS / "auto_place.py"), "--from-epingle", "--dry-run"],
+                dry_run=a.dry_run)
 
     if a.weekly:
         # 7. Resync agent : % Epingle recalculés depuis les faits git (R85).

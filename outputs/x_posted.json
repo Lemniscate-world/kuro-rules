@@ -1,0 +1,120 @@
+{
+ "discord": [
+  {
+   "date": "2026-09-21T13:16:27+00:00",
+   "projet": "Forma",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-21T13:16:27+00:00",
+   "projet": "Helium",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-21T13:16:28+00:00",
+   "projet": "Horcruxe Labs",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-21T13:16:29+00:00",
+   "projet": "LifeTrack",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-21T13:16:29+00:00",
+   "projet": "NeuralDBG",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-21T13:16:30+00:00",
+   "projet": "OpenQuant",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-23T20:00:23+00:00",
+   "projet": "Forma",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-23T20:00:24+00:00",
+   "projet": "Helium",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-23T20:00:25+00:00",
+   "projet": "Horcruxe Labs",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-23T20:00:26+00:00",
+   "projet": "LifeTrack",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-25T20:00:37+00:00",
+   "projet": "Helium",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-09-25T20:00:38+00:00",
+   "projet": "Horcruxe Labs",
+   "hash": "",
+   "id": ""
+  }
+ ],
+ "hub": [
+  {
+   "date": "2026-09-21T15:27:15+00:00",
+   "projet": "OpenQuant",
+   "hash": "e8ff55c",
+   "id": "6ab14cd2304cdd8191c00b94"
+  },
+  {
+   "date": "2026-09-22T20:00:42+00:00",
+   "projet": "OpenQuant",
+   "hash": "2bd966a",
+   "id": "6ab2de6952dc55ce94647fcc"
+  },
+  {
+   "date": "2026-09-23T20:00:39+00:00",
+   "projet": "OpenQuant",
+   "hash": "a64a199",
+   "id": "6ab42fe6c60ef106a8737e32"
+  },
+  {
+   "date": "2026-09-24T20:00:45+00:00",
+   "projet": "OpenQuant",
+   "hash": "623b5f2",
+   "id": "6ab5816b0b18c463f9337e71"
+  },
+  {
+   "date": "2026-09-25T20:00:51+00:00",
+   "projet": "OpenQuant",
+   "hash": "c8af59d",
+   "id": "6ab6d2f1f28173fa3f4cbfeb"
+  },
+  {
+   "date": "2026-09-26T20:00:58+00:00",
+   "projet": "OpenQuant",
+   "hash": "fc8568b",
+   "id": "6ab824799f89edbefe7d4bd5"
+  },
+  {
+   "date": "2026-09-27T20:00:48+00:00",
+   "projet": "OpenQuant",
+   "hash": "b2a7ae1",
+   "id": "6ab975ef36a0dcfcb3e2d587"
+  }
+ ]
+}
