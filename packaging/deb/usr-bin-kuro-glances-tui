@@ -1,0 +1,4 @@
+#!/bin/sh
+# kuro-glances-tui (paquet deb) : ALIAS DÉPRÉCIÉ de xenon-tui (décision 2026-10-04).
+echo "kuro-glances-tui est déprécié, utilisez xenon-tui" >&2
+exec /usr/bin/xenon-tui "$@"

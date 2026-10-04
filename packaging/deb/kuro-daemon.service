@@ -1,0 +1,13 @@
+[Unit]
+Description=Kuro daemon (surveillance projets)
+After=network.target
+
+[Service]
+User=kuro
+WorkingDirectory=/var/lib/kuro
+ExecStart=/usr/bin/python3 /opt/kuro/daemon.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

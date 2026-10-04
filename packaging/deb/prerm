@@ -1,0 +1,10 @@
+#!/bin/sh
+# prerm kuro : stoppe les services, garde les donnees (/var/lib/kuro).
+set -e
+
+case "$1" in
+    remove|deconfigure)
+        systemctl stop kuro-dashboard kuro-daemon || true
+        ;;
+esac
+exit 0

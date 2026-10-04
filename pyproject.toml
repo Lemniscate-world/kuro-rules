@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kuro-dashboard"
+# Version PyPI (PEP 440), lue depuis le paquet. Tag git : v1.3.0-kuro (R19).
+dynamic = ["version"]
+description = "Xenon (ex kuro-glances) : Glances Kuro, live system monitor + project dashboard (localhost API + web UI)"
+readme = "packaging/README.pypi.md"
+license = "MIT"
+authors = [{ name = "lambda-Section" }]
+requires-python = ">=3.10"
+dependencies = []
+optional-dependencies = { full = ["psutil"], textual = ["textual>=8"] }
+keywords = ["monitoring", "dashboard", "system", "kuro"]
+
+[project.urls]
+Homepage = "https://github.com/Lemniscate-world/kuro-rules"
+Repository = "https://github.com/Lemniscate-world/kuro-rules"
+
+[project.scripts]
+kuro-dashboard = "kuro_dashboard.api:main"
+kuro-system = "kuro_dashboard.system:main"
+xenon = "kuro_dashboard.tui:main"
+xenon-tui = "kuro_dashboard.tui_textual:main"
+# Alias dépréciés (décision 2026-10-04 : kuro-glances -> Xenon).
+kuro-glances = "kuro_dashboard.tui:main"
+kuro-glances-tui = "kuro_dashboard.tui_textual:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "kuro_dashboard.__version__" }
+
+[tool.setuptools.package-data]
+kuro_dashboard = ["static/*", "*.tcss"]

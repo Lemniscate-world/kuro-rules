@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kuro Control Center</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-left"></div>
+    <div class="ambient ambient-right"></div>
+
+    <div class="page-shell">
+      <header class="hero panel">
+        <div class="eyebrow">Kuro Control Center</div>
+        <div class="hero-grid">
+          <section class="hero-copy">
+            <h1>Agent intelligence across repos, workflows, and memory.</h1>
+            <p>
+              This dashboard turns <code>kuro-rules</code> into a local control plane:
+              repo hygiene, cross-project drift, failure memory, and sync visibility
+              in one place.
+            </p>
+            <div class="hero-meta">
+              <span id="generated-at" class="pill">Loading snapshot...</span>
+              <span id="workspace-root" class="pill ghost"></span>
+            </div>
+          </section>
+          <section id="metric-grid" class="metric-grid" aria-label="Summary metrics"></section>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <div class="section-label">Attention Queue</div>
+              <h2>What needs intervention now</h2>
+            </div>
+          </div>
+          <div id="alerts" class="stack"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <div class="section-label">Repo Mesh</div>
+              <h2>Tracked projects by organization</h2>
+            </div>
+            <div class="controls">
+              <input id="project-search" type="search" placeholder="Filter by project, org, branch" />
+              <div id="org-filters" class="chip-row"></div>
+            </div>
+          </div>
+          <div id="project-grid" class="project-grid"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <div class="section-label">Memory Vault</div>
+              <h2>Post-mortems and validation artifacts</h2>
+            </div>
+            <div id="knowledge-counts" class="pill ghost"></div>
+          </div>
+          <div id="knowledge-grid" class="memory-grid"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <div class="section-label">Rule Spine</div>
+              <h2>Rules already pushing toward this product</h2>
+            </div>
+          </div>
+          <div id="rule-grid" class="rule-grid"></div>
+        </section>
+
+        <section class="panel span-two">
+          <div class="section-head">
+            <div>
+              <div class="section-label">Sync Pulse</div>
+              <h2>Rule propagation and local control status</h2>
+            </div>
+          </div>
+          <div class="sync-layout">
+            <div id="sync-card" class="sync-card"></div>
+            <div id="kuro-card" class="sync-card"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,3 @@
+#!/bin/sh
+# kuro-dashboard (paquet deb) : API + UI sur localhost:8767 par defaut.
+PYTHONPATH=/opt/kuro-dashboard/src exec /usr/bin/python3 -m kuro_dashboard "$@"
