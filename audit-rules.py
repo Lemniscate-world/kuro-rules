@@ -79,15 +79,26 @@ def load_master_hashes(rules_dir: Path) -> dict[str, str]:
     return hashes
 
 
-def load_master_rule_numbers(rules_dir: Path) -> set[int]:
+REDIRECTOR_RE = re.compile(r"^-\s+\*\*(rule_[A-Za-z0-9_]+)\*\*", flags=re.M)
+LEGACY_RULE_RE = re.compile(r"^##\s+RULE\s+(\d+):", flags=re.M)
+
+
+def load_master_rule_numbers(rules_dir: Path) -> set[str]:
+    """Index redirector AGENTS.md (- **rule_*), fallback legacy ## RULE n:."""
     agents_path = rules_dir / "AGENTS.md"
     text = agents_path.read_text(encoding="utf-8", errors="replace")
-    return {int(n) for n in re.findall(r"^##\s+RULE\s+(\d+):", text, flags=re.M)}
+    entries = set(REDIRECTOR_RE.findall(text))
+    if entries:
+        return entries
+    return {f"RULE-{n}" for n in LEGACY_RULE_RE.findall(text)}
 
 
-def extract_rule_numbers(agents_path: Path) -> set[int]:
+def extract_rule_numbers(agents_path: Path) -> set[str]:
     text = agents_path.read_text(encoding="utf-8", errors="replace")
-    return {int(n) for n in re.findall(r"^##\s+RULE\s+(\d+):", text, flags=re.M)}
+    entries = set(REDIRECTOR_RE.findall(text))
+    if entries:
+        return entries
+    return {f"RULE-{n}" for n in LEGACY_RULE_RE.findall(text)}
 
 
 def relative_display(path: Path, base: Path) -> str:
@@ -167,7 +178,7 @@ def audit_master_rule_files(
 def audit_agents_rule_numbers(
     project_name: str,
     repo: Path,
-    master_rule_numbers: set[int],
+    master_rule_numbers: set[str],
 ) -> list[AuditIssue]:
     issues: list[AuditIssue] = []
 
@@ -180,10 +191,10 @@ def audit_agents_rule_numbers(
     missing = sorted(master_rule_numbers - repo_rule_numbers)
 
     if extra:
-        issues.append(AuditIssue(project_name, "FAIL", f"extra rule numbers {extra}"))
+        issues.append(AuditIssue(project_name, "FAIL", f"extra rule entries {extra}"))
     if missing:
         issues.append(
-            AuditIssue(project_name, "FAIL", f"missing rule numbers {missing}")
+            AuditIssue(project_name, "FAIL", f"missing rule entries {missing}")
         )
 
     return issues
@@ -260,7 +271,7 @@ def audit_repo(
     repo: Path,
     scope: str,
     master_hashes: dict[str, str],
-    master_rule_numbers: set[int],
+    master_rule_numbers: set[str],
     require_project_target: bool,
 ) -> list[AuditIssue]:
     issues: list[AuditIssue] = []

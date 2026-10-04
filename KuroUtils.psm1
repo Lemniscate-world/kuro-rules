@@ -1,9 +1,21 @@
 # KuroUtils.psm1 -- Centralized utilities for Kuro Rules management
 
+# Registre unique ownership (miroir scripts/gen_x_posts.py OWNED_MARKERS + R94).
+# Quantifie via `git remote -v` sur ~/Documents le 2026-09-21.
+# OWNED > EXTERNAL > UNKNOWN. Ne jamais diverger sans MAJ同步 des 2 fichiers.
 $script:OWNED_ORGS = @(
     "github.com/Lemniscate-world/",
     "github.com/Lemniscate-SHA-256/",
-    "github.com/pbakaus/"
+    "github.com/pbakaus/",
+    "github.com/LambdaSection/",
+    # Orgs satellites lambda-Section (un repo = une org par section) :
+    "github.com/Quant-Search/",
+    "github.com/AI8-Algorithm-Intelligence-Section-8/",
+    "github.com/Hackin-Life-X/",
+    "github.com/N-Hypatia/",
+    "github.com/EpureCAD/",
+    "github.com/HeliumXChain/",
+    "github.com/Rare-Sagittarius/"
 )
 
 $script:EXTERNAL_ORGS = @(
