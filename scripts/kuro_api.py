@@ -1,440 +1,52 @@
 #!/usr/bin/env python3
-"""kuro_api.py — API REST locale de l'intelligence Kuro (zéro dépendance).
+"""Shim repo (dev) : l API Kuro vit dans le paquet `kuro_dashboard` (src/).
 
-Interroge ~/.kuro/kuro.db en lecture seule. Bind 127.0.0.1 uniquement.
-Auth optionnelle : $KURO_API_TOKEN (Authorization: Bearer <token>).
-
-Endpoints :
-    GET  /api/status                 état général (counts, heartbeat, moteur LLM)
-    GET  /api/projects               liste des projets
-    GET  /api/projects/{name}        détail + dernières sessions
-    GET  /api/alerts[?unack=1]       alertes du daemon
-    GET  /api/sessions?limit=20      sessions récentes
-    GET  /api/memory                 nœuds de mémoire
-    GET  /api/summary                digest textuel (humain ou prompt LLM)
-    GET  /api/finance                burn rate, runway, MRR (R111: 100% local)
-    GET  /api/metrics                lead time, vélocité, échecs CI, pivots
-    POST /api/ask  {"question":".."} question libre -> cerveau Kuro
-
-Usage:
-    python scripts/kuro_api.py [--port 8767]
+Contexte installe (pip) : utilisez `kuro-dashboard` / `python -m kuro_dashboard`.
+Contexte repo : ce shim expose les memes noms qu avant (tests + run-api.ps1
+inchanges) et pointe l UI vers dashboard/ et le scan vers ce repo.
 """
 
-import argparse
-import json
 import os
-import sqlite3
 import sys
-import urllib.parse
-from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+_HERE = Path(__file__).resolve().parent
+_REPO = _HERE.parent
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_HERE))  # kuro_llm, kuro_finance, kuro_metrics, kuro_strategy
+os.environ.setdefault("KURO_RULES_DIR", str(_REPO))
+os.environ.setdefault("KURO_STATIC_DIR", str(_REPO / "dashboard"))
 
-DB_PATH = Path.home() / ".kuro" / "kuro.db"
-DASHBOARD_DIR = Path(__file__).resolve().parent.parent / "dashboard"
-STATIC_FILES = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js",
-                "/styles.css": "styles.css", "/dashboard-data.json": "dashboard-data.json"}
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(DASHBOARD_DIR))
+from kuro_dashboard.api import (  # noqa: E402
+    DB_PATH,
+    STATIC_FILES,
+    Handler,
+    KuroServer,
+    _count,
+    answer_question,
+    build_summary,
+    db,
+    get_alerts,
+    get_finance,
+    get_memory,
+    get_metrics,
+    get_project,
+    get_projects,
+    get_robot,
+    get_sessions,
+    get_status,
+    get_strategy,
+    get_system,
+    main,
+    rows,
+)
 
-
-def db() -> sqlite3.Connection:
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, timeout=5)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def rows(conn, sql, params=()):
-    return [dict(r) for r in conn.execute(sql, params).fetchall()]
-
-
-def get_status() -> dict:
-    conn = db()
-    hb = rows(conn, "SELECT * FROM heartbeat ORDER BY timestamp DESC LIMIT 1")
-    out = {
-        "api_version": "1.1",
-        "projects": rows(conn, "SELECT COUNT(*) AS n FROM projects")[0]["n"],
-        "sessions": rows(conn, "SELECT COUNT(*) AS n FROM sessions")[0]["n"],
-        "alerts_open": rows(conn, "SELECT COUNT(*) AS n FROM alerts WHERE acknowledged = 0")[0]["n"],
-        "memory_nodes": rows(conn, "SELECT COUNT(*) AS n FROM memory_nodes")[0]["n"],
-        "heartbeat": hb[0] if hb else None,
-        "llm_engine": None,
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-    }
-    try:
-        from kuro_llm import available
-
-        out["llm_engine"] = available()
-    except Exception:
-        pass
-    return out
-
-
-def get_projects() -> list[dict]:
-    conn = db()
-    return rows(
-        conn,
-        """SELECT id, name, section, status, progress_pct, last_activity
-           FROM projects ORDER BY progress_pct DESC""",
-    )
-
-
-def get_project(name: str) -> dict | None:
-    conn = db()
-    proj = rows(
-        conn,
-        """SELECT id, name, path, section, status, progress_pct, last_activity, created_at
-           FROM projects WHERE lower(name) = lower(?)""",
-        (name,),
-    )
-    if not proj:
-        return None
-    p = proj[0]
-    p["sessions"] = rows(
-        conn,
-        """SELECT session_date, editor, progress_before, progress_after,
-                  tests_status, blockers, next_steps
-           FROM sessions WHERE project_id = ? ORDER BY session_date DESC LIMIT 10""",
-        (p["id"],),
-    )
-    p["alerts"] = rows(
-        conn,
-        """SELECT alert_type, message, severity, acknowledged, created_at
-           FROM alerts WHERE project_id = ? ORDER BY created_at DESC LIMIT 10""",
-        (p["id"],),
-    )
-    del p["id"]
-    return p
-
-
-def get_alerts(unack_only: bool = False) -> list[dict]:
-    conn = db()
-    where = "WHERE a.acknowledged = 0" if unack_only else ""
-    return rows(
-        conn,
-        f"""SELECT a.id, p.name AS project, a.alert_type, a.message, a.severity,
-                   a.acknowledged, a.created_at
-            FROM alerts a LEFT JOIN projects p ON p.id = a.project_id
-            {where} ORDER BY a.created_at DESC LIMIT 100""",
-    )
-
-
-def get_sessions(limit: int = 20) -> list[dict]:
-    conn = db()
-    return rows(
-        conn,
-        f"""SELECT p.name AS project, s.session_date, s.editor,
-                   s.progress_before, s.progress_after, s.tests_status, s.blockers
-            FROM sessions s LEFT JOIN projects p ON p.id = s.project_id
-            ORDER BY s.session_date DESC LIMIT {int(limit)}""",
-    )
-
-
-def get_memory() -> list[dict]:
-    conn = db()
-    return rows(
-        conn,
-        """SELECT n.node_type, n.title, substr(n.summary, 1, 200) AS summary,
-                  n.level, p.name AS project, n.created_at
-           FROM memory_nodes n LEFT JOIN projects p ON p.id = n.project_id
-           ORDER BY n.created_at DESC LIMIT 100""",
-    )
-
-
-def get_robot() -> dict:
-    """État du robot Kuro : journal récent + santé CI + moteur."""
-    root = Path(__file__).resolve().parent.parent
-    journal = root / "KURO_ACTIONS_LOG.md"
-    actions = []
-    if journal.exists():
-        for line in journal.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line.startswith("- ") or line.startswith("  - "):
-                actions.append(line.strip())
-        actions = actions[-20:]
-    # source fraîche en priorité : copie committée dans kuro-rules par le robot
-    ci_status = None
-    for candidate in (root / "ci-status.json",
-                       Path.home() / "Documents" / "Lemniscate-world" / "ci-status.json"):
-        try:
-            ci_status = json.loads(candidate.read_text(encoding="utf-8"))
-            break
-        except Exception:
-            continue
-    st = get_status()
-    repos = []
-    if isinstance(ci_status, dict):
-        for r in ci_status.get("repos", []):
-            if r.get("health") == "no_ci":
-                continue
-            fails = []
-            for w in r.get("workflows", []):
-                if w.get("conclusion") == "failure":
-                    fails.append({"name": w["name"], "url": w.get("url", "")})
-            repos.append(
-                {
-                    "name": r.get("name"),
-                    "health": r.get("health"),
-                    "checks_ok": len(r.get("workflows", [])) - len(fails),
-                    "checks_total": len(r.get("workflows", [])),
-                    "failing": fails,
-                }
-            )
-    return {
-        "actions_tail": actions,
-        "repos": repos,
-        "ci_overall": (ci_status or {}).get("overall"),
-        "llm_engine": st.get("llm_engine"),
-        "alerts_open": st.get("alerts_open"),
-        "daemon": st.get("heartbeat"),
-    }
-
-
-def get_finance() -> dict:
-    """Finances locales (R111) : fichier gitigné, zéro réseau, zéro LLM."""
-    try:
-        import kuro_finance
-
-        return kuro_finance.compute_from_default()
-    except Exception as exc:
-        return {"status": "unconfigured", "error": str(exc)}
-
-
-def get_metrics() -> dict:
-    try:
-        import kuro_metrics
-
-        return kuro_metrics.build_payload()
-    except Exception as exc:
-        return {"status": "error", "error": str(exc)}
-
-
-def get_strategy() -> dict:
-    """Digest stratégique : finance + exécution + OKR + pipeline + décisions."""
-    try:
-        import kuro_strategy
-
-        return kuro_strategy.build_payload()
-    except Exception as exc:
-        return {"status": "error", "error": str(exc)}
-
-
-def build_summary() -> str:
-    st = get_status()
-    conn = db()
-    stale = rows(
-        conn,
-        """SELECT name, status, progress_pct, last_activity FROM projects
-           WHERE last_activity < datetime('now', '-14 days')
-           ORDER BY last_activity ASC LIMIT 8""",
-    )
-    top_alerts = rows(
-        conn,
-        """SELECT message, severity FROM alerts
-           WHERE acknowledged = 0 ORDER BY created_at DESC LIMIT 5""",
-    )
-    lines = [
-        f"Projets: {st['projects']} · Sessions: {st['sessions']} · "
-        f"Alertes ouvertes: {st['alerts_open']} · Nœuds mémoire: {st['memory_nodes']}",
-        "",
-        "Stagnation >14j:",
-    ]
-    lines += [
-        f"- {r['name']} ({r['progress_pct']}%, {r['status']}, dernier: {str(r['last_activity'])[:10]})"
-        for r in stale
-    ] or ["- aucun"]
-    lines += ["", "Alertes ouvertes:"]
-    lines += [f"- [{r['severity']}] {r['message'][:120]}" for r in top_alerts] or ["- aucune"]
-    return "\n".join(lines)
-
-
-def answer_question(question: str) -> dict:
-    from kuro_llm import ask
-
-    context = build_summary()
-    answer = ask(
-        f"Contexte de l'entreprise lambda-Section:\n{context}\n\nQuestion: {question}",
-        system="Tu es le chef de projet IA de lambda-Section. Réponds court et factuel, en français.",
-    )
-    if answer is None:
-        return {"answer": None, "engine": None, "context": context}
-    return {"answer": answer, "engine": "auto", "context": context}
-
-
-class Handler(BaseHTTPRequestHandler):
-    def _json(self, code: int, payload) -> None:
-        body = json.dumps(payload, indent=2, ensure_ascii=False, default=str).encode("utf-8")
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def _auth_ok(self) -> bool:
-        token = os.environ.get("KURO_API_TOKEN")
-        if not token:
-            return True
-        header = self.headers.get("Authorization", "")
-        return header == f"Bearer {token}"
-
-    def do_GET(self) -> None:  # noqa: N802
-        if not self._auth_ok():
-            self._json(401, {"error": "unauthorized"})
-            return
-        parsed = urllib.parse.urlparse(self.path)
-        qs = urllib.parse.parse_qs(parsed.query)
-        path = parsed.path.rstrip("/") or "/"
-        try:
-            if path == "/api/dashboard":
-                import generate_dashboard
-
-                self._json(200, generate_dashboard.build_payload())
-            elif path == "/api/status":
-                self._json(200, get_status())
-            elif path == "/api/projects":
-                self._json(200, {"projects": get_projects()})
-            elif path.startswith("/api/projects/"):
-                name = urllib.parse.unquote(path.rsplit("/", 1)[1])
-                proj = get_project(name)
-                self._json(404, {"error": "projet inconnu"}) if proj is None else self._json(200, proj)
-            elif path == "/api/alerts":
-                self._json(200, {"alerts": get_alerts(unack_only=qs.get("unack") == ["1"])})
-            elif path == "/api/sessions":
-                limit = int(qs.get("limit", ["20"])[0])
-                self._json(200, {"sessions": get_sessions(limit)})
-            elif path == "/api/memory":
-                self._json(200, {"memory": get_memory()})
-            elif path == "/api/summary":
-                self._json(200, {"summary": build_summary()})
-            elif path == "/api/robot":
-                self._json(200, get_robot())
-            elif path == "/api/finance":
-                self._json(200, get_finance())
-            elif path == "/api/metrics":
-                self._json(200, get_metrics())
-            elif path == "/api/strategy":
-                self._json(200, get_strategy())
-            elif path in STATIC_FILES:
-                file_path = DASHBOARD_DIR / STATIC_FILES[path]
-                if not file_path.exists():
-                    self._json(404, {"error": "fichier introuvable"})
-                    return
-                ctype = "text/html" if file_path.suffix == ".html" else (
-                    "application/javascript" if file_path.suffix == ".js" else (
-                        "text/css" if file_path.suffix == ".css" else "application/json"
-                    )
-                )
-                body = file_path.read_bytes()
-                self.send_response(200)
-                self.send_header("Content-Type", f"{ctype}; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                self.wfile.write(body)
-            else:
-                self._json(404, {"error": "route inconnue"})
-        except Exception as exc:
-            self._json(500, {"error": str(exc)})
-
-    def do_POST(self) -> None:  # noqa: N802
-        if not self._auth_ok():
-            self._json(401, {"error": "unauthorized"})
-            return
-        path = self.path.rstrip("/")
-        if path == "/api/ask":
-            try:
-                length = int(self.headers.get("Content-Length", 0))
-                data = json.loads(self.rfile.read(length).decode("utf-8"))
-                question = (data.get("question") or "").strip()
-                if not question:
-                    self._json(400, {"error": "question vide"})
-                    return
-                self._json(200, answer_question(question))
-            except Exception as exc:
-                self._json(500, {"error": str(exc)})
-            return
-        if path.startswith("/api/alerts/") and path.endswith("/ack"):
-            parts = path.split("/")
-            if len(parts) != 4 or not parts[3].isdigit():
-                self._json(400, {"error": "attendu: POST /api/alerts/{id}/ack"})
-                return
-            alert_id = int(parts[3])
-            try:
-                conn = sqlite3.connect(DB_PATH, timeout=5)
-                with conn:
-                    cur = conn.execute(
-                        "UPDATE alerts SET acknowledged = 1 WHERE id = ?", (alert_id,)
-                    )
-                    updated = cur.rowcount
-                conn.close()
-                if updated:
-                    self._json(200, {"acknowledged": alert_id})
-                else:
-                    self._json(404, {"error": f"alerte {alert_id} inconnue"})
-            except Exception as exc:
-                self._json(500, {"error": str(exc)})
-            return
-        if path == "/api/alerts/ack-all":
-            try:
-                length = int(self.headers.get("Content-Length", 0))
-                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
-                days = int(body.get("older_than_days", 0) or 0)
-                conn = sqlite3.connect(DB_PATH, timeout=5)
-                with conn:
-                    if days > 0:
-                        cur = conn.execute(
-                            "UPDATE alerts SET acknowledged = 1 WHERE acknowledged = 0 "
-                            "AND created_at < datetime('now', ?)",
-                            (f"-{days} days",),
-                        )
-                    else:
-                        cur = conn.execute(
-                            "UPDATE alerts SET acknowledged = 1 WHERE acknowledged = 0"
-                        )
-                    acked = cur.rowcount
-                conn.close()
-                self._json(200, {"acked": acked})
-            except Exception as exc:
-                self._json(500, {"error": str(exc)})
-            return
-        self._json(404, {"error": "route inconnue (POST /api/ask ou /api/alerts/{id}/ack)"})
-
-    def log_message(self, fmt, *args):  # silence les logs d'accès
-        pass
-
-
-class KuroServer(ThreadingHTTPServer):
-    # Refuse le double-bind : sur Windows SO_REUSEADDR autorise deux listeners
-    # silencieux sur le même port -> réponses aléatoires selon l'instance.
-    allow_reuse_address = False
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description="API REST Kuro")
-    parser.add_argument("--port", type=int, default=8767)
-    args = parser.parse_args()
-
-    if not DB_PATH.exists():
-        print(f"kuro.db introuvable: {DB_PATH}")
-        return 1
-
-    try:
-        server = KuroServer(("127.0.0.1", args.port), Handler)
-    except OSError as exc:
-        print(f"port {args.port} déjà occupé (instance Kuro API déjà active ?): {exc}")
-        return 1
-
-    print(f"Kuro API sur http://127.0.0.1:{args.port} (db: {DB_PATH})")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        server.server_close()
-    return 0
-
+__all__ = [
+    "DB_PATH", "STATIC_FILES", "Handler", "KuroServer", "answer_question",
+    "build_summary", "db", "get_alerts", "get_finance", "get_memory",
+    "get_metrics", "get_project", "get_projects", "get_robot", "get_sessions",
+    "get_status", "get_strategy", "get_system", "main", "rows",
+]
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -69,6 +69,8 @@ def run_git(path: Path, *args: str) -> GitResult:
         )
     except FileNotFoundError:
         return GitResult(False, "git not available")
+    except (NotADirectoryError, OSError) as exc:
+        return GitResult(False, f"git cwd invalide: {exc}".strip()[:120])
     except subprocess.TimeoutExpired:
         return GitResult(False, "git timeout")
 
@@ -83,7 +85,10 @@ def read_text(path: Path) -> str:
 
 
 def iso_from_timestamp(timestamp: float) -> str:
-    return datetime.fromtimestamp(timestamp).astimezone().isoformat(timespec="seconds")
+    try:
+        return datetime.fromtimestamp(timestamp).astimezone().isoformat(timespec="seconds")
+    except (OSError, OverflowError, ValueError):
+        return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
 def parse_list_file(path: Path) -> list[str]:
@@ -470,36 +475,154 @@ def discover_untracked_repositories(
     return extras
 
 
+def _safe_count(cursor: Any, sql: str) -> int:
+    """COUNT tolerant : table absente -> 0, jamais d'exception."""
+    try:
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        return int(row[0]) if row and row[0] is not None else 0
+    except Exception:
+        return 0
+
+
+def _safe_one(cursor: Any, sql: str) -> Any | None:
+    """SELECT scalaire tolerant : table absente -> None."""
+    try:
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        return row[0] if row else None
+    except Exception:
+        return None
+
+
 def collect_kuro_daemon_state() -> dict[str, Any]:
+    """Etat daemon Kuro : tolerant aux schemas partiels (fresh install).
+
+    Tables lues en best-effort : heartbeat (daemon v1) OU activity_log
+    (daemon v2), projects, alerts. Table absente -> compteur 0, pas "error".
+    "error" uniquement si le fichier DB est illisible.
+    """
     import sqlite3
-    state = {"status": "inactive", "alerts": [], "projectCount": 0}
+    state: dict[str, Any] = {"status": "inactive", "alerts": [],
+                             "projectCount": 0, "heartbeatAt": None}
     if not KURO_DB_FILE.exists():
         return state
 
     try:
-        conn = sqlite3.connect(KURO_DB_FILE)
+        conn = sqlite3.connect(f"file:{KURO_DB_FILE}?mode=ro",
+                               uri=True, timeout=5)
+    except Exception:
+        state["status"] = "error"
+        return state
+    try:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        # Check if daemon was active recently (last hour)
-        cursor.execute("SELECT MAX(timestamp) FROM activity_log")
-        row = cursor.fetchone()
-        if row and row[0]:
-            last_ts = datetime.fromisoformat(row[0].replace('Z', '+00:00'))
-            if (datetime.now().astimezone() - last_ts).total_seconds() < 3600:
-                state["status"] = "active"
+        # Battement recent : heartbeat (v1) sinon activity_log (v2).
+        last_ts_raw = _safe_one(
+            cursor, "SELECT MAX(timestamp) FROM heartbeat")
+        if last_ts_raw is None:
+            last_ts_raw = _safe_one(
+                cursor, "SELECT MAX(timestamp) FROM activity_log")
+        if last_ts_raw:
+            state["heartbeatAt"] = str(last_ts_raw)
+            try:
+                last_ts = datetime.fromisoformat(
+                    str(last_ts_raw).replace('Z', '+00:00'))
+                if not last_ts.tzinfo:
+                    last_ts = last_ts.astimezone()
+                if (datetime.now().astimezone() - last_ts).total_seconds() < 3600:
+                    state["status"] = "active"
+            except Exception:
+                pass
 
-        cursor.execute("SELECT COUNT(*) FROM projects")
-        state["projectCount"] = cursor.fetchone()[0]
-
-        cursor.execute("SELECT a.*, p.name as project_name FROM alerts a JOIN projects p ON a.project_id = p.id WHERE a.acknowledged = 0")
-        state["alerts"] = [dict(r) for r in cursor.fetchall()]
-
-        conn.close()
-    except Exception:
-        state["status"] = "error"
+        state["projectCount"] = _safe_count(
+            cursor, "SELECT COUNT(*) FROM projects")
+        try:
+            cursor.execute(
+                "SELECT a.*, p.name as project_name FROM alerts a "
+                "LEFT JOIN projects p ON a.project_id = p.id "
+                "WHERE a.acknowledged = 0 LIMIT 20")
+            state["alerts"] = [dict(r) for r in cursor.fetchall()]
+        except Exception:
+            state["alerts"] = []
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
     return state
+
+
+def collect_coverage_state() -> dict[str, Any]:
+    """Fraicheur de coverage.local.json (jamais d'exception).
+
+    Le dashboard affichait des % vieux de plusieurs semaines sans le dire.
+    On expose generated_at + age + pct moyen pour que l'UI previenne
+    quand la mesure est stale (>7 j) au lieu d'afficher un chiffre muet.
+    """
+    cov_file = ROOT_DIR / "coverage.local.json"
+    out: dict[str, Any] = {"present": False, "generatedAt": None,
+                           "ageDays": None, "stale": True,
+                           "repos": 0, "avgPct": None}
+    try:
+        if not cov_file.exists():
+            return out
+        data = json.loads(cov_file.read_text(encoding="utf-8"))
+        out["present"] = True
+        gen = data.get("generated_at")
+        out["generatedAt"] = gen
+        repos = data.get("repos") or []
+        out["repos"] = len(repos)
+        pcts = [r.get("pct_total") for r in repos
+                if isinstance(r.get("pct_total"), (int, float))]
+        out["avgPct"] = round(sum(pcts) / len(pcts), 1) if pcts else None
+        if gen:
+            try:
+                dt = datetime.fromisoformat(str(gen).replace("Z", "+00:00"))
+                if not dt.tzinfo:
+                    dt = dt.astimezone()
+                age_d = (datetime.now().astimezone() - dt).total_seconds() / 86400
+                out["ageDays"] = round(age_d, 1)
+                out["stale"] = age_d > 7
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return out
+
+
+def collect_ci_status_state() -> dict[str, Any]:
+    """Fraicheur de ci-status.json (jamais d'exception)."""
+    out: dict[str, Any] = {"present": False, "generatedAt": None,
+                           "ageDays": None, "stale": True,
+                           "overall": None}
+    for candidate in (ROOT_DIR / "ci-status.json",
+                      Path.home() / "Documents" / "Lemniscate-world" / "ci-status.json"):
+        try:
+            if not candidate.exists():
+                continue
+            data = json.loads(candidate.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                continue
+            out["present"] = True
+            out["generatedAt"] = data.get("generated_at")
+            out["overall"] = data.get("overall")
+            try:
+                dt = datetime.fromisoformat(
+                    str(data.get("generated_at")).replace("Z", "+00:00"))
+                if not dt.tzinfo:
+                    dt = dt.astimezone()
+                age_d = (datetime.now().astimezone() - dt).total_seconds() / 86400
+                out["ageDays"] = round(age_d, 1)
+                out["stale"] = age_d > 2
+            except Exception:
+                pass
+            break
+        except Exception:
+            continue
+    return out
 
 
 def collect_kuro_rules_repo_state() -> dict[str, Any]:
@@ -559,6 +682,8 @@ def build_payload(use_cache: bool = True) -> dict[str, Any]:
         "syncLog": sync_log,
         "kuroDaemon": collect_kuro_daemon_state(),
         "kuroRulesRepo": collect_kuro_rules_repo_state(),
+        "coverage": collect_coverage_state(),
+        "ciStatus": collect_ci_status_state(),
     }
     _PAYLOAD_CACHE["ts"] = time.monotonic()
     _PAYLOAD_CACHE["payload"] = payload

@@ -29,6 +29,10 @@ def _llm_hermetic(tmp_path, monkeypatch):
     monkeypatch.delenv("OLLAMA_MODEL", raising=False)
     monkeypatch.delenv("KURO_ROUTER", raising=False)
     monkeypatch.setenv("KURO_POLLINATIONS", "0")
+    for _var in ("GROQ_API_KEY", "NVIDIA_API_KEY", "GEMINI_API_KEY",
+                 "GOOGLE_AI_KEY", "HF_TOKEN", "HUGGINGFACE_API_KEY",
+                 "MISTRAL_API_KEY"):
+        monkeypatch.delenv(_var, raising=False)
     monkeypatch.setattr(kuro_llm, "_llm_last_path", lambda: tmp_path / "llm_last.json")
     monkeypatch.setattr(kuro_llm, "_cache_path", lambda: tmp_path / "llm_cache.json")
     monkeypatch.setattr(kuro_llm, "_queue_path", lambda: tmp_path / "llm_queue.jsonl")

@@ -1,0 +1,7 @@
+# kuro-sync : un depot par ligne "<nom> <url-https>". Lignes # ignorees.
+# Seuls les commits pousses voyagent (jamais le travail non commite).
+# Git ff-only : un depot divergeant est signale, jamais ecrase.
+kuro https://github.com/Lemniscate-world/Kuro.git
+kuro-rules https://github.com/Lemniscate-world/kuro-rules.git
+# Ajoute tes depots actifs ici (un par ligne). Evite les gros forks
+# (pytorch-fork, transformers-fork) : du volume pour rien sur le serveur.

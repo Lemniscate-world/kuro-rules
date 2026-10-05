@@ -11,3 +11,5 @@
 | 2026-09-25 | hub | OpenQuant | OpenQuant (recherche quantitative : des systèmes de trading  | 6ab6d2f1f28173fa3f4cbfeb |
 | 2026-09-26 | hub | OpenQuant | OpenQuant (recherche quantitative : des systèmes de trading  | 6ab824799f89edbefe7d4bd5 |
 | 2026-09-27 | hub | OpenQuant | OpenQuant, projet open source de trading quantitatif : la co | 6ab975ef36a0dcfcb3e2d587 |
+| 2026-09-28 | hub | Helium | Helium (réseau privé de partage de ressources de calcul (GPU | 6abac787c375fa5e8aa8742d |
+| 2026-10-04 | hub | NeuralDBG | Ce qu'on a appris sur NeuralDBG : P2b saturation conditioned | 6ac2b05d283083e601c00d40 |

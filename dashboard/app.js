@@ -2,7 +2,43 @@ const state = {
   data: null,
   activeOrg: "all",
   searchTerm: "",
+  pageSize: 5,
+  projPage: 0,
+  knowPage: 0,
+  rulePage: 0,
+  syncPage: 0,
 };
+
+function pagerSlice(items, page, pageSize) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const cur = Math.min(Math.max(0, page), totalPages - 1);
+  const start = cur * pageSize;
+  return { totalPages, cur, start, end: Math.min(items.length, start + pageSize), slice: items.slice(start, start + pageSize) };
+}
+
+function ensurePager(gridId, pagerId, total, cur, totalPages, start, end, onPrev, onNext) {
+  let pager = document.getElementById(pagerId);
+  const grid = document.getElementById(gridId);
+  if (!pager && grid && grid.parentElement) {
+    pager = document.createElement("div");
+    pager.id = pagerId;
+    pager.className = "chip-row";
+    pager.style.cssText = "margin-top:.8rem;align-items:center";
+    grid.insertAdjacentElement("afterend", pager);
+  }
+  if (!pager) return;
+  if (!total) {
+    pager.innerHTML = "";
+    return;
+  }
+  pager.innerHTML = `
+    <button class="chip" data-act="prev" ${cur === 0 ? "disabled style='opacity:.4'" : ""}>← Prev</button>
+    <span class="pill ghost">${total ? start + 1 : 0}–${end} / ${total}</span>
+    <button class="chip" data-act="next" ${cur >= totalPages - 1 ? "disabled style='opacity:.4'" : ""}>Next →</button>
+  `;
+  pager.querySelector('[data-act="prev"]').onclick = onPrev;
+  pager.querySelector('[data-act="next"]').onclick = onNext;
+}
 
 function formatDate(value) {
   if (!value) return "Unknown";
@@ -119,6 +155,7 @@ function renderOrgFilters(organizations) {
   container.querySelectorAll(".chip").forEach((button) => {
     button.addEventListener("click", () => {
       state.activeOrg = button.dataset.org;
+      state.projPage = 0;
       renderOrgFilters(organizations);
       renderProjects();
     });
@@ -149,17 +186,21 @@ function projectMatches(project) {
 function renderProjects() {
   const data = state.data;
   const container = document.getElementById("project-grid");
-  const projects = data.trackedProjects.filter((project) => project.exists && projectMatches(project));
+  const all = data.trackedProjects.filter((project) => project.exists && projectMatches(project));
 
-  if (!projects.length) {
+  if (!all.length) {
     container.innerHTML = `
       <article class="project-card empty">
         <h3>No projects match the current filter.</h3>
         <p>Try another organization or a broader search term.</p>
       </article>
     `;
+    ensurePager("project-grid", "project-pager", 0, 0, 1, 0, 0, () => {}, () => {});
     return;
   }
+
+  const { totalPages, cur, start, end, slice: projects } = pagerSlice(all, state.projPage, state.pageSize);
+  state.projPage = cur;
 
   container.innerHTML = projects
     .map((project) => {
@@ -169,6 +210,11 @@ function renderProjects() {
       const remote = project.remoteUrl || "No remote";
       const drift =
         project.ahead || project.behind ? `${project.ahead} ahead / ${project.behind} behind` : "upstream aligned";
+      const files = (project.dirtyFiles || []).slice(0, 3).join(", ");
+      const moreFiles = (project.dirtyFiles || []).length > 3 ? ` +${project.dirtyFiles.length - 3}` : "";
+      const workflows = project.workflowCount != null ? `${project.workflowCount} workflows` : "";
+      const session = project.hasSessionSummary ? "session ✓" : "no session";
+      const readme = project.hasReadme ? "readme ✓" : "no readme";
 
       return `
         <article class="project-card ${escapeHtml(project.status)}">
@@ -184,7 +230,13 @@ function renderProjects() {
             <span>${escapeHtml(sync)}</span>
             <span>${escapeHtml(drift)}</span>
           </div>
+          <div class="project-facts">
+            <span>${escapeHtml(workflows)}</span>
+            <span>${escapeHtml(session)}</span>
+            <span>${escapeHtml(readme)}</span>
+          </div>
           <p class="project-commit">${escapeHtml(project.lastCommitMessage || "No commit metadata found")}</p>
+          ${files ? `<p class="project-commit" title="${escapeHtml((project.dirtyFiles || []).join(", "))}">📁 ${escapeHtml(files)}${escapeHtml(moreFiles)}</p>` : ""}
           <div class="project-footer">
             <span>${escapeHtml(formatDate(project.lastCommitAt))}</span>
             <code title="${escapeHtml(remote)}">${escapeHtml(remote)}</code>
@@ -193,6 +245,9 @@ function renderProjects() {
       `;
     })
     .join("");
+  ensurePager("project-grid", "project-pager", all.length, cur, totalPages, start, end,
+    () => { state.projPage = Math.max(0, state.projPage - 1); renderProjects(); },
+    () => { state.projPage = state.projPage + 1; renderProjects(); });
 }
 
 function renderKnowledge(knowledgeBase) {
@@ -202,8 +257,10 @@ function renderKnowledge(knowledgeBase) {
 
   const container = document.getElementById("knowledge-grid");
   const entries = knowledgeBase.entries || [];
+  const { totalPages, cur, start, end, slice: page } = pagerSlice(entries, state.knowPage, state.pageSize);
+  state.knowPage = cur;
 
-  container.innerHTML = entries
+  container.innerHTML = page
     .map(
       (entry) => `
         <article class="memory-card">
@@ -218,11 +275,16 @@ function renderKnowledge(knowledgeBase) {
       `
     )
     .join("");
+  ensurePager("knowledge-grid", "knowledge-pager", entries.length, cur, totalPages, start, end,
+    () => { state.knowPage = Math.max(0, state.knowPage - 1); renderKnowledge(state.data.knowledgeBase || { entries: [], counts: {} }); },
+    () => { state.knowPage = state.knowPage + 1; renderKnowledge(state.data.knowledgeBase || { entries: [], counts: {} }); });
 }
 
 function renderRules(ruleHighlights) {
   const container = document.getElementById("rule-grid");
-  container.innerHTML = ruleHighlights
+  const { totalPages, cur, start, end, slice: page } = pagerSlice(ruleHighlights || [], state.rulePage, state.pageSize);
+  state.rulePage = cur;
+  container.innerHTML = page
     .map(
       (rule) => `
         <article class="rule-card">
@@ -234,11 +296,16 @@ function renderRules(ruleHighlights) {
       `
     )
     .join("");
+  ensurePager("rule-grid", "rule-pager", (ruleHighlights || []).length, cur, totalPages, start, end,
+    () => { state.rulePage = Math.max(0, state.rulePage - 1); renderRules(state.data.ruleHighlights || []); },
+    () => { state.rulePage = state.rulePage + 1; renderRules(state.data.ruleHighlights || []); });
 }
 
 function renderSync(syncLog, kuroRulesRepo) {
   const syncCard = document.getElementById("sync-card");
-  const latestEntries = (syncLog.entries || []).slice(0, 8);
+  const allEntries = syncLog.entries || [];
+  const { totalPages, cur, start, end, slice: latestEntries } = pagerSlice(allEntries, state.syncPage, state.pageSize);
+  state.syncPage = cur;
 
   syncCard.innerHTML = `
     <div class="sync-topline">
@@ -258,7 +325,19 @@ function renderSync(syncLog, kuroRulesRepo) {
         )
         .join("")}
     </div>
+    <div id="sync-pager" class="chip-row" style="margin-top:.8rem;align-items:center"></div>
   `;
+
+  const pager = document.getElementById("sync-pager");
+  if (pager) {
+    pager.innerHTML = `
+      <button class="chip" data-act="prev" ${cur === 0 ? "disabled style='opacity:.4'" : ""}>← Prev</button>
+      <span class="pill ghost">${allEntries.length ? start + 1 : 0}–${end} / ${allEntries.length}</span>
+      <button class="chip" data-act="next" ${cur >= totalPages - 1 ? "disabled style='opacity:.4'" : ""}>Next →</button>
+    `;
+    pager.querySelector('[data-act="prev"]').onclick = () => { state.syncPage = Math.max(0, state.syncPage - 1); renderSync(state.data.syncLog || {}, state.data.kuroRulesRepo || {}); };
+    pager.querySelector('[data-act="next"]').onclick = () => { state.syncPage = state.syncPage + 1; renderSync(state.data.syncLog || {}, state.data.kuroRulesRepo || {}); };
+  }
 
   const dirty = kuroRulesRepo.dirtyCount ? `${kuroRulesRepo.dirtyCount} dirty files` : "clean worktree";
   document.getElementById("kuro-card").innerHTML = `
@@ -279,6 +358,7 @@ function bindSearch() {
   const input = document.getElementById("project-search");
   input.addEventListener("input", (event) => {
     state.searchTerm = event.target.value;
+    state.projPage = 0;
     renderProjects();
   });
 }
@@ -293,12 +373,30 @@ async function loadData() {
   return await response.json();
 }
 
+function freshnessSuffix(data) {
+  // Age du snapshot + alertes stale (coverage / CI) : le dashboard ne doit
+  // plus afficher un chiffre vieux de 3 semaines sans le dire.
+  const parts = [];
+  try {
+    const ageMin = (Date.now() - new Date(data.generatedAt).getTime()) / 60000;
+    if (!Number.isNaN(ageMin) && ageMin > 5) parts.push(`vieux de ${Math.round(ageMin)} min`);
+    else if (!Number.isNaN(ageMin)) parts.push("live");
+  } catch (_) {}
+  const cov = data.coverage;
+  if (cov && cov.present && cov.stale) parts.push(`coverage stale (${cov.ageDays} j)`);
+  else if (cov && !cov.present) parts.push("coverage absente");
+  const ci = data.ciStatus;
+  if (ci && ci.present && ci.stale) parts.push(`CI stale (${ci.ageDays} j)`);
+  return parts.length ? ` · ${parts.join(" · ")}` : "";
+}
+
 async function load() {
   try {
     const data = await loadData();
     state.data = data;
 
-    document.getElementById("generated-at").textContent = `Snapshot ${formatDate(data.generatedAt)}`;
+    document.getElementById("generated-at").textContent =
+      `Snapshot ${formatDate(data.generatedAt)}${freshnessSuffix(data)}`;
     document.getElementById("workspace-root").textContent = data.workspaceRoot;
 
     renderMetrics(data.summary);

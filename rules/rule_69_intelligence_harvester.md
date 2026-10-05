@@ -33,6 +33,20 @@ Collecter 3+ sources externes (citations, études, posts, données) qui prouvent
 4. Ajouter dans `research/tech_scout.md` (creer si inexistant) + lier dans `desk_research_report.md` Risk Analysis Remedy
 5. Si 3+ repos trouves avec last commit <30j et >500 stars: Technical Risk peut etre downgrade HIGH->MEDIUM (documenter)
 
+## Autorisation permanente "en apprendre" (2026-10-04)
+
+Quand l'utilisateur dit "en apprendre <url github>" ou "on peut apprendre quoi de ceci ? <url>",
+l'agent est autorise en permanence a cloner le repo en lecture seule pour apprentissage,
+sans redemander :
+
+1. `git clone --depth 1 --filter=blob:none --sparse <url>` dans `%TEMP%/opencode` ou `/tmp`
+   (jamais dans le workspace sauf demande explicite), `sparse-checkout` minimal
+   (`docs`, `crates/.../embedding_host`, `README.md`) pour rester leger.
+2. Lecture seule : jamais de commit/push/fork, jamais d'exfiltration de secrets,
+   jamais d'execution de code non revu du repo clone.
+3. Restituer : URL / stars / license / ce qu'il resout / limites / snippet 1-3 lignes,
+   comme un Tech Scout.
+
 ## Processus
 
 1. Identifier l'hypothèse à vérifier (ex: "les devs ML galèrent avec le debugging de gradients")

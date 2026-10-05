@@ -170,3 +170,17 @@ coverage.local.json
 
 # artefacts generes
 apps/kuro-pulse/kuro.ico
+leads.local.json
+nurture.local.json
+
+# Packaging kuro-dashboard (R76 : dist/ build/ + oeufs python)
+build/
+*.egg-info/
+
+# Config gateway reelle (cles via env, jamais commitee ; cf. litellm-config.example.yaml)
+litellm-config.yaml
+
+# graphes locaux Omnigraph (POC kuro-omnigraph, jamais commites)
+*.omni/
+*.omni
+graph.omni

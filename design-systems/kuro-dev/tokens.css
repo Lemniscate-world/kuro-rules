@@ -1,0 +1,225 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * design-systems/kuro-dev/tokens.css
+ *
+ * Structured token bindings for "Kuro Dev" — Primer-dense devtool
+ * for developers: docs, CLI, dashboards. Light functional canvas,
+ * visible borders, system fonts, tabular numbers.
+ *
+ * This file pre-compiles the values described in `DESIGN.md` into
+ * the schema shared with every OD design system. Agents generating a
+ * Kuro-Dev-flavored artifact should paste the `:root { … }` block
+ * verbatim into the first `<style>` of the artifact, then reference
+ * every value through `var(--name)` — never re-author the hex
+ * inline. The fixture in `components.html` is the round-trip proof
+ * that the token block alone is sufficient to render a recognisably
+ * Kuro Dev page.
+ *
+ * Why this file exists:
+ *   DESIGN.md gives humans context ("Primer blue #0969da — primary
+ *   actions"), but agents have to translate prose names like
+ *   "Primer blue" into the standard token names the lint enforces
+ *   (`--accent`). This file pre-translates the brand once, so agents
+ *   copy structure rather than invent it.
+ *
+ * Schema notes (Kuro Dev binds the shared schema in seven brand-
+ * specific ways — see `#KuroDev N` tags inline for each decision):
+ *   #KuroDev 1  — 3-tier surface: white page / #f6f8fa raised /
+ *                #eaeef2 inset-warm for wells, row hover, drop zones.
+ *   #KuroDev 2  — 3-tier foreground (#1f2328 / #59636e / #656c76).
+ *                No fourth metadata tier — `--meta` aliases
+ *                `var(--muted)`, like Stripe.
+ *   #KuroDev 3  — Two border tiers, both always visible: #d0d7de
+ *                default and #eaeef2 soft hairlines (opposite of
+ *                Linear's translucent-white-on-dark trick).
+ *   #KuroDev 4  — `--accent-hover` and `--accent-active` bind to
+ *                Primer's own #0550ae (not a black-mix formula).
+ *   #KuroDev 5  — Type scale ceiling is 40px (`--text-4xl`), not
+ *                56/72px. Display 40px/600 is for empty states only —
+ *                dense tools don't stage marketing heroes.
+ *   #KuroDev 6  — `--elev-raised` carries Primer's neutral layered
+ *                shadow (no blue tint, no luminance stepping).
+ *   #KuroDev 7  — `--focus-ring` is the Primer halo: 2px solid
+ *                accent edge + translucent outer glow, always visible
+ *                on white for keyboard-heavy CLI/doc flows.
+ *
+ * Brand-specific extensions (Layer C):
+ *   None. Diff red/green, syntax colors, and avatar hues from
+ *   DESIGN.md are *data* — they live inline where used, derived
+ *   from `--success` / `--danger`, never promoted to schema slots.
+ * ─────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ─── Surface (3 levels — #KuroDev 1) ───────────────────────────
+   * White page, subtle raised panels, inset warm wells. Borders do
+   * the structure; shadow stays reserved for floating layers.
+   * Brands without a tertiary surface tier should alias
+   * `--surface-warm` to `var(--surface)`; Kuro Dev binds a real
+   * value because dense tables and wells need that quiet
+   * separation. */
+  --bg:           #ffffff;
+  --surface:      #f6f8fa;
+  --surface-warm: #eaeef2;  /* inset wells, row hover, drop zones */
+
+  /* ─── Foreground ramp (3 tiers — #KuroDev 2) ──────────────────
+   * Primer default ink (`#1f2328`) carries headings and body —
+   * never pure black. Muted (`#59636e`) is secondary text.
+   * `#656c76` is placeholders and captions (CI-checked 4.5:1
+   * on white per semantic pair).
+   *
+   * Kuro Dev doesn't differentiate a fourth metadata tier, so
+   * `--meta` aliases `var(--muted)`. */
+  --fg:    #1f2328;          /* primer ink — headings, body, labels */
+  --fg-2:  #59636e;          /* primer muted — secondary text */
+  --muted: #656c76;          /* placeholders, captions */
+  --meta:  var(--muted);     /* alias — no separate metadata tier */
+
+  /* ─── Border (2 tiers — #KuroDev 3) ────────────────────────────
+   * Both tiers always visible on light: default containers and
+   * inputs, soft hairlines for row separators and nested
+   * dividers. Never translucent-white-on-dark (that's Linear). */
+  --border:      #d0d7de;
+  --border-soft: #eaeef2;  /* row hairlines, nested dividers */
+
+  /* ─── Accent ──────────────────────────────────────────────────────
+   * Primer blue — primary buttons, links, checked controls,
+   * selected nav, focus base. Hard cap of ≤2 visible uses per
+   * screen (lint `accent-overuse` P1 enforces). */
+  --accent:    #0969da;
+  --accent-on: #ffffff;     /* button label on blue — DESIGN.md §4 */
+
+  /* ─── Accent states (#KuroDev 4) ─────────────────────────────────
+   * Hand-picked Primer value, NOT a black-mix formula.
+   *
+   * Schema rule: every brand provides `--accent-hover` and
+   * `--accent-active`. The binding strategy (formula / identity /
+   * hand-picked) is brand-decided. */
+  --accent-hover:  #0550ae;  /* Primer darker blue — DESIGN.md §2 */
+  --accent-active: #0550ae;  /* Primer pressed/selected state */
+
+  /* ─── Semantic ───────────────────────────────────────────────────
+   * Primer status triad. Success green for passing/merged,
+   * amber for draft/attention, red for failing/destructive.
+   * Status only — never decorative, never primary actions. */
+  --success: #1a7f37;        /* DESIGN.md success green */
+  --warn:    #9a6700;        /* amber — draft / attention */
+  --danger:  #d1242c;        /* red — failing / destructive */
+
+  /* ─── Typography — fonts ─────────────────────────────────────────
+   * System stack is the identity (DESIGN.md §1): no licensed
+   * display face, no OpenType stylistic set, no negative
+   * tracking. Mono stack for code, IDs, paths, diffs.
+   *
+   * `--font-mono` is the Primer mono stack per DESIGN.md §3 —
+   * code blocks at 12px / 400 with 1.67 line-height, plus
+   * tabular-nums on every countable surface. */
+  --font-display:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-body:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* ─── Typography — type scale (#KuroDev 5) ─────────────────────
+   * Dense devtool mapping: 12 / 14 / 14 / 16 /
+   * 20 / 24 / 32 / 40. Default body is 14px (not 16px);
+   * display ceiling is 40px/600 for empty states only.
+   * The 10px micro tier is inlined where used, never promoted. */
+  --text-xs:   12px;         /* metadata, counters, code */
+  --text-sm:   14px;         /* secondary UI, help text */
+  --text-base: 14px;         /* body baseline — dense default */
+  --text-lg:   16px;         /* docs lede, panel intro */
+  --text-xl:   20px;         /* panel title */
+  --text-2xl:  24px;         /* section title */
+  --text-3xl:  32px;         /* page title */
+  --text-4xl:  40px;         /* display — empty states only */
+
+  /* ─── Typography — leading & tracking ───────────────────────────
+   * Reading rhythm is 1.50 — Primer body openness for dense 14px
+   * system text.
+   *
+   * `--leading-tight` is the heading rhythm — 1.25 matches
+   * DESIGN.md panel/page titles.
+   *
+   * `--tracking-display` is brand-defining by absence: 0, always.
+   * No Stripe -0.02em compression, no Linear -0.022em
+   * engineering. Tool text must never compress. */
+  --leading-body:     1.50;
+  --leading-tight:    1.25;
+  --tracking-display: 0;
+
+  /* ─── Spacing ────────────────────────────────────────────────────
+   * 4px Primer base unit. The schema's 4/8/12/16/20/24/32/48
+   * ladder covers the tool chrome rhythm; tables add hairline
+   * rows (`--border-soft`) rather than extra spacing tiers. */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+
+  /* ─── Section rhythm ─────────────────────────────────────────────
+   * Dense tool rhythm: 64px desktop / 48px tablet / 32px phone.
+   * Tool pages scroll with scan lines; they don't stage heroes
+   * with Stripe's 96px air or Linear's 80px+ isolation. */
+  --section-y-desktop: 64px;
+  --section-y-tablet:  48px;
+  --section-y-phone:   32px;
+
+  /* ─── Radius ─────────────────────────────────────────────────────
+   * Functional Primer rounding: 6px everywhere functional,
+   * 12px for dialogs and large panels only. No 4px small tier
+   * (that's Stripe), no 8px card middle (that's Linear).
+   * `--radius-pill` is counters and status pills only. */
+  --radius-sm:   6px;        /* buttons, inputs, cards, badges */
+  --radius-md:   6px;        /* same tier — Primer flat scale */
+  --radius-lg:   12px;       /* dialogs, large panels only */
+  --radius-pill: 9999px;     /* counters, status pills only */
+
+  /* ─── Elevation (3 levels — #KuroDev 6) ────────────────────────
+   * Primer neutral depth: borders structure the page, shadow
+   * only lifts floating layers (popovers, dialogs, dropdowns).
+   *
+   * No chromatic tint (that's Stripe), no white-border
+   * luminance stepping (that's Linear). Shadow means "floats",
+   * nothing else. */
+  --elev-flat:   none;
+  --elev-ring:   0 0 0 1px var(--border);
+  --elev-raised:
+    0 1px 2px   rgba(31, 35, 40, 0.06),
+    0 8px 24px  rgba(66, 74, 83, 0.12);
+
+  /* ─── Focus ring (#KuroDev 7) ──────────────────────────────────
+   * Primer halo — 2px solid accent edge plus a translucent outer
+   * glow via color-mix. Keyboard-heavy CLI/doc flows mandate
+   * unmistakable focus on white.
+   *
+   * Implemented as box-shadow stack so it layers outside the
+   * element without affecting layout. */
+  --focus-ring:
+    0 0 0 2px var(--accent),
+    0 0 0 5px color-mix(in oklab, var(--accent), transparent 70%);
+
+  /* ─── Motion ─────────────────────────────────────────────────────
+   * Dense-tool timing: 80ms micro, 160ms base, one easeOutCubic
+   * curve. Hover shifts background/border only — never layout
+   * (no width/height animation), never bounce. */
+  --motion-fast:   80ms;
+  --motion-base:   160ms;
+  --ease-standard: cubic-bezier(0.33, 1, 0.68, 1);
+
+  /* ─── Layout ─────────────────────────────────────────────────────
+   * 1280px wide container for tables and diffs (vs Stripe 1080,
+   * Linear 1200). Gutters compress 32 → 24 → 16. Sidebar 264px
+   * + fluid main; tables scroll horizontally with sticky first
+   * column on small screens. */
+  --container-max:            1280px;
+  --container-gutter-desktop: 32px;
+  --container-gutter-tablet:  24px;
+  --container-gutter-phone:   16px;
+}

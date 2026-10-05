@@ -69,7 +69,10 @@ def _static_dir() -> Path:
 
 
 STATIC_FILES = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js",
-                "/styles.css": "styles.css", "/dashboard-data.json": "dashboard-data.json"}
+                "/styles.css": "styles.css"}
+# /dashboard-data.json et /api/dashboard servent le payload LIVE (scan 60 s
+# cache) : le snapshot statique dashboard/dashboard-data.json n'est qu'un
+# repli hors-ligne (gitigne, vite stale). Ne jamais le servir via l'API.
 
 
 def db() -> sqlite3.Connection:
@@ -93,97 +96,133 @@ def _count(conn: sqlite3.Connection, sql: str) -> int:
 def get_status() -> dict:
     conn = db()
     try:
-        hb = rows(conn, "SELECT * FROM heartbeat ORDER BY timestamp DESC LIMIT 1")
-    except sqlite3.Error:
-        hb = []
-    out = {
-        "api_version": "1.1",
-        "projects": _count(conn, "SELECT COUNT(*) AS n FROM projects"),
-        "sessions": _count(conn, "SELECT COUNT(*) AS n FROM sessions"),
-        "alerts_open": _count(conn, "SELECT COUNT(*) AS n FROM alerts WHERE acknowledged = 0"),
-        "memory_nodes": _count(conn, "SELECT COUNT(*) AS n FROM memory_nodes"),
-        "heartbeat": hb[0] if hb else None,
-        "llm_engine": None,
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-    }
-    try:
-        from kuro_llm import available
+        try:
+            hb = rows(conn, "SELECT * FROM heartbeat ORDER BY timestamp DESC LIMIT 1")
+        except sqlite3.Error:
+            hb = []
+        out = {
+            "api_version": "1.1",
+            "projects": _count(conn, "SELECT COUNT(*) AS n FROM projects"),
+            "sessions": _count(conn, "SELECT COUNT(*) AS n FROM sessions"),
+            "alerts_open": _count(conn, "SELECT COUNT(*) AS n FROM alerts WHERE acknowledged = 0"),
+            "memory_nodes": _count(conn, "SELECT COUNT(*) AS n FROM memory_nodes"),
+            "heartbeat": hb[0] if hb else None,
+            "llm_engine": None,
+            "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        }
+        try:
+            from kuro_llm import available
 
-        out["llm_engine"] = available()
-    except Exception:
-        pass
-    return out
+            out["llm_engine"] = available()
+        except Exception:
+            pass
+        return out
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_projects() -> list[dict]:
     conn = db()
-    return rows(
-        conn,
-        """SELECT id, name, section, status, progress_pct, last_activity
-           FROM projects ORDER BY progress_pct DESC""",
-    )
+    try:
+        return rows(
+            conn,
+            """SELECT id, name, section, status, progress_pct, last_activity
+               FROM projects ORDER BY progress_pct DESC""",
+        )
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_project(name: str) -> dict | None:
     conn = db()
-    proj = rows(
-        conn,
-        """SELECT id, name, path, section, status, progress_pct, last_activity, created_at
-           FROM projects WHERE lower(name) = lower(?)""",
-        (name,),
-    )
-    if not proj:
-        return None
-    p = proj[0]
-    p["sessions"] = rows(
-        conn,
-        """SELECT session_date, editor, progress_before, progress_after,
-                  tests_status, blockers, next_steps
-           FROM sessions WHERE project_id = ? ORDER BY session_date DESC LIMIT 10""",
-        (p["id"],),
-    )
-    p["alerts"] = rows(
-        conn,
-        """SELECT alert_type, message, severity, acknowledged, created_at
-           FROM alerts WHERE project_id = ? ORDER BY created_at DESC LIMIT 10""",
-        (p["id"],),
-    )
-    del p["id"]
-    return p
+    try:
+        proj = rows(
+            conn,
+            """SELECT id, name, path, section, status, progress_pct, last_activity, created_at
+               FROM projects WHERE lower(name) = lower(?)""",
+            (name,),
+        )
+        if not proj:
+            return None
+        p = proj[0]
+        p["sessions"] = rows(
+            conn,
+            """SELECT session_date, editor, progress_before, progress_after,
+                      tests_status, blockers, next_steps
+               FROM sessions WHERE project_id = ? ORDER BY session_date DESC LIMIT 10""",
+            (p["id"],),
+        )
+        p["alerts"] = rows(
+            conn,
+            """SELECT alert_type, message, severity, acknowledged, created_at
+               FROM alerts WHERE project_id = ? ORDER BY created_at DESC LIMIT 10""",
+            (p["id"],),
+        )
+        del p["id"]
+        return p
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_alerts(unack_only: bool = False) -> list[dict]:
     conn = db()
-    where = "WHERE a.acknowledged = 0" if unack_only else ""
-    return rows(
-        conn,
-        f"""SELECT a.id, p.name AS project, a.alert_type, a.message, a.severity,
-                   a.acknowledged, a.created_at
-            FROM alerts a LEFT JOIN projects p ON p.id = a.project_id
-            {where} ORDER BY a.created_at DESC LIMIT 100""",
-    )
+    try:
+        where = "WHERE a.acknowledged = 0" if unack_only else ""
+        return rows(
+            conn,
+            f"""SELECT a.id, p.name AS project, a.alert_type, a.message, a.severity,
+                       a.acknowledged, a.created_at
+                FROM alerts a LEFT JOIN projects p ON p.id = a.project_id
+                {where} ORDER BY a.created_at DESC LIMIT 100""",
+        )
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_sessions(limit: int = 20) -> list[dict]:
     conn = db()
-    return rows(
-        conn,
-        f"""SELECT p.name AS project, s.session_date, s.editor,
-                   s.progress_before, s.progress_after, s.tests_status, s.blockers
-            FROM sessions s LEFT JOIN projects p ON p.id = s.project_id
-            ORDER BY s.session_date DESC LIMIT {int(limit)}""",
-    )
+    try:
+        return rows(
+            conn,
+            f"""SELECT p.name AS project, s.session_date, s.editor,
+                       s.progress_before, s.progress_after, s.tests_status, s.blockers
+                FROM sessions s LEFT JOIN projects p ON p.id = s.project_id
+                ORDER BY s.session_date DESC LIMIT {int(limit)}""",
+        )
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_memory() -> list[dict]:
     conn = db()
-    return rows(
-        conn,
-        """SELECT n.node_type, n.title, substr(n.summary, 1, 200) AS summary,
-                  n.level, p.name AS project, n.created_at
-           FROM memory_nodes n LEFT JOIN projects p ON p.id = n.project_id
-           ORDER BY n.created_at DESC LIMIT 100""",
-    )
+    try:
+        return rows(
+            conn,
+            """SELECT n.node_type, n.title, substr(n.summary, 1, 200) AS summary,
+                      n.level, p.name AS project, n.created_at
+               FROM memory_nodes n LEFT JOIN projects p ON p.id = n.project_id
+               ORDER BY n.created_at DESC LIMIT 100""",
+        )
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_robot() -> dict:
@@ -275,17 +314,23 @@ def get_system() -> dict:
 def build_summary() -> str:
     st = get_status()
     conn = db()
-    stale = rows(
-        conn,
-        """SELECT name, status, progress_pct, last_activity FROM projects
-           WHERE last_activity < datetime('now', '-14 days')
-           ORDER BY last_activity ASC LIMIT 8""",
-    )
-    top_alerts = rows(
-        conn,
-        """SELECT message, severity FROM alerts
-           WHERE acknowledged = 0 ORDER BY created_at DESC LIMIT 5""",
-    )
+    try:
+        stale = rows(
+            conn,
+            """SELECT name, status, progress_pct, last_activity FROM projects
+               WHERE last_activity < datetime('now', '-14 days')
+               ORDER BY last_activity ASC LIMIT 8""",
+        )
+        top_alerts = rows(
+            conn,
+            """SELECT message, severity FROM alerts
+               WHERE acknowledged = 0 ORDER BY created_at DESC LIMIT 5""",
+        )
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
     lines = [
         f"Projets: {st['projects']} · Sessions: {st['sessions']} · "
         f"Alertes ouvertes: {st['alerts_open']} · Nœuds mémoire: {st['memory_nodes']}",
@@ -346,12 +391,16 @@ class Handler(BaseHTTPRequestHandler):
         qs = urllib.parse.parse_qs(parsed.query)
         path = parsed.path.rstrip("/") or "/"
         try:
-            if path.startswith("/api/") and path != "/api/system" and not DB_PATH.exists():
+            _DB_OPTIONAL = ("/api/system", "/api/dashboard", "/dashboard-data.json")
+            if path.startswith("/api/") and path not in _DB_OPTIONAL and not DB_PATH.exists():
                 self._json(503, {"error": "no-db",
-                                 "detail": "kuro.db absente : seul /api/system repond "
+                                 "detail": "kuro.db absente : seuls /api/system et "
+                                           "/api/dashboard repondent "
                                            "(relancer avec une base ou monter ~/.kuro)"})
                 return
-            if path == "/api/dashboard":
+            if path in ("/api/dashboard", "/dashboard-data.json"):
+                # Payload live (cache 60 s cote scan) : jamais le fichier
+                # statique gitigne. Ne requiert pas la DB (git + fichiers).
                 self._json(200, scan_build_payload())
             elif path == "/api/status":
                 self._json(200, get_status())
@@ -456,11 +505,13 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(500, {"error": str(exc)})
             return
         if path.startswith("/api/alerts/") and path.endswith("/ack"):
+            # "/api/alerts/1/ack" -> ['', 'api', 'alerts', '1', 'ack'] (len 5)
             parts = path.split("/")
-            if len(parts) != 4 or not parts[3].isdigit():
+            if len(parts) != 5 or not parts[3].isdigit():
                 self._json(400, {"error": "attendu: POST /api/alerts/{id}/ack"})
                 return
             alert_id = int(parts[3])
+            conn = None
             try:
                 conn = sqlite3.connect(DB_PATH, timeout=5)
                 with conn:
@@ -468,15 +519,21 @@ class Handler(BaseHTTPRequestHandler):
                         "UPDATE alerts SET acknowledged = 1 WHERE id = ?", (alert_id,)
                     )
                     updated = cur.rowcount
-                conn.close()
                 if updated:
                     self._json(200, {"acknowledged": alert_id})
                 else:
                     self._json(404, {"error": f"alerte {alert_id} inconnue"})
             except Exception as exc:
                 self._json(500, {"error": str(exc)})
+            finally:
+                try:
+                    if conn is not None:
+                        conn.close()
+                except Exception:
+                    pass
             return
         if path == "/api/alerts/ack-all":
+            conn = None
             try:
                 length = int(self.headers.get("Content-Length", 0))
                 body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
@@ -494,10 +551,15 @@ class Handler(BaseHTTPRequestHandler):
                             "UPDATE alerts SET acknowledged = 1 WHERE acknowledged = 0"
                         )
                     acked = cur.rowcount
-                conn.close()
                 self._json(200, {"acked": acked})
             except Exception as exc:
                 self._json(500, {"error": str(exc)})
+            finally:
+                try:
+                    if conn is not None:
+                        conn.close()
+                except Exception:
+                    pass
             return
         self._json(404, {"error": "route inconnue (POST /api/ask, /api/compute/request ou /api/alerts/{id}/ack)"})
 

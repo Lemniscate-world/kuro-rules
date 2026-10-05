@@ -447,10 +447,18 @@ def _usage_path() -> Path:
 _USAGE_COST_PER_MTOK = {
     "openrouter": 0.0,
     "groq": 0.0,
+    "nvidia": 0.0,
+    "gemini": 0.0,
+    "hf": 0.0,
+    "mistral": 0.0,
     "deepseek": 1.0,
     "ollama-cloud": 2.0,
     "litellm:openrouter": 0.0,
     "litellm:groq": 0.0,
+    "litellm:nvidia": 0.0,
+    "litellm:gemini": 0.0,
+    "litellm:huggingface": 0.0,
+    "litellm:mistral": 0.0,
     "litellm:deepseek": 1.0,
     "pollinations": 0.0,
     "cache": 0.0,
@@ -548,6 +556,18 @@ def _litellm_router(prompt: str, system: str) -> tuple[str | None, str]:
     if os.environ.get("GROQ_API_KEY"):
         fallbacks.append("groq/" + os.environ.get(
             "GROQ_MODEL", DEFAULT_GROQ_MODEL))
+    if os.environ.get("NVIDIA_API_KEY"):
+        fallbacks.append("nvidia_nim/" + os.environ.get(
+            "NVIDIA_MODEL", "moonshotai/kimi-k3"))
+    if os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_AI_KEY", ""):
+        fallbacks.append("gemini/" + os.environ.get(
+            "GEMINI_MODEL", "gemini-2.5-flash"))
+    if os.environ.get("HF_TOKEN", "") or os.environ.get("HUGGINGFACE_API_KEY", ""):
+        fallbacks.append("huggingface/" + os.environ.get(
+            "HF_MODEL", "zai-org/GLM-5.3"))
+    if os.environ.get("MISTRAL_API_KEY"):
+        fallbacks.append("mistral/" + os.environ.get(
+            "MISTRAL_MODEL", "mistral-small-latest"))
     if os.environ.get("DEEPSEEK_API_KEY"):
         fallbacks.append("deepseek/" + os.environ.get(
             "DEEPSEEK_MODEL", DEFAULT_DEEPSEEK_MODEL))
@@ -670,6 +690,76 @@ def _breaker_note(label: str, failed: bool) -> None:
         pass
 
 
+def _chat_completions(base: str, model: str, key: str, prompt: str,
+                      system: str, timeout: int = 120,
+                      extra_headers: dict | None = None,
+                      max_tokens: int = 1200) -> tuple[str | None, str]:
+    """Appel OpenAI chat/completions generique (copie du pattern OpenQuant).
+
+    Retourne (texte, "ok") ou (None, statut). Jamais d exception levee
+    (les erreurs reseau remontent en "error" via _post).
+    """
+    if not key:
+        return None, "no-key"
+    headers = {"Authorization": f"Bearer {key}"}
+    if extra_headers:
+        headers.update(extra_headers)
+    data = _post(
+        f"{base.rstrip('/')}/chat/completions",
+        {"model": model,
+         "messages": [{"role": "system", "content": system},
+                      {"role": "user", "content": prompt}],
+         "max_tokens": int(os.environ.get("KURO_CHAT_MAX_TOKENS", str(max_tokens))),
+         "temperature": 0.3},
+        headers,
+        timeout=timeout,
+    )
+    if not data:
+        return None, "error"
+    _TLS.usage = _openai_usage(data)
+    try:
+        msg = data["choices"][0]["message"]
+        text = (msg.get("content") or msg.get("reasoning") or "").strip()
+        return (text, "ok") if text else (None, "empty")
+    except Exception:
+        return None, "bad-shape"
+
+
+def _nvidia(prompt: str, system: str) -> tuple[str | None, str]:
+    """NVIDIA Build gratuit (Kimi K3, le + intelligent gratuit)."""
+    return _chat_completions(
+        os.environ.get("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+        os.environ.get("NVIDIA_MODEL", "moonshotai/kimi-k3"),
+        os.environ.get("NVIDIA_API_KEY", ""), prompt, system, timeout=150)
+
+
+def _gemini(prompt: str, system: str) -> tuple[str | None, str]:
+    """Gemini gratuit permanent (1M ctx). Cle : aistudio.google.com."""
+    return _chat_completions(
+        os.environ.get("GEMINI_BASE_URL",
+                       "https://generativelanguage.googleapis.com/v1beta/openai/"),
+        os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+        os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_AI_KEY", ""),
+        prompt, system, timeout=120)
+
+
+def _hf(prompt: str, system: str) -> tuple[str | None, str]:
+    """HuggingFace Inference Providers (free tier + credits mensuels)."""
+    return _chat_completions(
+        os.environ.get("HF_BASE_URL", "https://router.huggingface.co/v1"),
+        os.environ.get("HF_MODEL", "zai-org/GLM-5.3"),
+        os.environ.get("HF_TOKEN", "") or os.environ.get("HUGGINGFACE_API_KEY", ""),
+        prompt, system, timeout=150)
+
+
+def _mistral(prompt: str, system: str) -> tuple[str | None, str]:
+    """Mistral free tier (quotas justes). Cle : console.mistral.ai."""
+    return _chat_completions(
+        os.environ.get("MISTRAL_BASE_URL", "https://api.mistral.ai/v1"),
+        os.environ.get("MISTRAL_MODEL", "mistral-small-latest"),
+        os.environ.get("MISTRAL_API_KEY", ""), prompt, system, timeout=120)
+
+
 def _legs_for_tier(tier: str) -> list[tuple]:
     """Ordre des jambes par besoin : routine=gratuit d abord, dur=costaud d abord."""
     g = globals()  # resolu a l appel (les tests monkeypatchent ces noms)
@@ -681,6 +771,18 @@ def _legs_for_tier(tier: str) -> list[tuple]:
         "groq": (g["_groq"],
                  "groq/" + os.environ.get("GROQ_MODEL", DEFAULT_GROQ_MODEL),
                  {"no-key"}),
+        "nvidia": (g["_nvidia"],
+                   "nvidia/" + os.environ.get("NVIDIA_MODEL", "moonshotai/kimi-k3"),
+                   {"no-key"}),
+        "gemini": (g["_gemini"],
+                   "gemini/" + os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+                   {"no-key"}),
+        "hf": (g["_hf"],
+               "hf/" + os.environ.get("HF_MODEL", "zai-org/GLM-5.3"),
+               {"no-key"}),
+        "mistral": (g["_mistral"],
+                    "mistral/" + os.environ.get("MISTRAL_MODEL", "mistral-small-latest"),
+                    {"no-key"}),
         "deepseek": (g["_deepseek"],
                      "deepseek/" + os.environ.get(
                          "DEEPSEEK_MODEL", DEFAULT_DEEPSEEK_MODEL),
@@ -691,9 +793,12 @@ def _legs_for_tier(tier: str) -> list[tuple]:
         "pollinations": (g["_pollinations"], "pollinations", {"disabled"}),
     }
     orders = {
-        "routine": ["local", "pollinations", "groq", "openrouter", "deepseek", "cloud"],
-        "dur": ["openrouter", "groq", "deepseek", "cloud", "local", "pollinations"],
-        "auto": ["openrouter", "groq", "deepseek", "local", "cloud", "pollinations"],
+        "routine": ["local", "pollinations", "groq", "nvidia", "gemini",
+                    "hf", "mistral", "openrouter", "deepseek", "cloud"],
+        "dur": ["openrouter", "deepseek", "nvidia", "groq", "gemini", "hf",
+                "mistral", "cloud", "local", "pollinations"],
+        "auto": ["openrouter", "groq", "deepseek", "nvidia", "gemini", "hf",
+                 "mistral", "local", "cloud", "pollinations"],
     }
     return [table[name] for name in orders.get(tier, orders["auto"])]
 
@@ -845,8 +950,9 @@ def brain_status() -> list[dict]:
     try:
         recent = _recent_leg_outcomes()
 
-        def _keyed(name: str, var: str) -> None:
-            if not os.environ.get(var):
+        def _keyed(name: str, var: str, var2: str = "") -> None:
+            key = os.environ.get(var, "") or (os.environ.get(var2, "") if var2 else "")
+            if not key:
                 rows.append({"leg": name, "state": "off", "detail": "pas de cle"})
             elif recent.get(name) == "ok":
                 rows.append({"leg": name, "state": "ok", "detail": "repond"})
@@ -859,6 +965,10 @@ def brain_status() -> list[dict]:
 
         _keyed("openrouter", "OPENROUTER_API_KEY")
         _keyed("groq", "GROQ_API_KEY")
+        _keyed("nvidia", "NVIDIA_API_KEY")
+        _keyed("gemini", "GEMINI_API_KEY", "GOOGLE_AI_KEY")
+        _keyed("hf", "HF_TOKEN", "HUGGINGFACE_API_KEY")
+        _keyed("mistral", "MISTRAL_API_KEY")
         _keyed("deepseek", "DEEPSEEK_API_KEY")
 
         model = os.environ.get("OLLAMA_MODEL")

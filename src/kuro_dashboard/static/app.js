@@ -373,12 +373,30 @@ async function loadData() {
   return await response.json();
 }
 
+function freshnessSuffix(data) {
+  // Age du snapshot + alertes stale (coverage / CI) : le dashboard ne doit
+  // plus afficher un chiffre vieux de 3 semaines sans le dire.
+  const parts = [];
+  try {
+    const ageMin = (Date.now() - new Date(data.generatedAt).getTime()) / 60000;
+    if (!Number.isNaN(ageMin) && ageMin > 5) parts.push(`vieux de ${Math.round(ageMin)} min`);
+    else if (!Number.isNaN(ageMin)) parts.push("live");
+  } catch (_) {}
+  const cov = data.coverage;
+  if (cov && cov.present && cov.stale) parts.push(`coverage stale (${cov.ageDays} j)`);
+  else if (cov && !cov.present) parts.push("coverage absente");
+  const ci = data.ciStatus;
+  if (ci && ci.present && ci.stale) parts.push(`CI stale (${ci.ageDays} j)`);
+  return parts.length ? ` · ${parts.join(" · ")}` : "";
+}
+
 async function load() {
   try {
     const data = await loadData();
     state.data = data;
 
-    document.getElementById("generated-at").textContent = `Snapshot ${formatDate(data.generatedAt)}`;
+    document.getElementById("generated-at").textContent =
+      `Snapshot ${formatDate(data.generatedAt)}${freshnessSuffix(data)}`;
     document.getElementById("workspace-root").textContent = data.workspaceRoot;
 
     renderMetrics(data.summary);

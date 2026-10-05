@@ -1,4 +1,4 @@
-# RULE 118: Marketing via Kuro — Tout Passe par la Pipeline
+# RULE 120: Marketing via Kuro — Tout Passe par la Pipeline
 
 **Principe** : aucune action marketing (post, réponse, lancement, mesure)
 ne se fait hors pipeline Kuro. Les comptes et les clics finaux restent

@@ -71,6 +71,18 @@
    "projet": "Horcruxe Labs",
    "hash": "",
    "id": ""
+  },
+  {
+   "date": "2026-09-28T20:01:00+00:00",
+   "projet": "Helium",
+   "hash": "",
+   "id": ""
+  },
+  {
+   "date": "2026-10-04T20:00:13+00:00",
+   "projet": "NeuralDBG",
+   "hash": "",
+   "id": ""
   }
  ],
  "hub": [
@@ -115,6 +127,18 @@
    "projet": "OpenQuant",
    "hash": "b2a7ae1",
    "id": "6ab975ef36a0dcfcb3e2d587"
+  },
+  {
+   "date": "2026-09-28T20:01:13+00:00",
+   "projet": "Helium",
+   "hash": "a7abf08",
+   "id": "6abac787c375fa5e8aa8742d"
+  },
+  {
+   "date": "2026-10-04T20:00:29+00:00",
+   "projet": "NeuralDBG",
+   "hash": "adb59401",
+   "id": "6ac2b05d283083e601c00d40"
   }
  ]
 }

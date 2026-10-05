@@ -1,0 +1,70 @@
+# LiteLLM Gateway — config exemple pour Kuro (copie adaptée d'OpenQuant).
+# Repos : https://github.com/BerriAI/litellm (MIT, 140+ providers).
+# Lancement : `litellm --config litellm-config.yaml --port 4000`
+# Puis : KURO_ROUTER=litellm (lib) OU pointer l API vers le proxy.
+# Aujourd'hui : 1 seul consommateur (Kuro) -> proxy ETEINT par defaut,
+# la lib opt-in suffit. Allumer quand Episode/MiroFish partageront.
+#
+# Ce que ça apporte vs la chaîne interne (scripts/kuro_llm.py) :
+# - fallbacks + cooldowns + retries gérés par le routeur (pas le caller)
+# - lowest-cost routing : le moins cher capable de servir la requête
+# - budgets durs par clé (anti-facture-surprise) + tracking spend
+# - cache local : ne jamais payer 2x la même réponse (TTL 600)
+model_list:
+  # Primaire : OpenRouter (1 seule cle, cascade :free puissants oct 2026)
+  - model_name: kuro-brain
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+  - model_name: kuro-brain
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+  - model_name: kuro-brain
+    litellm_params:
+      model: openrouter/deepseek/deepseek-v4-flash:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+  # Gratuit rapide : Groq (free tier genereux, cle console.groq.com)
+  - model_name: kuro-brain
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+  # Secours intelligent : DeepSeek direct (quand la cle est alimentee)
+  - model_name: kuro-brain
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_base: https://api.deepseek.com/v1
+      api_key: os.environ/DEEPSEEK_API_KEY
+      rpm: 30
+  # Gratuit local : Qwen 8B (5 Go, 100% VRAM 8 Go, zero reseau, quota infini)
+  - model_name: kuro-brain
+    litellm_params:
+      model: ollama/qwen3:8b
+      api_base: http://localhost:11434
+  # NOTE : Pollinations (filet sans cle) reste une jambe de scripts/kuro_llm.py,
+  # pas du proxy (pas de provider litellm stable constate pour lui).
+
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 2
+  timeout: 120
+  fallbacks:
+    - kuro-brain: ["kuro-brain"]  # retry intra-groupe puis maillon suivant
+# NOTE 402 (copie OpenQuant, verifie) : DeepSeek sans solde repond 402
+# (erreur client -> la gateway ne bascule PAS auto dessus). La chaine
+# kuro_llm, elle, bascule sur tout non-200 — c'est elle le filet, pas la
+# gateway. Meme logique que brain.deepseek_back chez OpenQuant.
+
+general_settings:
+  # Cache : ne jamais payer 2x (summaries/rapports repetitifs)
+  cache: true
+  cache_params:
+    type: local
+    ttl: 600
+
+# Budgets : coupe avant la facture (ex: cles virtuelles + max_budget).
+# litellm --config ... puis Admin UI. Gratuits et local = 0 $ par construction.
