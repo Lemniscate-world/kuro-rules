@@ -1,0 +1,15 @@
+# Kuro standard pre-commit — déployé par sync-rules.ps1 (OWNED), NE PAS EDITER localement sans raison.
+# Miroir allégé de kuro-rules/.pre-commit-config.yaml (R112). Règle: trailing, EOF, YAML/JSON, secrets.
+# Python: ruff seulement si présent (ne casse pas les repos non-Python).
+exclude: "^(node_modules|gui/node_modules|gui/dist)/"
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: detect-private-key

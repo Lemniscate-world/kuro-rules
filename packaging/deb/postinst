@@ -1,0 +1,20 @@
+#!/bin/sh
+# postinst kuro : cree l utilisateur systeme, bootstrap la DB, demarre tout.
+set -e
+
+case "$1" in
+    configure)
+        if ! id kuro >/dev/null 2>&1; then
+            adduser --system --home /var/lib/kuro --group kuro
+        fi
+        mkdir -p /var/lib/kuro/Documents
+        chown -R kuro:kuro /var/lib/kuro /opt/kuro /opt/kuro-dashboard
+        # Bootstrap DB (ne fait rien si deja presente, ne bloque jamais l install)
+        runuser -u kuro -- /usr/bin/python3 /opt/kuro/daemon.py --scan || true
+        systemctl daemon-reload || true
+        systemctl enable kuro-daemon kuro-dashboard || true
+        systemctl restart kuro-daemon kuro-dashboard || true
+        echo "[kuro] installe. Dashboard via tunnel : ssh -N -L 8767:localhost:8767 <hote>"
+        ;;
+esac
+exit 0

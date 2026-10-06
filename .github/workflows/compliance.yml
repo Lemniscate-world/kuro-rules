@@ -68,7 +68,10 @@ jobs:
       - name: R39 — No assert in production
         run: |
           if [ -d "neuraldbg" ] || [ -d "src" ]; then
-            VIOLATIONS=$(grep -rn "assert " --include="*.py" . --exclude-dir=tests --exclude-dir=test --exclude-dir=.venv | grep -v "assert isinstance\|assert __name__" | head -20)
+            # Instruction assert en debut de ligne (avec indent optionnelle) :
+            # le motif large "assert " flaguait des faux positifs (chaines qui
+            # GENERENT du code de test, regex qui DETECTENT les asserts).
+            VIOLATIONS=$(grep -rnE "^[[:space:]]*assert " --include="*.py" . --exclude-dir=tests --exclude-dir=test --exclude-dir=.venv --exclude-dir=.git | head -20)
             if [ -n "$VIOLATIONS" ]; then
               echo "❌ assert() found in production code:"
               echo "$VIOLATIONS"

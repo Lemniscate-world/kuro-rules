@@ -44,8 +44,19 @@ try {
         $index += "- **$($rf.BaseName)**: $title`n"
     }
 
-    [System.IO.File]::WriteAllText($agentsPath, $index, [System.Text.Encoding]::UTF8)
-    Write-KuroLog "  OK: Smart Redirector generated with $($ruleFiles.Count) entries." -Color DarkGray
+    if ($DryRun) {
+        # CI-verifiable : ne jamais ecrire en DryRun, signaler le drift (B2).
+        $current = ""
+        if (Test-Path $agentsPath) { $current = [System.IO.File]::ReadAllText($agentsPath) }
+        if ($current -ne $index) {
+            Write-KuroLog "  DRIFT: AGENTS.md index serait regenere ($($ruleFiles.Count) entrees)." -Color Yellow
+        } else {
+            Write-KuroLog "  OK: Smart Redirector a jour ($($ruleFiles.Count) entries)." -Color DarkGray
+        }
+    } else {
+        [System.IO.File]::WriteAllText($agentsPath, $index, [System.Text.Encoding]::UTF8)
+        Write-KuroLog "  OK: Smart Redirector generated with $($ruleFiles.Count) entries." -Color DarkGray
+    }
 } catch {
     Write-KuroLog "  ERROR: Failed to generate index: $_" -Color Red
     exit 1
@@ -110,14 +121,51 @@ foreach ($proj in $projects) {
         }
     }
 
+    # --- R112: standard tooling pre-commit (OWNED uniquement, C) ---
+    # Source: templates/.pre-commit-config.yaml (générique). Ne jamais écraser
+    # une config locale customisée sauf -Force. DryRun-aware pour CI.
+    $isOwnedForTooling = $SkipOwnershipCheck -or ($ownership -eq "OWNED")
+    if ($isOwnedForTooling) {
+        $preSrc = Join-Path $RULES_DIR "templates\.pre-commit-config.yaml"
+        $preDst = Join-Path $proj.Path ".pre-commit-config.yaml"
+        if (Test-Path $preSrc) {
+            $needPre = $false
+            if (-not (Test-Path $preDst)) { $needPre = $true }
+            elseif ($Force) { $needPre = $true }
+            if ($needPre) {
+                if (-not $DryRun) { Copy-Item $preSrc $preDst -Force }
+                $projSynced += ".pre-commit-config.yaml (R112)"
+                $syncCount++
+            }
+        }
+    }
+
     # --- ALWAYS-ON: compliance workflow + manifest (enforcement CI, tous repos) ---
+    # En DryRun: verifie le drift du workflow sans ecrire (CI-verifiable, B2).
+    $wfSrc = Join-Path $RULES_DIR "templates\kuro-compliance.yml"
+    $wfDst = Join-Path $proj.Path ".github\workflows\kuro-compliance.yml"
+    $wfDrift = $false
+    if (Test-Path $wfSrc) {
+        if (-not (Test-Path $wfDst)) { $wfDrift = $true }
+        else {
+            $srcHash = (Get-FileHash $wfSrc -Algorithm MD5).Hash
+            $dstHash = (Get-FileHash $wfDst -Algorithm MD5).Hash
+            if ($srcHash -ne $dstHash) { $wfDrift = $true }
+        }
+    }
+    if ($wfDrift) {
+        $projSynced += ".github/workflows/kuro-compliance.yml"
+        $syncCount++
+    }
     if (-not $DryRun) {
-        $wfDir = Join-Path $proj.Path ".github\workflows"
-        New-Item -ItemType Directory -Path $wfDir -Force | Out-Null
-        Copy-Item (Join-Path $RULES_DIR "templates\kuro-compliance.yml") (Join-Path $wfDir "kuro-compliance.yml") -Force
+        if ($wfDrift) {
+            $wfDir = Join-Path $proj.Path ".github\workflows"
+            New-Item -ItemType Directory -Path $wfDir -Force | Out-Null
+            Copy-Item $wfSrc $wfDst -Force
+        }
 
         $agentsDst = Join-Path $proj.Path "AGENTS.md"
-        if (Test-Path $agentsDst) {
+        if ((-not $DryRun) -and (Test-Path $agentsDst)) {
             $sha256 = (Get-FileHash $agentsDst -Algorithm SHA256).Hash.ToLower()
             $ruleCount = (Select-String -LiteralPath $agentsDst -Pattern '^- \*\*rule_').Count
             $manifestObj = @{
@@ -135,12 +183,16 @@ foreach ($proj in $projects) {
                 (($manifestObj | ConvertTo-Json) + "`n"),
                 (New-Object System.Text.UTF8Encoding($false))
             )
-            $projSynced += ".github/workflows/kuro-compliance.yml + .kuro/rules-manifest.json"
+            $projSynced += ".kuro/rules-manifest.json"
         }
     }
 
     if ($projSynced.Count -gt 0) {
-        Write-KuroLog "  SYNCED -> $($proj.Name) [$ownership] ($($projSynced -join ', '))" -Color Green
+        if ($DryRun) {
+            Write-KuroLog "  DRIFT -> $($proj.Name) [$ownership] ($($projSynced -join ', '))" -Color Yellow
+        } else {
+            Write-KuroLog "  SYNCED -> $($proj.Name) [$ownership] ($($projSynced -join ', '))" -Color Green
+        }
         $logEntries += "- $($proj.Name) [$ownership] : $($projSynced -join ', ')"
     }
 }
@@ -155,6 +207,16 @@ if (-not $DryRun -and $logEntries.Count -gt 0) {
         $newContent = "# Sync Log`n`n" + $logHeader + $logBody + ($existing -replace "^# Sync Log\s*\n*", "")
     } else { $newContent = "# Sync Log`n`n" + $logHeader + $logBody }
     [System.IO.File]::WriteAllText($logFile, $newContent, [System.Text.Encoding]::UTF8)
+}
+
+if ($DryRun) {
+    # CI-verifiable : exit 1 si drift, 0 si propre (B2).
+    if ($syncCount -gt 0) {
+        Write-KuroLog "DryRun: DRIFT detecte ($syncCount fichier(s), $($logEntries.Count) projet(s)). Relancer sans -DryRun." -Color Red
+        exit 1
+    }
+    Write-KuroLog "DryRun: propre, aucun drift." -Color Green
+    exit 0
 }
 
 Write-KuroLog "Done. Total syncs: $syncCount" -Color Cyan

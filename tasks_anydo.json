@@ -1,0 +1,91 @@
+{
+  "generated_at": "2026-10-05T07:03:18.679081+00:00",
+  "mcp_endpoint": "https://mcp.any.do/sse",
+  "usage": "Connecter Claude (Settings > Connectors > https://mcp.any.do/sse) puis coller les titres, ex: '@Any.do ajoute [titre] avec rappel lundi 10h'",
+  "tasks": [
+    {
+      "title": "Suivi vendredi — montrer maquette",
+      "source": "pipeline.next_step",
+      "date": "2026-08-24",
+      "due": ""
+    },
+    {
+      "title": "Fix anti-doublons puis bouton tout-cocher 1-tap, valider reprise du cochage 7j",
+      "source": "pipeline.next_step",
+      "date": "2026-09-17",
+      "due": ""
+    },
+    {
+      "title": "Runway critique (< 3 mois) : priorité absolue revenus — lancer les interviews R2 vers des clients payants avant toute no",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "NEW",
+      "age_days": 0,
+      "tag": "NEW"
+    },
+    {
+      "title": "Pipeline vide cette semaine : planifier au moins 1 interview Mom Test (R2)",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 7,
+      "tag": "J7"
+    },
+    {
+      "title": "OKR 'Interviews Mom Test / semaine' sous 50% (0.0/3.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 22,
+      "tag": "J22"
+    },
+    {
+      "title": "OKR 'Premier revenu MRR (USD) — palier 1' sous 50% (0.0/10.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 22,
+      "tag": "J22"
+    },
+    {
+      "title": "OKR 'MRR palier 2 (USD) — activé après palier 1' sous 50% (0.0/100.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 22,
+      "tag": "J22"
+    },
+    {
+      "title": "OKR 'Commits / semaine (moyenne repos actifs)' sous 50% (0.99/10.0) : plan d'action cette semaine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 22,
+      "tag": "J22"
+    },
+    {
+      "title": "Vélocité moyenne < 1 commit/semaine : choisir UN projet focus et livrer",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 3,
+      "tag": "J3"
+    },
+    {
+      "title": "CI : 1 check(s) en échec — le guardian diagnostique, corrige la cause racine",
+      "source": "strategy.decision",
+      "date": "",
+      "due": "",
+      "status": "OPEN",
+      "age_days": 22,
+      "tag": "J22"
+    }
+  ]
+}

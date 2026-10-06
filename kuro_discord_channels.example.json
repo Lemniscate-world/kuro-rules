@@ -1,5 +1,12 @@
 {
-  "_comment": "Copier ce fichier en kuro_discord_channels.local.json (gitignore) et remplir les webhooks Discord.",
+  "_comment": "Copier en kuro_discord_channels.local.json (gitignore). investors/default (racine) servent au digest investisseurs ; channels sert aux posts par projet (kuro_discord.py post). Webhooks : parametres du salon -> Integrations -> Webhooks.",
   "investors": "https://discord.com/api/webhooks/INVESTORS_CHANNEL",
-  "default": ""
+  "default": "",
+  "channels": {
+    "helium": "https://discord.com/api/webhooks/HELIUM_CHANNEL",
+    "neuraldbg": "https://discord.com/api/webhooks/NEURALDBG_CHANNEL",
+    "lifetrack": "https://discord.com/api/webhooks/LIFETRACK_CHANNEL",
+    "openquant": "https://discord.com/api/webhooks/OPENQUANT_CHANNEL",
+    "forma": "https://discord.com/api/webhooks/FORMA_CHANNEL"
+  }
 }

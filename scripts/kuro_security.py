@@ -131,13 +131,16 @@ def main() -> int:
         print("GH_TOKEN absent — sécurité non exécutable")
         return 0
 
-    repos: list[str] = []
-    for owner in args.owners:
-        found = discover(token, owner)
-        print(f"DISCOVER {owner}: {len(found)} repos actifs")
-        repos.extend(found)
+    private = os.environ.get("KURO_PRIVATE_TOKEN") or None
+    found: dict[str, str] = {}
+    for tok in [t for t in (token, private) if t]:
+        for owner in args.owners:
+            for repo in discover(tok, owner):
+                found.setdefault(repo, tok)
+    print(f"DISCOVER {len(found)} repos actifs ({', '.join(args.owners)})"
+          + (" + token prive" if private else ""))
 
-    results = [harden_repo(r, token) for r in repos]
+    results = [harden_repo(r, tok) for r, tok in sorted(found.items())]
 
     enabled_now = sum(1 for r in results if r["alerts_enabled"] is True)
     failed = [r for r in results if isinstance(r["alerts_enabled"], str)]

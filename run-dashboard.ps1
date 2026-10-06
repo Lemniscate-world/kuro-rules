@@ -1,6 +1,7 @@
 param(
-    [int]$Port = 8765,
-    [switch]$NoOpen
+    [int]$Port = 8767,
+    [switch]$NoOpen,
+    [switch]$StaticOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,11 +14,11 @@ if (-not (Test-Path $GeneratorPath)) {
     throw "Dashboard generator not found: $GeneratorPath"
 }
 
-Write-Host "[*] Refreshing dashboard snapshot..." -ForegroundColor Cyan
+Write-Host "[*] Refreshing dashboard snapshot (fallback hors-ligne)..." -ForegroundColor Cyan
 python $GeneratorPath
 
 if ($LASTEXITCODE -ne 0) {
-    throw "Dashboard snapshot generation failed."
+    Write-Host "[!] Snapshot statique echoue, l'API servira du live." -ForegroundColor Yellow
 }
 
 $Url = "http://127.0.0.1:$Port"
@@ -26,13 +27,21 @@ if (-not $NoOpen) {
     Start-Process $Url | Out-Null
 }
 
-Write-Host "[*] Serving dashboard at $Url" -ForegroundColor Green
-Write-Host "[*] Press Ctrl+C to stop." -ForegroundColor DarkGray
+if ($StaticOnly) {
+    Write-Host "[*] Serving STATIC dashboard at $Url (sans API : donnees gelees)" -ForegroundColor Yellow
+    Push-Location $DashboardDir
+    try {
+        python -m http.server $Port
+    }
+    finally {
+        Pop-Location
+    }
+    return
+}
 
-Push-Location $DashboardDir
-try {
-    python -m http.server $Port
-}
-finally {
-    Pop-Location
-}
+# Defaut : API Kuro (live /api/dashboard + /api/system + UI).
+# Le snapshot statique reste le repli si l'API est injoignable.
+Write-Host "[*] Serving Kuro API + dashboard at $Url (live, refresh 60s)" -ForegroundColor Green
+Write-Host "[*] Press Ctrl+C to stop." -ForegroundColor DarkGray
+$env:KURO_RULES_DIR = $RootDir
+python -m kuro_dashboard --port $Port

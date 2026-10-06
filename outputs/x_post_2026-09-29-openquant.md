@@ -1,0 +1,7 @@
+OpenQuant (recherche quantitative : des systèmes de trading validés statistiquement) : .env charge au sommet supervise + IAU trade — et vous, vous gérez ça comment.
+
+119 commits 30j, 31 à 7j, 59% Actif.
+
+https://github.com/Quant-Search/OpenQuant
+
+#OpenQuant #Quant #Trading

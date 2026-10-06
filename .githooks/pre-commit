@@ -1,0 +1,25 @@
+#!/bin/sh
+# pre-commit kuro-rules (R101) : bloque les fichiers de planification prives.
+# Installe via : git config core.hooksPath .githooks
+BLOCKED="decision-memo.md
+LAUNCH_POSTS.md
+docs/launch_plan_
+docs/hn_feedback_log.md
+docs/community_post_template.md
+docs/launch_postmortem.md
+docs/cdp_protocol_definition.md
+docs/STRUCTURE_DOCS.md
+docs/verification_report_
+docs/tracking/
+SESSION_SUMMARY.md"
+STAGED=$(git diff --cached --name-only)
+for pat in $BLOCKED; do
+  hit=$(printf '%s\n' "$STAGED" | grep -F "$pat" || true)
+  if [ -n "$hit" ]; then
+    echo "[R101] commit refuse : fichier prive detecte :" >&2
+    echo "$hit" >&2
+    echo "Retirer avec : git rm --cached <fichier>" >&2
+    exit 1
+  fi
+done
+exit 0

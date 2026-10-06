@@ -1,0 +1,17 @@
+**Helium** — 28% Actif
+Helium est réseau privé de partage de ressources de calcul (GPU/RAM) pour l'IA.
+
+Travaux réalisés :
+1. VM template PyTorch + robustness (resize, route, expose fix).
+
+Prochaine étape : Poursuite des travaux en cours.
+
+Repo : https://github.com/HeliumXChain/Helium
+Caption X :
+Ce qu'on a appris sur Helium : VM template PyTorch + robustness (resize, route, expose fix).
+
+8 commits 30j, 2 à 7j, 28% Actif.
+
+https://github.com/HeliumXChain/Helium
+
+#Helium #Rust #Blockchain

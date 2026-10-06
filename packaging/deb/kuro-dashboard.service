@@ -1,0 +1,14 @@
+[Unit]
+Description=Kuro API + dashboard (localhost uniquement)
+After=network.target kuro-daemon.service
+
+[Service]
+User=kuro
+WorkingDirectory=/var/lib/kuro
+Environment=KURO_DOCS_DIR=/var/lib/kuro/Documents
+ExecStart=/usr/bin/kuro-dashboard --port 8767
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

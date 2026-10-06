@@ -1,0 +1,102 @@
+/* kuro.tcss — theme Glances Kuro sombre, esprit btop (Textual, opt-in). */
+Screen {
+    background: #0d1117;
+    color: #e6edf3;
+}
+
+#body {
+    height: 1fr;
+}
+
+#main {
+    width: 1fr;
+    padding: 0 1;
+}
+
+#sidebar {
+    width: 46;
+    border-left: solid #30363d;
+    padding: 0 1;
+}
+
+.section-title {
+    color: #f0b72f;
+    text-style: bold;
+    margin-top: 1;
+}
+
+.box {
+    border: solid #30363d;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+.box.hidden {
+    display: none;
+}
+
+/* Palette btop par defaut (btop_theme.cpp) : une teinte par box. */
+#cpu-box {
+    border: solid #556d59;
+}
+
+#mem-box {
+    border: solid #6c6c4b;
+}
+
+#net-box {
+    border: solid #5c588d;
+}
+
+#disk-box {
+    border: solid #6c6c4b;
+}
+
+#proc-box {
+    border: solid #805252;
+}
+
+#cpu-spark, #mem-spark {
+    height: 3;
+    color: #3fb950;
+}
+
+#net-up-spark {
+    height: 2;
+    color: #58a6ff;
+}
+
+#net-down-spark {
+    height: 2;
+    color: #bc8cff;
+}
+
+#cores {
+    color: #8b949e;
+}
+
+#face {
+    border: solid #30363d;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+#brain, #kuro {
+    margin-bottom: 1;
+}
+
+#proc-filter.hidden {
+    display: none;
+}
+
+#proc-filter {
+    margin-bottom: 1;
+}
+
+#procs {
+    height: 1fr;
+}
+
+Header, Footer {
+    background: #161b22;
+}

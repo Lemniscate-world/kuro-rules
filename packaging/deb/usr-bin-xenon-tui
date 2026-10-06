@@ -1,0 +1,4 @@
+#!/bin/sh
+# xenon-tui (paquet deb) : Glances Kuro en TUI riche (Textual, opt-in).
+# Requiert : python3-textual ou pip install kuro-dashboard[textual].
+PYTHONPATH=/opt/kuro-dashboard/src exec /usr/bin/python3 -m kuro_dashboard.tui_textual "$@"

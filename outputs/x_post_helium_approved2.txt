@@ -1,0 +1,7 @@
+Helium : partage GPU entre pairs de confiance. Template PyTorch reproductible + tunnel auto-repare apres reboot.
+
+8 commits 30j, MIT, install 1 commande.
+
+https://github.com/HeliumXChain/Helium
+
+#Helium #P2P #GPU

@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kuro Dev — reference components</title>
+    <meta
+      name="description"
+      content="Reference fixture for design-systems/kuro-dev. Every visible
+        value comes from tokens.css; the page itself follows Kuro Dev's
+        rules — system stack at 14px/400, tracking 0, weight 400 at 14px
+        sizes, Primer ink (#1f2328) headings on white, blue-
+        tinted multi-layer shadows on elevated surfaces, functional 6px radius, 12px dialogs only, and Primer blue capped at ≤2 visible uses
+        per screen."
+    />
+
+    <style>
+      /* :root paste — sourced verbatim from
+         design-systems/kuro-dev/tokens.css. Keep this block in sync
+         when tokens.css changes. The agent prompt instructs the
+         Designer panelist to paste this block as the FIRST thing in
+         their <style>, then reference everything below via var(...). */
+            /* :root paste - sourced verbatim from
+         design-systems/kuro-dev/tokens.css. Keep this block in sync
+         when tokens.css changes. */
+:root { … }` block
+ * verbatim into the first `<style>` of the artifact, then reference
+ * every value through `var(--name)` — never re-author the hex
+ * inline. The fixture in `components.html` is the round-trip proof
+ * that the token block alone is sufficient to render a recognisably
+ * Kuro Dev page.
+ *
+ * Why this file exists:
+ *   DESIGN.md gives humans context ("Primer blue #0969da — primary
+ *   actions"), but agents have to translate prose names like
+ *   "Primer blue" into the standard token names the lint enforces
+ *   (`--accent`). This file pre-translates the brand once, so agents
+ *   copy structure rather than invent it.
+ *
+ * Schema notes (Kuro Dev binds the shared schema in seven brand-
+ * specific ways — see `#KuroDev N` tags inline for each decision):
+ *   #KuroDev 1  — 3-tier surface: white page / #f6f8fa raised /
+ *                #eaeef2 inset-warm for wells, row hover, drop zones.
+ *   #KuroDev 2  — 3-tier foreground (#1f2328 / #59636e / #656c76).
+ *                No fourth metadata tier — `--meta` aliases
+ *                `var(--muted)`, like Kuro Dev.
+ *   #KuroDev 3  — Two border tiers, both always visible: #d0d7de
+ *                default and #eaeef2 soft hairlines (opposite of
+ *                Linear's translucent-white-on-dark trick).
+ *   #KuroDev 4  — `--accent-hover` and `--accent-active` bind to
+ *                Primer's own #0550ae (not a black-mix formula).
+ *   #KuroDev 5  — Type scale ceiling is 40px (`--text-4xl`), not
+ *                56/72px. Display 40px/600 is for empty states only —
+ *                dense tools don't stage marketing heroes.
+ *   #KuroDev 6  — `--elev-raised` carries Primer's neutral layered
+ *                shadow (no blue tint, no luminance stepping).
+ *   #KuroDev 7  — `--focus-ring` is the Primer halo: 2px solid
+ *                accent edge + translucent outer glow, always visible
+ *                on white for keyboard-heavy CLI/doc flows.
+ *
+ * Brand-specific extensions (Layer C):
+ *   None. Diff red/green, syntax colors, and avatar hues from
+ *   DESIGN.md are *data* — they live inline where used, derived
+ *   from `--success` / `--danger`, never promoted to schema slots.
+ * ─────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ─── Surface (3 levels — #KuroDev 1) ───────────────────────────
+   * White page, subtle raised panels, inset warm wells. Borders do
+   * the structure; shadow stays reserved for floating layers.
+   * Brands without a tertiary surface tier should alias
+   * `--surface-warm` to `var(--surface)`; Kuro Dev binds a real
+   * value because dense tables and wells need that quiet
+   * separation. */
+  --bg:           #ffffff;
+  --surface:      #f6f8fa;
+  --surface-warm: #eaeef2;  /* inset wells, row hover, drop zones */
+
+  /* ─── Foreground ramp (3 tiers — #KuroDev 2) ──────────────────
+   * Primer default ink (`#1f2328`) carries headings and body —
+   * never pure black. Muted (`#59636e`) is secondary text.
+   * `#656c76` is placeholders and captions (CI-checked 4.5:1
+   * on white per semantic pair).
+   *
+   * Kuro Dev doesn't differentiate a fourth metadata tier, so
+   * `--meta` aliases `var(--muted)`. */
+  --fg:    #1f2328;          /* primer ink — headings, body, labels */
+  --fg-2:  #59636e;          /* primer muted — secondary text */
+  --muted: #656c76;          /* placeholders, captions */
+  --meta:  var(--muted);     /* alias — no separate metadata tier */
+
+  /* ─── Border (2 tiers — #KuroDev 3) ────────────────────────────
+   * Both tiers always visible on light: default containers and
+   * inputs, soft hairlines for row separators and nested
+   * dividers. Never translucent-white-on-dark (that's Linear). */
+  --border:      #d0d7de;
+  --border-soft: #eaeef2;  /* row hairlines, nested dividers */
+
+  /* ─── Accent ──────────────────────────────────────────────────────
+   * Primer blue — primary buttons, links, checked controls,
+   * selected nav, focus base. Hard cap of ≤2 visible uses per
+   * screen (lint `accent-overuse` P1 enforces). */
+  --accent:    #0969da;
+  --accent-on: #ffffff;     /* button label on blue — DESIGN.md §4 */
+
+  /* ─── Accent states (#KuroDev 4) ─────────────────────────────────
+   * Hand-picked Primer value, NOT a black-mix formula.
+   *
+   * Schema rule: every brand provides `--accent-hover` and
+   * `--accent-active`. The binding strategy (formula / identity /
+   * hand-picked) is brand-decided. */
+  --accent-hover:  #0550ae;  /* Primer darker blue — DESIGN.md §2 */
+  --accent-active: #0550ae;  /* Primer pressed/selected state */
+
+  /* ─── Semantic ───────────────────────────────────────────────────
+   * Primer status triad. Success green for passing/merged,
+   * amber for draft/attention, red for failing/destructive.
+   * Status only — never decorative, never primary actions. */
+  --success: #1a7f37;        /* DESIGN.md success green */
+  --warn:    #9a6700;        /* amber — draft / attention */
+  --danger:  #d1242c;        /* red — failing / destructive */
+
+  /* ─── Typography — fonts ─────────────────────────────────────────
+   * System stack is the identity (DESIGN.md §1): no licensed
+   * display face, no OpenType stylistic set, no negative
+   * tracking. Mono stack for code, IDs, paths, diffs.
+   *
+   * `--font-mono` is the Primer mono stack per DESIGN.md §3 —
+   * code blocks at 12px / 400 with 1.67 line-height, plus
+   * tabular-nums on every countable surface. */
+  --font-display:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-body:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* ─── Typography — type scale (#KuroDev 5) ─────────────────────
+   * Dense devtool mapping: 12 / 14 / 14 / 16 /
+   * 20 / 24 / 32 / 40. Default body is 14px (not 16px);
+   * display ceiling is 40px/600 for empty states only.
+   * The 10px micro tier is inlined where used, never promoted. */
+  --text-xs:   12px;         /* metadata, counters, code */
+  --text-sm:   14px;         /* secondary UI, help text */
+  --text-base: 14px;         /* body baseline — dense default */
+  --text-lg:   16px;         /* docs lede, panel intro */
+  --text-xl:   20px;         /* panel title */
+  --text-2xl:  24px;         /* section title */
+  --text-3xl:  32px;         /* page title */
+  --text-4xl:  40px;         /* display — empty states only */
+
+  /* ─── Typography — leading & tracking ───────────────────────────
+   * Reading rhythm is 1.50 — Primer body openness for dense 14px
+   * system text.
+   *
+   * `--leading-tight` is the heading rhythm — 1.25 matches
+   * DESIGN.md panel/page titles.
+   *
+   * `--tracking-display` is brand-defining by absence: 0, always.
+   * No Kuro Dev -0.02em compression, no Linear -0.022em
+   * engineering. Tool text must never compress. */
+  --leading-body:     1.50;
+  --leading-tight:    1.25;
+  --tracking-display: 0;
+
+  /* ─── Spacing ────────────────────────────────────────────────────
+   * 4px Primer base unit. The schema's 4/8/12/16/20/24/32/48
+   * ladder covers the tool chrome rhythm; tables add hairline
+   * rows (`--border-soft`) rather than extra spacing tiers. */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+
+  /* ─── Section rhythm ─────────────────────────────────────────────
+   * Dense tool rhythm: 64px desktop / 48px tablet / 32px phone.
+   * Tool pages scroll with scan lines; they don't stage heroes
+   * with Kuro Dev's 96px air or Linear's 80px+ isolation. */
+  --section-y-desktop: 64px;
+  --section-y-tablet:  48px;
+  --section-y-phone:   32px;
+
+  /* ─── Radius ─────────────────────────────────────────────────────
+   * Functional Primer rounding: 6px everywhere functional,
+   * 12px for dialogs and large panels only. No 4px small tier
+   * (that's Kuro Dev), no 8px card middle (that's Linear).
+   * `--radius-pill` is counters and status pills only. */
+  --radius-sm:   6px;        /* buttons, inputs, cards, badges */
+  --radius-md:   6px;        /* same tier — Primer flat scale */
+  --radius-lg:   12px;       /* dialogs, large panels only */
+  --radius-pill: 9999px;     /* counters, status pills only */
+
+  /* ─── Elevation (3 levels — #KuroDev 6) ────────────────────────
+   * Primer neutral depth: borders structure the page, shadow
+   * only lifts floating layers (popovers, dialogs, dropdowns).
+   *
+   * No chromatic tint (that's Kuro Dev), no white-border
+   * luminance stepping (that's Linear). Shadow means "floats",
+   * nothing else. */
+  --elev-flat:   none;
+  --elev-ring:   0 0 0 1px var(--border);
+  --elev-raised:
+    0 1px 2px   rgba(31, 35, 40, 0.06),
+    0 8px 24px  rgba(66, 74, 83, 0.12);
+
+  /* ─── Focus ring (#KuroDev 7) ──────────────────────────────────
+   * Primer halo — 2px solid accent edge plus a translucent outer
+   * glow via color-mix. Keyboard-heavy CLI/doc flows mandate
+   * unmistakable focus on white.
+   *
+   * Implemented as box-shadow stack so it layers outside the
+   * element without affecting layout. */
+  --focus-ring:
+    0 0 0 2px var(--accent),
+    0 0 0 5px color-mix(in oklab, var(--accent), transparent 70%);
+
+  /* ─── Motion ─────────────────────────────────────────────────────
+   * Dense-tool timing: 80ms micro, 160ms base, one easeOutCubic
+   * curve. Hover shifts background/border only — never layout
+   * (no width/height animation), never bounce. */
+  --motion-fast:   80ms;
+  --motion-base:   160ms;
+  --ease-standard: cubic-bezier(0.33, 1, 0.68, 1);
+
+  /* ─── Layout ─────────────────────────────────────────────────────
+   * 1280px wide container for tables and diffs (vs Kuro Dev 1080,
+   * Linear 1200). Gutters compress 32 → 24 → 16. Sidebar 264px
+   * + fluid main; tables scroll horizontally with sticky first
+   * column on small screens. */
+  --container-max:            1280px;
+  --container-gutter-desktop: 32px;
+  --container-gutter-tablet:  24px;
+  --container-gutter-phone:   16px;
+}
+
+      /* ─── Reset (minimal) ───────────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        font-weight: 400;        /* Kuro Dev's signature: 400 is body weight */
+        line-height: var(--leading-body);
+        /* `tabular-nums` on data, normal elsewhere
+           (DESIGN.md §3 Principles). Inheriting from <body> applies
+           it to every descendant by default; specific components
+           that need `tnum` for data tables override locally. */
+        font-variant-numeric: normal;
+        -webkit-font-smoothing: antialiased;
+      }
+      strong { font-weight: 400; } /* caps at 600 in the system stack per DESIGN.md §7 */
+
+      /* ─── Layout primitives ─────────────────────────────────────── */
+      .container {
+        max-width: var(--container-max);
+        margin-inline: auto;
+        padding-inline: var(--container-gutter-desktop);
+      }
+      section {
+        padding-block: var(--section-y-desktop);
+      }
+      section + section {
+        border-top: 1px solid var(--border);
+      }
+      @media (max-width: 1023px) {
+        .container { padding-inline: var(--container-gutter-tablet); }
+        section { padding-block: var(--section-y-tablet); }
+      }
+      @media (max-width: 639px) {
+        .container { padding-inline: var(--container-gutter-phone); }
+        section { padding-block: var(--section-y-phone); }
+      }
+
+      /* ─── Typography ────────────────────────────────────────────── */
+      h1, h2, h3 {
+        font-family: var(--font-display);
+        font-weight: 600;          /* Kuro Dev's anti-convention signature */
+        line-height: var(--leading-tight);
+        letter-spacing: var(--tracking-display);
+        color: var(--fg);
+        margin: 0;
+      }
+      h1 {
+        font-size: var(--text-4xl);
+        line-height: 1.03;         /* DESIGN.md §3: display hero ratio */
+        letter-spacing: 0;  /* exact -1.4px at 56px */
+      }
+      h2 {
+        font-size: var(--text-2xl);
+      }
+      h3 {
+        font-size: var(--text-xl);
+        letter-spacing: 0;   /* relaxed at 22px per DESIGN.md §3 */
+      }
+      p { margin: 0; }
+
+      .lede {
+        font-size: var(--text-lg);
+        line-height: var(--leading-body);
+        color: var(--muted);
+        max-width: 56ch;
+      }
+      .body-muted { color: var(--muted); }
+      .body-meta  { color: var(--meta); font-size: var(--text-sm); }
+      .body-sm    { font-size: var(--text-sm); }
+
+      /* `.eyebrow` is the only place uppercase + tracking is used —
+         small label, deep-navy on lavender wash. tracking is well
+         above the craft 0.06em floor. */
+      .eyebrow {
+        display: inline-block;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        line-height: 1;
+        color: var(--muted);
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .stack-3 > * + * { margin-block-start: var(--space-3); }
+      .stack-4 > * + * { margin-block-start: var(--space-4); }
+      .stack-6 > * + * { margin-block-start: var(--space-6); }
+      .stack-8 > * + * { margin-block-start: var(--space-8); }
+
+      /* ─── Buttons ───────────────────────────────────────────────
+       * Kuro Dev buttons are conservative — 4px radius, 8/16 padding,
+       * weight-400/500 system stack, tracking 0. Hover shifts background
+       * colour; never transforms. Primary uses --accent / --accent-on;
+       * ghost uses the brand purple as text colour against a
+       * transparent shell with a purple-tinted border. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-display);
+        font-variant-numeric: normal;
+        font-weight: 400;
+        font-size: var(--text-base);
+        line-height: 1;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--fg);
+        text-decoration: none;
+        transition:
+          background-color var(--motion-fast) var(--ease-standard),
+          border-color var(--motion-fast) var(--ease-standard),
+          color var(--motion-fast) var(--ease-standard),
+          box-shadow var(--motion-fast) var(--ease-standard);
+      }
+      .btn:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .btn-primary:hover  { background: var(--accent-hover); }
+      .btn-primary:active { background: var(--accent-active); }
+
+      /* Ghost / outlined — DESIGN.md §4 spec verbatim.
+         The hover wash is the only place we tint --accent with
+         transparency inline; it's a once-per-page rule rather than
+         a cross-component pattern, so it stays inline rather than
+         being promoted to a token. */
+      .btn-ghost {
+        background: transparent;
+        color: var(--accent);
+        border-color: color-mix(in oklab, var(--accent), white 65%);
+      }
+      .btn-ghost:hover {
+        background: color-mix(in oklab, var(--accent), transparent 95%);
+        border-color: color-mix(in oklab, var(--accent), white 55%);
+      }
+
+      /* Compact button for nav and toolbar — 14px / 4px radius */
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: var(--text-sm);
+      }
+
+      /* ─── Inputs ────────────────────────────────────────────── */
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .field label {
+        font-size: var(--text-sm);
+        font-weight: 400;
+        color: var(--fg-2);        /* dark-slate label per DESIGN.md §4 */
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--fg);
+        font-family: inherit;
+        font-variant-numeric: normal;
+        font-size: var(--text-base);
+        font-weight: 400;
+        line-height: 1.4;
+        outline: none;
+        transition:
+          border-color var(--motion-fast) var(--ease-standard),
+          box-shadow var(--motion-fast) var(--ease-standard);
+      }
+      .field input:focus-visible,
+      .field select:focus-visible,
+      .field textarea:focus-visible {
+        border-color: var(--accent);
+        box-shadow: var(--focus-ring);
+      }
+      .field input::placeholder { color: var(--muted); }
+      .field-help {
+        font-size: var(--text-xs);
+        color: var(--muted);
+      }
+
+      /* ─── Cards ─────────────────────────────────────────────────
+       * Two card flavours:
+       *   .card           hairline border, no shadow — for grids and
+       *                   form panels where the border IS the edge.
+       *   .card-elevated  no border, neutral Primer layered shadow —
+       *                   for featured / hero cards where Kuro Dev's
+       *                   trademark elevation does the work.
+       * Both share radius and padding. Hover on .card-elevated
+       * intensifies the shadow; .card stays static (border doesn't
+       * pulse). */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--space-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+      .card-elevated {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: var(--space-8);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        box-shadow: var(--elev-raised);
+        transition: box-shadow var(--motion-base) var(--ease-standard);
+      }
+      .card-elevated:hover {
+        /* Intensify the near layer; far stays the same so the lift
+           reads as "drawing closer", not "growing larger". */
+        box-shadow:
+          rgba(31, 35, 40, 0.06)  0px 30px 45px -30px,
+          rgba(0,   0,  0, 0.14)  0px 24px 48px -16px;
+      }
+      .card-title {
+        font-family: var(--font-display);
+        font-variant-numeric: normal;
+        font-weight: 600;
+        font-size: var(--text-xl);
+        line-height: 1.12;
+        letter-spacing: 0;
+        color: var(--fg);
+      }
+
+      /* ─── Badges ────────────────────────────────────────────────
+       * Success badge per DESIGN.md §4. Pill radius is wrong here —
+       * Kuro Dev uses 4px on badges, never 9999px. */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 1px 6px;
+        border-radius: var(--radius-sm);
+        font-size: var(--text-xs);
+        font-weight: 400;
+        line-height: 1.6;
+        font-variant-numeric: normal;
+      }
+      .badge-success {
+        color: var(--success);
+        background: color-mix(in oklab, var(--success), transparent 80%);
+        border: 1px solid
+          color-mix(in oklab, var(--success), transparent 60%);
+      }
+      .badge-muted {
+        color: var(--muted);
+        background: var(--surface-warm);
+        border: 1px solid var(--border);
+      }
+      .badge-accent {
+        color: var(--accent);
+        background: color-mix(in oklab, var(--accent), white 88%);
+        border: 1px solid
+          color-mix(in oklab, var(--accent), white 70%);
+      }
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      /* ─── Links ─────────────────────────────────────────────────
+       * Default link is Primer blue. Underline appears only on
+       * hover, at a generous offset so the rule reads as a
+       * deliberate gesture. */
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        font-variant-numeric: normal;
+      }
+      a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 1px;
+      }
+
+      /* ─── Kbd ───────────────────────────────────────────────────
+       * system mono at 12px, hairline border, navy text. Kuro Dev's
+       * kbd is small and dense — no padding inflation. */
+      kbd {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-warm);
+        color: var(--fg-2);
+      }
+
+      /* ─── Distinctive brand element: gradient halo ──────────────
+       * Kuro Dev's signature hero decoration is a soft pastel wash
+       * behind the headline — built here from the brand purple
+       * mixed at varying transparencies (no raw hex outside :root).
+       * The halo sits in a layered radial-gradient and lets the
+       * navy headline read as "floating in twilight". */
+      .halo {
+        position: absolute;
+        inset: -10% -20% -20% -10%;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            60% 50% at 15% 30%,
+            color-mix(in oklab, var(--accent), transparent 70%) 0%,
+            color-mix(in oklab, var(--accent), transparent 100%) 65%
+          ),
+          radial-gradient(
+            45% 40% at 85% 20%,
+            color-mix(in oklab, var(--danger), transparent 75%) 0%,
+            color-mix(in oklab, var(--danger), transparent 100%) 70%
+          ),
+          radial-gradient(
+            55% 45% at 70% 80%,
+            color-mix(in oklab, var(--accent), transparent 80%) 0%,
+            color-mix(in oklab, var(--accent), transparent 100%) 70%
+          );
+        filter: blur(40px);
+        z-index: 0;
+      }
+
+      /* ─── Code block ────────────────────────────────────────────
+       * DESIGN.md §3: system mono at 12px / weight 500 / 2.00
+       * line-height. The 2.00 leading is intentional — Kuro Dev's
+       * payment-integration snippets need to read like prose, not
+       * like a terminal dump. */
+      .code {
+        background: var(--surface-warm);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--space-5);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        font-weight: 500;
+        line-height: 2.0;
+        color: var(--fg);
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .code .k { color: var(--accent); }                 /* keyword */
+      .code .s { color: var(--success); }                /* string  */
+      .code .c { color: var(--muted); }                  /* comment */
+      .code .n { color: var(--fg-2); }                   /* identifier */
+
+      /* ─── Metric (tabular financial rendering) ──────────────────
+       * DESIGN.md §3 "Caption Tabular" — `tnum` for any number in
+       * a data display so columns of figures align. The values use
+       * deep navy; the labels use slate. */
+      .metric {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .metric-value {
+        font-family: var(--font-display);
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        font-size: var(--text-2xl);
+        line-height: 1.1;
+        letter-spacing: 0;
+        color: var(--fg);
+      }
+      .metric-label {
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
+
+      /* ─── Section-specific layout ───────────────────────────── */
+      .hero {
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-inner {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: var(--space-12);
+        align-items: end;
+      }
+      @media (max-width: 1023px) {
+        .hero-inner { grid-template-columns: 1fr; gap: var(--space-8); }
+      }
+      .hero h1 {
+        max-width: 14ch;
+        margin: 0;
+      }
+      .hero-actions {
+        display: flex;
+        gap: var(--space-3);
+        margin-block-start: var(--space-8);
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-5);
+        margin-block-start: var(--space-8);
+      }
+      @media (max-width: 1023px) {
+        .features-grid { grid-template-columns: 1fr 1fr; }
+      }
+      @media (max-width: 639px) {
+        .features-grid { grid-template-columns: 1fr; }
+      }
+
+      /* Pricing-style featured card row — exercises .card-elevated
+         alongside .card so the elevation contrast is visible. */
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr 1fr;
+        gap: var(--space-5);
+        align-items: stretch;
+        margin-block-start: var(--space-8);
+      }
+      @media (max-width: 1023px) {
+        .pricing-grid { grid-template-columns: 1fr; }
+      }
+      .pricing-price {
+        font-family: var(--font-display);
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        font-size: var(--text-3xl);
+        line-height: 1.05;
+        letter-spacing: 0;
+        color: var(--fg);
+      }
+      .pricing-price small {
+        font-size: var(--text-sm);
+        color: var(--muted);
+        margin-inline-start: var(--space-2);
+        font-variant-numeric: normal;
+      }
+      .pricing-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .pricing-list li {
+        position: relative;
+        padding-inline-start: var(--space-5);
+        font-size: var(--text-sm);
+        color: var(--fg-2);
+        line-height: 1.5;
+      }
+      .pricing-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.45em;
+        width: 12px;
+        height: 7px;
+        border-left: 1.5px solid var(--accent);
+        border-bottom: 1.5px solid var(--accent);
+        transform: rotate(-45deg);
+        transform-origin: 0 100%;
+      }
+
+      .metric-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-8);
+      }
+      @media (max-width: 767px) {
+        .metric-row { grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: var(--space-12);
+        align-items: start;
+      }
+      @media (max-width: 1023px) {
+        .form-row { grid-template-columns: 1fr; }
+      }
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        max-width: 460px;
+        padding: var(--space-6);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--elev-flat);
+      }
+      .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+      }
+      .form-actions {
+        display: flex;
+        gap: var(--space-3);
+        margin-block-start: var(--space-2);
+        align-items: center;
+      }
+
+      .icon { width: 14px; height: 14px; flex-shrink: 0; }
+      .row-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <!-- ════════════════════════════════════════════════════════════
+           HERO — exercises: gradient .halo (Kuro Dev's signature
+           pastel-wash behind the headline, built entirely from
+           color-mix() over --accent and --danger), h1 at 32px / weight 600 / tracking 0 (the tool's "density"),
+           .lede in slate, .btn-primary + .btn-ghost from DESIGN.md
+           §4 verbatim. Asymmetric grid on desktop; single column on
+           tablet.
+      ═══════════════════════════════════════════════════════════════ -->
+      <section class="hero" data-od-id="hero">
+        <div class="halo" aria-hidden="true"></div>
+
+        <div class="hero-inner">
+          <div class="stack-6">
+            <span class="eyebrow">Issues · Reviews · CI</span>
+            <h1>Dense dev workflow: issues, reviews, checks.</h1>
+            <p class="lede">
+              The reference fixture pastes Kuro Dev's token block into a
+              single <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">&lt;style&gt;</code>
+              and renders a recognisable Kuro Dev page without authoring
+              any additional values — every colour, type size, and
+              shadow below resolves through <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">var(--*)</code>.
+            </p>
+            <div class="hero-actions">
+              <a href="./tokens.css" class="btn btn-primary">
+                New issue
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+              <a href="./DESIGN.md" class="btn btn-ghost">View docs</a>
+            </div>
+          </div>
+
+          <aside class="card-elevated" aria-label="Payment summary">
+            <div class="row-between">
+              <span class="eyebrow">Pull request #4821</span>
+              <span class="badge badge-success">
+                <span class="badge-dot" aria-hidden="true"></span>
+                Checks passing
+              </span>
+            </div>
+
+            <div class="metric">
+              <div
+                class="metric-value"
+                style="font-size: var(--text-3xl); letter-spacing: -0.02em"
+              >
+                #4821<span style="color: var(--muted)"> · opened</span>
+              </div>
+              <div class="metric-label">
+                kuro-dev · 12/48 reviews (7j)
+              </div>
+            </div>
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: var(--space-3);
+                padding-block-start: var(--space-3);
+                border-top: 1px solid var(--border);
+              "
+            >
+              <div class="metric">
+                <div class="metric-label">Commits</div>
+                <div
+                  class="metric-value"
+                  style="font-size: var(--text-base); color: var(--fg-2)"
+                >
+                  +1,204
+                </div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Deletions</div>
+                <div
+                  class="metric-value"
+                  style="font-size: var(--text-base); color: var(--fg-2)"
+                >
+                  −312
+                </div>
+              </div>
+            </div>
+
+            <p class="body-sm body-muted">
+              Press <kbd>⌘</kbd> <kbd>K</kbd> to open the command palette
+              scoped to this repository.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════
+           METRICS — exercises: .metric pattern with `tnum`, deep-
+           navy values, slate labels. Numbers describe the fixture
+           itself, not invented claims.
+      ═══════════════════════════════════════════════════════════════ -->
+      <section data-od-id="metrics">
+        <div class="stack-3">
+          <span class="eyebrow">Tokens in numbers</span>
+          <h2 style="max-width: 24ch">
+            Fifty-six tokens carry every visible value below.
+          </h2>
+        </div>
+
+        <div class="metric-row" style="margin-block-start: var(--space-8)">
+          <div class="metric">
+            <div class="metric-value">56</div>
+            <div class="metric-label">tokens in :root</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">0</div>
+            <div class="metric-label">layer-C extensions: none</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">3</div>
+            <div class="metric-label">elevation levels (flat · ring · raised)</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">400</div>
+            <div class="metric-label">default system weight</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════
+           FEATURES — exercises: h2, .card (hairline border), h3 with
+           tighter tracking, body text, .features-grid responsive
+           ladder. Each card describes a real property of this
+           fixture (no "feature one/two/three" filler).
+      ═══════════════════════════════════════════════════════════════ -->
+      <section data-od-id="features">
+        <div class="stack-3">
+          <span class="eyebrow">What this fixture exercises</span>
+          <h2 style="max-width: 30ch">
+            Every component renders through <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">var(--*)</code> —
+            no raw hex, no off-token type.
+          </h2>
+        </div>
+
+        <div class="features-grid">
+          <article class="card">
+            <h3 class="card-title">Shadow as utility</h3>
+            <p class="body-muted body-sm">
+              The neutral Primer layered shadow lives at
+              <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">--elev-raised</code>.
+              Rebinding it to a neutral drop shadow erases Kuro Dev's
+              atmosphere even when every colour is right.
+            </p>
+            <a href="./tokens.css" class="body-sm">Inspect tokens →</a>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Density as voice</h3>
+            <p class="body-muted body-sm">
+              Display sizes run at weight 600 with zero tracking.
+              Kuro Dev's headlines feel like they don't need to shout;
+              weight 600 would erase the brand instantly.
+            </p>
+            <a href="./DESIGN.md" class="body-sm">Read the spec →</a>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Accent discipline</h3>
+            <p class="body-muted body-sm">
+              <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">--accent</code>
+              appears at most twice per screen — primary CTA and link
+              colour. Decorative ruby / magenta gradients live in the
+              hero halo, not on interactive elements.
+            </p>
+            <a href="./tokens.css" class="body-sm">Inspect accent →</a>
+          </article>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════
+           PRICING — exercises: .card-elevated with the trademark
+           neutral layered shadow, alongside two .card siblings so the
+           elevation hierarchy is immediately visible. Tabular numerals
+           on the price; check-mark feature list keyed to --accent.
+      ═══════════════════════════════════════════════════════════════ -->
+      <section data-od-id="pricing">
+        <div class="stack-3">
+          <span class="eyebrow">Runner tiers</span>
+          <h2 style="max-width: 26ch">
+            Featured tier lifts via shadow alone — no colour shift, no
+            border change.
+          </h2>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="card">
+            <div class="stack-3">
+              <h3 class="card-title">Team</h3>
+              <p class="body-muted body-sm">
+                For teams running their first CI workflows.
+              </p>
+            </div>
+            <div class="pricing-price">
+              $0<small>/mo · 2,000 min</small>
+            </div>
+            <ul class="pricing-list">
+              <li>2,000 CI minutes</li>
+              <li>Branch protection</li>
+              <li>Issue templates</li>
+            </ul>
+            <a href="./tokens.css" class="btn btn-ghost btn-sm">Choose Team</a>
+          </article>
+
+          <article class="card-elevated" aria-label="Featured tier">
+            <div class="row-between">
+              <span class="eyebrow">Most used</span>
+              <span class="badge badge-accent">Featured</span>
+            </div>
+            <h3 class="card-title">Scale</h3>
+            <div class="pricing-price">
+              $21<small>/mo · 2,000 min</small>
+            </div>
+            <ul class="pricing-list">
+              <li>20,000 CI minutes included</li>
+              <li>Required status checks</li>
+              <li>Code owners</li>
+              <li>Audit log</li>
+            </ul>
+            <a href="./tokens.css" class="btn btn-primary btn-sm">Choose Scale</a>
+          </article>
+
+          <article class="card">
+            <div class="stack-3">
+              <h3 class="card-title">Scale</h3>
+              <p class="body-muted body-sm">
+                Custom runners for regulated monorepos.
+              </p>
+            </div>
+            <div class="pricing-price">
+              Custom
+            </div>
+            <ul class="pricing-list">
+              <li>Self-hosted runners</li>
+              <li>SAML + SCIM</li>
+              <li>EU data residency</li>
+            </ul>
+            <a href="./DESIGN.md" class="btn btn-ghost btn-sm">View docs</a>
+          </article>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════
+           CODE PREVIEW — exercises: system mono at 12px / weight
+           500 / line-height 2.00 (DESIGN.md §3). Keyword tokens use
+           --accent; strings use --success; comments use --muted.
+      ═══════════════════════════════════════════════════════════════ -->
+      <section data-od-id="code">
+        <div class="form-row">
+          <div class="stack-4">
+            <span class="eyebrow">CLI preview</span>
+            <h2 style="max-width: 18ch">
+              One command, full checks.
+            </h2>
+            <p class="body-muted lede">
+              The monospace face is <code style="font-family:var(--font-mono);font-size:0.95em">system mono</code>
+              at 12px / weight 500 / line-height 2.00 — generous leading
+              so payment snippets read like prose, not like terminal
+              output.
+            </p>
+            <div>
+              <a href="./tokens.css" class="btn btn-ghost btn-sm">Inspect mono token</a>
+            </div>
+          </div>
+
+<pre class="code">
+<span class="c"># Require checks on PR 4821, then merge when green</span>
+$ gh pr checks <span class="n">4821</span> --required
+<span class="s">all required checks passed (18/18)</span>
+$ opencode run <span class="s">"Use open-design with kuro-dev"</span> <span class="k">--format</span> json
+</pre>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════
+           FORM — exercises: .field, input :focus-visible (purple halo
+           via --focus-ring), .btn-primary (reused), .btn-ghost,
+           .field-help. The form panel itself uses .card-elevated so
+           the trademark shadow frames the inputs.
+      ═══════════════════════════════════════════════════════════════ -->
+      <section data-od-id="form">
+        <div class="form-row">
+          <div class="stack-4">
+            <span class="eyebrow">Issue form</span>
+            <h2 style="max-width: 22ch">
+              Inputs inherit the same tokens.
+            </h2>
+            <p class="body-muted lede">
+              Focus rings, borders, placeholder colour — all derive
+              from <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">--accent</code>
+              and <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">--border</code>.
+              The submit button reuses <code style="font-family:var(--font-mono);font-size:0.92em;color:var(--fg-2)">.btn-primary</code>
+              unchanged. The panel stays flat on its border.
+            </p>
+          </div>
+
+          <form class="form" onsubmit="event.preventDefault();">
+            <div class="row-between">
+              <h3 class="card-title" style="font-size: var(--text-lg)">
+                View docs
+              </h3>
+              <span class="badge badge-muted">New issue</span>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="first">Title</label>
+                <input
+                  id="first"
+                  type="text"
+                  placeholder="Jamie"
+                  autocomplete="given-name"
+                />
+              </div>
+              <div class="field">
+                <label for="last">Repository</label>
+                <input
+                  id="last"
+                  type="text"
+                  placeholder="Liu"
+                  autocomplete="family-name"
+                />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="email">Area</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="jamie@acme.dev"
+                autocomplete="email"
+                required
+              />
+              <p class="field-help">
+                Triage runs on labels and code owners.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="volume">Severity</label>
+              <select id="volume">
+                <option>S0 · blocker</option>
+                <option>S1 · high</option>
+                <option>S2 · normal</option>
+                <option>S3 · low</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                New issue
+              </button>
+              <button type="button" class="btn btn-ghost">
+                Save draft
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

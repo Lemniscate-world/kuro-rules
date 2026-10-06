@@ -36,6 +36,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 STRATEGY_FILE = ROOT_DIR / "strategy.local.json"
 PIPELINE_FILE = ROOT_DIR / "pipeline.local.json"
 CI_FILE = ROOT_DIR / "ci-status.json"
+DOCS_DIR = ROOT_DIR.parent
 
 
 def _load(path: Path) -> dict:
@@ -149,9 +150,103 @@ def okr_progress(objectives: list[dict], finance: dict, metrics: dict, pipeline:
     return out
 
 
+# ---------- conformite des plans (R12/R13b : le plan d'abord, sinon aveugle) ----------
+
+def plan_compliance(docs_dir: Path | None = None) -> dict[str, Any]:
+    """Scanne les repos git : PLAN.md present ? sous-plan *_2ANS.md present ?
+
+    Retourne {total, sans_plan: [...], actifs_sans_cap: [...]}.
+    actifs_sans_cap = repos avec PLAN.md mais sans *_2ANS.md ET velocite > 0
+    (on ne demande un cap 2 ans qu'a ce qui bouge vraiment).
+    """
+    root = docs_dir or DOCS_DIR
+    sans_plan: list[str] = []
+    avec_plan: list[str] = []
+    sans_sousplan: list[str] = []
+    try:
+        children = sorted([c for c in root.iterdir() if c.is_dir()], key=lambda c: c.name.lower())
+    except OSError:
+        return {"total": 0, "sans_plan": [], "actifs_sans_cap": []}
+    for child in children:
+        if not (child / ".git").exists():
+            continue
+        if child.resolve() == ROOT_DIR.resolve():
+            continue  # kuro-rules n'est pas un projet livrable
+        has_plan = (child / "PLAN.md").exists() or (child / "docs" / "PLAN.md").exists()
+        if not has_plan:
+            sans_plan.append(child.name)
+            continue
+        avec_plan.append(child.name)
+        has_cap = (len(list(child.glob("PLAN_*_2ANS.md")) + list((child / "docs").glob("PLAN_*_2ANS.md"))
+                       if (child / "docs").exists() else list(child.glob("PLAN_*_2ANS.md"))) > 0)
+        if not has_cap:
+            sans_sousplan.append(child.name)
+    # Ne reclamer un cap 2 ans que pour les repos actifs (velocite > 0).
+    actifs_sans_cap: list[str] = []
+    if sans_sousplan:
+        try:
+            import kuro_metrics
+            payload = kuro_metrics.build_payload()
+            vel = {str(p.get("name", "")).lower(): float(p.get("velocity_per_week") or 0)
+                   for p in payload.get("projects", [])}
+        except Exception:
+            vel = {}
+        actifs_sans_cap = [n for n in sans_sousplan if vel.get(n.lower(), 0) > 0]
+    return {"total": len(sans_plan) + len(avec_plan),
+            "sans_plan": sorted(sans_plan, key=str.lower),
+            "actifs_sans_cap": sorted(actifs_sans_cap, key=str.lower)}
+
+
+def campaign(metrics: dict, okrs: list[dict], pipeline: dict, plans: dict | None = None) -> dict[str, str]:
+    """Section Campagne (grande strategie) : guerre / bataille / arene + gate necessite.
+
+    Deterministe : chaque ligne derive d'un fait mesure. La bataille qui ne
+    prepare rien et dont la necessite n'est pas demontree ne part pas.
+    """
+    plans = plans or {}
+    # Guerre = l'OKR le plus en retard, sinon le premier non atteint.
+    guerre = "aucun OKR defini — definir la guerre avant les batailles"
+    worst = [o for o in okrs if not o.get("hit") and o.get("current") is not None]
+    if worst:
+        worst.sort(key=lambda o: (o.get("pct") if o.get("pct") is not None else 101))
+        w = worst[0]
+        guerre = f"{w['label']} ({w['current']}/{w['target']})"
+    # Bataille = repo le plus rapide, avec gate de necessite.
+    bataille = "aucune donnee de velocite"
+    gate_n = "necessite non demontree — ne pas lancer"
+    gate_c = "consequences : +maintenance, +surface CI, -focus ailleurs"
+    projects = (metrics.get("projects") or []) if isinstance(metrics, dict) else []
+    if projects:
+        top = max(projects, key=lambda p: float(p.get("velocity_per_week") or 0))
+        bataille = (f"{top.get('name')} ({top.get('velocity_per_week')} c/sem) "
+                     f"prepare : livrer vert puis attaquer l'OKR « {guerre} »")
+        if int(top.get("ci_failures") or 0) > 0:
+            gate_n = f"necessaire : {top.get('ci_failures')} check(s) CI en echec — reparer d'abord"
+        elif worst:
+            gate_n = f"necessaire : OKR « {w['label']} » sous les 50% — la bataille sert la guerre"
+        elif float((metrics.get("averages") or {}).get("velocity_per_week") or 0) < 1:
+            gate_n = "necessaire : velocite moyenne < 1 c/sem — debloquer un front unique"
+        gate_c = (f"consequences : 2h bornees, 0 breaking change cross-repo (R105), "
+                  f"SESSION_SUMMARY prepend (R42) — sinon la bataille coute plus qu'elle ne rapporte")
+    # Arene ignoree = ce que le code ne voit pas : signaux dehors ou pivots endormis.
+    pivots = metrics.get("pivot_candidates") or [] if isinstance(metrics, dict) else []
+    last_insight = (pipeline.get("last") or {}).get("insight") if isinstance(pipeline, dict) else None
+    if last_insight:
+        arene = f"insight pipeline : {last_insight}"
+    elif pivots:
+        arene = f"{len(pivots)} candidat(s) pivot endormis — 1 signal Radar a reconvertir avant d'ouvrir un front"
+    else:
+        arene = "aucun signal dehors — lancer 1 ecoute Radar (R69) avant d'ouvrir un front"
+    if (plans.get("sans_plan") or []):
+        arene += f" · {len(plans['sans_plan'])} repos sans PLAN.md : pas de bataille sans carte"
+    return {"guerre": guerre, "bataille": bataille, "arene": arene,
+            "gate_necessite": gate_n, "gate_consequences": gate_c}
+
+
 # ---------- règles de décision (déterministes) ----------
 
-def keyed_decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict) -> list[tuple[str, str]]:
+def keyed_decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict,
+                    plans: dict | None = None) -> list[tuple[str, str]]:
     """Mêmes règles que decisions(), avec une clé stable par règle (suivi NEW/OPEN/RESOLVED)."""
     out: list[tuple[str, str]] = []
     runway = finance.get("runway_months")
@@ -172,11 +267,21 @@ def keyed_decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pi
         out.append(("velocity", "Vélocité moyenne < 1 commit/semaine : choisir UN projet focus et livrer"))
     if ci and ci.get("failures"):
         out.append(("ci", f"CI : {ci['failures']} check(s) en échec — le guardian diagnostique, corrige la cause racine"))
+    plans = plans or {}
+    sans_plan = plans.get("sans_plan") or []
+    if sans_plan:
+        top = ", ".join(sans_plan[:5]) + ("…" if len(sans_plan) > 5 else "")
+        out.append(("plans", f"Plans : {len(sans_plan)} repos sans PLAN.md ({top}) — ecrire la carte avant le pick, sinon le worker tourne aveugle (R12)"))
+    sans_cap = plans.get("actifs_sans_cap") or []
+    if sans_cap:
+        top = ", ".join(sans_cap[:5]) + ("…" if len(sans_cap) > 5 else "")
+        out.append(("caps", f"Caps 2 ans : {len(sans_cap)} repos actifs sans sous-plan ({top}) — 1 sous-plan docs/PLAN_<X>_2ANS.md par front actif (R13b)"))
     return out
 
 
-def decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict) -> list[str]:
-    return [text for _, text in keyed_decisions(finance, metrics, ci, okrs, pipeline)]
+def decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline: dict,
+              plans: dict | None = None) -> list[str]:
+    return [text for _, text in keyed_decisions(finance, metrics, ci, okrs, pipeline, plans)]
 
 
 DECISIONS_FILE = ROOT_DIR / "strategy_decisions.local.json"  # local, gitigné (R111/R113)
@@ -267,8 +372,10 @@ def build_payload(track: bool = True) -> dict[str, Any]:
     ci = collect_ci()
     pipeline = collect_pipeline()
     okrs = okr_progress(strategy.get("objectives", []) or [], finance, metrics, pipeline)
-    keyed = keyed_decisions(finance, metrics, ci, okrs, pipeline)
+    plans = plan_compliance()
+    keyed = keyed_decisions(finance, metrics, ci, okrs, pipeline, plans)
     opened, resolved = track_decisions(keyed) if track else ([{"key": k, "text": t, "status": "OPEN", "age_days": 0} for k, t in keyed], [])
+    camp = campaign(metrics, okrs, pipeline, plans)
     return {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "finance": {
@@ -292,6 +399,8 @@ def build_payload(track: bool = True) -> dict[str, Any]:
         },
         "decisions": opened,
         "resolved": resolved,
+        "plans": plans,
+        "campaign": camp,
     }
 
 
@@ -313,6 +422,18 @@ def render(payload: dict[str, Any]) -> str:
         lines.append(f"    Dernière insight : {p['last_insight']}")
     for ns in p["next_steps"]:
         lines.append(f"    Prochain pas : {ns}")
+    camp = payload.get("campaign") or {}
+    if camp:
+        lines.append("  Campagne (grande strategie) :")
+        lines.append(f"    Guerre   : {camp.get('guerre')}")
+        lines.append(f"    Bataille : {camp.get('bataille')}")
+        lines.append(f"    Arene ignoree : {camp.get('arene')}")
+        lines.append(f"    Gate : {camp.get('gate_necessite')}")
+        lines.append(f"           {camp.get('gate_consequences')}")
+    pl = payload.get("plans") or {}
+    if pl and (pl.get("sans_plan") or pl.get("actifs_sans_cap")):
+        lines.append(f"  Plans : {len(pl.get('sans_plan') or [])} sans PLAN.md · "
+                     f"{len(pl.get('actifs_sans_cap') or [])} actifs sans cap 2 ans")
     lines.extend(_fmt_decisions(payload.get("decisions") or []))
     lines.extend(_fmt_resolved(payload.get("resolved") or []))
     return "\n".join(lines)

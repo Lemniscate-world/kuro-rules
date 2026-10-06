@@ -1,0 +1,12 @@
+Package: kuro
+Version: 1.3.0-1
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3 (>= 3.10), python3-psutil, python3-watchdog
+Suggests: python3-textual
+Maintainer: lambda-Section
+Description: Kuro complet : daemon de surveillance + API + dashboard Glances
+ Surveille les projets (SESSION_SUMMARY), expose une API localhost:8767
+ et un dashboard web avec moniteur systeme live (CPU, RAM, disques,
+ GPU, Docker). Voir : ssh -N -L 8767:localhost:8767 <hote>.
