@@ -54,9 +54,12 @@ def base_string(method, url, params):
 
 
 def sign(base, consumer_secret, token_secret):
+    # OAuth 1.0a (RFC 5849 §3.4.2) IMPOSE HMAC-SHA1 : ce n est pas du hash
+    # de mot de passe (faux positif CodeQL "weak password hashing").
+    # hmac.digest() = API moderne recommandee, meme octets sur le fil.
     key = "%s&%s" % (percent_encode(consumer_secret), percent_encode(token_secret or ""))
-    mac = hmac.new(key.encode(), base.encode(), hashlib.sha1)
-    return base64.b64encode(mac.digest()).decode()
+    mac = hmac.digest(key.encode(), base.encode(), "sha1")
+    return base64.b64encode(mac).decode()
 
 
 def auth_header(oauth_params):

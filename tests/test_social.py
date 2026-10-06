@@ -97,6 +97,18 @@ def test_x_build_auth_deterministe():
     assert h1.startswith("OAuth ") and 'oauth_signature="' in h1
 
 
+def test_x_sign_octets_identiques_legacy():
+    """HMAC-SHA1 impose par OAuth 1.0a : hmac.digest() rend les memes octets
+    que l ancienne construction hmac.new(..., hashlib.sha1)."""
+    import base64
+    import hashlib
+    import hmac as _hmac
+
+    legacy = base64.b64encode(
+        _hmac.new(b"k&s", b"base", hashlib.sha1).digest()).decode()
+    assert xp.sign("base", "k", "s") == legacy
+
+
 def test_discord_save_channel_map_fusion(tmp_path):
     f = tmp_path / "ch.json"
     f.write_text('{"investors": "https://wh/i", "channels": {"a": "https://wh/a"}}',
