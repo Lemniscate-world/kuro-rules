@@ -417,10 +417,12 @@ def drain_queue(limit: int = 5) -> list[dict]:
     return results
 
 
-def _record_brain(engine: str | None, seconds: float, prompt: str = "") -> None:
+def _record_brain(engine: str | None, seconds: float, prompt: str = "",
+                  model: str = "") -> None:
     """Dernier cerveau utilise (lu par Xenon). Jamais bloquant.
 
     prompt_hash = empreinte 16 hex (pas le texte : pas de fuite).
+    model = label complet ("openrouter/nvidia/...:free", "" si routeur/cache).
     Sert a mesurer le taux de repetition avant tout cache (cf. GPTCache).
     """
     try:
@@ -429,6 +431,7 @@ def _record_brain(engine: str | None, seconds: float, prompt: str = "") -> None:
         digest = _prompt_hash(prompt)
         path.write_text(
             json.dumps({"engine": engine or "deterministe",
+                        "model": model or "",
                         "latency_s": round(seconds, 1),
                         "at": time.strftime("%Y-%m-%d %H:%M:%S"),
                         "prompt_hash": digest}),
@@ -444,8 +447,9 @@ def _usage_path() -> Path:
 
 # Cout estime $ / 1M tokens (mix entree+sortie, ordre de grandeur, variable
 # selon modele exact — affiche comme ~est dans le TUI, jamais facture).
+# Regle d honestete : 0.0 = vraiment gratuit (tiers :free, local, cache),
+# None = prix inconnu (le TUI affiche ~$? au lieu de mentir $0.0000).
 _USAGE_COST_PER_MTOK = {
-    "openrouter": 0.0,
     "groq": 0.0,
     "nvidia": 0.0,
     "gemini": 0.0,
@@ -464,6 +468,30 @@ _USAGE_COST_PER_MTOK = {
     "cache": 0.0,
     "deterministe": 0.0,
 }
+
+
+def _model_rate(model: str, engine: str | None) -> float | None:
+    """$/MTok blended pour un appel, ou None si prix inconnu.
+
+    Le modele exact decide, pas la jambe : un :free OpenRouter coute 0
+    (vrai zero) mais un modele payant non tarife rend None — le TUI
+    affiche alors un compteur "cout inconnu" au lieu de $0.0000.
+    """
+    m = (model or "").lower()
+    if ":free" in m:
+        return 0.0
+    leg = ((engine or "").split("/")[0].split(":")[0] or "").lower()
+    if leg in ("", "cache", "deterministe", "local", "ollama-local",
+               "ollama", "pollinations",
+               "groq", "nvidia", "gemini", "hf", "mistral"):
+        return 0.0
+    if leg == "deepseek":
+        return _USAGE_COST_PER_MTOK["deepseek"]
+    if leg in ("ollama-cloud", "cloud"):
+        return _USAGE_COST_PER_MTOK["ollama-cloud"]
+    if (engine or "").lower().startswith("litellm:"):
+        return _USAGE_COST_PER_MTOK.get(engine.lower().split("/")[0], None)
+    return None
 
 # Compteurs reels du dernier appel, par thread (l API est multi-thread) :
 # les jambes y deposent {"total_tokens": N}, _done les consomme et efface.
@@ -492,19 +520,16 @@ def _ollama_usage(data: dict) -> dict | None:
 
 def _record_usage(engine: str | None, seconds: float, prompt: str = "",
                   text: str | None = None, total_tokens: int | None = None,
-                  legs: list | None = None) -> None:
+                  legs: list | None = None, model: str = "") -> None:
     """Une ligne JSON par appel LLM (lu par Xenon : couts estimes).
 
     Tokens reels si fournis, sinon estimes ~ caracteres/4 (convention).
     legs = [[jambe, statut]...] de la tentative (vide si routeur/cache).
-    Jambes locales, cache, pollinations et echecs = cout 0.
+    model = label complet pour le cout et l affichage ("" si inconnu).
+    est_cost_usd = null quand le prix est inconnu (jamais 0 par defaut).
     Jamais bloquant, jamais d exception.
     """
     try:
-        name = engine or ""
-        if name.startswith("litellm:"):
-            name = name[len("litellm:"):]
-        eng = name.split("/")[0].split(":")[0]
         prompt_chars = len(prompt or "")
         resp_chars = len(text or "")
         if total_tokens is None:
@@ -512,19 +537,19 @@ def _record_usage(engine: str | None, seconds: float, prompt: str = "",
             reels = False
         else:
             reels = True
-        rate = (_USAGE_COST_PER_MTOK.get(engine or "")
-                or _USAGE_COST_PER_MTOK.get(name, 0.0)
-                or _USAGE_COST_PER_MTOK.get(eng, 0.0))
+        rate = _model_rate(model, engine)
+        cost = None if rate is None else round(total_tokens * rate / 1_000_000, 6)
         path = _usage_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         entry = {"day": time.strftime("%Y-%m-%d"),
                  "at": time.strftime("%Y-%m-%d %H:%M:%S"),
                  "engine": engine or "deterministe",
+                 "model": model or "",
                  "latency_s": round(seconds, 1),
                  "prompt_chars": prompt_chars, "resp_chars": resp_chars,
                  "tokens": total_tokens, "tokens_reels": reels,
                  "legs": [[str(a), str(b)] for a, b in (legs or [])][:8],
-                 "est_cost_usd": round(total_tokens * rate / 1_000_000, 6)}
+                 "est_cost_usd": cost}
         with path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry) + "\n")
         # borne : garde les 2000 dernieres lignes
@@ -862,7 +887,8 @@ def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.",
     """Chaîne : routeur opt-in, puis jambes dans l ordre du tier."""
     start = time.monotonic()
 
-    def _done(text: str | None, engine: str, trail: list | None = None) -> str | None:
+    def _done(text: str | None, engine: str, trail: list | None = None,
+              model: str = "") -> str | None:
         seconds = time.monotonic() - start
         usage = getattr(_TLS, "usage", None)
         _TLS.usage = None
@@ -871,9 +897,9 @@ def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.",
             tokens = int((usage or {}).get("total_tokens", 0)) or None
         except Exception:
             tokens = None
-        _record_brain(engine if text else None, seconds, prompt)
+        _record_brain(engine if text else None, seconds, prompt, model)
         _record_usage(engine if text else None, seconds, prompt, text, tokens,
-                      trail or [])
+                      trail or [], model)
         if text:
             _cache_store(prompt, text)
         return text
@@ -881,7 +907,7 @@ def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.",
     text, status = _litellm_router(prompt, system)
     if text:
         print(f"kuro_llm: routeur litellm ok ({status})")
-        return _done(text, status, [])
+        return _done(text, status, [], model=status)
     if status not in ("router-off", "no-litellm", "router-empty"):
         print(f"kuro_llm: routeur litellm indisponible ({status})")
     cached = _cache_lookup(prompt)
@@ -900,7 +926,7 @@ def ask(prompt: str, system: str = "Tu es l'analyste du studio lambda-Section.",
         if text:
             print(f"kuro_llm: {label} ok")
             _breaker_note(short, False)
-            return _done(text, short, trail)
+            return _done(text, short, trail, model=label)
         _breaker_note(short, status not in quiet
                       and status not in _CB_CONFIG_STATUSES)
         if status not in quiet:

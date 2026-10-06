@@ -47,7 +47,13 @@ def mood_for(system: dict | None, kuro: dict | None) -> tuple[str, str]:
     cpu = _num((system.get("cpu") or {}).get("percent"))
     mem = _num((system.get("memory") or {}).get("percent"))
     parts = (system.get("disk") or {}).get("partitions") or []
-    disk_max = max([_num(p.get("percent")) or 0.0 for p in parts] or [0.0])
+    disk_peaks: list[tuple[float, str]] = []
+    for p in parts:
+        try:
+            disk_peaks.append((float(p.get("percent")), str(p.get("mount", "?"))))
+        except (TypeError, ValueError):
+            continue
+    disk_max, disk_mount = max(disk_peaks or [(0.0, "?")], key=lambda t: t[0])
     temps = [(_num(t.get("current")) or 0.0)
              for t in ((system.get("sensors") or {}).get("temperatures") or [])]
     temp_max = max(temps or [0.0])
@@ -57,7 +63,7 @@ def mood_for(system: dict | None, kuro: dict | None) -> tuple[str, str]:
     if db and age is not None and age >= 15:
         return "critical", f"daemon silencieux depuis {age:.0f} min"
     if disk_max >= 95:
-        return "critical", f"disque plein a {disk_max:.0f}%"
+        return "critical", f"disque {disk_mount} plein a {disk_max:.0f}%"
     if (cpu or 0.0) >= 90 or (mem or 0.0) >= 95 or temp_max >= 85:
         worst = max(cpu or 0.0, mem or 0.0, temp_max)
         return "critical", f"machine en surchauffe ({worst:.0f})"

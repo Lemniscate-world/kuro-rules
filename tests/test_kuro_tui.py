@@ -21,6 +21,12 @@ def _fast_integrators(monkeypatch):
     """
     monkeypatch.setattr(tui, "agents_lines", lambda: [])
     monkeypatch.setattr(_git_projects, "discover", lambda force=False: [])
+    import urllib.request as _url
+    monkeypatch.setattr(_url, "urlopen",
+                        lambda *a, **k: (_ for _ in ()).throw(
+                            OSError("pas de reseau en test")))
+    monkeypatch.setattr(tui, "_OLLAMA_CACHE", {"ts": 0.0, "ok": False,
+                                               "names": []})
 
 
 def test_bar_shapes():

@@ -369,21 +369,36 @@ class KuroApp(App):
 
     def _brain_lines(self) -> list[str]:
         try:
-            from .tui import _read_brain
+            from .tui import _legs_line, _read_brain, _rel_age, _short_model_name
             data = _read_brain()
         except Exception:
             data = None
         if not data:
             lines = ["cerveau : inconnu"]
         else:
-            lines = [f"cerveau : {data.get('engine', '?')} ({data.get('latency_s', '?')}s)"]
+            eng = str(data.get("engine") or "?")
+            model = _short_model_name(data.get("model") or "")
+            tag = f" [{model}]" if model and model != eng else ""
+            age = _rel_age(data.get("at"))
+            lines = [f"cerveau : {eng}{tag} ({data.get('latency_s', '?')}s"
+                     f"{', ' + age if age else ''})"]
         try:
-            calls_d, cost_d, calls_w, cost_w, top, lat = _usage_stats()
+            from .tui import _pl, _unk_txt
+            (calls_d, cost_d, unk_d, cache_d,
+             calls_w, cost_w, unk_w, cache_w, top, lat) = _usage_stats()
         except Exception:
             return lines
-        if calls_d or calls_w:
-            lines.append(f"couts : ~${cost_d:.4f} auj. ({calls_d})")
-            lines.append(f"~${cost_w:.4f} /7j ({calls_w}) top:{top}")
+        if calls_d or calls_w or cache_d or cache_w:
+            lines.append(f"couts : ~${cost_d:.4f} auj. ({calls_d} {_pl(calls_d, 'appel')}"
+                         f"{_unk_txt(unk_d)})")
+            lines.append(f"~${cost_w:.4f} /7j ({calls_w} {_pl(calls_w, 'appel')}"
+                         f"{_unk_txt(unk_w)}) top:{top} lat:{lat}s")
+            if cache_d or cache_w:
+                lines.append(f"cache : {cache_w} hits /7j (0 token)")
+        try:
+            lines.extend(_legs_line())
+        except Exception:
+            pass
         return lines
 
     def _kuro_lines(self, kuro: dict | None) -> list[str]:

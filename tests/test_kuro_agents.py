@@ -59,7 +59,8 @@ def test_collect_trie_problemes_dabord(monkeypatch):
 def test_collect_sans_cli(monkeypatch):
     monkeypatch.setattr(agents.shutil, "which", lambda name: None)
     data = agents.collect_agents()
-    assert data == {"present": False, "agents": [], "crons": []}
+    assert data == {"present": False, "agents": [], "crons": [],
+                    "agents_ok": False, "crons_ok": False}
 
 
 def test_cache_60s(monkeypatch):

@@ -77,14 +77,27 @@ MOOD_COLORS = {"happy": "ok", "idle": "dim", "worried": "warn",
                "critical": "crit"}
 
 
+def _stdout_is_tty() -> bool:
+    """stdout est-il un terminal ? Jamais d'exception (pipe ferme, etc.)."""
+    try:
+        return bool(sys.stdout.isatty())
+    except Exception:
+        return False
+
+
 def _colors_on() -> bool:
     """Couleurs si terminal reel + autorise (NO_COLOR et --no-color coupent).
 
     KURO_FORCE_COLOR=1 force pour demos/captures (pipe compris).
+    Jamais d'exception : un stdout exotique (pipe ferme, console
+    minimale) ne doit pas tuer le rendu — vu en prod, frame perdue.
     """
-    if os.environ.get("KURO_FORCE_COLOR") == "1":
-        return bool(_COLOR)
-    return bool(_COLOR) and sys.stdout.isatty() and os.environ.get("NO_COLOR") is None
+    try:
+        if os.environ.get("KURO_FORCE_COLOR") == "1":
+            return bool(_COLOR)
+        return bool(_COLOR) and sys.stdout.isatty() and os.environ.get("NO_COLOR") is None
+    except Exception:
+        return False
 
 
 def _paint(text: str, level: str, use_color: bool) -> str:
@@ -368,7 +381,7 @@ def fmt_bytes(value: Any) -> str:
         if num < 1024.0 or unit == "TB":
             return f"{int(num)} B" if unit == "B" else f"{num:.1f} {unit}"
         num /= 1024.0
-    return f"{num:.1f} TB"
+    return f"{num:.1f} TB"  # pragma: no cover - TB matche toujours ci-dessus
 
 
 def fmt_rate(bytes_per_s: float | None) -> str:
@@ -629,10 +642,33 @@ def _read_brain() -> dict | None:
         return None
 
 
+# Moteurs qui ne sont pas des appels LLM : le cache local (0 token,
+# instantane) et le mode deterministe (que des echecs) gonflaient les
+# "appels" et ecrasaient la latence moyenne vers 0. Ils sont comptes a
+# part (hits) et exclus des stats d appels.
+_NON_CALL_ENGINES = {"", "cache", "deterministe"}
+
+
+def _pl(n: int, sing: str, plur: str | None = None) -> str:
+    """Pluriel francais : 1 appel, 0/2+ appels. Jamais d exception."""
+    try:
+        return sing if int(n) == 1 else (plur if plur else sing + "s")
+    except Exception:
+        return plur if plur else sing + "s"
+
+
 def _usage_stats() -> tuple:
-    """(appels_auj, cout_auj, appels_7j, cout_7j, top_moteur, lat_moy). Zeros si absent."""
-    calls_d = calls_w = 0
+    """Stats 7 j sur les VRAIS appels LLM (cache/deterministe exclus).
+
+    (appels_auj, cout_auj, couts_inconnus_auj, hits_cache_auj,
+     appels_7j, cout_7j, couts_inconnus_7j, hits_cache_7j,
+     top_moteur, lat_moy).
+    cout inconnu = modele payant non tarife (prix null, pas $0 menteur).
+    """
+    zero = (0, 0.0, 0, 0, 0, 0.0, 0, 0, "?", "?")
+    calls_d = cache_d = calls_w = cache_w = 0
     cost_d = cost_w = 0.0
+    unk_d = unk_w = 0
     lat_sum = lat_n = 0
     engines: dict[str, int] = {}
     try:
@@ -642,7 +678,7 @@ def _usage_stats() -> tuple:
         today_s = today.isoformat()
         lines = LLM_USAGE_FILE.read_text(encoding="utf-8").splitlines()[-2000:]
     except Exception:
-        return 0, 0.0, 0, 0.0, "?", "?"
+        return zero
     for line in lines:
         try:
             e = json.loads(line)
@@ -650,25 +686,39 @@ def _usage_stats() -> tuple:
             continue
         if not isinstance(e, dict) or (e.get("day") or "") < week_ago:
             continue
-        try:
-            c = float(e.get("est_cost_usd") or 0.0)
-        except Exception:
+        eng = str(e.get("engine") or "?")
+        is_today = e.get("day") == today_s
+        if eng in _NON_CALL_ENGINES:
+            cache_w += 1
+            if is_today:
+                cache_d += 1
+            continue
+        raw_cost = e.get("est_cost_usd")
+        if raw_cost is None:
+            unk_w += 1
+            if is_today:
+                unk_d += 1
             c = 0.0
+        else:
+            try:
+                c = float(raw_cost or 0.0)
+            except Exception:
+                c = 0.0
         calls_w += 1
         cost_w += c
-        eng = str(e.get("engine") or "?")
         engines[eng] = engines.get(eng, 0) + 1
         try:
             lat_sum += float(e.get("latency_s") or 0.0)
             lat_n += 1
         except Exception:
             pass
-        if e.get("day") == today_s:
+        if is_today:
             calls_d += 1
             cost_d += c
     top = max(engines, key=lambda k: engines[k]) if engines else "?"
     lat = f"{lat_sum / lat_n:.1f}" if lat_n else "?"
-    return calls_d, cost_d, calls_w, cost_w, top, lat
+    return (calls_d, cost_d, unk_d, cache_d,
+            calls_w, cost_w, unk_w, cache_w, top, lat)
 
 
 def sec_agents() -> list[str]:
@@ -795,7 +845,7 @@ def _marketing_launch(root: Path) -> tuple:
         # Cap : la checklist contient aussi des taches non-posts -> borne aux drafts.
         publies = min(publies, drafts)
         return drafts, publies
-    except Exception:
+    except Exception:  # pragma: no cover - splitlines() sur str ne leve pas
         return 0, 0
 
 
@@ -813,15 +863,32 @@ def _marketing_tracker(root: Path) -> tuple:
                 if l.strip().startswith("|") and "**" in l
                 and any(k in l for k in ("Reddit", "Discord", "GitHub", "X ", "HN", "Lobsters", "Blog"))]
         return len(rows), path.name
-    except Exception:
+    except Exception:  # pragma: no cover - comprehension sur str ne leve pas
         return 0, "?"
+
+
+def _file_age_txt(path: Path) -> str:
+    """" (maj il y a 17j)" / " (maj il y a 3h)" / "" si illisible."""
+    try:
+        from datetime import datetime as _dt
+        age_s = max(0.0, (_dt.now().astimezone() - _dt.fromtimestamp(
+            path.stat().st_mtime).astimezone()).total_seconds())
+        if age_s < 5400:
+            return f" (maj il y a {int(age_s // 60)} min)"
+        if age_s < 86400:
+            return f" (maj il y a {int(age_s // 3600)}h)"
+        return f" (maj il y a {int(age_s // 86400)}j)"
+    except Exception:
+        return ""
 
 
 def sec_marketing() -> list[str]:
     """Apercu marketing local (pipeline + drafts + tracker). Jamais d exception.
 
     Sources 100% locales : pipeline.local.json, LAUNCH_POSTS.md,
-    acquisition_tracker.md. Zero reseau, zero LLM.
+    acquisition_tracker.md. Zero reseau, zero LLM. Chaque ligne porte l'age
+    de sa source : un chiffre vieux de 3 semaines ne doit pas passer pour
+    du live.
     """
     try:
         root = _rules_dir()
@@ -831,18 +898,64 @@ def sec_marketing() -> list[str]:
         if not total and not drafts and not canaux:
             return [f"MARKETING donnees absentes (dir {root} : "
                     "pipeline.local.json / LAUNCH_POSTS.md introuvables)"]
-        lines = [f"pipeline : {total} entrees - {itw_7d} interview 7j (cible 3/sem)"]
+        pipe_age = _file_age_txt(root / "pipeline.local.json")
+        launch_age = _file_age_txt(root / "LAUNCH_POSTS.md")
+        track_age = _file_age_txt(root / "acquisition_tracker.md")
+        if not (root / "acquisition_tracker.md").exists():
+            track_age = _file_age_txt(root / "docs" / "tracking" / "acquisition_tracker.md")
+        lines = [f"pipeline : {total} entrees - {itw_7d} {_pl(itw_7d, 'interview')} 7j"
+                 f" (cible 3/sem){pipe_age}"]
         if insight:
             lines.append(f"  insight : {insight}")
         if nxt:
             lines.append(f"  prochain pas : {nxt}")
         if drafts:
-            lines.append(f"  drafts : {drafts} posts prets [{publies}/{drafts} publies]")
+            lines.append(f"  drafts : {drafts} posts prets [{publies}/{drafts} publies]{launch_age}")
         if canaux:
-            lines.append(f"  tracker : {canaux} canaux suivis (Reddit/Discord/GitHub)")
+            lines.append(f"  tracker : {canaux} canaux suivis (Reddit/Discord/GitHub){track_age}")
         return lines[:6]
     except Exception:
         return ["MARKETING (indisponible)"]
+
+
+def _rel_age(when: Any) -> str:
+    """Age relatif best-effort ("il y a 10h", "il y a 3j", ""). Jamais d exception."""
+    try:
+        from datetime import datetime as _dt
+        txt = str(when or "").strip()
+        if not txt:
+            return ""
+        stamp = _dt.fromisoformat(txt.replace("Z", "+00:00"))
+        if stamp.tzinfo is None:
+            stamp = stamp.astimezone()
+        secs = max(0.0, (_dt.now().astimezone() - stamp).total_seconds())
+        if secs < 300:
+            return "a l'instant"
+        if secs < 5400:
+            return f"il y a {int(secs // 60)} min"
+        if secs < 86400:
+            return f"il y a {int(secs // 3600)}h"
+        return f"il y a {int(secs // 86400)}j"
+    except Exception:
+        return ""
+
+
+def _short_model_name(model: Any) -> str:
+    """Nom court d un modele ("a/b:free" -> "b:free"). "" si absent."""
+    try:
+        return str(model or "").split("@")[0].split("/")[-1] or ""
+    except Exception:
+        return ""
+
+
+def _unk_txt(n: int) -> str:
+    """" +2 couts inconnus" / "" si 0. Jamais d exception."""
+    try:
+        if int(n) <= 0:
+            return ""
+        return f" +{int(n)} {_pl(n, 'coût inconnu', 'coûts inconnus')}"
+    except Exception:
+        return ""
 
 
 def sec_brain() -> list[str]:
@@ -851,19 +964,40 @@ def sec_brain() -> list[str]:
     if not data:
         lines = ["cerveau : inconnu (aucun appel LLM enregistre)"]
     else:
-        lines = [f"cerveau : {data.get('engine', '?')}  "
-                f"({data.get('latency_s', '?')}s, {data.get('at', '?')})"]
-    calls_d, cost_d, calls_w, cost_w, top, lat = _usage_stats()
-    if calls_d or calls_w:
-        lines.append(f"  couts : ~${cost_d:.4f} auj. ({calls_d} appels)  "
-                     f"~${cost_w:.4f} /7j ({calls_w} appels)  top:{top} lat:{lat}s")
+        age = _rel_age(data.get("at"))
+        eng = str(data.get("engine") or "?")
+        model = _short_model_name(data.get("model") or "")
+        tag = f" [{model}]" if model and model != eng else ""
+        lines = [f"cerveau : {eng}{tag}  "
+                 f"({data.get('latency_s', '?')}s, {data.get('at', '?')}"
+                 f"{', ' + age if age else ''})"]
+    (calls_d, cost_d, unk_d, cache_d,
+     calls_w, cost_w, unk_w, cache_w, top, lat) = _usage_stats()
+    if calls_d or calls_w or cache_d or cache_w:
+        lines.append(f"  couts : ~${cost_d:.4f} auj. ({calls_d} {_pl(calls_d, 'appel')}"
+                     f"{_unk_txt(unk_d)})  ~${cost_w:.4f} /7j ({calls_w} "
+                     f"{_pl(calls_w, 'appel')}{_unk_txt(unk_w)})  "
+                     f"top:{top} lat:{lat}s")
+        if cache_d or cache_w:
+            lines.append(f"  cache local : {cache_d} {_pl(cache_d, 'hit')} auj., "
+                         f"{cache_w} {_pl(cache_w, 'hit')} /7j (0 token, instantané)")
     lines.extend(_legs_line())
     return lines
 
 
-def _recent_legs(limit: int = 60) -> dict[str, str]:
-    """Dernier statut connu par jambe (historique local). Jamais d exception."""
+def _recent_legs(limit: int = 60, max_age_days: int = 7) -> dict[str, str]:
+    """Dernier statut connu par jambe (historique local recent). Jamais d exception.
+
+    Fenetre de 7 j : un "DOWN" vieux de 3 semaines sans aucun appel depuis
+    n'est plus une info, c'est du bruit qui fait croire a une panne live.
+    Entrees sans date lisible -> conservees (compatibilite ascendante).
+    """
     out: dict[str, str] = {}
+    try:
+        from datetime import date, timedelta
+        cutoff = (date.today() - timedelta(days=max_age_days)).isoformat()
+    except Exception:
+        cutoff = ""
     try:
         text = LLM_USAGE_FILE.read_text(encoding="utf-8")
     except Exception:
@@ -875,6 +1009,12 @@ def _recent_legs(limit: int = 60) -> dict[str, str]:
             continue
         if not isinstance(entry, dict):
             continue
+        try:
+            day = str(entry.get("day") or "")
+            if cutoff and day and day < cutoff:
+                continue
+        except Exception:  # pragma: no cover - str() sur JSON ne leve pas
+            pass
         for pair in entry.get("legs") or []:
             try:
                 out[str(pair[0])] = str(pair[1])
@@ -883,11 +1023,49 @@ def _recent_legs(limit: int = 60) -> dict[str, str]:
     return out
 
 
-def _legs_line() -> list[str]:
-    """Etat des jambes SANS depenser de tokens (cles + historique local).
+_OLLAMA_TTL_SECONDS = 120.0
+_OLLAMA_CACHE: dict = {"ts": 0.0, "ok": False, "names": []}
 
-    Meme regle que kuro_llm.brain_status() mais sans import ni reseau :
-    presence des cles + derniers resultats connus. Marques : OK (prouve),
+
+def _ollama_state() -> tuple[bool, list]:
+    """Ollama localhost joignable + modeles tires (cache 120 s).
+
+    Meme semantique que kuro_llm.brain_status() pour la jambe locale, sans
+    l'importer (Xenon reste sans dependance a l'import) : que du loopback
+    (OLLAMA_URL ou 127.0.0.1:11434), timeout 2 s, jamais d internet,
+    jamais de tokens depenses, jamais d exception. Le "local ?" permanent
+    (jamais teste) mentait alors que le daemon tourne avec le modele.
+    """
+    now = time.monotonic()
+    try:
+        if (now - float(_OLLAMA_CACHE.get("ts", 0.0))) < _OLLAMA_TTL_SECONDS:
+            return bool(_OLLAMA_CACHE.get("ok")), list(_OLLAMA_CACHE.get("names") or [])
+    except Exception:
+        pass
+    ok, names = False, []
+    try:
+        import urllib.request
+
+        base = (os.environ.get("OLLAMA_URL") or "http://127.0.0.1:11434").rstrip("/")
+        with urllib.request.urlopen(base + "/api/tags", timeout=2) as resp:
+            data = json.loads((resp.read() or b"").decode("utf-8") or "{}")
+        if isinstance(data, dict):
+            names = [str(m.get("name") or "") for m in (data.get("models") or [])
+                     if isinstance(m, dict)]
+            ok = True
+    except Exception:
+        ok, names = False, []
+    _OLLAMA_CACHE.update({"ts": time.monotonic(), "ok": ok, "names": names})
+    return ok, names
+
+
+def _legs_line() -> list[str]:
+    """Etat des jambes SANS depenser de tokens (cles + historique + sonde locale).
+
+    Jambes cloud : presence des cles + derniers resultats connus (pas de
+    sonde reseau : un test couterait des tokens). Jambe locale : sonde
+    localhost /api/tags en cache 120 s (meme semantique que
+    kuro_llm.brain_status, sans l importer). Marques : OK (prouve),
     DOWN (echec recent), off (non configure), ? (jamais teste).
     """
     try:
@@ -905,7 +1083,11 @@ def _legs_line() -> list[str]:
             else:
                 states.append((leg, "?"))
         model = os.environ.get("OLLAMA_MODEL")
-        states.append(("local", "?" if model and not model.endswith(":cloud") else "off"))
+        if not model or model.endswith(":cloud"):
+            states.append(("local", "off"))
+        else:
+            ok, names = _ollama_state()
+            states.append(("local", "OK" if ok and model in names else "DOWN"))
         states.append(("pollinations", "off"
                        if os.environ.get("KURO_POLLINATIONS", "1") == "0" else "?"))
         states.append(("litellm", "on"
@@ -978,7 +1160,10 @@ def _titled(label: str, rows: list[str], width: int) -> list[str]:
             return []
         return [_div(label, width), *rows]
     except Exception:
-        return list(rows or [])
+        try:
+            return list(rows or [])
+        except Exception:
+            return []
 
 
 def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
@@ -998,7 +1183,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
     width = term_width()
     if compact is None:
         try:
-            compact = bool(sys.stdout.isatty()) and term_height() < 32
+            compact = _stdout_is_tty() and term_height() < 32
         except Exception:
             compact = False
     nprocs = 5 if compact else 10
@@ -1032,12 +1217,14 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             body += _box(f"DETAIL {detail.get('pid', '?')}",
                          sec_proc_detail(detail), total, "cyan")
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
-        if sys.stdout.isatty():
-            room = term_height() - len(parts)
+        if _stdout_is_tty():
+            try:
+                room = term_height() - len(parts)
+            except Exception:
+                room = 0
             if room > 0:
                 parts = parts[:-1] + [""] * room + parts[-1:]
         return "\n".join(parts) + "\n"
-    hide = set(hidden or ())
     hide = set(hidden or ())
     if width >= WIDE_MIN_WIDTH:
         total = min(width, 170)
@@ -1108,9 +1295,12 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             body += _box("5 MARKETING", sec_marketing(), total, "cyan")
         body += detail_box
     parts = [_fit(p, total) for p in body] + [_fit(f"{footer} {spinner(now)}", total)]
-    if sys.stdout.isatty():
+    if _stdout_is_tty():
         # Remplit tout l ecran, footer colle en bas (captures/tests : pas de pad).
-        room = term_height() - len(parts)
+        try:
+            room = term_height() - len(parts)
+        except Exception:
+            room = 0
         if room > 0:
             parts = parts[:-1] + [""] * room + parts[-1:]
     return "\n".join(parts) + "\n"
@@ -1124,7 +1314,7 @@ class _RawKeys:
         self._unix_old = None
 
     def __enter__(self) -> "_RawKeys":
-        if os.name != "nt":
+        if os.name != "nt":  # pragma: no cover - branches Unix (CI Windows)
             try:
                 import termios
                 import tty
@@ -1137,7 +1327,7 @@ class _RawKeys:
         return self
 
     def __exit__(self, *args: Any) -> None:
-        if self._unix_fd is not None:
+        if self._unix_fd is not None:  # pragma: no cover - branches Unix
             try:
                 import termios
 
@@ -1155,18 +1345,18 @@ class _RawKeys:
                     if first in (b"\xe0", b"\x00"):
                         # Fleches Windows : normalise comme les sequences ANSI.
                         second = msvcrt.getch()
-                        try:
+                        try:  # pragma: no cover - decode(replace) ne leve pas
                             letter = second.decode("utf-8", "replace")
-                        except Exception:
+                        except Exception:  # pragma: no cover
                             return None
                         return {"H": "\x1b[A", "P": "\x1b[B"}.get(letter)
                     return first.decode("utf-8", "replace")
                 return None
-            import select
+            import select  # pragma: no cover - branches Unix (CI Windows)
 
-            if select.select([sys.stdin], [], [], 0)[0]:
-                return sys.stdin.read(1)
-            return None
+            if select.select([sys.stdin], [], [], 0)[0]:  # pragma: no cover
+                return sys.stdin.read(1)  # pragma: no cover
+            return None  # pragma: no cover
         except Exception:
             return None
 
@@ -1291,7 +1481,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
         while True:
             if compact is None:
                 try:
-                    compact_mode = (bool(sys.stdout.isatty())
+                    compact_mode = (_stdout_is_tty()
                                     and term_height() < 32)
                 except Exception:
                     compact_mode = False
@@ -1302,7 +1492,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                     hist["mem"].append((snap.get("memory") or {}).get("percent"))
                     hist["cpu"] = hist["cpu"][-HIST_LEN:]
                     hist["mem"] = hist["mem"][-HIST_LEN:]
-                except Exception:
+                except Exception:  # pragma: no cover - snap.get() ne leve pas
                     pass
                 now = time.monotonic()
                 dt = (now - prev_t) if prev_t else interval
@@ -1312,7 +1502,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                     hist["down"].append(recv)
                     hist["up"] = hist["up"][-HIST_LEN:]
                     hist["down"] = hist["down"][-HIST_LEN:]
-                except Exception:
+                except Exception:  # pragma: no cover - ne leve pas en pratique
                     pass
                 sys.stdout.write("\x1b[H\x1b[J" + render_frame(
                     snap, prev, dt, ksnap, now, hist, sort, filt, sel,
@@ -1386,7 +1576,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                             detail = None
                 elif key == "r":
                     waited = interval
-    return 0
+    return 0  # pragma: no cover - boucle infinie, sortie par "q"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1400,7 +1590,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     global _COLOR
     _COLOR = not args.no_color
-    if not sys.stdout.isatty():
+    if not _stdout_is_tty():
         sys.stdout.write(render_frame(collect_system_snapshot(top_n=args.top),
                                        kuro=collect_kuro_snapshot()))
         return 0
@@ -1412,5 +1602,5 @@ def main(argv: list[str] | None = None) -> int:
         return 130
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == "__main__":  # pragma: no cover - point d'entree script
+    sys.exit(main())  # pragma: no cover

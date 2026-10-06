@@ -27,7 +27,8 @@ def roots() -> list[Path]:
     """Racines scannees : env KURO_PROJECTS_ROOTS (os.pathsep) sinon defauts."""
     raw = os.environ.get("KURO_PROJECTS_ROOTS")
     if raw:
-        return [Path(p).expanduser() for p in raw.split(os.pathsep) if p.strip()]
+        return [Path(p.strip()).expanduser()
+                for p in raw.split(os.pathsep) if p.strip()]
     home = Path.home()
     return [home / "repos", home / "Documents"]
 

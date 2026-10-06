@@ -125,9 +125,13 @@ def _disk(psutil_mod: Any) -> dict[str, Any]:
         except Exception:
             partitions = []
     if not partitions:
-        total, used, _free = shutil.disk_usage(Path.home().anchor)
-        partitions = [{"mount": "fallback", "fstype": "", "total": total, "used": used,
-                       "percent": round(used / total * 100, 1) if total else None}]
+        try:
+            total, used, _free = shutil.disk_usage(Path.home().anchor)
+            partitions = [{"mount": "fallback", "fstype": "", "total": total,
+                            "used": used,
+                            "percent": round(used / total * 100, 1) if total else None}]
+        except Exception:
+            partitions = []
     io: dict[str, Any] = {}
     if psutil_mod is not None:
         try:
@@ -272,9 +276,30 @@ def proc_detail(pid: int) -> dict[str, Any] | None:
         return None
 
 
+def _prime_process_cpu(psutil_mod: Any) -> None:
+    """Amorce psutil : le 1er cpu_percent() d'un processus rend toujours 0.0.
+
+    Sans amorce + courte pause, la 1re frame (mode pipe/CI surtout) affiche
+    un TOP a 0.0 partout — info perimee des la naissance. Best-effort :
+    jamais d'exception, cout ~0.1 s quand psutil est la.
+    """
+    try:
+        import time as _time
+
+        for proc in psutil_mod.process_iter(["cpu_percent"]):
+            try:
+                proc.cpu_percent()
+            except Exception:
+                continue
+        _time.sleep(0.1)
+    except Exception:
+        pass
+
+
 def _top_processes(psutil_mod: Any, top_n: int) -> list[dict[str, Any]]:
     if psutil_mod is None:
         return []
+    _prime_process_cpu(psutil_mod)
     try:
         procs = list(psutil_mod.process_iter(
             ["pid", "name", "cpu_percent", "memory_percent", "status"]))
@@ -363,5 +388,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == "__main__":  # pragma: no cover - point d'entree script
+    sys.exit(main())  # pragma: no cover

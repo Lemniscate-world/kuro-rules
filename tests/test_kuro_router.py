@@ -398,3 +398,39 @@ def test_brain_status_preuves_recentes(monkeypatch, tmp_path):
     assert rows["openrouter"][0] == "down"
     assert rows["deepseek"][0] == "down"
     assert rows["local"][0] == "off"
+
+
+def test_usage_enregistre_modele_complet(monkeypatch, tmp_path):
+    monkeypatch.setattr(kuro_llm, "_post", lambda *a, **k: {
+        "choices": [{"message": {"content": "salut"}}],
+        "usage": {"total_tokens": 100}})
+    monkeypatch.setenv("OPENROUTER_API_KEY", "cle-test")
+    assert kuro_llm.ask("bonjour le monde") == "salut"
+    entry = _last_usage(tmp_path)
+    assert entry["model"].endswith(":free"), entry
+    brain = json.loads((tmp_path / "llm_last.json").read_text(encoding="utf-8"))
+    assert brain["model"].endswith(":free")
+
+
+def test_usage_modele_payant_cout_inconnu(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENROUTER_MODEL", "openai/gpt-4o")
+    monkeypatch.setattr(kuro_llm, "_post", lambda *a, **k: {
+        "choices": [{"message": {"content": "salut"}}],
+        "usage": {"total_tokens": 100}})
+    monkeypatch.setenv("OPENROUTER_API_KEY", "cle-test")
+    assert kuro_llm.ask("bonjour") == "salut"
+    entry = _last_usage(tmp_path)
+    assert "gpt-4o" in entry["model"] and ":free" not in entry["model"]
+    assert entry["est_cost_usd"] is None, "prix inconnu : null, pas $0 menteur"
+
+
+def test_model_rate_honnete():
+    assert kuro_llm._model_rate("openrouter/x:free", "openrouter") == 0.0
+    assert kuro_llm._model_rate("openai/gpt-4o", "openrouter") is None
+    assert kuro_llm._model_rate("", "openrouter") is None
+    assert kuro_llm._model_rate("", "deepseek") == 1.0
+    assert kuro_llm._model_rate("", "ollama-local") == 0.0
+    assert kuro_llm._model_rate("", "groq") == 0.0
+    assert kuro_llm._model_rate("x", "litellm:deepseek") == 1.0
+    assert kuro_llm._model_rate("x", "litellm:openrouter") == 0.0
+    assert kuro_llm._model_rate("x", "litellm:truc") is None

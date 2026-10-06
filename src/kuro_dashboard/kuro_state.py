@@ -98,13 +98,67 @@ def _count_summaries(base: Path) -> int:
                         found += 1
                 except Exception:
                     continue
-    except Exception:
+    except Exception:  # pragma: no cover - boucle protegee partout dedans
         pass
     return found
 
 
+def _count_git_dirs(roots: list[Path]) -> int:
+    """Depots git un niveau sous les racines (rapide, sans sous-processus).
+
+    ~/repos n'existe pas sur toutes les machines (Windows : tout est sous
+    ~/Documents) — compter ses dossiers bruts affichait "0 repos" alors que
+    le sensing git en voyait 50+. On compte les enfants avec un .git.
+    """
+    seen: set[str] = set()
+    try:
+        for root in roots:
+            try:
+                if not root.is_dir():
+                    continue
+                children = list(root.iterdir())
+            except Exception:
+                continue
+            for child in children:
+                try:
+                    if not child.is_dir() or (child / ".git").is_file():
+                        continue
+                    if not (child / ".git").exists():
+                        continue
+                    try:
+                        key = str(child.resolve())
+                    except Exception:
+                        key = str(child)
+                    seen.add(key)
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    return len(seen)
+
+
+def _project_roots() -> list[Path]:
+    """Racines scannees : env KURO_PROJECTS_ROOTS sinon ~/repos + ~/Documents."""
+    try:
+        from .projects import roots as _roots
+        return list(_roots())
+    except Exception:
+        pass
+    try:
+        raw = os.environ.get("KURO_PROJECTS_ROOTS")
+        if raw:
+            return [Path(p.strip()).expanduser()
+                    for p in raw.split(os.pathsep) if p.strip()]
+    except Exception:
+        pass
+    try:
+        return [Path.home() / "repos", Path.home() / "Documents"]
+    except Exception:
+        return []
+
+
 def _fs_signals() -> dict[str, Any]:
-    """Signaux reels disque (jamais d exception) : dossiers ~/repos + SESSION_SUMMARY."""
+    """Signaux reels disque (jamais d exception) : depots git + SESSION_SUMMARY."""
     now = time.monotonic()
     try:
         if _FS_CACHE["signals"] and (now - _FS_CACHE["ts"]) < _FS_TTL:
@@ -114,10 +168,8 @@ def _fs_signals() -> dict[str, Any]:
     repos = 0
     summaries = 0
     try:
-        repos_dir = Path.home() / "repos"
-        if repos_dir.is_dir():
-            repos = sum(1 for p in repos_dir.iterdir() if p.is_dir())
-    except Exception:
+        repos = _count_git_dirs(_project_roots())
+    except Exception:  # pragma: no cover - _project_roots() ne leve plus
         repos = 0
     try:
         for base in (Path.home() / "Documents", Path.home() / "repos"):
