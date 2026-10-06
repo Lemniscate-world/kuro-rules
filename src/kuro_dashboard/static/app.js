@@ -433,8 +433,16 @@ function notifyNewAlerts(count) {
   if (Notification.permission === "granted") {
     new Notification("Kuro Desk", { body: `${count - last} nouvelle(s) alerte(s) détectée(s)` });
   } else if (Notification.permission !== "denied") {
-    Notification.requestPermission();
+    try {
+      unhandledIgnorable(Notification.requestPermission());
+    } catch (_) {}
   }
+}
+
+function unhandledIgnorable(promise) {
+  // load*() gerent deja leurs erreurs (panneau "indisponible") : ce catch
+  // ne sert qu a ne jamais laisser de rejet flottant (Sonar S9383).
+  if (promise && typeof promise.catch === "function") promise.catch(() => {});
 }
 
 async function loadRobotPanel() {
@@ -535,9 +543,9 @@ async function loadFinancePanel() {
   }
 }
 
-load();
-setInterval(load, 60000);
-setInterval(loadRobotPanel, 60000);
-setInterval(loadFinancePanel, 60000);
-loadRobotPanel();
-loadFinancePanel();
+unhandledIgnorable(load());
+setInterval(() => unhandledIgnorable(load()), 60000);
+setInterval(() => unhandledIgnorable(loadRobotPanel()), 60000);
+setInterval(() => unhandledIgnorable(loadFinancePanel()), 60000);
+unhandledIgnorable(loadRobotPanel());
+unhandledIgnorable(loadFinancePanel());

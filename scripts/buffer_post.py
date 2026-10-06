@@ -163,19 +163,6 @@ def list_scheduled(api_key, org_id=""):
             out.append({"id": node["id"], "text": (node.get("text") or "")[:80],
                         "createdAt": node.get("createdAt", "")})
     return out
-    if len(t) > MAX_LEN:
-        raise BufferError("trop long: %d/%d" % (len(t), MAX_LEN))
-    due = ', dueAt: "%s"' % due_at if mode == "customScheduled" and due_at else ""
-    query = ("mutation CreatePost { createPost(input: { text: %s, channelId: \"%s\", "
-             "schedulingType: automatic, mode: %s%s }) { ... on PostActionSuccess { post { id text dueAt } } "
-             "... on MutationError { message } } }" % (
-                 json.dumps(t), channel_id, mode, due))
-    data = gql(query, api_key)
-    node = (data.get("createPost") or {})
-    post = node.get("post") or {}
-    if post.get("id"):
-        return {"id": post["id"], "dueAt": post.get("dueAt", ""), "queued": mode != "shareNow"}
-    raise BufferError(node.get("message") or "reponse inattendue: %s" % json.dumps(data)[:200])
 
 
 def main(argv=None):
