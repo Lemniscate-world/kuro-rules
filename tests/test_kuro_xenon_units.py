@@ -5,6 +5,7 @@ import re
 import sqlite3
 import subprocess
 import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -148,7 +149,7 @@ def test_snapshot_cache_ttl(monkeypatch):
     first = sy.get_cached_snapshot()
     second = sy.get_cached_snapshot()
     assert first is second, "cache 2.5 s attendu"
-    sy._SNAP_CACHE["ts"] = 0.0
+    sy._SNAP_CACHE["ts"] = time.monotonic() - 3.0
     assert sy.get_cached_snapshot() is not first
 
 
@@ -588,12 +589,12 @@ def test_project_roots_replis(monkeypatch, tmp_path):
                         lambda: (_ for _ in ()).throw(RuntimeError("mort")))
     monkeypatch.setenv("KURO_PROJECTS_ROOTS", str(tmp_path))
     assert ks._project_roots() == [tmp_path]
-
-    class _BoomGet(dict):
-        def get(self, *a, **k):
-            raise RuntimeError("env mort")
-
-    monkeypatch.setattr(ks.os, "environ", _BoomGet())
+    # home illisible + pas d env : repli [] (jamais d exception).
+    # (Ne pas casser os.environ globalement : pytest lui-meme le lit.)
+    monkeypatch.delenv("KURO_PROJECTS_ROOTS", raising=False)
+    monkeypatch.setattr(Path, "home",
+                        classmethod(lambda cls: (_ for _ in ()).throw(
+                            OSError("home mort"))))
     assert ks._project_roots() == []
 
 

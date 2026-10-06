@@ -1,10 +1,13 @@
 """Tests tui.py vagues 2 : helpers purs, rendu large/compacte, clavier, watch, main.
 
 Hermetique : integrations lentes coupees (agents, git, snapshots reels).
+Portable CI : pas d hypothese Windows, pas d uptime, pas d env global.
 """
 
 import json
+import os
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -13,6 +16,32 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from kuro_dashboard import tui  # noqa: E402
 from kuro_dashboard import projects as _git_projects  # noqa: E402
+
+
+def _stale(ttl):
+    """Timestamp garanti perime, meme sur runner booté il y a 10 s.
+
+    ts=0.0 semble FRAIS quand time.monotonic() < TTL (runner CI frais) :
+    tous les tests d invalidation de cache doivent passer par ici.
+    """
+    return time.monotonic() - float(ttl) - 1.0
+
+
+def _boom_environ(monkeypatch, key):
+    """os.environ casse UNIQUEMENT pour *key* (snapshot du reste).
+
+    Casser tout os.environ (dict vide qui leve) rend pytest fou
+    (il lit $CI pendant le report) : ne jamais faire ca.
+    """
+    snap = dict(os.environ)
+
+    class _SelectiveBoom(dict):
+        def get(self, k, *a, **k2):
+            if k == key:
+                raise RuntimeError("env mort")
+            return super().get(k, *a, **k2)
+
+    monkeypatch.setattr(os, "environ", _SelectiveBoom(snap))
 
 
 @pytest.fixture(autouse=True)
@@ -26,8 +55,8 @@ def _fast(monkeypatch):
     monkeypatch.setattr(_url, "urlopen",
                         lambda *a, **k: (_ for _ in ()).throw(
                             OSError("pas de reseau en test")))
-    monkeypatch.setattr(tui, "_OLLAMA_CACHE", {"ts": 0.0, "ok": False,
-                                               "names": []})
+    monkeypatch.setattr(tui, "_OLLAMA_CACHE", {"ts": _stale(120),
+                                               "ok": False, "names": []})
 
 
 def _payload(**kw):
@@ -261,7 +290,7 @@ def test_jambes_variantes(monkeypatch, tmp_path):
         def __exit__(self, *a):
             return None
 
-    tui._OLLAMA_CACHE.update({"ts": 0.0, "ok": False, "names": []})
+    tui._OLLAMA_CACHE.update({"ts": _stale(120), "ok": False, "names": []})
     monkeypatch.setattr(_url, "urlopen", lambda *a, **k: _Resp())
     assert "local OK" in tui._legs_line()[0]
     monkeypatch.setenv("OLLAMA_MODEL", "x:cloud")
@@ -581,6 +610,8 @@ def test_render_compact_auto_term_casse(monkeypatch):
 
 
 def test_rules_dir_pas_de_dossiers(monkeypatch):
+    # delenv : en CI, KURO_RULES_DIR est renseigne (branche env prioritaire).
+    monkeypatch.delenv("KURO_RULES_DIR", raising=False)
     orig = tui._rules_dir_cached
     monkeypatch.setattr(Path, "is_dir", lambda self: False)
     orig.cache_clear()
@@ -743,12 +774,8 @@ def test_rules_dir_cached_isdir_mort(monkeypatch):
 
 
 def test_rules_dir_cached_environ_mort(monkeypatch):
-    class _BoomGet(dict):
-        def get(self, *a, **k):
-            raise RuntimeError("env mort")
-
+    _boom_environ(monkeypatch, "KURO_RULES_DIR")
     orig = tui._rules_dir_cached
-    monkeypatch.setattr(tui.os, "environ", _BoomGet())
     orig.cache_clear()
     try:
         assert tui._rules_dir_cached() == Path(".")
@@ -768,6 +795,8 @@ def test_pipeline_outer_exception(tmp_path, monkeypatch):
     assert tui._marketing_pipeline(root) == (0, 0, "", "")
 
 
+@pytest.mark.skipif(os.name != "nt",
+                        reason="touches Windows : msvcrt et console 1252")
 def test_msvcrt_getch_boom(monkeypatch):
     import types as _t
     fake = _t.ModuleType("msvcrt")
@@ -779,11 +808,7 @@ def test_msvcrt_getch_boom(monkeypatch):
 
 
 def test_legs_line_exception(monkeypatch):
-    class _BoomGet(dict):
-        def get(self, *a, **k):
-            raise RuntimeError("env mort")
-
-    monkeypatch.setattr(tui.os, "environ", _BoomGet())
+    _boom_environ(monkeypatch, "OPENROUTER_API_KEY")
     assert tui._legs_line() == []
 
 
@@ -815,6 +840,8 @@ def test_render_wide_avec_detail(monkeypatch):
     assert "DETAIL pid 9" in frame
 
 
+@pytest.mark.skipif(os.name != "nt",
+                        reason="touches Windows : msvcrt et console 1252")
 def test_msvcrt_fleches(monkeypatch):
     import types as _t
 
@@ -929,7 +956,7 @@ def test_pluriels_et_modeles():
 def test_ollama_state_sonde_et_cache(monkeypatch):
     import json as _js
     import urllib.request as _real
-    tui._OLLAMA_CACHE.update({"ts": 0.0, "ok": False, "names": []})
+    tui._OLLAMA_CACHE.update({"ts": _stale(120), "ok": False, "names": []})
 
     class _Resp:
         def __init__(self, payload):
@@ -978,13 +1005,13 @@ def test_ollama_cache_illisible(monkeypatch):
 
 
 def test_ollama_state_daemon_mort_et_json_casse(monkeypatch):
-    tui._OLLAMA_CACHE.update({"ts": 0.0, "ok": False, "names": []})
+    tui._OLLAMA_CACHE.update({"ts": _stale(120), "ok": False, "names": []})
     import urllib.request as _real
     monkeypatch.setattr(_real, "urlopen",
                         lambda *a, **k: (_ for _ in ()).throw(
                             OSError("daemon mort")))
     assert tui._ollama_state() == (False, [])
-    tui._OLLAMA_CACHE.update({"ts": 0.0, "ok": False, "names": []})
+    tui._OLLAMA_CACHE.update({"ts": _stale(120), "ok": False, "names": []})
 
     class _Bad:
         def read(self):

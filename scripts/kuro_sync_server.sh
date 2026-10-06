@@ -11,6 +11,9 @@
 # seuls les commits pousses voyagent, jamais le travail non commite) ;
 # restart stop/attente/start (jamais de restart sec sur le port 8767) ;
 # log ASCII dans ~/.kuro/sync.log ; lock anti-chevauchement.
+# Anti-derive : KURO_SYNC_BRANCH (ex "master") fige la branche suivie par
+# clone ; un clone sur une autre branche est signale en echec (jamais de
+# pull silencieux sur la mauvaise branche = serveur gele sans le dire).
 set -euo pipefail
 
 RULES_DIR="${KURO_RULES_DIR:-$HOME/Documents/kuro-rules}"
@@ -66,6 +69,14 @@ sync_one() {
         return 0
     fi
     before=$(git -C "$dest" rev-parse HEAD 2>/dev/null || echo "unknown")
+    branch=$(git -C "$dest" branch --show-current 2>/dev/null || echo "?")
+    if [ -n "${KURO_SYNC_BRANCH:-}" ] && [ "$branch" != "$KURO_SYNC_BRANCH" ]; then
+        log "$name: ATTENTION branche locale $branch (attendue : $KURO_SYNC_BRANCH)"
+        say "$name: ATTENTION branche locale $branch (attendue : $KURO_SYNC_BRANCH)"
+        say "$name: pull ignore (fixer la branche ou ajuster KURO_SYNC_BRANCH)"
+        echo "failed"
+        return 0
+    fi
     if ! timeout 120 git -C "$dest" fetch origin >>"$LOG_FILE" 2>&1; then
         echo "failed"
         return 0
@@ -73,8 +84,10 @@ sync_one() {
     if [ "$MODE" = "--dry-run" ]; then echo "would-pull"; return 0; fi
     if timeout 120 git -C "$dest" pull --ff-only >>"$LOG_FILE" 2>&1; then
         after=$(git -C "$dest" rev-parse HEAD 2>/dev/null || echo "unknown")
+        log "$name: branche $branch $before -> $after"
         if [ "$before" = "$after" ]; then echo "uptodate"; else echo "changed"; fi
     else
+        log "$name: pull --ff-only refuse (divergent ? voir git status sur le serveur)"
         echo "failed"
     fi
     return 0
@@ -105,7 +118,7 @@ reinstall_package() {
     fi
     local missing=""
     local cmd=""
-    for cmd in xenon kuro-system kuro-dashboard; do
+    for cmd in xenon xenon-tui kuro-system kuro-dashboard; do
         if ! timeout 60 "$VENV_BIN/$cmd" --help >/dev/null 2>&1; then
             missing="$missing $cmd"
         fi
@@ -113,7 +126,7 @@ reinstall_package() {
     if [ -n "$missing" ]; then
         log "reinstall: commandes manquantes:$missing"
     else
-        log "reinstall: 3 commandes OK"
+        log "reinstall: 4 commandes OK"
     fi
     return 0
 }

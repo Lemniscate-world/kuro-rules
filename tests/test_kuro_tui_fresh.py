@@ -11,6 +11,7 @@ Cible les "infos pas a jour" constatees sur machine reelle :
 import json
 import os
 import sys
+import time
 from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -33,8 +34,9 @@ def _fast_caches(monkeypatch):
     monkeypatch.setattr(_url, "urlopen",
                         lambda *a, **k: (_ for _ in ()).throw(
                             OSError("pas de reseau en test")))
-    monkeypatch.setattr(wtui, "_OLLAMA_CACHE", {"ts": 0.0, "ok": False,
-                                                "names": []})
+    monkeypatch.setattr(wtui, "_OLLAMA_CACHE",
+                        {"ts": time.monotonic() - 121.0, "ok": False,
+                         "names": []})
     monkeypatch.setattr(wks, "_FS_CACHE", {"ts": 0.0, "signals": {}})
     import kuro_dashboard.projects as _pr
     monkeypatch.setattr(_pr, "_CACHE", {"ts": 0.0, "roots": None, "repos": []})

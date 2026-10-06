@@ -37,6 +37,26 @@ def _run_promote(home: Path, *args: str):
     pytest.skip("aucun bash executable")
 
 
+def _require_user_manager():
+    """do_verify exige 'systemctl --user' FONCTIONNEL (bus user actif).
+
+    Binaire present mais bus absent (conteneur CI) -> is-active echoue et
+    le promote rend 3 (partiel) alors que les fichiers sont bons : on skippe,
+    la verif services se fait sur machine avec systemd --user reel.
+    """
+    if not shutil.which("systemctl"):
+        return  # Windows : do_verify court-circuite sans systemd, tests valides
+    for bash in _bash_candidates():
+        try:
+            r = subprocess.run([bash, "-c", "systemctl --user list-units >/dev/null 2>&1"],
+                               capture_output=True, timeout=30)
+            if r.returncode == 0:
+                return
+        except Exception:
+            continue
+    pytest.skip("pas de systemd --user fonctionnel ici")
+
+
 def _make_db(path: Path, projects: int = 1) -> None:
     conn = sqlite3.connect(path)
     conn.execute("CREATE TABLE IF NOT EXISTS projects (id INTEGER)")
@@ -61,6 +81,7 @@ def test_check_sans_replica(tmp_path):
 
 
 def test_promote_echange_avec_backup(tmp_path):
+    _require_user_manager()
     home = tmp_path / "home"
     (home / ".kuro").mkdir(parents=True)
     _make_db(home / ".kuro" / "kuro.db", projects=1)
@@ -74,6 +95,7 @@ def test_promote_echange_avec_backup(tmp_path):
 
 
 def test_promote_replica_vieux_refuse(tmp_path):
+    _require_user_manager()
     home = tmp_path / "home"
     (home / ".kuro").mkdir(parents=True)
     _make_db(home / ".kuro" / "kuro.db", projects=1)

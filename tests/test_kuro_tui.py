@@ -25,7 +25,8 @@ def _fast_integrators(monkeypatch):
     monkeypatch.setattr(_url, "urlopen",
                         lambda *a, **k: (_ for _ in ()).throw(
                             OSError("pas de reseau en test")))
-    monkeypatch.setattr(tui, "_OLLAMA_CACHE", {"ts": 0.0, "ok": False,
+    import time as _t
+    monkeypatch.setattr(tui, "_OLLAMA_CACHE", {"ts": _t.monotonic() - 121.0, "ok": False,
                                                "names": []})
 
 

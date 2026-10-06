@@ -83,10 +83,12 @@ def test_build_payload_cache_hit():
 
 
 def test_build_payload_stale_rebuilds(monkeypatch):
+    import time as _t
     saved = _save_scan_cache()
     try:
         scan._PAYLOAD_CACHE["payload"] = {"ok": "stale"}
-        scan._PAYLOAD_CACHE["ts"] = 0.0
+        # ts garanti perime (ts=0 semble frais si monotonic < TTL).
+        scan._PAYLOAD_CACHE["ts"] = _t.monotonic() - 61.0
         monkeypatch.setattr(scan, "parse_list_file", lambda path: [])
         monkeypatch.setattr(scan, "detect_git_repositories", lambda: [])
         payload = scan.build_payload()
