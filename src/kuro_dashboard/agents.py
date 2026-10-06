@@ -18,7 +18,10 @@ AGENTS_TTL_SECONDS = 60
 _AGENTS_CACHE: dict[str, Any] = {"ts": 0.0, "lines": []}
 
 
-OPENCLAW_TIMEOUT_SECONDS = 6
+# NOTE: ne PAS descendre sous 10 s (R116) : la gateway locale met
+# ~7 s a repondre (resolution modeles), un timeout plus court rend
+# toute la section AGENTS faussement "indisponible" en permanence.
+OPENCLAW_TIMEOUT_SECONDS = 12
 
 
 def _openclaw_json(*args: str) -> Any | None:
