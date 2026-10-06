@@ -26,6 +26,18 @@ def test_info_sans_clone_et_alias_kuro():
     assert i == [("FuturProjet", "suivi-sans-clone-local")]
 
 
+def test_github_org_strict():
+    g = cc.github_org_from_remotes
+    assert g("origin\tgit@github.com:MyOrg/Repo.git (fetch)") == "MyOrg"
+    assert g("origin\thttps://github.com/MyOrg/Repo.git (fetch)") == "MyOrg"
+    assert g("origin\thttps://GITHUB.COM/MyOrg/Repo (fetch)") == "MyOrg"
+    # pieges que l ancien substring laissait passer :
+    assert g("origin\thttps://github.com.evil.com/MyOrg/Repo.git (fetch)") == ""
+    assert g("origin\thttps://evil.com/?x=github.com/MyOrg (fetch)") == ""
+    assert g("origin\tgit@gitlab.com:MyOrg/Repo.git (fetch)") == ""
+    assert g("") == "" and g("nimporte-quoi") == ""
+
+
 def test_org_registry_inconnues():
     warns = cc.check_org_registry(
         {"Quant-Search": 2, "Lemniscate-world": 5},

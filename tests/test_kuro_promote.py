@@ -37,24 +37,52 @@ def _run_promote(home: Path, *args: str):
     pytest.skip("aucun bash executable")
 
 
-def _require_user_manager():
-    """do_verify exige 'systemctl --user' FONCTIONNEL (bus user actif).
+def _user_units_active():
+    """kuro-daemon + kuro-api actifs sous systemd --user (verifiables) ?
 
-    Binaire present mais bus absent (conteneur CI) -> is-active echoue et
-    le promote rend 3 (partiel) alors que les fichiers sont bons : on skippe,
-    la verif services se fait sur machine avec systemd --user reel.
+    Vrai si do_verify() peut rendre 0 : sans systemctl (Windows) il
+    court-circuite a 0 ; avec systemctl mais sans les unites kuro (CI),
+    is-active echoue et le promote rend 3 (partiel) alors que les fichiers
+    sont bons. Dans ce cas on verifie les FICHIERS strictement et on
+    tolere rc 3, au lieu de skipper toute la couverture.
     """
     if not shutil.which("systemctl"):
-        return  # Windows : do_verify court-circuite sans systemd, tests valides
+        return True
     for bash in _bash_candidates():
         try:
-            r = subprocess.run([bash, "-c", "systemctl --user list-units >/dev/null 2>&1"],
-                               capture_output=True, timeout=30)
-            if r.returncode == 0:
-                return
+            r = subprocess.run(
+                [bash, "-c", "systemctl --user is-active kuro-daemon kuro-api"
+                             " >/dev/null 2>&1"],
+                capture_output=True, timeout=30)
+            return r.returncode == 0
         except Exception:
             continue
-    pytest.skip("pas de systemd --user fonctionnel ici")
+    return False
+
+
+def _assert_rc_promote(r, verifiable):
+    if verifiable:
+        assert r.returncode == 0, r.stdout + r.stderr
+    else:
+        assert r.returncode in (0, 3), r.stdout + r.stderr
+
+
+def test_user_units_inverifiables(monkeypatch):
+    """systemctl present mais unites absentes -> verification impossible."""
+    import shutil as _shutil
+    monkeypatch.setattr(_shutil, "which",
+                        lambda n: "/usr/bin/systemctl" if n == "systemctl" else None)
+    assert _user_units_active() is False
+
+
+def test_assert_rc_tolerant():
+    from subprocess import CompletedProcess
+    partiel = CompletedProcess(args=[], returncode=3, stdout="PARTIEL", stderr="")
+    _assert_rc_promote(partiel, False)  # fichiers bons, services inverifiables
+    with pytest.raises(AssertionError):
+        _assert_rc_promote(partiel, True)
+    _assert_rc_promote(CompletedProcess(args=[], returncode=0,
+                                        stdout="", stderr=""), True)
 
 
 def _make_db(path: Path, projects: int = 1) -> None:
@@ -81,13 +109,12 @@ def test_check_sans_replica(tmp_path):
 
 
 def test_promote_echange_avec_backup(tmp_path):
-    _require_user_manager()
     home = tmp_path / "home"
     (home / ".kuro").mkdir(parents=True)
     _make_db(home / ".kuro" / "kuro.db", projects=1)
     _make_db(home / ".kuro" / "kuro-replica.db", projects=7)
     r = _run_promote(home, "--promote")
-    assert r.returncode == 0, r.stdout + r.stderr
+    _assert_rc_promote(r, _user_units_active())
     assert _count(home / ".kuro" / "kuro.db") == 7
     backups = list((home / ".kuro").glob("kuro.db.pre-promote-*"))
     assert len(backups) == 1
@@ -95,7 +122,6 @@ def test_promote_echange_avec_backup(tmp_path):
 
 
 def test_promote_replica_vieux_refuse(tmp_path):
-    _require_user_manager()
     home = tmp_path / "home"
     (home / ".kuro").mkdir(parents=True)
     _make_db(home / ".kuro" / "kuro.db", projects=1)
@@ -107,5 +133,5 @@ def test_promote_replica_vieux_refuse(tmp_path):
     assert r.returncode == 2
     assert _count(home / ".kuro" / "kuro.db") == 1
     r = _run_promote(home, "--promote", "--force")
-    assert r.returncode == 0
+    _assert_rc_promote(r, _user_units_active())
     assert _count(home / ".kuro" / "kuro.db") == 9

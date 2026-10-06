@@ -18,6 +18,7 @@ Usage :
 """
 import os
 import sys
+import urllib.parse
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -66,6 +67,36 @@ def check(projects, epingle_names, local_ownership):
     return errors, warns, infos
 
 
+def github_org_from_remotes(remotes):
+    """Org GitHub du 1er remote, "" si non-GitHub. Parse strict, jamais de substring.
+
+    Remplace le test `"github.com/" in ligne` (CodeQL HIGH : un hote
+    `github.com.evil.com` ou un parametre `?x=github.com/` passait le filtre
+    et faussait le registre d orgs).
+    """
+    try:
+        first = (remotes or "").splitlines()[0]
+        fields = first.split()
+        url = fields[1] if len(fields) > 1 else ""
+        if not url:
+            return ""
+        if url.startswith("git@"):
+            host, _, path = url[4:].partition(":")
+            if host.lower() != "github.com":
+                return ""
+            parts = [p for p in path.split("/") if p]
+            return parts[0]
+        if "://" not in url:
+            return ""
+        parsed = urllib.parse.urlparse(url)
+        if (parsed.hostname or "").lower() not in ("github.com", "www.github.com"):
+            return ""
+        parts = [p for p in parsed.path.split("/") if p]
+        return parts[0] if parts else ""
+    except Exception:
+        return ""
+
+
 def check_org_registry(local_orgs, owned_markers, external_markers):
     """Orgs rencontrees non classees -> WARN (regression classe Quant-Search)."""
     warns = []
@@ -112,11 +143,9 @@ def main(argv=None):
             remotes = gx.run("git remote -v", cwd=d)
             own = gx.classify_ownership(remotes) if remotes else "UNKNOWN"
             local_ownership[d.name.lower()] = own
-            if remotes:
-                first = remotes.splitlines()[0]
-                if "github.com/" in first:
-                    org = first.split("github.com/")[1].split("/")[0]
-                    local_orgs[org] = local_orgs.get(org, 0) + 1
+            org = github_org_from_remotes(remotes) if remotes else ""
+            if org:
+                local_orgs[org] = local_orgs.get(org, 0) + 1
 
     errors, warns, infos = check(projects, epingle_names, local_ownership)
     org_warns = check_org_registry(local_orgs, gx.OWNED_MARKERS, gx.EXTERNAL_MARKERS)
