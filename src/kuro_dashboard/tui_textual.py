@@ -428,12 +428,13 @@ class KuroApp(App):
         return lines
 
     def _render_market(self) -> None:
-        self._title("market-box", "MARKETING")
+        self._title("market-box", "MARCHÉ · STRATÉGIE · SEO")
         try:
             from .tui import sec_marketing, sec_seo, sec_strategy
-            lines = [*sec_marketing(), *sec_strategy(), *sec_seo()]
+            lines = [*sec_marketing(), "-- STRATÉGIE --",
+                     *sec_strategy(), "-- SEO --", *sec_seo()]
         except Exception:
-            lines = ["MARKETING (indisponible)"]
+            lines = ["MARCHÉ (indisponible)"]
         try:
             self.query_one("#market", Static).update("\n".join(lines))
         except Exception:

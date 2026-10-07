@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
-from ci_guardian import classify_failure, fail_keys, should_alert  # noqa: E402
+from ci_guardian import classify_failure, should_alert  # noqa: E402
 
 
 def _report(fails):

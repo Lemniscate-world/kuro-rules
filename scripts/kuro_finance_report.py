@@ -216,7 +216,7 @@ def main() -> int:
         try:
             fin_path = Path(__file__).resolve().parent.parent / "finances.local.json"
             sys.path.insert(0, str(Path(__file__).resolve().parent))
-            from kuro_finance import month_list, load_finances
+            from kuro_finance import load_finances, month_list
             detail = month_list(load_finances(fin_path))
         except Exception:
             detail = None

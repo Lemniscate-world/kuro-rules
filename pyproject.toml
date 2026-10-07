@@ -50,7 +50,10 @@ select = ["E", "F", "W", "I", "UP", "N"]
 ignore = ["E501", "UP017"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/test_*.py" = ["S101"]
+"tests/test_*.py" = ["S101", "E402"]
+"scripts/*.py" = ["E402", "UP031"]
+# UP031 (printf -> f-string) reste à migrer dans scripts/ : 58 sites sûrs
+# mais trop diffus pour cette PR — suivi dédié, CI src+tests déjà stricte.
 
 [tool.mypy]
 python_version = "3.12"

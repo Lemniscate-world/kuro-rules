@@ -10,9 +10,10 @@ Checks:
 Usage: python scripts/post_session_check.py [--fix] [--quiet]
 """
 
-import subprocess, sys, os
-from pathlib import Path
+import subprocess
+import sys
 from datetime import date
+from pathlib import Path
 
 HOME = Path.home()
 DOCS = HOME / "Documents"
@@ -61,9 +62,12 @@ def check_projects_listed():
     text = EPINGLE.read_text(encoding="utf-8")
     missing = []
     for d in sorted(DOCS.iterdir()):
-        if not d.is_dir(): continue
-        if d.name.startswith('.'): continue
-        if d.name in ('kuro-rules', 'Vault', 'Lemniscate-world', 'WindowsPowerShell', 'vcpkg', 'MATLAB'): continue
+        if not d.is_dir():
+            continue
+        if d.name.startswith('.'):
+            continue
+        if d.name in ('kuro-rules', 'Vault', 'Lemniscate-world', 'WindowsPowerShell', 'vcpkg', 'MATLAB'):
+            continue
         has_agents = (d / "AGENTS.md").exists()
         has_git = (d / ".git").exists()
         if has_agents or has_git:
@@ -122,12 +126,15 @@ def main():
             all_ok = False
 
     if fix:
-        if not quiet: print("\n--- Auto-fix ---")
+        if not quiet:
+            print("\n--- Auto-fix ---")
         status, msg = regenerate_portfolio()
-        if not quiet: print(f"  {status} Regenerate: {msg}")
+        if not quiet:
+            print(f"  {status} Regenerate: {msg}")
         if status != FAIL:
             status, msg = commit_portfolio()
-            if not quiet: print(f"  {status} Commit: {msg}")
+            if not quiet:
+                print(f"  {status} Commit: {msg}")
 
     if not quiet:
         print()

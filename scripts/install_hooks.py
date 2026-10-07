@@ -10,7 +10,8 @@ These hooks are HARDER to bypass because:
 Usage: python scripts/install_hooks.py [--force]
 """
 
-import subprocess, sys, shutil
+import subprocess
+import sys
 from pathlib import Path
 
 DOCS = Path.home() / "Documents"
@@ -32,8 +33,10 @@ def install_hooks(force=False):
         sys.exit(1)
     repos = []
     for d in sorted(DOCS.iterdir()):
-        if not d.is_dir(): continue
-        if not (d / ".git").exists(): continue
+        if not d.is_dir():
+            continue
+        if not (d / ".git").exists():
+            continue
         repos.append(d)
 
     print(f"Found {len(repos)} git repos")

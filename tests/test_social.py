@@ -1,7 +1,6 @@
 """Tests kuro_discord + x_post — logique pure, zero reseau."""
 
 import sys
-from pathlib import Path
 
 import kuro_discord as kd
 import x_post as xp
@@ -159,8 +158,9 @@ def test_discord_ensure_webhooks_403_stop(monkeypatch):
 
 
 def test_kit_subscribe_ok(monkeypatch):
-    import kit_post as kp
     import urllib.request
+
+    import kit_post as kp
     monkeypatch.setenv("KIT_API_SECRET", "s")
     monkeypatch.setattr(urllib.request, "urlopen",
                         _fake_urlopen_factory({"subscription": {"id": "s1", "email_address": "a@b.cd"}}))
@@ -175,8 +175,9 @@ def test_kit_subscribe_ok(monkeypatch):
 
 
 def test_kit_broadcast_create_et_send(monkeypatch):
-    import kit_post as kp
     import urllib.request
+
+    import kit_post as kp
     monkeypatch.setenv("KIT_API_SECRET", "s")
     monkeypatch.setattr(urllib.request, "urlopen",
                         _fake_urlopen_factory({"broadcast": {"id": "b1"}}))
@@ -194,10 +195,11 @@ def test_kit_broadcast_create_et_send(monkeypatch):
 
 
 def test_kit_http_error_claire(monkeypatch):
-    import kit_post as kp
-    import urllib.request
-    import urllib.error
     import io
+    import urllib.error
+    import urllib.request
+
+    import kit_post as kp
 
     def _boom(req, timeout=30):
         raise urllib.error.HTTPError(req.full_url, 401, "Unauthorized",
@@ -225,9 +227,9 @@ def test_kit_sync_md_et_sujets(tmp_path):
 
 
 def test_kit_sync_send_next(monkeypatch, tmp_path):
-    import sys
-    import types
     import json
+    import types
+
     import kit_sync as ks
     (tmp_path / "issue-01-a.md").write_text("# A\nx", encoding="utf-8")
     (tmp_path / ".kit_ids.json").write_text('{"issue-01-a.md": "b1"}', encoding="utf-8")
@@ -268,8 +270,9 @@ def _fake_urlopen_factory(payload):
 
 
 def test_buffer_create_post_ok(monkeypatch):
-    import buffer_post as bp
     import urllib.request
+
+    import buffer_post as bp
     payload = {"data": {"createPost": {"post": {"id": "p1", "text": "hi", "dueAt": "d"}}}}
     monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen_factory(payload))
     res = bp.create_post("hi", "ch1", "key")
@@ -277,8 +280,9 @@ def test_buffer_create_post_ok(monkeypatch):
 
 
 def test_buffer_mutation_error_queue(monkeypatch):
-    import buffer_post as bp
     import urllib.request
+
+    import buffer_post as bp
     payload = {"data": {"createPost": {"message": "Queue limit reached"}}}
     monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen_factory(payload))
     try:
@@ -290,8 +294,9 @@ def test_buffer_mutation_error_queue(monkeypatch):
 
 
 def test_buffer_list_channels(monkeypatch):
-    import buffer_post as bp
     import urllib.request
+
+    import buffer_post as bp
     calls = []
 
     def _fake(req, timeout=30):
@@ -322,7 +327,6 @@ def test_buffer_validate_long_et_vide():
         raise AssertionError("BufferError attendue")
     # URL compte 23 (t.co) : 260 + 45 URL = 283 brut mais 260+23 accepté si mocké.
     import urllib.request
-    seen = {}
 
     class _Cap:
         status = 200
@@ -346,8 +350,9 @@ def test_buffer_validate_long_et_vide():
     assert res["id"] == "p9"
 
 def test_buffer_create_thread(monkeypatch):
-    import buffer_post as bp
     import urllib.request
+
+    import buffer_post as bp
     seen = {}
 
     class _Cap(_FakeResp):

@@ -17,9 +17,10 @@ Usage :
 import json
 import os
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -46,7 +47,7 @@ class BufferError(Exception):
 def gql(query_text, api_key):
     req = urllib.request.Request(
         API, data=json.dumps({"query": query_text}).encode(), method="POST",
-        headers={"Authorization": "Bearer %s" % api_key,
+        headers={"Authorization": f"Bearer {api_key}",
                  "Content-Type": "application/json",
                  "User-Agent": "Kuro/1.0 (lambda-Section)"},
     )
@@ -54,7 +55,7 @@ def gql(query_text, api_key):
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8") or "{}")
     except urllib.error.HTTPError as exc:
-        raise BufferError("HTTP %s %s" % (exc.code, exc.read().decode("utf-8", errors="replace")[:300]))
+        raise BufferError("HTTP {} {}".format(exc.code, exc.read().decode("utf-8", errors="replace")[:300]))
     except Exception as exc:
         raise BufferError(str(exc)[:200])
     if isinstance(data, dict) and data.get("errors"):
@@ -71,8 +72,7 @@ def list_organizations(api_key):
 def list_channels(api_key):
     out = []
     for org in list_organizations(api_key):
-        data = gql('query GetChannels { channels(input: { organizationId: "%s" }) { id name service } }'
-                   % org["id"], api_key)
+        data = gql('query GetChannels {{ channels(input: {{ organizationId: "{}" }}) {{ id name service }} }}'.format(org["id"]), api_key)
         for c in data.get("channels", []) or []:
             if c.get("id"):
                 out.append({"id": c["id"], "name": c.get("name", ""),
@@ -92,17 +92,16 @@ def create_post(text, channel_id, api_key, mode="addToQueue", due_at=""):
         size = len(t)
     if size > MAX_LEN:
         raise BufferError("trop long: %d/%d" % (size, MAX_LEN))
-    due = ', dueAt: "%s"' % due_at if mode == "customScheduled" and due_at else ""
-    query = ("mutation CreatePost { createPost(input: { text: %s, channelId: \"%s\", "
-             "schedulingType: automatic, mode: %s%s }) { ... on PostActionSuccess { post { id text dueAt } } "
-             "... on MutationError { message } } }" % (
-                 json.dumps(t), channel_id, mode, due))
+    due = f', dueAt: "{due_at}"' if mode == "customScheduled" and due_at else ""
+    query = (f"mutation CreatePost {{ createPost(input: {{ text: {json.dumps(t)}, channelId: \"{channel_id}\", "
+             f"schedulingType: automatic, mode: {mode}{due} }}) {{ ... on PostActionSuccess {{ post {{ id text dueAt }} }} "
+             "... on MutationError { message } } }")
     data = gql(query, api_key)
     node = (data.get("createPost") or {})
     post = node.get("post") or {}
     if post.get("id"):
         return {"id": post["id"], "dueAt": post.get("dueAt", ""), "queued": mode != "shareNow"}
-    raise BufferError(node.get("message") or "reponse inattendue: %s" % json.dumps(data)[:200])
+    raise BufferError(node.get("message") or f"reponse inattendue: {json.dumps(data)[:200]}")
 
 
 def create_thread(main_text, reply_text, channel_id, api_key, mode="customScheduled", due_at=""):
@@ -120,23 +119,22 @@ def create_thread(main_text, reply_text, channel_id, api_key, mode="customSchedu
         sizes = (len(main), len(reply))
     if max(sizes) > MAX_LEN:
         raise BufferError("thread trop long: %s/%d" % (sizes, MAX_LEN))
-    due = ', dueAt: "%s"' % due_at if mode == "customScheduled" and due_at else ""
-    query = ("mutation CreateThreadedPost { createPost(input: { text: %s, channelId: \"%s\", "
-             "schedulingType: automatic, mode: %s%s, metadata: { twitter: { thread: [ "
-             "{ text: %s }, { text: %s } ] } } }) { ... on PostActionSuccess { post { id dueAt } } "
-             "... on MutationError { message } } }" % (
-                 json.dumps(main), channel_id, mode, due, json.dumps(main), json.dumps(reply)))
+    due = f', dueAt: "{due_at}"' if mode == "customScheduled" and due_at else ""
+    query = (f"mutation CreateThreadedPost {{ createPost(input: {{ text: {json.dumps(main)}, channelId: \"{channel_id}\", "
+             f"schedulingType: automatic, mode: {mode}{due}, metadata: {{ twitter: {{ thread: [ "
+             f"{{ text: {json.dumps(main)} }}, {{ text: {json.dumps(reply)} }} ] }} }} }}) {{ ... on PostActionSuccess {{ post {{ id dueAt }} }} "
+             "... on MutationError { message } } }")
     data = gql(query, api_key)
     node = (data.get("createPost") or {})
     post = node.get("post") or {}
     if post.get("id"):
         return {"id": post["id"], "dueAt": post.get("dueAt", ""), "queued": mode != "shareNow"}
-    raise BufferError(node.get("message") or "reponse inattendue: %s" % json.dumps(data)[:200])
+    raise BufferError(node.get("message") or f"reponse inattendue: {json.dumps(data)[:200]}")
 
 
 def _delete_mutation(post_id, field):
-    return ("mutation DeletePost { deletePost(input: { %s: \"%s\" }) { __typename "
-            "... on MutationError { message } } }" % (field, post_id))
+    return (f"mutation DeletePost {{ deletePost(input: {{ {field}: \"{post_id}\" }}) {{ __typename "
+            "... on MutationError { message } } }")
 
 
 def delete_post(post_id, api_key):
@@ -144,7 +142,7 @@ def delete_post(post_id, api_key):
     node = data.get("deletePost") or {}
     if node.get("__typename") in ("DeletePostPayload", "DeletePostSuccess"):
         return True
-    raise BufferError(node.get("message") or "suppression impossible: %s" % json.dumps(data)[:200])
+    raise BufferError(node.get("message") or f"suppression impossible: {json.dumps(data)[:200]}")
 
 
 def list_scheduled(api_key, org_id=""):
@@ -153,8 +151,8 @@ def list_scheduled(api_key, org_id=""):
         if not orgs:
             raise BufferError("aucune organisation")
         org_id = orgs[0]["id"]
-    query = ("query GetScheduledPosts { posts(input: { organizationId: \"%s\", "
-             "filter: { status: [scheduled] } }) { edges { node { id text createdAt } } } }" % org_id)
+    query = (f"query GetScheduledPosts {{ posts(input: {{ organizationId: \"{org_id}\", "
+             "filter: { status: [scheduled] } }) { edges { node { id text createdAt } } } }")
     data = gql(query, api_key)
     out = []
     for e in (data.get("posts") or {}).get("edges", []) or []:
@@ -191,10 +189,10 @@ def main(argv=None):
     try:
         if args.cmd == "channels":
             for c in list_channels(api_key):
-                print("  %s  %s [%s]" % (c["id"], c["name"], c.get("service", "?")))
+                print("  {}  {} [{}]".format(c["id"], c["name"], c.get("service", "?")))
             return 0
         if args.cmd == "delete":
-            print("  suppression post %s ..." % args.id)
+            print(f"  suppression post {args.id} ...")
             if not args.apply:
                 print("  [DRY] rien supprime. --apply pour retirer vraiment de la file.")
                 return 0
@@ -203,24 +201,24 @@ def main(argv=None):
             return 0
         if args.cmd == "queue":
             for p in list_scheduled(api_key, args.org):
-                print("  %s  %s | %s" % (p["id"], p["createdAt"][:16], p["text"]))
+                print("  {}  {} | {}".format(p["id"], p["createdAt"][:16], p["text"]))
             return 0
         text = args.text
         if args.from_file:
             text = Path(args.from_file).read_text(encoding="utf-8")
         text = (text or "").strip()
         mode = "shareNow" if args.now else ("customScheduled" if args.at else "addToQueue")
-        print("  %s" % text.replace("\n", " / ")[:160])
+        print("  {}".format(text.replace("\n", " / ")[:160]))
         print("  %d/%d caracteres -> canal %s [%s]" % (len(text), MAX_LEN, args.channel, mode))
         if not args.apply:
             print("  [DRY] rien envoye. --apply pour mettre en file.")
             return 0
         res = create_post(text, args.channel, api_key, mode=mode, due_at=args.at)
-        print("  [OK] id=%s dueAt=%s" % (res["id"], res.get("dueAt", "?")))
+        print("  [OK] id={} dueAt={}".format(res["id"], res.get("dueAt", "?")))
         print("  Rappel R99 : logger dans docs/tracking/acquisition_tracker.md sous 5 min.")
         return 0
     except BufferError as exc:
-        print("[ERR] buffer: %s" % exc)
+        print(f"[ERR] buffer: {exc}")
         return 1
 
 

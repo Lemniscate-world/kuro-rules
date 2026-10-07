@@ -1,11 +1,9 @@
 """Tests self-healing Kuro — logique pure, sans reseau ni process reel."""
 
-import json
 
-import kuro_autodebug as AD
-import kuro_doctor as DOC
-import kuro_supervisor as SUP
-
+import kuro_autodebug as AD  # noqa: N812 - alias courts, convention de ce module
+import kuro_doctor as DOC  # noqa: N812 - alias courts, convention de ce module
+import kuro_supervisor as SUP  # noqa: N812 - alias courts, convention de ce module
 
 # ---------- superviseur : decide ----------
 

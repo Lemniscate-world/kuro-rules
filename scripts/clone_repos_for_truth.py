@@ -8,7 +8,9 @@ les repos listés dans Epingle depuis LambdaSection et Lemniscate-world.
 Usage (CI): python clone_repos_for_truth.py --token "$TOKEN"
 Ignorer silencieusement les repos privés/inexistants.
 """
-import re, subprocess, sys
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 HOME = Path.home()

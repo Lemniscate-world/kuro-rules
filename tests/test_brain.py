@@ -37,7 +37,6 @@ def test_llm_critique_en(monkeypatch):
     import types
     fake = types.ModuleType("kuro_llm")
     seen = {}
-    import json as _j
 
     def _ask(prompt, system=""):
         seen["prompt"] = prompt

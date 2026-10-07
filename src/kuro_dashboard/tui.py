@@ -462,16 +462,22 @@ def _swap_rates(cur: dict, prev: dict | None, dt: float) -> tuple:
 
 
 def _disk_busy(cur: dict, prev: dict | None, dt: float) -> float | None:
-    """% de temps disques occupes (read+write time) entre 2 snapshots."""
+    """% de temps disques occupes (read+write time) entre 2 snapshots.
+
+    Exige les 4 compteurs (psutil les documente optionnels par plateforme) :
+    sinon le cumul courant passerait pour un intervalle -> faux 100%.
+    """
     if not prev or dt <= 0:
         return None
     try:
         io, pio = (cur.get("disk") or {}).get("io") or {}, \
             (prev.get("disk") or {}).get("io") or {}
-        if not io and not pio:
+        vals = [io.get("read_time"), io.get("write_time"),
+                pio.get("read_time"), pio.get("write_time")]
+        if any(v is None for v in vals):
             return None
-        busy_ms = ((io.get("read_time", 0) - pio.get("read_time", 0))
-                   + (io.get("write_time", 0) - pio.get("write_time", 0)))
+        busy_ms = ((io["read_time"] - pio["read_time"])
+                   + (io["write_time"] - pio["write_time"]))
         return min(100.0, max(0.0, busy_ms / (dt * 1000) * 100))
     except Exception:
         return None
@@ -596,8 +602,9 @@ def sec_procs(payload: dict, width: int, sort: str = "cpu", filt: str = "",
     lines = [title]
     try:
         states = payload.get("process_states") or {}
+        # waiting = normal sur Windows/macOS (psutil), idle/? = fond.
         weird = {k: v for k, v in states.items()
-                 if k not in ("running", "sleeping", "idle", "?", "") and v}
+                 if k not in ("running", "sleeping", "waiting", "idle", "?", "") and v}
         if weird:
             lines.append("  etats anormaux : " + ", ".join(
                 f"{v} {k}" for k, v in sorted(weird.items())))
@@ -1086,7 +1093,7 @@ def sec_strategy() -> list[str]:
             f"({_strat_delta(last.get('runway_months'), old.get('runway_months'), ' mois')})"
             f"{age}",
             f"  velocite : {_val('velocity')} c/sem "
-            f"({_strat_delta(last.get('velocity'), old.get('velocity'), ' c/sem')})"
+            f"({_strat_delta(last.get('velocity'), old.get('velocity'), ' c/sem')})",
             f"  OKR : {okr_txt} moy. "
             f"({_strat_delta(last.get('okr_avg_pct'), old.get('okr_avg_pct'), ' pts')}) "
             f"{last.get('okr_hit', '?')}/{last.get('okr_total', '?')} atteints",

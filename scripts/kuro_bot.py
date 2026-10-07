@@ -99,7 +99,7 @@ def cmd_finance(full: bool) -> str:
     detail = None
     if full:
         try:
-            from kuro_finance import month_list, load_finances
+            from kuro_finance import load_finances, month_list
             detail = month_list(load_finances(FINANCES))
         except Exception:
             detail = None
@@ -157,11 +157,11 @@ def cmd_abos_remove(label: str) -> str:
 def cmd_rappel() -> str:
     import kuro_reminders
     lines = kuro_reminders.check(force=True, post=True)
-    return "Rappels vérifiés :\n" + "\n".join(f"• {l}" for l in lines)
+    return "Rappels vérifiés :\n" + "\n".join(f"• {line}" for line in lines)
 
 
 def cmd_propositions() -> str:
-    import kuro_proposals as P
+    import kuro_proposals as P  # noqa: N812 - alias court, convention de ce module
     items = P.pending()
     if not items:
         return "Aucune proposition en attente."
@@ -169,19 +169,19 @@ def cmd_propositions() -> str:
 
 
 def cmd_valide(pid: str) -> str:
-    import kuro_proposals as P
+    import kuro_proposals as P  # noqa: N812 - alias court, convention de ce module
     return (f"**{pid}** validée." if P.set_status(pid, "valide")
             else f"Proposition **{pid}** inconnue (`!propositions`).")
 
 
 def cmd_rejette(pid: str) -> str:
-    import kuro_proposals as P
+    import kuro_proposals as P  # noqa: N812 - alias court, convention de ce module
     return (f"**{pid}** rejetée." if P.set_status(pid, "rejette")
             else f"Proposition **{pid}** inconnue (`!propositions`).")
 
 
 def cmd_vacances(arg: str) -> str:
-    import kuro_proposals as P
+    import kuro_proposals as P  # noqa: N812 - alias court, convention de ce module
     if arg not in ("on", "off"):
         return f"Vacances : {'ON' if P.vacances() else 'OFF'}. Usage : `!vacances on|off`"
     P.set_vacances(arg == "on")

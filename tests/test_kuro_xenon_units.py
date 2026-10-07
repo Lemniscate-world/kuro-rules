@@ -1,6 +1,5 @@
 """Tests unites Xenon v2 : system / kuro_state / projects / agents, hermetique."""
 
-import json
 import re
 import sqlite3
 import subprocess
@@ -110,7 +109,7 @@ def test_proc_detail_branches(monkeypatch):
             raise RuntimeError("x")
 
     class _Ps:
-        def Process(self, pid):
+        def Process(self, pid):  # noqa: N802 - mock psutil (API Capitalisée imposée)
             return _P()
 
     monkeypatch.setattr(sy, "_psutil", lambda: _Ps())
@@ -119,7 +118,7 @@ def test_proc_detail_branches(monkeypatch):
     assert info["threads"] is None and info["cpu_user"] is None
 
     class _PsBoom:
-        def Process(self, pid):
+        def Process(self, pid):  # noqa: N802 - mock psutil (API Capitalisée imposée)
             raise RuntimeError("parti")
 
     monkeypatch.setattr(sy, "_psutil", lambda: _PsBoom())
@@ -189,15 +188,15 @@ def test_host_et_cpu_sans_psutil():
 
 
 def test_memory_swap_etats(monkeypatch):
-    from types import SimpleNamespace as _NS
+    from types import SimpleNamespace
 
     class _Ps:
         def virtual_memory(self):
-            return _NS(_asdict=lambda: {"total": 8, "available": 4, "used": 4,
+            return SimpleNamespace(_asdict=lambda: {"total": 8, "available": 4, "used": 4,
                                         "percent": 50.0})
 
         def swap_memory(self):
-            return _NS(_asdict=lambda: {"total": 2, "used": 1, "percent": 50.0,
+            return SimpleNamespace(_asdict=lambda: {"total": 2, "used": 1, "percent": 50.0,
                                         "sin": 10, "sout": 20})
 
     mem = sy._memory(_Ps())
@@ -459,19 +458,19 @@ def test_agents_lines_avec_taches(monkeypatch):
 
 
 def test_disk_partition_illisible_sautee(monkeypatch):
-    from types import SimpleNamespace as _NS
+    from types import SimpleNamespace
 
     class _Ps:
         def disk_partitions(self, all=False):
-            return [_NS(mountpoint="/ok", fstype="ext4"),
-                    _NS(mountpoint="/ko", fstype="ext4"),
-                    _NS(mountpoint="/snap/core22", fstype="squashfs"),
-                    _NS(mountpoint="/snap/data", fstype="ext4")]
+            return [SimpleNamespace(mountpoint="/ok", fstype="ext4"),
+                    SimpleNamespace(mountpoint="/ko", fstype="ext4"),
+                    SimpleNamespace(mountpoint="/snap/core22", fstype="squashfs"),
+                    SimpleNamespace(mountpoint="/snap/data", fstype="ext4")]
 
         def disk_usage(self, mount):
             if mount == "/ko":
                 raise PermissionError("verrouille")
-            return _NS(_asdict=lambda: {"total": 100, "used": 10,
+            return SimpleNamespace(_asdict=lambda: {"total": 100, "used": 10,
                                         "percent": 10.0})
 
         def disk_io_counters(self):
@@ -489,14 +488,14 @@ def test_git_dirs_racine_fichier(tmp_path):
 
 
 def test_sensors_avec_donnees(monkeypatch):
-    from types import SimpleNamespace as _NS
+    from types import SimpleNamespace
 
     class _Ps:
         def sensors_temperatures(self):
-            return {"cpu": [_NS(label="t", current=55.0, high=90.0)]}
+            return {"cpu": [SimpleNamespace(label="t", current=55.0, high=90.0)]}
 
         def sensors_fans(self):
-            return {"f": [_NS(label="v", current=1200)]}
+            return {"f": [SimpleNamespace(label="v", current=1200)]}
 
     got = sy._sensors(_Ps())
     assert got["temperatures"][0]["current"] == 55.0

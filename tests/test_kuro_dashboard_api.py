@@ -148,12 +148,13 @@ def test_http_routes_live(tmp_path, monkeypatch):
     thread.start()
     try:
         def _get(p):
-            # Windows coupe parfois le loopback (WinError 10053, AV/proxy) :
-            # un seul retry sur erreur socket transitoire, les asserts restent stricts.
+            # Windows coupe parfois le loopback (WinError 10053, AV/proxy) et
+            # /api/system met ~12 s sur PC chargé : timeout large + retries,
+            # les asserts restent stricts.
             last = None
-            for _ in range(2):
+            for _ in range(4):
                 try:
-                    with urllib.request.urlopen(f"http://127.0.0.1:{port}{p}", timeout=10) as r:
+                    with urllib.request.urlopen(f"http://127.0.0.1:{port}{p}", timeout=30) as r:
                         return r.status, json.loads(r.read().decode("utf-8"))
                 except (TimeoutError, ConnectionError) as exc:
                     last = exc
@@ -314,5 +315,6 @@ def test_get_seo_present(monkeypatch, tmp_path):
     monkeypatch.setattr("os.path.expanduser", lambda p: str(tmp_path))
     seo = kap.get_seo()
     assert seo["status"] == "ok"
-    assert seo["p0_count"] == 2 and seo["p1_count"] == 1
+    assert seo["p0_count"] == 2
+    assert seo["p1_count"] == 1
     assert seo["p0_top"][0] == "Fix title"

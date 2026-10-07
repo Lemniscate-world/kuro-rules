@@ -305,6 +305,33 @@ def get_strategy() -> dict:
         return {"status": "error", "error": str(exc)}
 
 
+def _seo_items(text: str, header: str) -> list:
+    """Items numérotés sous un header ### (même parsing que Xenon)."""
+    out, inside = [], False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("### "):
+            inside = stripped == header
+            continue
+        if inside and stripped and stripped[0].isdigit():
+            parts = stripped.split(None, 1)
+            out.append(parts[1][:110] if len(parts) > 1 else stripped[:110])
+    return out
+
+
+def _seo_age(path: str) -> str:
+    """Âge du fichier d'audit ('' si illisible)."""
+    try:
+        age_s = _dt_now().timestamp() - os.path.getmtime(path)
+    except OSError:
+        return ""
+    if age_s >= 86400:
+        return f"il y a {int(age_s // 86400)}j"
+    if age_s >= 3600:
+        return f"il y a {int(age_s // 3600)}h"
+    return f"il y a {int(age_s // 60)} min"
+
+
 def get_seo() -> dict:
     """Audit SEO du cron strategy-daily (~/leads/SEO_AUDIT.md).
 
@@ -324,28 +351,9 @@ def get_seo() -> dict:
             if line.startswith("Date"):
                 date = line[5:].strip()[:40]
                 break
-
-        def _items(header: str) -> list:
-            out, inside = [], False
-            for line in text.splitlines():
-                stripped = line.strip()
-                if stripped.startswith("### "):
-                    inside = stripped == header
-                    continue
-                if inside and stripped and stripped[0].isdigit():
-                    parts = stripped.split(None, 1)
-                    out.append(parts[1][:110] if len(parts) > 1 else stripped[:110])
-            return out
-
-        p0, p1 = _items("### P0"), _items("### P1")
-        try:
-            age_s = _dt_now().timestamp() - os.path.getmtime(path)
-            age = f"il y a {int(age_s // 86400)}j" if age_s >= 86400 else (
-                f"il y a {int(age_s // 3600)}h" if age_s >= 3600 else
-                f"il y a {int(age_s // 60)} min")
-        except OSError:
-            age = ""
-        return {"status": "ok", "date": date or "?", "age": age,
+        p0 = _seo_items(text, "### P0")
+        p1 = _seo_items(text, "### P1")
+        return {"status": "ok", "date": date or "?", "age": _seo_age(path),
                 "p0_count": len(p0), "p1_count": len(p1), "p0_top": p0[:3]}
     except Exception as exc:
         return {"status": "error", "error": str(exc)}

@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import kuro_omnigraph_branch as kb
 
-
 NODE = '{"type": "Decision", "data": {"slug": "d1", "statement": "s"}}'
 EDGE = '{"edge": "Makes", "from": "neuraldbg", "to": "d1"}'
 

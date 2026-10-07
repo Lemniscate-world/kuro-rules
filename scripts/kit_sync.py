@@ -9,7 +9,6 @@ Usage :
 """
 import html
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -25,19 +24,19 @@ def md_to_html(text):
         if not s:
             continue
         if s.startswith("# "):
-            out.append("<h1>%s</h1>" % html.escape(s[2:]))
+            out.append(f"<h1>{html.escape(s[2:])}</h1>")
         elif s.startswith("## "):
-            out.append("<h2>%s</h2>" % html.escape(s[3:]))
+            out.append(f"<h2>{html.escape(s[3:])}</h2>")
         elif re.match(r"^\d+\.\s", s):
-            out.append("<p><strong>%s</strong></p>" % html.escape(s))
+            out.append(f"<p><strong>{html.escape(s)}</strong></p>")
         elif s.startswith(("- ", "* ")):
-            out.append("<p>%s</p>" % html.escape(s[2:]))
+            out.append(f"<p>{html.escape(s[2:])}</p>")
         elif s.startswith(">"):
-            out.append("<blockquote>%s</blockquote>" % html.escape(s[1:].strip()))
+            out.append(f"<blockquote>{html.escape(s[1:].strip())}</blockquote>")
         elif s.startswith("*") and s.endswith("*"):
-            out.append("<p><em>%s</em></p>" % html.escape(s.strip("*")))
+            out.append("<p><em>{}</em></p>".format(html.escape(s.strip("*"))))
         else:
-            out.append("<p>%s</p>" % html.escape(s))
+            out.append(f"<p>{html.escape(s)}</p>")
     body = "\n".join(out)
     return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", body)
 
@@ -61,7 +60,7 @@ def main(argv=None):
 
     base = Path(args.dir) if args.dir else Path.home() / "Documents" / "OpenQuant" / "research" / "newsletter"
     if not base.is_dir():
-        print("[ERR] dossier introuvable: %s" % base)
+        print(f"[ERR] dossier introuvable: {base}")
         return 2
     state_path = base / ".kit_ids.json"
     try:
@@ -75,20 +74,20 @@ def main(argv=None):
     changed = False
     for path in files:
         if path.name in state:
-            print("  [SKIP] %s deja en draft (%s)" % (path.name, state[path.name]))
+            print(f"  [SKIP] {path.name} deja en draft ({state[path.name]})")
             continue
         md = path.read_text(encoding="utf-8")
         subject = subject_of(md, path.stem)
-        print("  %s -> '%s'" % (path.name, subject[:50]))
+        print(f"  {path.name} -> '{subject[:50]}'")
         if not args.apply:
             continue
         try:
             res = kp.create_broadcast(subject, md_to_html(md))
             state[path.name] = res["id"]
             changed = True
-            print("  [OK] draft id=%s" % res["id"])
+            print("  [OK] draft id={}".format(res["id"]))
         except Exception as exc:
-            print("  [ERR] %s: %s" % (path.name, str(exc)[:200]))
+            print(f"  [ERR] {path.name}: {str(exc)[:200]}")
             return 1
     if changed and args.apply:
         state_path.write_text(json.dumps(state, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -104,17 +103,17 @@ def main(argv=None):
             return 0
         target = todo[0]
         bid = state[target.name]
-        print("  envoi draft %s (%s) ..." % (target.name, bid))
+        print(f"  envoi draft {target.name} ({bid}) ...")
         if not args.apply:
             print("  [DRY] --apply pour envoyer vraiment (irreversible, audience reelle).")
             return 0
         try:
-            print("  [OK] envoye: %s" % kp.send_broadcast(bid))
+            print(f"  [OK] envoye: {kp.send_broadcast(bid)}")
             sent.append(bid)
             state["_sent"] = sent
             state_path.write_text(json.dumps(state, indent=1, ensure_ascii=False), encoding="utf-8")
         except Exception as exc:
-            print("  [ERR] envoi: %s" % str(exc)[:200])
+            print(f"  [ERR] envoi: {str(exc)[:200]}")
             return 1
     return 0
 

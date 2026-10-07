@@ -22,7 +22,6 @@ from kuro_dashboard.api import (  # noqa: E402
     STATIC_FILES,
     Handler,
     KuroServer,
-    _count,
     answer_question,
     build_summary,
     db,

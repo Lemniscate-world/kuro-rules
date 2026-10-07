@@ -1,13 +1,11 @@
 """Tests kuro_skills — logique pure, fichiers temporaires, zéro réseau."""
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
 import kuro_skills as ks  # noqa: E402
-
 
 # ---------- barre de progression ----------
 

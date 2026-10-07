@@ -38,7 +38,13 @@ def test_refus_main_protege_secret(monkeypatch):
 
 def test_build_message():
     msg = autosync.build_message("feat/x", ["a.py", "b.py"])
-    assert "feat/x" in msg and "2 fichiers" in msg
+    assert "feat/x" in msg
+    assert "2 fichiers" in msg
+
+
+def test_classify_inclut_dashboard():
+    ok, _skipped = autosync.classify(["dashboard/app.js", "dashboard/styles.css"])
+    assert ok == ["dashboard/app.js", "dashboard/styles.css"]
 
 
 def test_dry_run_depot_temporaire(tmp_path, monkeypatch, capsys):

@@ -13,7 +13,11 @@ Defaults (local workstation):
 On CI (GitHub Actions), paths are relative to checkout directories.
 """
 
-import re, sys, subprocess, os, json
+import json
+import os
+import re
+import subprocess
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -319,7 +323,7 @@ def generate(sections, output_path, updated_date):
     lines.append('<head>')
     lines.append('<meta charset="UTF-8">')
     lines.append('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
-    lines.append(f'<title>&#955; lambda-Section — Registre des projets</title>')
+    lines.append('<title>&#955; lambda-Section — Registre des projets</title>')
     lines.append(f'<meta name="description" content="Portfolio lambda-Section — {total} projets, {n_sections} sections actives, studio AI / Quant / Biohacking. Registre auto-genere depuis Epingle_Projets.md">')
     lines.append('<meta name="theme-color" content="#faf9f5">')
     lines.append('<meta property="og:title" content="λ lambda-Section — Registre des projets">')
@@ -706,7 +710,7 @@ def sync_readme(sections):
         readme_path.write_text(text, encoding="utf-8")
         print(f"  README synced: {total} projets, {num_sections} sections, {len(proj_map)} projects mapped")
     else:
-        print(f"  README already in sync")
+        print("  README already in sync")
 
 
 
@@ -773,7 +777,7 @@ def main():
         print(f"  Analytics: {n_a} pages injectees" if n_a else "  Analytics: analytics.txt absent — skip")
 
     if output == LOCAL_OUTPUT:
-        print(f"\nNext: cd ~/Documents/Lemniscate-world && git add index.html README.md && git commit -m 'sync' && git push")
+        print("\nNext: cd ~/Documents/Lemniscate-world && git add index.html README.md && git commit -m 'sync' && git push")
 
 
 if __name__ == "__main__":

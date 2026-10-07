@@ -7,7 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
 import kuro_strategy as ks  # noqa: E402
 
-
 FINANCE = {"mrr_monthly": 50.0, "runway_months": 1.0, "burn_rate_monthly": 25.0, "starting_cash": 0.0, "status": "critical"}
 METRICS = {"averages": {"velocity_per_week": 1.06, "lead_time_days": 47.2}}
 PIPELINE = {"interviews_7d": 1, "total": 4}
@@ -19,7 +18,7 @@ def _payload(runway=2.0, velocity=1.5, okr_avg=60.0, hit="1/2", itw=2,
              "label": "O", "target": 100, "current": okr_avg, "key": "o"}]
     return {"finance": {"runway_months": runway, "burn_rate_monthly": 10.0,
                         "mrr_monthly": 5.0},
-            "execution": {"velocity_per_week": velocity, "lead_time_days": 3.0,
+            "execution": {"velocity": velocity, "lead_time": 3.0,
                           "ci": {"failures": ci_fail}},
             "okr": okrs,
             "pipeline": {"total": 4, "interviews_7d": itw},
@@ -31,6 +30,13 @@ def test_snapshot_entry_champs():
     e = ks.snapshot_entry(_payload(), "2026-10-06")
     assert (e["date"], e["runway_months"], e["velocity"]) == ("2026-10-06", 2.0, 1.5)
     assert e["okr_avg_pct"] == 60.0 and e["decisions_open"] == ["velocity"]
+
+
+def test_snapshot_entry_cles_legacy():
+    legacy = _payload()
+    legacy["execution"] = {"velocity_per_week": 4.0, "lead_time_days": 9.0}
+    e = ks.snapshot_entry(legacy, "2026-10-06")
+    assert (e["velocity"], e["lead_time"]) == (4.0, 9.0)
 
 
 def test_append_snapshot_idempotent_et_prune(tmp_path, monkeypatch):

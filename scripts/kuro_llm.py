@@ -1110,7 +1110,6 @@ def stats_command(since: str = "", as_json: bool = False) -> int:
     Meme regle d honestete que le TUI : seuls les vrais appels comptent,
     couts inconnus comptes a part, jamais $0 menteur.
     """
-    from collections import Counter
     rows: list[dict] = []
     try:
         lines = _usage_path().read_text(encoding="utf-8").splitlines()[-2000:]

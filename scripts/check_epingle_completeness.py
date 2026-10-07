@@ -46,7 +46,7 @@ def read_projects_txt(path):
         lines = Path(path).read_text(encoding="utf-8").splitlines()
     except Exception:
         return []
-    return [l.strip() for l in lines if l.strip() and not l.strip().startswith("#")]
+    return [line.strip() for line in lines if line.strip() and not line.strip().startswith("#")]
 
 
 def check(projects, epingle_names, local_ownership):
@@ -59,11 +59,11 @@ def check(projects, epingle_names, local_ownership):
         if own == "NO-LOCAL-REPO":
             infos.append((name, "suivi-sans-clone-local"))
         elif "fork" in name.lower():
-            warns.append((name, "fork — decider suivi Outil/exclusion (%s)" % own))
+            warns.append((name, f"fork — decider suivi Outil/exclusion ({own})"))
         elif own == "OWNED":
             errors.append((name, "OWNED verifie mais absent d'Epingle — ajouter (R85)"))
         else:
-            warns.append((name, "ownership %s — confirmer avant ajout (R87)" % own))
+            warns.append((name, f"ownership {own} — confirmer avant ajout (R87)"))
     return errors, warns, infos
 
 
@@ -123,13 +123,13 @@ def main(argv=None):
     try:
         import gen_x_posts as gx
     except Exception as exc:
-        print("[ERR] import gen_x_posts impossible: %s" % exc)
+        print(f"[ERR] import gen_x_posts impossible: {exc}")
         return 2
 
     try:
         projs = gx.load_projects(args.epingle)
     except RuntimeError as exc:
-        print("[ERR] %s" % exc)
+        print(f"[ERR] {exc}")
         return 2
     epingle_names = set(p["name"].lower() for p in projs)
     projects = read_projects_txt(args.projects)

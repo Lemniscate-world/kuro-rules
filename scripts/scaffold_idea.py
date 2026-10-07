@@ -159,7 +159,7 @@ def scaffold(project, section, desc, status="Recherche", pct=0, dry=False):
         lines = PROJECTS_TXT.read_text(encoding="utf-8").splitlines()
     except Exception:
         lines = []
-    names = [l.strip() for l in lines if l.strip() and not l.strip().startswith("#")]
+    names = [line.strip() for line in lines if line.strip() and not line.strip().startswith("#")]
     if project in names:
         actions.append("projects.txt déjà présent")
     elif dry:

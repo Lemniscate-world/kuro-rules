@@ -32,7 +32,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 
 # Périmètre autosync : code, tests, tooling, CI, docs techniques.
-ALLOW_DIRS = ("src/", "tests/", "scripts/", ".github/", "docs/", "rules/", "prompts/", "templates/")
+ALLOW_DIRS = ("src/", "tests/", "scripts/", ".github/", "docs/", "rules/", "prompts/", "templates/",
+              "dashboard/")
 ALLOW_FILES = ("pyproject.toml", ".pre-commit-config.yaml", "AGENTS.md", "README.md")
 # Écrits par le bot kuro.yml : jamais touchés ici (conflits garantis sinon).
 BOT_OWNED = (
@@ -50,7 +51,8 @@ SECRET_RE = re.compile(r"(api_key|apikey|secret|password)\s*=\s*['\"]\w{8,}", re
 
 def _git(*args: str, timeout: int = 60) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args], cwd=REPO, capture_output=True, text=True, timeout=timeout
+        ["git", *args], cwd=REPO, capture_output=True, text=True,
+        encoding="utf-8", errors="replace", timeout=timeout,
     )
 
 
@@ -161,8 +163,8 @@ def main(argv: list[str] | None = None) -> int:
     if not ok:
         print("autosync: rien à synchroniser")
         return 0
-    staged_diff = _git("diff", "--", *ok, timeout=120).stdout
-    staged_diff += _git("diff", "--cached", "--", *ok, timeout=120).stdout
+    staged_diff = _git("diff", "--", *ok, timeout=120).stdout or ""
+    staged_diff += _git("diff", "--cached", "--", *ok, timeout=120).stdout or ""
     reasons = refusal_reasons(branch, ok, staged_diff, args.allow_main)
     if reasons:
         msg = "autosync: REFUS : " + " ; ".join(reasons)

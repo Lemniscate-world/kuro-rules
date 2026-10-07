@@ -10,9 +10,12 @@ Usage:
 
 Chaque billet est 100% factuel: commit hash, date, % avant/apres, tests, loc.
 """
-import os, re, subprocess, json, sys
+import os
+import re
+import subprocess
+import sys
+from datetime import date
 from pathlib import Path
-from datetime import date, datetime
 
 HOME = Path.home()
 # CI-overridable paths (workflow set KURO_RULES_DIR / LEMNISCATE_DIR / DOCS_DIR)
@@ -27,14 +30,13 @@ def run(cmd, cwd=None):
     try:
         r = subprocess.run(cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True, shell=True, timeout=8)
         return r.stdout.strip()
-    except:
+    except Exception:
         return ""
 
 def parse_epingle_projects():
     """Source unique de vérité: réutilise le parser du portfolio (60 projets, pas les livrables)."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from generate_portfolio import parse_epingle
-    from generate_portfolio import inject_analytics
     sections = parse_epingle(EPINGLE)
     projs = []
     for s in sections:
@@ -73,7 +75,7 @@ def generate_daily_blog(dry_run=True):
                 ld = date.fromisoformat(facts["date"][:10])
                 if ld >= cutoff:
                     recent.append((p, facts))
-            except:
+            except Exception:
                 pass
     if not recent:
         # fallback: take top 3 active projets
@@ -103,11 +105,11 @@ def generate_daily_blog(dry_run=True):
             lines.append("## Faits du jour (TRUTH_DAILY)")
             lines.append("")
             lines.append("```")
-            for l in t.splitlines()[:25]:
-                lines.append(l)
+            for line in t.splitlines()[:25]:
+                lines.append(line)
             lines.append("```")
             lines.append("")
-        except:
+        except Exception:
             pass
     lines.append("## Projets actifs (7j)")
     lines.append("")
@@ -116,7 +118,7 @@ def generate_daily_blog(dry_run=True):
     lines.append("")
     lines.append("## Verite")
     lines.append("")
-    lines.append(f"Tous les chiffres proviennent de `git log`, comptage tests, `Epingle_Projets.md`. Aucune estimation manuelle. Voir [portfolio](/).")
+    lines.append("Tous les chiffres proviennent de `git log`, comptage tests, `Epingle_Projets.md`. Aucune estimation manuelle. Voir [portfolio](/).")
     lines.append("")
     daily_content = "\n".join(lines)
 
@@ -147,7 +149,7 @@ def generate_daily_blog(dry_run=True):
         plines.append("")
         plines.append(f"**Commits 30j:** {f['c30']}")
         plines.append("")
-        plines.append(f"[Voir le monde S-?](/sections/) · [Portfolio](/)")
+        plines.append("[Voir le monde S-?](/sections/) · [Portfolio](/)")
         plines.append("")
         per_project_paths.append((path, "\n".join(plines)))
 
@@ -158,8 +160,8 @@ def generate_daily_blog(dry_run=True):
             print(f"  Per-project: {path.name}")
         # preview daily
         print("\n--- Daily preview (15 lignes) ---")
-        for l in daily_content.splitlines()[:15]:
-            print(l)
+        for line in daily_content.splitlines()[:15]:
+            print(line)
         return
 
     # Apply
@@ -178,7 +180,7 @@ def generate_daily_blog(dry_run=True):
     idx.append('</head><body>')
     idx.append('<h1>Blog — lambda-Section</h1>')
     idx.append('<p class="meta">Billets factuels auto-genere depuis git log + Epingle. Aucune hallucination.</p>')
-    idx.append(f'<p class="meta"><a href="../">← Portfolio</a> · <a href="../sections/">Mondes</a></p>')
+    idx.append('<p class="meta"><a href="../">← Portfolio</a> · <a href="../sections/">Mondes</a></p>')
     for p in posts[:20]:
         # parse frontmatter title
         try:
@@ -187,7 +189,7 @@ def generate_daily_blog(dry_run=True):
             title = m.group(1) if m else p.stem
             m2 = re.search(r'date:\s*(\S+)', txt)
             d = m2.group(1) if m2 else ""
-        except:
+        except Exception:
             title = p.stem
             d = ""
         idx.append(f'<div class="post"><div style="font-weight:700"><a href="{p.name}">{title}</a></div><div class="meta">{d} · {p.name}</div></div>')

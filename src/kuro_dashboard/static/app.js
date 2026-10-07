@@ -543,17 +543,71 @@ async function loadFinancePanel() {
   }
 }
 
+function strategyCells(s) {
+  // Cellules runway/velocite/OKR/pipeline/decisions (meme contenu que Xenon box 6).
+  const fin = s.finance || {};
+  const exe = s.execution || {};
+  const okr = Array.isArray(s.okr) ? s.okr : s.okr?.objectives || [];
+  let okrTxt = "—";
+  if (s.okr?.hit != null) okrTxt = `${s.okr.hit}/${s.okr.total || "?"}`;
+  else if (okr.length) okrTxt = `${okr.length} obj.`;
+  let runway = "?";
+  if (fin.runway_label) runway = fin.runway_label;
+  else if (fin.runway_months != null) runway = `${fin.runway_months} mois`;
+  let velocity = "—";
+  if (exe.velocity != null) velocity = `${exe.velocity} c/sem`;
+  let interviews = "—";
+  if (s.pipeline?.interviews_7d != null) interviews = s.pipeline.interviews_7d;
+  const decisions = Array.isArray(s.decisions) ? s.decisions.length : null;
+  let decisionsTxt = "—";
+  let decisionsTone = "inherit";
+  if (decisions != null) {
+    decisionsTxt = decisions;
+    if (decisions) decisionsTone = "#f85149";
+  }
+  return (
+    finCell("Runway", runway, finTone(fin.status)) +
+    finCell("Vélocité", velocity, "inherit") +
+    finCell("OKR", okrTxt, "inherit") +
+    finCell("Interviews 7j", interviews, "inherit") +
+    finCell("Décisions ouvertes", decisionsTxt, decisionsTone)
+  );
+}
+
+function seoCells(seo) {
+  // Cellules audit SEO (meme contenu que Xenon box 7).
+  if (seo.status !== "ok") {
+    return `<div style="margin-top:.4rem;color:var(--muted);font-size:.7rem">` +
+      `SEO : ${escapeHtml(seo.detail || seo.error || "pas d'audit")}</div>`;
+  }
+  let date = escapeHtml(seo.date || "?");
+  if (seo.age) date += ` (${escapeHtml(seo.age)})`;
+  let p0Tone = "#3fb950";
+  if (seo.p0_count) p0Tone = "#f85149";
+  let top = "";
+  if ((seo.p0_top || []).length) {
+    top = `<div style="margin-top:.4rem;color:var(--muted);font-size:.7rem">` +
+      `→ ${escapeHtml(seo.p0_top[0])}</div>`;
+  }
+  return `<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;` +
+    `font-family:var(--font-mono,monospace);font-size:.72rem">` +
+    finCell("SEO audit", date, "inherit") +
+    finCell("SEO P0", seo.p0_count, p0Tone) +
+    finCell("SEO P1", seo.p1_count, "inherit") +
+    `</div>` + top;
+}
+
 async function loadStrategyPanel() {
   // Meme contenu que les boxes Xenon 6 STRATÉGIE / 7 SEO, en web.
-  // Targets: #kuro-strategy (créé ici, après #kuro-finance).
+  // Cible : #kuro-strategy (créé ici, après #kuro-finance).
   let el = document.getElementById("kuro-strategy");
   if (!el) {
     el = document.createElement("section");
     el.id = "kuro-strategy";
     el.className = "panel strategy-panel";
     const anchor = document.getElementById("kuro-finance") || document.getElementById("kuro-robot");
-    if (anchor && anchor.parentElement) {
-      anchor.insertAdjacentElement("afterend", el);
+    if (anchor?.parentElement) {
+      anchor.after(el);
     } else {
       document.body.prepend(el);
     }
@@ -570,34 +624,14 @@ async function loadStrategyPanel() {
         `<div><strong>Stratégie &amp; SEO</strong> <em style="color:var(--muted)">— données indisponibles</em></div>`;
       return;
     }
-    const fin = s.finance || {};
-    const exe = s.execution || {};
-    const okr = Array.isArray(s.okr) ? s.okr : (s.okr && s.okr.objectives) || [];
-    const okrHit = (s.okr && s.okr.hit) != null ? `${s.okr.hit}/${s.okr.total || "?"}` : null;
-    const pipe = s.pipeline || {};
-    const decisions = Array.isArray(s.decisions) ? s.decisions.length : null;
-    const cells =
-      finCell("Runway", fin.runway_label || (fin.runway_months != null ? fin.runway_months + " mois" : "?"), finTone(fin.status)) +
-      finCell("Vélocité", exe.velocity != null ? exe.velocity + " c/sem" : "—", "inherit") +
-      finCell("OKR", okrHit || (okr.length ? okr.length + " obj." : "—"), "inherit") +
-      finCell("Interviews 7j", pipe.interviews_7d != null ? pipe.interviews_7d : "—", "inherit") +
-      finCell("Décisions ouvertes", decisions != null ? decisions : "—", decisions ? "#f85149" : "inherit");
-    const seoLine = seo.status === "ok"
-      ? `<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;font-family:var(--font-mono,monospace);font-size:.72rem">` +
-        finCell("SEO audit", escapeHtml(seo.date || "?") + (seo.age ? ` (${escapeHtml(seo.age)})` : ""), "inherit") +
-        finCell("SEO P0", seo.p0_count, seo.p0_count ? "#f85149" : "#3fb950") +
-        finCell("SEO P1", seo.p1_count, "inherit") +
-        `</div>` +
-        ((seo.p0_top || []).length
-          ? `<div style="margin-top:.4rem;color:var(--muted);font-size:.7rem">→ ${escapeHtml(seo.p0_top[0])}</div>` : "")
-      : `<div style="margin-top:.4rem;color:var(--muted);font-size:.7rem">SEO : ${escapeHtml(seo.detail || seo.error || "pas d'audit")}</div>`;
     el.innerHTML =
       `<div style="display:flex;justify-content:space-between;margin-bottom:.4rem">` +
       `<strong>Stratégie &amp; SEO</strong>` +
       `<span style="color:var(--muted);font-size:.65rem">Xenon boxes 6–7 · web</span></div>` +
       `<div style="display:flex;gap:.5rem;flex-wrap:wrap;font-family:var(--font-mono,monospace);font-size:.72rem">` +
-      cells + `</div>` + seoLine;
+      strategyCells(s) + `</div>` + seoCells(seo);
   } catch (_) {
+    // Panneau informatif : l'échec réseau est déjà visible via le message.
     el.innerHTML =
       `<div><strong>Stratégie &amp; SEO</strong> <em style="color:var(--muted)">— API Kuro locale indisponible</em></div>`;
   }

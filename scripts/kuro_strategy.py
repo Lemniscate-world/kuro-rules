@@ -226,8 +226,8 @@ def campaign(metrics: dict, okrs: list[dict], pipeline: dict, plans: dict | None
             gate_n = f"necessaire : OKR « {w['label']} » sous les 50% — la bataille sert la guerre"
         elif float((metrics.get("averages") or {}).get("velocity_per_week") or 0) < 1:
             gate_n = "necessaire : velocite moyenne < 1 c/sem — debloquer un front unique"
-        gate_c = (f"consequences : 2h bornees, 0 breaking change cross-repo (R105), "
-                  f"SESSION_SUMMARY prepend (R42) — sinon la bataille coute plus qu'elle ne rapporte")
+        gate_c = ("consequences : 2h bornees, 0 breaking change cross-repo (R105), "
+                  "SESSION_SUMMARY prepend (R42) — sinon la bataille coute plus qu'elle ne rapporte")
     # Arene ignoree = ce que le code ne voit pas : signaux dehors ou pivots endormis.
     pivots = metrics.get("pivot_candidates") or [] if isinstance(metrics, dict) else []
     last_insight = (pipeline.get("last") or {}).get("insight") if isinstance(pipeline, dict) else None
@@ -288,6 +288,9 @@ DECISIONS_FILE = ROOT_DIR / "strategy_decisions.local.json"  # local, gitigné (
 RESOLVED_KEEP_DAYS = 30
 RESOLVED_SHOW_DAYS = 7
 HISTORY_FILE = ROOT_DIR / "strategy_history.local.json"  # local, gitigne (R113)
+_env_hist = (os.environ.get("KURO_RULES_DIR") or "").strip()
+if _env_hist:  # snapshot là où Xenon lit (sinon box « pas d historique »)
+    HISTORY_FILE = Path(_env_hist).expanduser() / "strategy_history.local.json"
 HISTORY_KEEP_DAYS = 400
 
 
@@ -367,6 +370,16 @@ def track_decisions(keyed: list[tuple[str, str]]) -> tuple[list[dict], list[dict
 
 # ---------- historique mensuel (suivi d audit strategique) ----------
 
+def _pick(mapping: Any, *keys: str) -> Any:
+    """Première valeur non-None parmi `keys` (compat ascendante des payloads)."""
+    if not isinstance(mapping, dict):
+        return None
+    for key in keys:
+        if mapping.get(key) is not None:
+            return mapping.get(key)
+    return None
+
+
 def snapshot_entry(payload: dict[str, Any], today: str) -> dict[str, Any]:
     """Un point d historique comparable (pur, testable)."""
     fin = payload.get("finance") or {}
@@ -381,8 +394,8 @@ def snapshot_entry(payload: dict[str, Any], today: str) -> dict[str, Any]:
         "runway_months": fin.get("runway_months") if isinstance(fin, dict) else None,
         "burn": fin.get("burn_rate_monthly") if isinstance(fin, dict) else None,
         "mrr": fin.get("mrr_monthly") if isinstance(fin, dict) else None,
-        "velocity": ex.get("velocity_per_week") if isinstance(ex, dict) else None,
-        "lead_time": ex.get("lead_time_days") if isinstance(ex, dict) else None,
+        "velocity": _pick(ex, "velocity", "velocity_per_week"),
+        "lead_time": _pick(ex, "lead_time", "lead_time_days"),
         "ci_failures": ci.get("failures", 0),
         "okr_avg_pct": round(sum(pcts) / len(pcts), 1) if pcts else None,
         "okr_hit": sum(1 for o in okrs if isinstance(o, dict) and o.get("hit")),
@@ -421,9 +434,20 @@ def append_snapshot(payload: dict[str, Any], today: str | None = None,
         pass
     try:
         target.write_text(json.dumps(rows, indent=1, ensure_ascii=False), encoding="utf-8")
+    except Exception as exc:
+        print(f"[ strategy ] snapshot non écrit ({target}) : {exc}", file=sys.stderr)
+    return entry
+
+
+def _confined_out(path: Path, default_name: str) -> Path:
+    """Confine --out sous ROOT_DIR (S8707 : args CLI fournis par le cron/LLM)."""
+    try:
+        resolved = Path(path).expanduser().resolve()
+        if resolved == ROOT_DIR.resolve() or ROOT_DIR.resolve() in resolved.parents:
+            return resolved
     except Exception:
         pass
-    return entry
+    return ROOT_DIR / default_name
 
 
 def _delta(new: float | None, old: float | None) -> float | None:
@@ -664,13 +688,13 @@ def main() -> int:
         digest = monthly_digest()
         text = render_monthly(digest)
         if args.out:
-            args.out.write_text(text + "\n", encoding="utf-8")
+            _confined_out(args.out, "strategy_monthly.md").write_text(text + "\n", encoding="utf-8")
         print(json.dumps(digest, indent=2, ensure_ascii=False) if args.json else text)
         return 0
     payload = build_payload()
     text = render(payload)
     if args.out:
-        args.out.write_text(text + "\n", encoding="utf-8")
+        _confined_out(args.out, "strategy_digest.md").write_text(text + "\n", encoding="utf-8")
     print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else text)
     if args.discord:
         ok = post_discord(text)

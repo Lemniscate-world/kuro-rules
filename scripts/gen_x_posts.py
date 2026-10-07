@@ -213,7 +213,7 @@ def collect_week_subjects(project_path, days=7, limit=30):
     if not (project_path / ".git").is_dir():
         return []
     out = run('git log --since="%d days ago" --format="%%s"' % days, cwd=project_path)
-    return [l.strip() for l in (out or "").splitlines() if l.strip()][:limit]
+    return [line.strip() for line in (out or "").splitlines() if line.strip()][:limit]
 
 
 def is_trivia(subject):
@@ -413,7 +413,7 @@ def lint_post(name, text):
         if re.search(pattern, text or ""):
             found.append(label)
     for term in strategy_for(name).get("never", []):
-        if re.search(r"(?i)(?<![a-z0-9])%s(?![a-z0-9])" % re.escape(term), text or ""):
+        if re.search(rf"(?i)(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text or ""):
             if term not in found:
                 found.append(term)
     return found
@@ -455,9 +455,9 @@ def format_post_safe(name, pct, status, facts, lang="fr"):
     action = generic_type_word(facts.get("msg", ""))
     link = project_link(name)
     if ctx:
-        line1 = "%s (%s): %s %s." % (name, ctx, action, ongoing)
+        line1 = f"{name} ({ctx}): {action} {ongoing}."
     else:
-        line1 = "%s: %s %s." % (name, action, ongoing)
+        line1 = f"{name}: {action} {ongoing}."
     parts = ["%s\n\n%s, %d%% %s." % (line1, metric, pct_n, status_out)]
     if link:
         parts.append(link)
@@ -477,8 +477,8 @@ def format_long(name, pct, status, facts, desc=""):
     Jamais d'étape future inventée : SESSION_SUMMARY ou repli honnête. ≤1900 car."""
     short = format_post_safe(name, pct, status, facts) or "Contenu sensible — diffusion restreinte."
     presentation = presentation_for(name, desc or facts.get("project_desc", ""))
-    lines = ["**%s** — %s%% %s" % (name, pct, status)]
-    lines.append("%s est %s." % (name, presentation))
+    lines = [f"**{name}** — {pct}% {status}"]
+    lines.append(f"{name} est {presentation}.")
     lines.append("")
     lines.append("Travaux réalisés :")
     themes = [t for t in (facts.get("themes") or []) if t]
@@ -486,14 +486,14 @@ def format_long(name, pct, status, facts, desc=""):
         for i, t in enumerate(themes[:5], 1):
             lines.append("%d. %s." % (i, t.rstrip(".")))
     else:
-        lines.append("1. %s." % (_capitalize(
+        lines.append("1. {}.".format(_capitalize(
             sanitize(facts.get("msg", "maintenance")) or "maintenance").rstrip(".")))
     lines.append("")
     lines.append("Prochaine étape : %s" % (facts.get("next") or "Poursuite des travaux en cours."))
     lines.append("")
     link = project_link(name)
     if link:
-        lines.append("Repo : %s" % link)
+        lines.append(f"Repo : {link}")
     lines.append("Caption X :")
     lines.append(short)
     return "\n".join(lines)[:1900]
@@ -683,11 +683,11 @@ def load_projects(epingle_path):
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from generate_portfolio import parse_epingle
     except Exception as exc:
-        raise RuntimeError("import generate_portfolio.parse_epingle impossible: %s" % exc)
+        raise RuntimeError(f"import generate_portfolio.parse_epingle impossible: {exc}")
     try:
         sections = parse_epingle(Path(epingle_path))
     except Exception as exc:
-        raise RuntimeError("parse Epingle impossible (%s): %s" % (epingle_path, exc))
+        raise RuntimeError(f"parse Epingle impossible ({epingle_path}): {exc}")
     projs = []
     for s in sections:
         name_low = s["name"].lower()
@@ -793,40 +793,40 @@ def voice_line1(name, presentation, themes, metric_short, voice, lang="fr"):
     ctx = presentation or ""
     if lang == "en":
         if voice == "lecon":
-            head = "What we learned on %s: %s" % (name, t1)
+            head = f"What we learned on {name}: {t1}"
         elif voice == "chiffre":
-            head = "%s: %s — %s" % (name, metric_short, t1)
+            head = f"{name}: {metric_short} — {t1}"
         elif voice == "question":
             if ctx:
-                head = "%s (%s): %s — how do you handle this" % (name, ctx, t1)
+                head = f"{name} ({ctx}): {t1} — how do you handle this"
             else:
-                head = "%s: %s — how do you handle this" % (name, t1)
+                head = f"{name}: {t1} — how do you handle this"
         else:
             clean = [t for t in themes if t]
             t1b = clean[0]
             rest = clean[1:]
             body = t1b if len(clean) == 1 else ", ".join([t1b] + rest[:-1]) + " and " + rest[-1] if rest else t1b
             if ctx:
-                return "%s (%s): %s." % (name, ctx, body)
-            return "%s: %s." % (name, body)
+                return f"{name} ({ctx}): {body}."
+            return f"{name}: {body}."
         return head + "."
     if voice == "lecon":
-        head = "Ce qu'on a appris sur %s : %s" % (name, t1)
+        head = f"Ce qu'on a appris sur {name} : {t1}"
     elif voice == "chiffre":
-        head = "%s : %s — %s" % (name, metric_short, t1)
+        head = f"{name} : {metric_short} — {t1}"
     elif voice == "question":
         if ctx:
-            head = "%s (%s) : %s — et vous, vous gérez ça comment" % (name, ctx, t1)
+            head = f"{name} ({ctx}) : {t1} — et vous, vous gérez ça comment"
         else:
-            head = "%s : %s — et vous, vous gérez ça comment" % (name, t1)
+            head = f"{name} : {t1} — et vous, vous gérez ça comment"
     else:
         clean = [t for t in themes if t]
         t1b = clean[0]
         rest = [(t[0].lower() + t[1:]) if t[:1].isupper() else t for t in clean[1:]]
         body = t1b if len(clean) == 1 else ", ".join([t1b] + rest[:-1]) + " et " + rest[-1] if rest else t1b
         if ctx:
-            return "%s (%s) : %s." % (name, ctx, body)
-        return "%s : %s." % (name, body)
+            return f"{name} ({ctx}) : {body}."
+        return f"{name} : {body}."
     return head + "."
 
 
@@ -844,14 +844,14 @@ def format_post(name, pct, status, facts, lang="fr"):
         actioned = []
         for i, t in enumerate(themes):
             v = verbs[i] if i < len(verbs) else ""
-            actioned.append(("%s %s" % (v, t[0].lower() + t[1:])).strip() if v else t)
+            actioned.append((f"{v} {t[0].lower() + t[1:]}").strip() if v else t)
         themes = actioned
     if not themes:
         # Repli : dernier commit humanisé (mieux que rien, souvent filtré en amont).
         raw = sanitize(facts.get("msg", "maintenance"))
         verb, subject = split_conventional(raw, lang="en" if en else "fr")
         subject = _capitalize(subject[:90])
-        themes = [("%s: %s" % (verb, subject)) if verb else subject]
+        themes = [(f"{verb}: {subject}") if verb else subject]
     # Miniscule médiane pour la fluidité (« A, b et c » / « A, b and c »).
     flow = [themes[0]] + [(t[0].lower() + t[1:]) if t[:1].isupper() else t
                           for t in themes[1:3]]
@@ -909,9 +909,9 @@ def resolve_one(p, index):
             return None, (name, "no-local-repo")
         ownership = get_ownership(repo)
         if ownership != "OWNED":
-            return None, (name, "ownership-%s" % ownership)
+            return None, (name, f"ownership-{ownership}")
         if not is_eligible(p.get("status"), ownership):
-            return None, (name, "statut-%s" % p.get("status"))
+            return None, (name, "statut-{}".format(p.get("status")))
         facts = collect_velocity(repo)
         if facts is None:
             return None, (name, "no-git-facts")
@@ -924,7 +924,7 @@ def resolve_one(p, index):
         return ({"project": p, "facts": facts, "ownership": ownership,
                  "score": velocity_score(facts)}, None)
     except Exception as exc:
-        return None, (name, "erreur-%s" % exc)
+        return None, (name, f"erreur-{exc}")
 
 
 def select_top(projs, top_n, docs_dir=None):
@@ -986,11 +986,11 @@ def write_drafts(selected, outputs_dir, today=None, lang="fr", write_hub=True):
         if "themes" in f and not f["themes"]:
             # Pipeline réelle : rien de publiable cette semaine -> pas de draft du tout.
             # (Appels legacy sans clé "themes" gardent le repli dernier-commit.)
-            print("  [SKIP] %s : rien de publiable (que du trivia 7j)." % p["name"])
+            print("  [SKIP] {} : rien de publiable (que du trivia 7j).".format(p["name"]))
             continue
         post = format_post_safe(p["name"], p["pct"], p["status"], f, lang=lang)
         if post is None:
-            print("  [LINT-BLOCK] %s : contenu sensible inaffichable, pas de draft." % p["name"])
+            print("  [LINT-BLOCK] {} : contenu sensible inaffichable, pas de draft.".format(p["name"]))
             continue
         slug = re.sub(r"[^A-Za-z0-9-]+", "-", p["name"]).strip("-").lower() or "projet"
         base, n = slug, 2
@@ -998,10 +998,10 @@ def write_drafts(selected, outputs_dir, today=None, lang="fr", write_hub=True):
             slug = "%s-%d" % (base, n)
             n += 1
         used_slugs.add(slug)
-        path = out / ("x_post_%s-%s.md" % (today, slug))
+        path = out / (f"x_post_{today}-{slug}.md")
         path.write_text(post + "\n", encoding="utf-8")
         written.append((p["name"], str(path), post))
-        long_path = out / ("x_long_%s-%s.md" % (today, slug))
+        long_path = out / (f"x_long_{today}-{slug}.md")
         long_path.write_text(format_long(p["name"], p["pct"], p["status"], f,
                                          p.get("desc", "")) + "\n", encoding="utf-8")
     if not written:
@@ -1017,13 +1017,13 @@ def write_drafts(selected, outputs_dir, today=None, lang="fr", write_hub=True):
             hub_post = format_post_safe(top["project"]["name"], top["project"]["pct"],
                                         top["project"]["status"], top["facts"], lang=lang) or ""
             if hub_post:
-                hub_path = out / ("x_post_%s.md" % today)
+                hub_path = out / (f"x_post_{today}.md")
                 hub_path.write_text(hub_post + "\n", encoding="utf-8")
                 written.append(("HUB", str(hub_path), hub_post))
     # Menage R116 : supprime les drafts du jour devenus hors-selection
     # (ex: projet sorti du top-3). Ne touche jamais les autres dates ni le hub.
     keep = set(str(p) for _, p, _ in written)
-    for stale in out.glob("x_post_%s-*.md" % today):
+    for stale in out.glob(f"x_post_{today}-*.md"):
         if str(stale) not in keep:
             try:
                 stale.unlink()
@@ -1050,12 +1050,12 @@ def main(argv=None):
 
     epingle = Path(args.epingle)
     if not epingle.is_file():
-        print("[ERR] Epingle introuvable: %s" % epingle)
+        print(f"[ERR] Epingle introuvable: {epingle}")
         return 2
     try:
         projs = load_projects(epingle)
     except RuntimeError as exc:
-        print("[ERR] %s" % exc)
+        print(f"[ERR] {exc}")
         return 2
     if not projs:
         print("[SKIP] Epingle vide ou illisible — aucun draft.")
@@ -1083,7 +1083,7 @@ def main(argv=None):
         print(ascii_log("         %s (%d chars)" % (preview[:120], len(preview))))
     if dry:
         print("  [DRY] skipped=%d (top 10): %s" % (len(skipped), ascii_log(str(skipped[:10]))))
-        print("  [DRY] relance avec --apply pour ecrire dans %s" % args.outputs)
+        print(f"  [DRY] relance avec --apply pour ecrire dans {args.outputs}")
         return 0
 
     if not selected:

@@ -1,6 +1,5 @@
 """Tests gen_x_posts — logique pure, sans reseau ni git reel (R102)."""
 
-import sys
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -344,9 +343,6 @@ def test_en_action_verbs_et_franglais():
     assert gx.EN_ACTION_VERBS["feat"] == "Shipped"
     assert gx.looks_french("les résultats avec des données") is True
     assert gx.looks_french("shipped mesh MVP with releases") is False
-    facts = {"hash": "a1", "msg": "x", "c30": 9, "c7": 3,
-             "themes": ["Mesh MVP", "One-click install"],
-             "theme_verbs": ["Shipped", "Fixed"]}
     import post_brain as pb
     s, issues = pb.deterministic_score("Helium", "test", ["A"], lang="en")
     assert isinstance(s, int)

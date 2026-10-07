@@ -9,7 +9,6 @@ import ci_guardian  # noqa: E402
 import kuro_llm  # noqa: E402
 import weekly_report  # noqa: E402
 
-
 # ---------- kuro_llm ----------
 
 def test_cloud_candidates_priorise_et_filtre_locaux(monkeypatch):

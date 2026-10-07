@@ -1270,7 +1270,7 @@ def test_sec_strategy_vide_et_age(tmp_path, monkeypatch):
                                                           encoding="utf-8")
     rows2 = tui.sec_strategy()
     assert any("runway" in r and "+1" in r for r in rows2)
-    assert any("1 ouvertes" in r or "0 ouvertes" in r for r in rows2)
+    assert any("0 ouvertes" in r for r in rows2), "le dernier snapshot n'a aucune décision ouverte"
     assert tui._strat_delta(None, 1.0) == "?"
     assert tui._strat_delta("x", 1.0) == "?"
     assert tui._strat_delta(1.0, 1.0) == "="
@@ -1349,7 +1349,12 @@ def test_watch_touche_6_cache_box(monkeypatch, capsys):
     monkeypatch.setattr(tui.time, "sleep", lambda s: None)
     monkeypatch.setattr(tui, "_RawKeys", lambda: _ScriptedKeys(["6", "6", "q"]))
     assert tui.watch(interval=0.1, top=3) == 0
-    assert "GLANCES KURO" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    frames = out.split("GLANCES KURO")
+    assert len(frames) >= 4, "3 frames attendues (visible, cachée, visible)"
+    assert "6 STRAT" in frames[1]
+    assert "6 STRAT" not in frames[2]
+    assert "6 STRAT" in frames[3]
 
 
 def test_use_saturation_cpu_swap_disque():
@@ -1397,6 +1402,8 @@ def test_watch_jk_selection(monkeypatch, capsys):
     monkeypatch.setattr(tui, "_RawKeys",
                         lambda: _ScriptedKeys(["j", "k", "q"]))
     assert tui.watch(interval=0.1, top=3) == 0
+    out = capsys.readouterr().out
+    assert "| > " in out, "la touche j doit sélectionner une ligne (marqueur >)"
 
 
 def test_watch_entree_erreur_directe(monkeypatch, capsys):

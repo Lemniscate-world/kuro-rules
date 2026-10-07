@@ -17,9 +17,9 @@ Usage :
 import json
 import os
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
-import urllib.error
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -58,7 +58,7 @@ def api_call(method, path, params=None):
             return resp.status, json.loads(resp.read().decode("utf-8") or "{}")
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")[:400]
-        raise KitError("HTTP %s %s" % (exc.code, body))
+        raise KitError(f"HTTP {exc.code} {body}")
     except Exception as exc:
         raise KitError(str(exc)[:200])
 
@@ -66,7 +66,7 @@ def api_call(method, path, params=None):
 def check_key():
     status, data = api_call("GET", "/account")
     if not isinstance(data, dict) or not data.get("primary_email_address"):
-        raise KitError("reponse inattendue: %s" % json.dumps(data)[:200])
+        raise KitError(f"reponse inattendue: {json.dumps(data)[:200]}")
     return {"http": status, "plan": data.get("plan_type", "?"),
             "email": data.get("primary_email_address", "?")}
 
@@ -82,7 +82,7 @@ def subscribe(email, name="", tags=()):
     status, data = api_call("POST", "/subscribers", payload)
     sub = data.get("subscription", data)
     if not isinstance(sub, dict) or not sub.get("id"):
-        raise KitError("reponse inattendue: %s" % json.dumps(data)[:200])
+        raise KitError(f"reponse inattendue: {json.dumps(data)[:200]}")
     return {"id": sub["id"], "email": sub.get("email_address", email)}
 
 
@@ -90,7 +90,7 @@ def create_tag(name):
     status, data = api_call("POST", "/tags", {"tag": {"name": name}})
     tag = data.get("tag", data)
     if not isinstance(tag, dict) or not tag.get("id"):
-        raise KitError("reponse inattendue: %s" % json.dumps(data)[:200])
+        raise KitError(f"reponse inattendue: {json.dumps(data)[:200]}")
     return {"id": tag["id"], "name": tag.get("name", name)}
 
 
@@ -103,12 +103,12 @@ def create_broadcast(subject, html):
                             {"subject": subject, "content": html})
     b = data.get("broadcast", data)
     if not isinstance(b, dict) or not b.get("id"):
-        raise KitError("reponse inattendue: %s" % json.dumps(data)[:200])
+        raise KitError(f"reponse inattendue: {json.dumps(data)[:200]}")
     return {"id": b["id"]}
 
 
 def send_broadcast(broadcast_id):
-    status, data = api_call("POST", "/broadcasts/%s/send" % broadcast_id, {})
+    status, data = api_call("POST", f"/broadcasts/{broadcast_id}/send", {})
     return {"http": status, "response": data}
 
 
@@ -136,22 +136,22 @@ def main(argv=None):
     try:
         if args.cmd == "check":
             info = check_key()
-            print("  [OK] HTTP %(http)s plan=%(plan)s" % info)
+            print("  [OK] HTTP {http} plan={plan}".format(**info))
             return 0
         if args.cmd == "subscribe":
-            print("  %s %s tags=%s" % (args.email, args.name, args.tag or "-"))
+            print("  {} {} tags={}".format(args.email, args.name, args.tag or "-"))
             if not args.apply:
                 print("  [DRY] rien cree. --apply pour inscrire.")
                 return 0
             res = subscribe(args.email, args.name, args.tag)
-            print("  [OK] abonne id=%s" % res["id"])
+            print("  [OK] abonne id={}".format(res["id"]))
             return 0
         if args.cmd == "tag":
             if not args.apply:
-                print("  [DRY] rien cree. --apply pour creer le tag '%s'." % args.name)
+                print(f"  [DRY] rien cree. --apply pour creer le tag '{args.name}'.")
                 return 0
             res = create_tag(args.name)
-            print("  [OK] tag id=%s" % res["id"])
+            print("  [OK] tag id={}".format(res["id"]))
             return 0
         if args.cmd == "broadcast":
             html = args.html
@@ -162,13 +162,13 @@ def main(argv=None):
                 print("  [DRY] rien cree. --apply pour creer%s." % (" + envoyer" if args.send else " (draft)"))
                 return 0
             res = create_broadcast(args.subject, html)
-            print("  [OK] broadcast id=%s" % res["id"])
+            print("  [OK] broadcast id={}".format(res["id"]))
             if args.send:
                 sent = send_broadcast(res["id"])
-                print("  [OK] envoi: %s" % sent)
+                print(f"  [OK] envoi: {sent}")
             return 0
     except KitError as exc:
-        print("[ERR] kit: %s" % exc)
+        print(f"[ERR] kit: {exc}")
         return 1
     return 2
 
