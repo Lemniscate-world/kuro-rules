@@ -1301,6 +1301,29 @@ def test_compact_montre_strat_et_seo(monkeypatch):
     assert len(rows) <= 26
 
 
+def test_shrink_compact_priorites(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    payload = _payload()
+    payload["processes"] = [
+        {"pid": i, "name": f"p{i}", "cpu": 1.0, "mem": 1.0} for i in range(5)
+    ]
+    frame = tui.render_frame(payload, kuro=_kuro(), now=1.0, compact=True)
+    rows = frame.splitlines()
+    # PROC rogné d'abord, digest gardé, footer intact.
+    mid = tui._shrink_compact(rows, len(rows) - 2)
+    assert len(mid) <= len(rows) - 2
+    assert any(r.startswith("+- 4 ") for r in mid)
+    assert any("STRAT/SEO" in r for r in mid)
+    assert mid[-1] == rows[-1]
+    # Écran minuscule : digest sauté, PROC gardé à 1 ligne, footer intact.
+    tiny = tui._shrink_compact(rows, 16)
+    assert len(tiny) < len(rows)
+    assert tiny[-1] == rows[-1]
+    assert any(r.startswith("+- 4 ") for r in tiny)
+    assert not any("STRAT/SEO" in r for r in tiny)
+    assert tui._shrink_compact(rows, 500) == rows
+
+
 def test_sec_seo_absent_et_parsing(tmp_path, monkeypatch):
     # Absent (cas PC sans ~/leads) : message honnête, jamais de chiffres inventés.
     monkeypatch.setattr(tui.Path, "home", lambda: tmp_path)

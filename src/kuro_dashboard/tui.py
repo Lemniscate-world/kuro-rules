@@ -1542,6 +1542,39 @@ def _compact_strat_seo(hidden: set) -> list[str]:
         return []
 
 
+def _shrink_compact(parts: list[str], height: int) -> list[str]:
+    """Rogne le compact à `height` rangs (petits écrans).
+
+    Priorité : box PROC d'abord (garde 1 ligne), digest STRAT/SEO ensuite.
+    Header + footer jamais touchés. Pur, testable.
+    """
+    try:
+        parts = list(parts)
+        if len(parts) <= height or height < 12:
+            return parts
+        for marker, keep in (("+- 4 ", 1), ("+- 6 STRAT/SEO", 0)):
+            if len(parts) <= height:
+                break
+            start = next((i for i, line in enumerate(parts)
+                          if line.startswith(marker)), -1)
+            if start < 0:
+                continue
+            end = next((i for i in range(start + 1, len(parts))
+                        if parts[i].startswith("+")
+                        and set(parts[i]) <= {"+", "-"}), -1)
+            if end < 0:
+                continue
+            if keep == 0:
+                del parts[start:end + 1]
+            else:
+                overflow = len(parts) - height
+                removable = max(0, (end - start - 1) - keep)
+                del parts[start + 1:start + 1 + min(removable, overflow)]
+        return parts
+    except Exception:
+        return parts
+
+
 def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
                  kuro: dict | None = None, now: float | None = None,
                  hist: dict | None = None, sort: str = "cpu", filt: str = "",
@@ -1601,6 +1634,12 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
                          sec_proc_detail(detail), total, "cyan")
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
         if _stdout_is_tty():
+            try:
+                height = term_height()
+            except Exception:
+                height = 0
+            if height and len(parts) > height:
+                parts = _shrink_compact(parts, height)
             try:
                 room = term_height() - len(parts)
             except Exception:
