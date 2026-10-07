@@ -15,7 +15,9 @@ Usage:
   python scripts/compute_progress.py --dry-run
   python scripts/compute_progress.py --apply  # met à jour Epingle_Projets.md
 """
-import os, re, subprocess, sys
+import os
+import re
+import subprocess
 from pathlib import Path
 
 HOME = Path.home()
@@ -26,7 +28,7 @@ def run(cmd, cwd=None):
     try:
         r = subprocess.run(cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True, shell=True, timeout=8)
         return r.stdout.strip()
-    except:
+    except Exception:
         return ""
 
 def collect(project_name):
@@ -52,7 +54,7 @@ def collect(project_name):
             continue
         try:
             tfuncs += len(re.findall(r'^\s*def test_', tf.read_text(encoding="utf-8", errors="ignore"), re.MULTILINE))
-        except:
+        except Exception:
             pass
     # loc
     loc = 0
@@ -61,7 +63,7 @@ def collect(project_name):
             continue
         try:
             loc += len(pf.read_text(encoding="utf-8", errors="ignore").splitlines())
-        except:
+        except Exception:
             pass
     # test files (py + ts/js, quick)
     test_files = list(cand.rglob("test*.py")) + list(cand.rglob("*_test.py"))
@@ -89,11 +91,16 @@ def compute_pct(status, cur_pct, facts):
         days = (date.today() - date.fromisoformat(last[:10])).days if last and len(last) >= 10 else 999
     except Exception:
         days = 999
-    if days <= 7: score += 10
-    elif days <= 30: score += 7
-    elif days <= 60: score += 3
-    elif days <= 90: score -= 5
-    else: score -= 15
+    if days <= 7:
+        score += 10
+    elif days <= 30:
+        score += 7
+    elif days <= 60:
+        score += 3
+    elif days <= 90:
+        score -= 5
+    else:
+        score -= 15
     if facts.get("dirty"):
         score -= 3
     target = max(0, min(95, score))
@@ -152,7 +159,6 @@ def main():
                     changes.append((name_raw, cur, auto, status, facts))
                     if not dry:
                         # replace pct cell
-                        new_pct_cell = f" {auto}% "
                         # rebuild line
                         parts[1] = f" {auto}% "
                         new_line = "| " + " | ".join(parts) + " |"

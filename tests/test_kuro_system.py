@@ -177,7 +177,7 @@ def test_proc_detail_fake_psutil(monkeypatch):
             return SimpleNamespace(user=2.5, system=0.5)
 
     class _FakePsutilProc:
-        def Process(self, pid):
+        def Process(self, pid):  # noqa: N802 - mock psutil (API Capitalisée imposée)
             assert pid == 4242
             return _FakeProc()
 

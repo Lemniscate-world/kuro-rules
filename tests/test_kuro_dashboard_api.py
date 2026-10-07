@@ -100,7 +100,7 @@ def test_build_summary_et_robot(_api_db):
 
 
 def test_compute_status_et_finance_metrics(monkeypatch):
-    class _E(Exception):
+    class _E(Exception):  # noqa: N818 - faux HTTPError minimal pour le test
         def __init__(self, status):
             self.status = status
     assert kap._compute_status(_E(404)) == 404
@@ -148,8 +148,17 @@ def test_http_routes_live(tmp_path, monkeypatch):
     thread.start()
     try:
         def _get(p):
-            with urllib.request.urlopen(f"http://127.0.0.1:{port}{p}", timeout=10) as r:
-                return r.status, json.loads(r.read().decode("utf-8"))
+            # Windows coupe parfois le loopback (WinError 10053, AV/proxy) et
+            # /api/system met ~12 s sur PC chargé : timeout large + retries,
+            # les asserts restent stricts.
+            last = None
+            for _ in range(4):
+                try:
+                    with urllib.request.urlopen(f"http://127.0.0.1:{port}{p}", timeout=30) as r:
+                        return r.status, json.loads(r.read().decode("utf-8"))
+                except (TimeoutError, ConnectionError) as exc:
+                    last = exc
+            raise last
         code, dash = _get("/api/dashboard")
         assert code == 200 and "generatedAt" in dash
         code, dash2 = _get("/dashboard-data.json")
@@ -290,3 +299,22 @@ def test_auth_et_no_db(tmp_path, monkeypatch):
         monkeypatch.delenv("KURO_API_TOKEN", raising=False)
         server.shutdown()
         server.server_close()
+
+
+def test_get_seo_absent(monkeypatch, tmp_path):
+    monkeypatch.setattr("os.path.expanduser", lambda p: str(tmp_path))
+    assert kap.get_seo()["status"] == "missing"
+
+
+def test_get_seo_present(monkeypatch, tmp_path):
+    leads = tmp_path / "leads"
+    leads.mkdir()
+    (leads / "SEO_AUDIT.md").write_text(
+        "Date : 2026-10-07\n\n### P0\n1 Fix title\n2 Fix meta\n\n### P1\n1 Add sitemap\n",
+        encoding="utf-8")
+    monkeypatch.setattr("os.path.expanduser", lambda p: str(tmp_path))
+    seo = kap.get_seo()
+    assert seo["status"] == "ok"
+    assert seo["p0_count"] == 2
+    assert seo["p1_count"] == 1
+    assert seo["p0_top"][0] == "Fix title"

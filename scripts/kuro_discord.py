@@ -31,8 +31,8 @@ import re
 import sys
 import time
 import unicodedata
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -73,7 +73,7 @@ def channel_name(project, struct_map=None):
         hit = (struct_map.get("channels", {}) or {}).get(project)
         if hit:
             return hit.lstrip("#")
-    return "proj-%s" % slug(project)[:90]
+    return f"proj-{slug(project)[:90]}"
 
 
 def category_name(section_raw, fallback_num, struct_map=None):
@@ -92,7 +92,7 @@ def category_name(section_raw, fallback_num, struct_map=None):
         r"(?i)^\s*λ?\s*-?\s*section-?\d*\s*-?\s*", "", raw).strip()
     theme = unicodedata.normalize("NFKD", theme).encode("ascii", "ignore").decode("ascii")
     theme = re.sub(r"\s+", " ", theme).strip()[:40] or "Divers"
-    return "SEC %s - %s" % (num, theme)
+    return f"SEC {num} - {theme}"
 
 
 def load_projects(epingle_path):
@@ -175,7 +175,7 @@ def auto_adopt(projects, guild_channels):
         if m:
             num = m.group(1)
             hits = [c for c in existing_cats
-                    if re.search(r"(λ-?0*%s\b|[^0-9]0*%s\b)" % (num, num), c)]
+                    if re.search(rf"(λ-?0*{num}\b|[^0-9]0*{num}\b)", c)]
             if len(hits) == 1:
                 catmap[sec] = hits[0]
     return adopted, ambiguous, catmap
@@ -187,7 +187,7 @@ def api_call(method, path, token, payload=None):
     data = json.dumps(payload).encode() if payload is not None else None
     req = urllib.request.Request(
         API + path, data=data, method=method,
-        headers={"Authorization": "Bot %s" % token,
+        headers={"Authorization": f"Bot {token}",
                  "Content-Type": "application/json",
                  "User-Agent": "Kuro/1.0 (lambda-Section)"},
     )
@@ -210,9 +210,9 @@ def api_call(method, path, token, payload=None):
 
 def sync_guild(guild_id, token, plan, dry=True):
     """Idempotent : cree ce qui manque, corrige topic/nom sinon. Retourne stats."""
-    status, channels = api_call("GET", "/guilds/%s/channels" % guild_id, token)
+    status, channels = api_call("GET", f"/guilds/{guild_id}/channels", token)
     if status != 200:
-        print("[ERR] lecture salons: %s %s" % (status, channels))
+        print(f"[ERR] lecture salons: {status} {channels}")
         return {"error": True}
     by_name = {c.get("name", ""): c for c in channels if isinstance(c, dict)}
     cats = {c.get("name", ""): c.get("id") for c in channels
@@ -222,9 +222,9 @@ def sync_guild(guild_id, token, plan, dry=True):
         cat_id = cats.get(cat)
         if cat_id is None:
             if dry:
-                print(ascii_console("  [DRY] categorie+ %s" % cat))
+                print(ascii_console(f"  [DRY] categorie+ {cat}"))
             else:
-                status, created = api_call("POST", "/guilds/%s/channels" % guild_id,
+                status, created = api_call("POST", f"/guilds/{guild_id}/channels",
                                            token, {"name": cat, "type": 4})
                 if status in (200, 201):
                     cat_id = created.get("id")
@@ -232,33 +232,33 @@ def sync_guild(guild_id, token, plan, dry=True):
                     stats["cat_create"] += 1
                     time.sleep(0.6)
                 else:
-                    print("[ERR] categorie %s: %s %s" % (cat, status, created))
+                    print(f"[ERR] categorie {cat}: {status} {created}")
                     continue
         for chan, topic, proj in chans:
             cur = by_name.get(chan)
             if cur is None:
                 if dry:
-                    print(ascii_console("  [DRY] salon+ #%s (%s)" % (chan, proj)))
+                    print(ascii_console(f"  [DRY] salon+ #{chan} ({proj})"))
                 else:
                     status, created = api_call(
-                        "POST", "/guilds/%s/channels" % guild_id, token,
+                        "POST", f"/guilds/{guild_id}/channels", token,
                         {"name": chan, "type": 0, "parent_id": cat_id, "topic": topic})
                     if status in (200, 201):
                         stats["chan_create"] += 1
                         by_name[chan] = created
                     else:
-                        print("[ERR] salon %s: %s %s" % (chan, status, created))
+                        print(f"[ERR] salon {chan}: {status} {created}")
                     time.sleep(0.6)
             elif (cur.get("topic") or "") != topic or cur.get("parent_id") != cat_id:
                 if dry:
-                    print(ascii_console("  [DRY] corrige #%s (topic/parent)" % chan))
+                    print(ascii_console(f"  [DRY] corrige #{chan} (topic/parent)"))
                 else:
-                    status, _ = api_call("PATCH", "/channels/%s" % cur.get("id"),
+                    status, _ = api_call("PATCH", "/channels/{}".format(cur.get("id")),
                                          token, {"topic": topic, "parent_id": cat_id})
                     if status == 200:
                         stats["topic_fix"] += 1
                     else:
-                        print("[ERR] patch %s: %s" % (chan, status))
+                        print(f"[ERR] patch {chan}: {status}")
                     time.sleep(0.6)
             else:
                 stats["ok"] += 1
@@ -269,7 +269,7 @@ def sync_guild(guild_id, token, plan, dry=True):
 
 def collect_channel_ids(guild_id, token, wanted):
     """{nom_salon: id} frais depuis le guild. wanted = set de noms."""
-    status, channels = api_call("GET", "/guilds/%s/channels" % guild_id, token)
+    status, channels = api_call("GET", f"/guilds/{guild_id}/channels", token)
     if status != 200:
         return {}
     return {c.get("name", ""): c.get("id") for c in channels
@@ -278,9 +278,9 @@ def collect_channel_ids(guild_id, token, wanted):
 
 def audit_guild(guild_id, token, plan):
     """Lecture seule : affiche TOUT le serveur, tagge gere/non-gere/doublon potentiel."""
-    status, channels = api_call("GET", "/guilds/%s/channels" % guild_id, token)
+    status, channels = api_call("GET", f"/guilds/{guild_id}/channels", token)
     if status != 200:
-        print("[ERR] lecture salons: %s %s" % (status, channels))
+        print(f"[ERR] lecture salons: {status} {channels}")
         return 2
     managed = set()
     for _cat, chans in plan:
@@ -308,12 +308,12 @@ def ensure_webhooks(token, chan_ids, dry=True):
     out = {}
     for chan, (cid, pslug) in sorted(chan_ids.items()):
         if dry:
-            print(ascii_console("  [DRY] webhook+ #%s" % chan))
+            print(ascii_console(f"  [DRY] webhook+ #{chan}"))
             continue
-        status, hooks = api_call("GET", "/channels/%s/webhooks" % cid, token)
+        status, hooks = api_call("GET", f"/channels/{cid}/webhooks", token)
         if status == 403:
-            print("[ERR] Manage Webhooks manquant sur #%s — portail dev -> Bot -> "
-                  "permissions : cocher Manage Webhooks puis reinviter le bot." % chan)
+            print(f"[ERR] Manage Webhooks manquant sur #{chan} — portail dev -> Bot -> "
+                  "permissions : cocher Manage Webhooks puis reinviter le bot.")
             return out
         reused = ""
         if status == 200:
@@ -324,13 +324,13 @@ def ensure_webhooks(token, chan_ids, dry=True):
         if reused:
             out[pslug] = reused
             continue
-        status, created = api_call("POST", "/channels/%s/webhooks" % cid, token,
+        status, created = api_call("POST", f"/channels/{cid}/webhooks", token,
                                    {"name": "Kuro"})
         if status in (200, 201) and created.get("url"):
             out[pslug] = created["url"]
-            print(ascii_console("  [OK] webhook #%s" % chan))
+            print(ascii_console(f"  [OK] webhook #{chan}"))
         else:
-            print("[ERR] webhook #%s: %s %s" % (chan, status, created))
+            print(f"[ERR] webhook #{chan}: {status} {created}")
         time.sleep(0.6)
     return out
 
@@ -440,13 +440,13 @@ def main(argv=None):
         try:
             plan = build_plan(load_projects(args.epingle), struct_map)
         except Exception as exc:
-            print("[ERR] Epingle illisible: %s" % exc)
+            print(f"[ERR] Epingle illisible: {exc}")
             return 2
         print("=== plan Discord (depuis Epingle) ===")
         for cat, chans in plan:
             print(ascii_console("  [%s] %d salon(s)" % (cat, len(chans))))
             for chan, _topic, proj in chans:
-                print(ascii_console("    #%s <- %s" % (chan, proj)))
+                print(ascii_console(f"    #{chan} <- {proj}"))
         print("  Total: %d categories, %d salons" % (len(plan), sum(len(c) for _, c in plan)))
         return 0
 
@@ -459,7 +459,7 @@ def main(argv=None):
         try:
             plan = build_plan(load_projects(args.epingle), struct_map)
         except Exception as exc:
-            print("[ERR] Epingle illisible: %s" % exc)
+            print(f"[ERR] Epingle illisible: {exc}")
             return 2
         return audit_guild(guild, token, plan)
 
@@ -474,11 +474,11 @@ def main(argv=None):
         try:
             projs = load_projects(args.epingle)
         except Exception as exc:
-            print("[ERR] Epingle illisible: %s" % exc)
+            print(f"[ERR] Epingle illisible: {exc}")
             return 2
-        status, guild_channels = api_call("GET", "/guilds/%s/channels" % args.guild, token)
+        status, guild_channels = api_call("GET", f"/guilds/{args.guild}/channels", token)
         if status != 200:
-            print("[ERR] lecture salons: %s" % status)
+            print(f"[ERR] lecture salons: {status}")
             return 1
         adopted, ambiguous, catmap = auto_adopt(projs, guild_channels)
         print("=== adopt (ta structure gagne, zero destruction) ===")
@@ -489,7 +489,7 @@ def main(argv=None):
         for sec, cat in sorted(catmap.items()):
             print(ascii_console("  [CAT] %-40s -> %s" % (sec[:40], cat)))
         if not args.apply:
-            print("  [DRY] --apply pour ecrire %s" % STRUCT_MAP_FILE.name)
+            print(f"  [DRY] --apply pour ecrire {STRUCT_MAP_FILE.name}")
             return 0
         STRUCT_MAP_FILE.write_text(json.dumps(
             {"channels": adopted, "categories": catmap,
@@ -507,9 +507,9 @@ def main(argv=None):
         if not args.guild:
             print("[ERR] --guild requis.")
             return 2
-        status, guild_channels = api_call("GET", "/guilds/%s/channels" % args.guild, token)
+        status, guild_channels = api_call("GET", f"/guilds/{args.guild}/channels", token)
         if status != 200:
-            print("[ERR] lecture salons: %s" % status)
+            print(f"[ERR] lecture salons: {status}")
             return 1
         try:
             in_plan = set()
@@ -525,17 +525,17 @@ def main(argv=None):
         print("=== retire-ours (SUPPRESSION de notre structure parallele) ===")
         print("  Exclus (encore utilises par le plan) : tout SEC*/proj-* present ci-dessus est garde.")
         for c in ours:
-            print(ascii_console("  [%s] #%s" % ("SUPPRIME" if args.apply else "DRY-supprime", c.get("name"))))
+            print(ascii_console("  [{}] #{}".format("SUPPRIME" if args.apply else "DRY-supprime", c.get("name"))))
         if not args.apply:
             print("  [DRY] %d objets. --apply pour supprimer vraiment." % len(ours))
             return 0
         gone = 0
         for c in ours:
-            st, _ = api_call("DELETE", "/channels/%s" % c.get("id"), token)
+            st, _ = api_call("DELETE", "/channels/{}".format(c.get("id")), token)
             if st == 200:
                 gone += 1
             else:
-                print("[ERR] suppression #%s: HTTP %s" % (c.get("name"), st))
+                print("[ERR] suppression #{}: HTTP {}".format(c.get("name"), st))
             time.sleep(0.6)
         print("  [OK] %d/%d supprimes." % (gone, len(ours)))
         return 0
@@ -551,10 +551,10 @@ def main(argv=None):
         try:
             plan = build_plan(load_projects(args.epingle), struct_map)
         except Exception as exc:
-            print("[ERR] Epingle illisible: %s" % exc)
+            print(f"[ERR] Epingle illisible: {exc}")
             return 2
         stats = sync_guild(args.guild, token, plan, dry=not args.apply)
-        print("  stats: %s" % stats)
+        print(f"  stats: {stats}")
         if stats.get("error"):
             return 1
         if args.webhooks:
@@ -569,7 +569,7 @@ def main(argv=None):
             full = {c: (ids.get(c), s) for c, (_, s) in wanted.items() if ids.get(c)}
             missing = sorted(set(wanted) - set(ids))
             if missing:
-                print("[ERR] salons introuvables APRES sync (ne devrait pas arriver): %s" % missing)
+                print(f"[ERR] salons introuvables APRES sync (ne devrait pas arriver): {missing}")
                 return 1
             created = ensure_webhooks(token, full, dry=False)
             added, repointed, kept = save_channel_map(created)
@@ -583,21 +583,21 @@ def main(argv=None):
             try:
                 body = Path(args.message_file).read_text(encoding="utf-8")
             except Exception as exc:
-                print("[ERR] fichier illisible: %s" % exc)
+                print(f"[ERR] fichier illisible: {exc}")
         body = (body or "").strip()
         if not body:
             print("[ERR] message vide.")
             return 2
         url = webhook_for(args.project, load_channel_map())
         if not url:
-            print("[ERR] aucun webhook pour '%s' (kuro_discord_channels.local.json / DISCORD_WEBHOOK_URL)." % args.project)
+            print(f"[ERR] aucun webhook pour '{args.project}' (kuro_discord_channels.local.json / DISCORD_WEBHOOK_URL).")
             return 2
-        title = args.title or ("Update %s" % args.project)
+        title = args.title or (f"Update {args.project}")
         try:
             status = post_webhook(url, title, body)
-            print(ascii_console("  [OK] post '%s' -> HTTP %s" % (args.project, status)))
+            print(ascii_console(f"  [OK] post '{args.project}' -> HTTP {status}"))
         except Exception as exc:
-            print("[ERR] post: %s" % str(exc)[:200])
+            print(f"[ERR] post: {str(exc)[:200]}")
             return 1
         return 0
     if args.cmd == "announce":
@@ -613,36 +613,36 @@ def main(argv=None):
             try:
                 body = Path(args.message_file).read_text(encoding="utf-8")
             except Exception as exc:
-                print("[ERR] fichier illisible: %s" % exc)
+                print(f"[ERR] fichier illisible: {exc}")
                 return 2
         body = (body or "").strip()
         if not body:
             print("[ERR] message vide.")
             return 2
         want = args.channel.lstrip("#")
-        status, channels = api_call("GET", "/guilds/%s/channels" % args.guild, token)
+        status, channels = api_call("GET", f"/guilds/{args.guild}/channels", token)
         if status != 200:
-            print("[ERR] lecture salons: %s" % status)
+            print(f"[ERR] lecture salons: {status}")
             return 1
         target = next((c for c in channels if isinstance(c, dict)
                        and c.get("type") == 0 and c.get("name") == want), None)
         if not target:
-            print("[ERR] salon #%s introuvable." % want)
+            print(f"[ERR] salon #{want} introuvable.")
             return 1
-        status, posted = api_call("POST", "/channels/%s/messages" % target.get("id"),
+        status, posted = api_call("POST", "/channels/{}/messages".format(target.get("id")),
                                   token, {"content": body[:2000]})
         if status not in (200, 201) or not posted.get("id"):
-            print("[ERR] post #%s: HTTP %s %s" % (want, status, str(posted)[:150]))
+            print(f"[ERR] post #{want}: HTTP {status} {str(posted)[:150]}")
             return 1
         mid = posted["id"]
-        print(ascii_console("  [OK] post #%s id=%s" % (want, mid)))
+        print(ascii_console(f"  [OK] post #{want} id={mid}"))
         if args.no_pin:
             return 0
-        status, _ = api_call("PUT", "/channels/%s/pins/%s" % (target.get("id"), mid), token)
+        status, _ = api_call("PUT", "/channels/{}/pins/{}".format(target.get("id"), mid), token)
         if status in (200, 201, 204):
-            print(ascii_console("  [OK] épingle #%s" % want))
+            print(ascii_console(f"  [OK] épingle #{want}"))
             return 0
-        print("[ERR] pin #%s: HTTP %s (droit Manage Messages requis)" % (want, status))
+        print(f"[ERR] pin #{want}: HTTP {status} (droit Manage Messages requis)")
         return 1
     return 2
 

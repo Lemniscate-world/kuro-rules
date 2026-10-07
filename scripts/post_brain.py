@@ -81,7 +81,7 @@ def deterministic_score(project, text, themes=(), lang="fr"):
             score += 5
         else:
             score -= 5
-            issues.append("phrases trop longues (%.0f mots/phrase)" % avg)
+            issues.append(f"phrases trop longues ({avg:.0f} mots/phrase)")
     if re.search(r"  +", t):
         score -= 2
         issues.append("espaces doubles")
@@ -101,22 +101,22 @@ def llm_critique(project, text, lang="fr"):
     if (lang or "fr").lower() == "en":
         prompt = (
             "You are an editor for tech X posts (280 chars max). "
-            "Project: %s. Post: \"%s\". "
+            f"Project: {project}. Post: \"{text[:500]}\". "
             "Reply with strict JSON only: "
             '{"score": <0-100>, "issues": ["..."], "rewrite": "<improved version>" or null}. '
             "Criteria: clarity for non-experts, real informative value, "
             "useless jargon, risk of leaking internal details. "
-            "The rewrite keeps hashtags and metric, <=280 chars." % (project, text[:500]))
+            "The rewrite keeps hashtags and metric, <=280 chars.")
         system = "You are a demanding editor. Strict JSON only."
     else:
         prompt = (
             "Tu es éditeur pour des posts X tech (280 car max). "
-            "Projet : %s. Post : « %s ». "
+            f"Projet : {project}. Post : « {text[:500]} ». "
             "Réponds JSON strict uniquement : "
             '{"score": <0-100>, "issues": ["..."], "rewrite": "<version améliorée>" ou null}. '
             "Critères : clarté pour un non-initié, valeur informative réelle, "
             "jargon inutile, risque de révéler des détails internes. "
-            "Le rewrite garde hashtags et métrique, ≤280 car." % (project, text[:500]))
+            "Le rewrite garde hashtags et métrique, ≤280 car.")
         system = "Tu es un éditeur exigeant. JSON strict uniquement."
     try:
         raw = ask(prompt, system=system)
@@ -192,15 +192,15 @@ def ingest_delivery(state_path=None, out_path=None):
         import gen_x_posts as gx
         state = json.loads(Path(state_path or gx.OUTPUTS / "x_posted.json").read_text(encoding="utf-8"))
     except Exception as exc:
-        return {"error": "etat illisible: %s" % exc}
+        return {"error": f"etat illisible: {exc}"}
     orgs = bp.list_organizations(api_key)
     if not orgs:
         return {"error": "aucune organisation"}
     scheduled, sent = {}, {}
     for org in orgs:
         for status_name, filt in (("scheduled", "scheduled"), ("sent", "sent")):
-            q = ("query Posts { posts(input: { organizationId: \"%s\", "
-                 "filter: { status: [%s] } }) { edges { node { id } } } }" % (org["id"], status_name))
+            q = ("query Posts {{ posts(input: {{ organizationId: \"{}\", "
+                 "filter: {{ status: [{}] }} }}) {{ edges {{ node {{ id }} }} }} }}".format(org["id"], status_name))
             try:
                 data = bp.gql(q, api_key)
             except Exception:
@@ -279,7 +279,7 @@ def main(argv=None):
 
     if args.cmd == "flag":
         if flag_term(args.project, args.term):
-            print("  [OK] '%s' musele pour %s (effectif des demain)." % (args.term, args.project))
+            print(f"  [OK] '{args.term}' musele pour {args.project} (effectif des demain).")
         else:
             print("  [SKIP] deja musele.")
         return 0
@@ -287,17 +287,17 @@ def main(argv=None):
     if args.cmd == "ingest":
         out = ingest_delivery()
         if "error" in out:
-            print("[ERR] %s" % out["error"])
+            print("[ERR] {}".format(out["error"]))
             return 1
         counts = {}
         for v in out.values():
             counts[v["statut"]] = counts.get(v["statut"], 0) + 1
-        print("  diffusion: %s" % counts)
+        print(f"  diffusion: {counts}")
         return 0
 
     if args.cmd == "learn":
         for line in learn():
-            print("  - %s" % line)
+            print(f"  - {line}")
         return 0
 
     if args.cmd == "review":
@@ -306,7 +306,7 @@ def main(argv=None):
             try:
                 text = Path(args.from_file).read_text(encoding="utf-8")
             except Exception as exc:
-                print("[ERR] draft illisible: %s" % exc)
+                print(f"[ERR] draft illisible: {exc}")
                 return 2
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         import gen_x_posts as gx
@@ -316,7 +316,7 @@ def main(argv=None):
             rep["score"], rep["score_det"],
             (", llm %d" % rep["score_llm"]) if rep["score_llm"] is not None else ", llm indisponible"))
         for i in rep["issues"] + (["lint: " + ", ".join(lint)] if lint else []):
-            print("  - %s" % i)
+            print(f"  - {i}")
         append_history(rep)
         if args.rewrite and rep.get("rewrite"):
             new = (rep["rewrite"] or "").strip()

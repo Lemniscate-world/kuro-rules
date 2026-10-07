@@ -383,7 +383,7 @@ def test_brain_status_tout_off(monkeypatch):
     assert rows["mistral"] == "off"
 
 
-def test_brain_status_preuves_recentes(monkeypatch, tmp_path):
+def test_brain_status_multi_moteurs_echec_partage(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENROUTER_API_KEY", "cle")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "cle")
     monkeypatch.delenv("OLLAMA_MODEL", raising=False)

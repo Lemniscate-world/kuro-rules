@@ -1,7 +1,6 @@
 """Tests agents.py : parse JSON OpenClaw, cache 60 s, CLI absent."""
 
 import sys
-import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))

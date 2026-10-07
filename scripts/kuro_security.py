@@ -173,7 +173,7 @@ def main() -> int:
     print(report)
     # Statut machine pour investor_digest (fini le 15/15 en dur)
     try:
-        from pathlib import Path as _P
+        from pathlib import Path as _P  # noqa: N814 - alias local temporaire
         _status = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "protected": enabled_now,

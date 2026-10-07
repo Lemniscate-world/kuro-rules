@@ -29,7 +29,6 @@ Zero dépendance, cross-platform (R93). Secrets jamais loggés. R101 : decision-
 import json
 import os
 import re
-import subprocess
 import sys
 import unicodedata
 from datetime import date
@@ -272,8 +271,9 @@ def main(argv=None):
     elif args.from_discord_export:
         sys.path.insert(0, str((KURORULES / "scripts").resolve()))
         try:
+            from pathlib import Path as _P  # noqa: N814 - alias local temporaire
+
             import sync_discord_to_epingle as sde
-            from pathlib import Path as _P
             msgs = sde.load_exports(_P(args.from_discord_export).expanduser())
             print(f"Discord: {len(msgs)} salon(s) avec messages")
             for proj, snippets in msgs.items():

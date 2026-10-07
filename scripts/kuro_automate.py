@@ -113,7 +113,7 @@ def main():
     load_dotenv()
     (ROOT / "logs").mkdir(exist_ok=True)
     sys.path.insert(0, str(SCRIPTS))
-    import kuro_proposals as _P
+    import kuro_proposals as _P  # noqa: N812 - alias court, convention de ce module
     write = (a.full and not a.dry_run) and not _P.vacances()
     if _P.vacances():
         print("mode vacances : lecture seule forcee")

@@ -156,11 +156,13 @@ kuro_discord_channels.local.json
 
 # finances privees (R111 - jamais comiter)
 finances.local.json
+budgets.local.json
 
 # strategie privee (R113 - jamais comiter)
 strategy.local.json
 pipeline.local.json
 strategy_decisions.local.json
+strategy_history.local.json
 pull_anydo.json
 proposals.local.json
 watchdog.local.json

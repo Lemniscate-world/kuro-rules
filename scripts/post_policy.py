@@ -93,7 +93,7 @@ def last_post_time(state, account):
 
 
 def creds_prefix(account):
-    return "X_" if account == "hub" else "X_%s_" % account.upper().replace("-", "_")
+    return "X_" if account == "hub" else "X_{}_".format(account.upper().replace("-", "_"))
 
 
 def has_creds(account):
@@ -120,12 +120,12 @@ def publish_via_buffer(text, account, lang="fr"):
         raise bp.BufferError("BUFFER_API_KEY absent")
     channel = buffer_channel_for(account)
     if not channel:
-        raise bp.BufferError("canal Buffer non configure (BUFFER_CHANNEL_%s)" % account.upper())
+        raise bp.BufferError(f"canal Buffer non configure (BUFFER_CHANNEL_{account.upper()})")
     urls = _gx.URL_RE.findall(text or "")
     if urls and (lang or "fr").lower() == "en":
-        reply = "Code & details here: %s" % urls[0]
+        reply = f"Code & details here: {urls[0]}"
     elif urls:
-        reply = "Code et détails ici : %s" % urls[0]
+        reply = f"Code et détails ici : {urls[0]}"
     else:
         reply = ""
     if reply:
@@ -150,8 +150,8 @@ def maybe_rewrite(project, text, themes=(), lang="fr"):
     Retourne (texte, True/False). Ne leve jamais."""
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
-        import post_brain as _brain
         import gen_x_posts as _gx
+        import post_brain as _brain
         rep = _brain.review_draft(project, text, themes, lang=lang)
         new = (rep.get("rewrite") or "").strip()
         if not new or rep.get("score_llm") is None:
@@ -180,7 +180,7 @@ def discord_notify(project, long_path):
         url = kd.webhook_for(project, kd.load_channel_map())
         if not url:
             return False
-        kd.post_webhook(url, "Update %s" % project, body)
+        kd.post_webhook(url, f"Update {project}", body)
         return True
     except Exception:
         return False
@@ -237,7 +237,7 @@ def record_post(state, account, project, commit_hash, tweet_id=""):
 
 
 def append_posts_log(account, project, text, tweet_id="", path=POSTS_LOG):
-    line = "| %s | %s | %s | %.60s | %s |\n" % (
+    line = "| {} | {} | {} | {:.60} | {} |\n".format(
         now_utc().date().isoformat(), account, project,
         (text or "").replace("\n", " ").replace("|", "/"), tweet_id)
     p = Path(path)
@@ -277,12 +277,12 @@ def main(argv=None):
         import gen_x_posts as gx
         import x_post as xp
     except Exception as exc:
-        print("[ERR] imports: %s" % exc)
+        print(f"[ERR] imports: {exc}")
         return 2
     try:
         projs = gx.load_projects(args.epingle)
     except RuntimeError as exc:
-        print("[ERR] %s" % exc)
+        print(f"[ERR] {exc}")
         return 2
     selected, skipped = gx.select_top(projs, max(1, args.top or 5), docs_dir=args.docs)
     if args.annex:
@@ -298,7 +298,7 @@ def main(argv=None):
     plan, raisons = decide(selected, state, hub=args.hub, annex_accounts=args.annex,
                            min_score=args.min_score, cooldown_h=args.cooldown_h)
 
-    print("=== post_policy (hub=%s, annexes=%s, via=%s) ===" % (
+    print("=== post_policy (hub={}, annexes={}, via={}) ===".format(
         args.hub, args.annex or "aucune", args.via))
     for item in plan:
         r = item["entry"]
@@ -320,8 +320,7 @@ def main(argv=None):
     need_x_credits = (args.via == "x")
     can_post = (not need_x_credits) or x_posting_enabled()
     if need_x_credits and not can_post:
-        print("  [SKIP] X_PLAN=%s : pas de credits API -> drafts + Discord seuls (voir R94-v2)."
-              % os.environ.get("X_PLAN", "free"))
+        print("  [SKIP] X_PLAN={} : pas de credits API -> drafts + Discord seuls (voir R94-v2).".format(os.environ.get("X_PLAN", "free")))
     # Batches par langue (hub EN, annexes FR) : le menage stale ne doit pas
     # effacer les picks d'une autre langue. Discord recoit les tops actifs FR.
     by_lang = {}
@@ -333,7 +332,6 @@ def main(argv=None):
         for r in selected:
             if r["project"]["name"] not in in_plan:
                 fr_extra.append(r)
-    batch = []
     by_project = {}
     hub_projects = set(it["project"] for it in plan if it["account"] == args.hub)
     for lang, entries in [("en", by_lang.get("en", [])), ("fr", by_lang.get("fr", []) + fr_extra)]:
@@ -360,37 +358,36 @@ def main(argv=None):
                     except Exception:
                         continue
             if last is not None and now_utc() - last < timedelta(hours=args.cooldown_h):
-                print("  [SKIP] discord #%s : cooldown." % proj_name)
+                print(f"  [SKIP] discord #{proj_name} : cooldown.")
                 continue
             ppath = by_project[proj_name][0]
             long_path = str(Path(ppath).with_name(
                 Path(ppath).stem.replace("x_post_", "x_long_", 1) + ".md"))
             if Path(long_path).exists() and discord_notify(proj_name, long_path):
-                print(gx.ascii_log("  [OK] discord #%s" % proj_name))
+                print(gx.ascii_log(f"  [OK] discord #{proj_name}"))
                 record_post(state, "discord", proj_name, "")
             else:
-                print("  [SKIP] discord #%s : pas de webhook." % proj_name)
+                print(f"  [SKIP] discord #{proj_name} : pas de webhook.")
     for item in plan:
         slug = item["account"]
         r = item["entry"]
         path, text = by_project.get(item["project"], ("", ""))
         if not path:
-            print("  [SKIP] @%s %s : draft bloque au lint, rien a poster." % (slug, item["project"]))
+            print("  [SKIP] @{} {} : draft bloque au lint, rien a poster.".format(slug, item["project"]))
             continue
         if not can_post:
-            print("  [SKIP] @%s %s : plan X free, pas de post X." % (slug, item["project"]))
+            print("  [SKIP] @{} {} : plan X free, pas de post X.".format(slug, item["project"]))
             continue
         if not has_creds(slug):
-            print("  [SKIP] @%s sans cles %s* — draft seul." % (slug, creds_prefix(slug)))
+            print(f"  [SKIP] @{slug} sans cles {creds_prefix(slug)}* — draft seul.")
             continue
         if not text:
-            print("  [ERR] draft vide pour %s" % item["project"])
+            print("  [ERR] draft vide pour {}".format(item["project"]))
             ko += 1
             continue
         leaks = gx.lint_post(item["project"], text)
         if leaks:
-            print("  [LINT-BLOCK] @%s %s : termes sensibles %s — post refuse."
-                  % (slug, item["project"], leaks))
+            print("  [LINT-BLOCK] @{} {} : termes sensibles {} — post refuse.".format(slug, item["project"], leaks))
             ko += 1
             continue
         if not args.no_rewrite:
@@ -399,10 +396,11 @@ def main(argv=None):
                 lang=account_lang(slug))
             if rewritten:
                 text = new_text
-                print(gx.ascii_log("  [BRAIN-REWRITE] @%s version LLM garde-fous OK" % slug))
+                print(gx.ascii_log(f"  [BRAIN-REWRITE] @{slug} version LLM garde-fous OK"))
         try:
             sys.path.insert(0, str(Path(__file__).resolve().parent))
-            from post_brain import deterministic_score as _score, append_history as _hist
+            from post_brain import append_history as _hist
+            from post_brain import deterministic_score as _score
             det, det_issues = _score(item["project"], text, r["facts"].get("themes", []),
                                      lang=account_lang(slug))
             print("  [BRAIN] @%s score %d/100%s" % (
@@ -411,20 +409,20 @@ def main(argv=None):
                    "score_det": det, "issues": det_issues, "score_llm": None,
                    "rewrite": None, "score": det})
         except Exception as exc:
-            print("  [WARN] brain indisponible: %s" % str(exc)[:100])
+            print(f"  [WARN] brain indisponible: {str(exc)[:100]}")
         if args.via == "buffer":
             try:
                 tid = publish_via_buffer(text, slug, lang=account_lang(slug))
                 record_post(state, slug, item["project"], r["facts"].get("hash", ""), tid)
                 append_posts_log(slug, item["project"], text, tid)
-                print(gx.ascii_log("  [OK] buffer @%s %s id=%s" % (slug, item["project"], tid)))
+                print(gx.ascii_log("  [OK] buffer @{} {} id={}".format(slug, item["project"], tid)))
                 ok += 1
             except Exception as exc:
-                print("  [ERR] buffer @%s %s: %s" % (slug, item["project"], str(exc)[:200]))
+                print("  [ERR] buffer @{} {}: {}".format(slug, item["project"], str(exc)[:200]))
                 ko += 1
             continue
         if not has_creds(slug):
-            print("  [SKIP] @%s sans cles %s* — draft seul." % (slug, creds_prefix(slug)))
+            print(f"  [SKIP] @{slug} sans cles {creds_prefix(slug)}* — draft seul.")
             continue
         creds = {"api_key": os.environ[creds_prefix(slug) + "API_KEY"],
                  "api_secret": os.environ[creds_prefix(slug) + "API_SECRET"],
@@ -435,7 +433,7 @@ def main(argv=None):
             tid = (data.get("data") or {}).get("id", "")
             record_post(state, slug, item["project"], r["facts"].get("hash", ""), tid)
             append_posts_log(slug, item["project"], text, tid)
-            print(gx.ascii_log("  [OK] @%s %s HTTP %s id=%s" % (
+            print(gx.ascii_log("  [OK] @{} {} HTTP {} id={}".format(
                 slug, item["project"], status, tid)))
             ok += 1
         except Exception as exc:
@@ -443,10 +441,10 @@ def main(argv=None):
             try:
                 import urllib.error as _ue
                 if isinstance(exc, _ue.HTTPError):
-                    detail = "HTTP %s %s" % (exc.code, exc.read().decode("utf-8", errors="replace")[:300])
+                    detail = "HTTP {} {}".format(exc.code, exc.read().decode("utf-8", errors="replace")[:300])
             except Exception:
                 pass
-            print("  [ERR] @%s %s: %s" % (slug, item["project"], detail))
+            print("  [ERR] @{} {}: {}".format(slug, item["project"], detail))
             ko += 1
     save_state(state)
     print("  [OK] postes=%d echecs=%d. R99 : reporter dans acquisition_tracker.md." % (ok, ko))

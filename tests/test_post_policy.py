@@ -43,7 +43,8 @@ def test_hub_saute_sans_theme_publiable():
 
 def test_annexe_score_cooldown_dedupe():
     sel = [_entry("Helium", 19, h="h9")]
-    annex = lambda plan: [i for i in plan if i["account"] == "helium"]
+    def annex(plan):
+        return [i for i in plan if i["account"] == "helium"]
     # score insuffisant
     plan, raisons = pp.decide(sel, {}, annex_accounts=["Helium"], min_score=20)
     assert annex(plan) == [] and raisons == [("Helium", "annexe-score-19<20")]
@@ -92,7 +93,7 @@ def test_publish_via_buffer_ok_et_sans_canal(monkeypatch):
     import types
     fake = types.ModuleType("buffer_post")
 
-    class FakeErr(Exception):
+    class FakeErr(Exception):  # noqa: N818 - mime BufferError du module moqué
         pass
     fake.BufferError = FakeErr
     fake.create_post = lambda t, c, k, mode="addToQueue", due_at="": {"id": "b1"}

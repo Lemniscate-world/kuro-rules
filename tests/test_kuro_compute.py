@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 import kuro_compute as kc  # noqa: E402
+
 from kuro_dashboard import api as kuro_api  # noqa: E402
 
 

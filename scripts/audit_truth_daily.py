@@ -16,9 +16,11 @@ Usage:
   python scripts/audit_truth_daily.py --output TRUTH_DAILY.md
 """
 
-import os, subprocess, re, sys
-from pathlib import Path
+import os
+import re
+import subprocess
 from datetime import date, datetime
+from pathlib import Path
 
 HOME = Path.home()
 DOCS = Path(os.environ.get("DOCS_DIR", str(HOME / "Documents")))
@@ -84,7 +86,7 @@ def collect_project_facts(proj_path: Path, quick=False):
         try:
             txt = tf.read_text(encoding="utf-8", errors="ignore")
             test_funcs += len(re.findall(r'^\s*def test_', txt, re.MULTILINE))
-        except:
+        except Exception:
             pass
     facts["test_funcs"] = test_funcs
     # python lines (sample, not full rglob for speed)
@@ -105,7 +107,7 @@ def scan_all(quick=True):
                 name = m.group(1).strip()
                 if name.lower() not in ("projet", "section") and len(name) < 30:
                     epingle_projects.add(name.lower())
-        except:
+        except Exception:
             pass
     for child in sorted(DOCS.iterdir()):
         if not child.is_dir():
@@ -129,7 +131,7 @@ def write_truth_report(facts_list, output_path):
     lines = []
     lines.append(f"# TRUTH DAILY — {today}")
     lines.append("")
-    lines.append(f"> **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.")
+    lines.append("> **Auto-généré** chaque jour à partir de `git log` + comptage tests. Aucune estimation, que des faits.")
     lines.append(f"> **Projects scannés:** {len(facts_list)} | **Source:** `~/Documents` + `Epingle_Projets.md`")
     lines.append("")
     lines.append("| Projet | Dernier commit | Branche | Tests | LOC | 30j | Dirty |")
@@ -176,21 +178,20 @@ def write_truth_report(facts_list, output_path):
 
 def update_epingle_with_facts(facts_list):
     """Optionally patch Epingle descriptions with factual footer (last commit + tests)."""
-    text = EPINGLE.read_text(encoding="utf-8")
-    updated = 0
+    EPINGLE.read_text(encoding="utf-8")
     for f in facts_list:
         if not f.get("git"):
             continue
         name = f["name"]
         # Build factual suffix
-        suffix = f" | git: {f.get('last_date')} {f.get('last_hash')} ({f.get('commits_30d')} commits 30j), {f.get('test_files')} tests"
+        f" | git: {f.get('last_date')} {f.get('last_hash')} ({f.get('commits_30d')} commits 30j), {f.get('test_files')} tests"
         # Find line
-        pattern = re.compile(rf'(^\|\s*\*\*{re.escape(name)}\*\*\s*\|[^\n]+\|)([^\n]+)(\|)', re.MULTILINE | re.IGNORECASE)
+        re.compile(rf'(^\|\s*\*\*{re.escape(name)}\*\*\s*\|[^\n]+\|)([^\n]+)(\|)', re.MULTILINE | re.IGNORECASE)
         # Instead, just ensure last commit not already in description
         # For now, we don't auto-patch Epingle to avoid overwriting curated descriptions.
         # We only report. To enable, uncomment below.
         pass
-    print(f"  Epingle not auto-patched (dry). Use TRUTH_DAILY.md as source, copy manually if needed.")
+    print("  Epingle not auto-patched (dry). Use TRUTH_DAILY.md as source, copy manually if needed.")
 
 def main():
     import argparse

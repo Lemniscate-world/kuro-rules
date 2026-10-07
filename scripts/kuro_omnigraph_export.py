@@ -174,7 +174,7 @@ def read_projects_txt(path: Path) -> list[str]:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
     except FileNotFoundError as exc:
         raise ExportError(f"projects.txt introuvable : {path}") from exc
-    return [l.strip() for l in lines if l.strip() and not l.strip().startswith("#")]
+    return [line.strip() for line in lines if line.strip() and not line.strip().startswith("#")]
 
 
 def build_records(

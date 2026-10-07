@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from collections import defaultdict
 from datetime import datetime
@@ -32,7 +31,6 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kuro_metrics import (  # noqa: E402
-    GitResult,
     commits_in_window,
     detect_git_repositories,
     load_ci_status,

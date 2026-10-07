@@ -25,7 +25,9 @@ Le script:
 
 Voir aussi: generate_portfolio.py qui sync ensuite Epingle -> portfolio + README
 """
-import json, re, sys
+import json
+import re
+import sys
 from pathlib import Path
 
 LOCAL_EPINGLE = Path.home() / "Documents" / "kuro-rules" / "Epingle_Projets.md"

@@ -25,7 +25,7 @@ import json
 import os
 import sys
 import urllib.request
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):

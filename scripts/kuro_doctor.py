@@ -254,7 +254,7 @@ def main(fix=False):
     try:
         r = subprocess.run([sys.executable, "-m", "pytest", "tests", "-q"],
                            cwd=str(KURO_ROOT), capture_output=True, text=True, timeout=180)
-        last = [l for l in r.stdout.splitlines() if l.strip()][-1] if r.stdout else ""
+        last = [line for line in r.stdout.splitlines() if line.strip()][-1] if r.stdout else ""
         tests_ok = r.returncode == 0
     except Exception as e:
         last, tests_ok = str(e), False

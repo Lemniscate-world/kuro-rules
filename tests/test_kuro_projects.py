@@ -9,8 +9,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from kuro_dashboard import projects  # noqa: E402
-from kuro_dashboard import tui  # noqa: E402
+from kuro_dashboard import (
+    projects,  # noqa: E402
+    tui,  # noqa: E402
+)
 
 git = pytest.mark.skipif(not shutil.which("git"), reason="git requis")
 

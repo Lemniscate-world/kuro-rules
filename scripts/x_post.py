@@ -19,7 +19,6 @@ Usage :
   python scripts/x_post.py --text "..." --apply
 """
 import base64
-import hashlib
 import hmac
 import json
 import os
@@ -45,10 +44,10 @@ def percent_encode(value):
 def base_string(method, url, params):
     """Base string OAuth 1.0a (RFC 5849 §3.4.1). params = [(k, v)]."""
     parts = urllib.parse.urlparse(url)
-    norm_url = "%s://%s%s" % (parts.scheme.lower(), parts.netloc.lower(),
+    norm_url = "{}://{}{}".format(parts.scheme.lower(), parts.netloc.lower(),
                               parts.path or "/")
     encoded = sorted((percent_encode(k), percent_encode(v)) for k, v in params)
-    norm_params = "&".join("%s=%s" % (k, v) for k, v in encoded)
+    norm_params = "&".join(f"{k}={v}" for k, v in encoded)
     return "&".join([method.upper(), percent_encode(norm_url),
                      percent_encode(norm_params)])
 
@@ -57,13 +56,13 @@ def sign(base, consumer_secret, token_secret):
     # OAuth 1.0a (RFC 5849 §3.4.2) IMPOSE HMAC-SHA1 : ce n est pas du hash
     # de mot de passe (faux positif CodeQL "weak password hashing").
     # hmac.digest() = API moderne recommandee, meme octets sur le fil.
-    key = "%s&%s" % (percent_encode(consumer_secret), percent_encode(token_secret or ""))
+    key = "{}&{}".format(percent_encode(consumer_secret), percent_encode(token_secret or ""))
     mac = hmac.digest(key.encode(), base.encode(), "sha1")
     return base64.b64encode(mac).decode()
 
 
 def auth_header(oauth_params):
-    items = ", ".join('%s="%s"' % (percent_encode(k), percent_encode(v))
+    items = ", ".join(f'{percent_encode(k)}="{percent_encode(v)}"'
                       for k, v in sorted(oauth_params.items()))
     return "OAuth " + items
 
@@ -95,7 +94,7 @@ def validate(text):
 def account_prefix(account):
     if (account or "hub").lower() == "hub":
         return "X_"
-    return "X_%s_" % account.upper().replace("-", "_")
+    return "X_{}_".format(account.upper().replace("-", "_"))
 
 
 def post_tweet(text, creds):
@@ -145,18 +144,18 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     print("=== x_post (X API v2) ===")
-    print("  compte: @%s" % args.account)
+    print(f"  compte: @{args.account}")
     if args.verify:
         creds, missing = load_creds(account_prefix(args.account))
         if missing:
-            print("[ERR] cles manquantes: %s." % ", ".join(missing))
+            print("[ERR] cles manquantes: {}.".format(", ".join(missing)))
             return 2
         try:
             status, data = verify_creds(creds)
             user = (data.get("data") or {})
-            print("  [OK] HTTP %s -> @%s (%s)" % (status, user.get("username", "?"), user.get("name", "?")))
+            print("  [OK] HTTP {} -> @{} ({})".format(status, user.get("username", "?"), user.get("name", "?")))
         except Exception as exc:
-            print("[ERR] verify: %s" % str(exc)[:300])
+            print(f"[ERR] verify: {str(exc)[:300]}")
             return 1
         return 0
 
@@ -165,44 +164,43 @@ def main(argv=None):
         try:
             text = Path(args.from_file).read_text(encoding="utf-8")
         except Exception as exc:
-            print("[ERR] draft illisible: %s" % exc)
+            print(f"[ERR] draft illisible: {exc}")
             return 2
     text, err = validate(text)
     if err:
-        print("[ERR] draft invalide: %s" % err)
+        print(f"[ERR] draft invalide: {err}")
         return 2
 
     print("=== x_post (X API v2) ===")
-    print("  compte: @%s" % args.account)
-    print("  %s" % text.replace("\n", " / "))
+    print(f"  compte: @{args.account}")
+    print("  {}".format(text.replace("\n", " / ")))
     print("  %d/%d caracteres" % (len(text), MAX_LEN))
     if not args.apply:
-        print("  [DRY] rien poste. Relance avec --apply (+ cles %s*)."
-              % account_prefix(args.account))
+        print(f"  [DRY] rien poste. Relance avec --apply (+ cles {account_prefix(args.account)}*).")
         return 0
 
     creds, missing = load_creds(account_prefix(args.account))
     if missing:
-        print("[ERR] cles manquantes: %s (voir docstring, 1 jeu par compte X)." % ", ".join(missing))
+        print("[ERR] cles manquantes: {} (voir docstring, 1 jeu par compte X).".format(", ".join(missing)))
         return 2
     try:
         status, data = post_tweet(text, creds)
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")[:500]
-        print("[ERR] post: HTTP %s %s" % (exc.code, body))
+        print(f"[ERR] post: HTTP {exc.code} {body}")
         return 1
     except Exception as exc:
-        print("[ERR] post: %s" % str(exc)[:300])
+        print(f"[ERR] post: {str(exc)[:300]}")
         return 1
     tid = (data.get("data") or {}).get("id", "?")
-    print("  [OK] HTTP %s id=%s" % (status, tid))
+    print(f"  [OK] HTTP {status} id={tid}")
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from post_policy import record_post, append_posts_log, load_state, save_state
+        from post_policy import append_posts_log, load_state, record_post, save_state
         save_state(record_post(load_state(), args.account, "", tid))
         append_posts_log(args.account, Path(args.from_file).stem if args.from_file else "", text, tid)
     except Exception as exc:
-        print("  [WARN] log local impossible: %s" % str(exc)[:120])
+        print(f"  [WARN] log local impossible: {str(exc)[:120]}")
     print("  Rappel R99 : logger dans docs/tracking/acquisition_tracker.md sous 5 min.")
     return 0
 

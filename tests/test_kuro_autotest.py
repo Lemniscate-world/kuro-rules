@@ -50,7 +50,7 @@ def _repo(tmp_path):
 
 
 def test_repo_introuvable():
-    res = at.autotest_repo(str("Nope"), max_n=1)
+    res = at.autotest_repo("Nope", max_n=1)
     assert res[0]["error"] == "repo introuvable"
 
 
@@ -83,7 +83,7 @@ def test_rouge_supprime_apres_essais(tmp_path, monkeypatch):
 def test_llm_vert_au_2e_essai(tmp_path, monkeypatch):
     import kuro_coverage
     import kuro_llm
-    repo = _repo(tmp_path)
+    _repo(tmp_path)
     monkeypatch.setattr(kuro_coverage, "test_stems", lambda r: set())
     monkeypatch.setattr(kuro_llm, "ask", lambda *a, **k: "def test_a():\n    assert True\n")
     calls = {"n": 0}

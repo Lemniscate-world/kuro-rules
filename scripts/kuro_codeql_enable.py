@@ -1,8 +1,7 @@
 import json
 import subprocess
-import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
 TOKEN = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True).stdout.strip()
 API = "https://api.github.com"

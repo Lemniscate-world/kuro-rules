@@ -134,8 +134,8 @@ def gen_llm_tests(rel_path: str, source: str, error: str = "") -> str:
 def failure_excerpt(output: str, limit: int = 1200) -> str:
     """Lignes utiles (FAILED/erreurs/assert) + fin du log. Pur."""
     lines = output.splitlines()
-    keep = [l for l in lines
-            if "FAILED" in l or "Error" in l or "assert" in l or "E  " in l]
+    keep = [line for line in lines
+            if "FAILED" in line or "Error" in line or "assert" in line or "E  " in line]
     tail = "\n".join(lines[-15:])
     text = ("\n".join(keep[-20:]) + "\n---\n" + tail) if keep else tail
     return text[-limit:]

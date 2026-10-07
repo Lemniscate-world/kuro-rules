@@ -226,8 +226,8 @@ def campaign(metrics: dict, okrs: list[dict], pipeline: dict, plans: dict | None
             gate_n = f"necessaire : OKR « {w['label']} » sous les 50% — la bataille sert la guerre"
         elif float((metrics.get("averages") or {}).get("velocity_per_week") or 0) < 1:
             gate_n = "necessaire : velocite moyenne < 1 c/sem — debloquer un front unique"
-        gate_c = (f"consequences : 2h bornees, 0 breaking change cross-repo (R105), "
-                  f"SESSION_SUMMARY prepend (R42) — sinon la bataille coute plus qu'elle ne rapporte")
+        gate_c = ("consequences : 2h bornees, 0 breaking change cross-repo (R105), "
+                  "SESSION_SUMMARY prepend (R42) — sinon la bataille coute plus qu'elle ne rapporte")
     # Arene ignoree = ce que le code ne voit pas : signaux dehors ou pivots endormis.
     pivots = metrics.get("pivot_candidates") or [] if isinstance(metrics, dict) else []
     last_insight = (pipeline.get("last") or {}).get("insight") if isinstance(pipeline, dict) else None
@@ -287,6 +287,11 @@ def decisions(finance: dict, metrics: dict, ci: dict, okrs: list[dict], pipeline
 DECISIONS_FILE = ROOT_DIR / "strategy_decisions.local.json"  # local, gitigné (R111/R113)
 RESOLVED_KEEP_DAYS = 30
 RESOLVED_SHOW_DAYS = 7
+HISTORY_FILE = ROOT_DIR / "strategy_history.local.json"  # local, gitigne (R113)
+_env_hist = (os.environ.get("KURO_RULES_DIR") or "").strip()
+if _env_hist:  # snapshot là où Xenon lit (sinon box « pas d historique »)
+    HISTORY_FILE = Path(_env_hist).expanduser() / "strategy_history.local.json"
+HISTORY_KEEP_DAYS = 400
 
 
 def _load_store() -> dict:
@@ -363,6 +368,178 @@ def track_decisions(keyed: list[tuple[str, str]]) -> tuple[list[dict], list[dict
     return opened, resolved
 
 
+# ---------- historique mensuel (suivi d audit strategique) ----------
+
+def _pick(mapping: Any, *keys: str) -> Any:
+    """Première valeur non-None parmi `keys` (compat ascendante des payloads)."""
+    if not isinstance(mapping, dict):
+        return None
+    for key in keys:
+        if mapping.get(key) is not None:
+            return mapping.get(key)
+    return None
+
+
+def snapshot_entry(payload: dict[str, Any], today: str) -> dict[str, Any]:
+    """Un point d historique comparable (pur, testable)."""
+    fin = payload.get("finance") or {}
+    ex = payload.get("execution") or {}
+    okrs = payload.get("okr") or []
+    pipe = payload.get("pipeline") or []
+    ci = (ex.get("ci") or {}) if isinstance(ex, dict) else {}
+    pcts = [o.get("pct") for o in okrs
+            if isinstance(o, dict) and o.get("pct") is not None]
+    return {
+        "date": today,
+        "runway_months": fin.get("runway_months") if isinstance(fin, dict) else None,
+        "burn": fin.get("burn_rate_monthly") if isinstance(fin, dict) else None,
+        "mrr": fin.get("mrr_monthly") if isinstance(fin, dict) else None,
+        "velocity": _pick(ex, "velocity", "velocity_per_week"),
+        "lead_time": _pick(ex, "lead_time", "lead_time_days"),
+        "ci_failures": ci.get("failures", 0),
+        "okr_avg_pct": round(sum(pcts) / len(pcts), 1) if pcts else None,
+        "okr_hit": sum(1 for o in okrs if isinstance(o, dict) and o.get("hit")),
+        "okr_total": len(okrs),
+        "interviews_7d": pipe.get("interviews_7d", 0) if isinstance(pipe, dict) else 0,
+        "pipeline_total": pipe.get("total", 0) if isinstance(pipe, dict) else 0,
+        "decisions_open": sorted({
+            (d.get("key") or "") for d in (payload.get("decisions") or [])
+            if isinstance(d, dict) and d.get("key")}),
+    }
+
+
+def load_history(path: Path | None = None) -> list[dict]:
+    """Historique trie par date (entrees valides seulement)."""
+    try:
+        data = json.loads((path or HISTORY_FILE).read_text(encoding="utf-8"))
+        rows = [r for r in (data if isinstance(data, list) else []) if isinstance(r, dict)]
+        return sorted(rows, key=lambda r: str(r.get("date", "")))
+    except Exception:
+        return []
+
+
+def append_snapshot(payload: dict[str, Any], today: str | None = None,
+                    path: Path | None = None) -> dict[str, Any]:
+    """Ajoute (ou remplace si meme jour) un snapshot + prune >400 j."""
+    from datetime import date as _date
+    today = today or _date.today().isoformat()
+    target = path or HISTORY_FILE
+    rows = [r for r in load_history(target) if str(r.get("date", "")) != today]
+    entry = snapshot_entry(payload, today)
+    rows.append(entry)
+    try:
+        cutoff = (_date.fromisoformat(today) - timedelta(days=HISTORY_KEEP_DAYS)).isoformat()
+        rows = [r for r in rows if str(r.get("date", "")) >= cutoff]
+    except ValueError:
+        pass
+    try:
+        target.write_text(json.dumps(rows, indent=1, ensure_ascii=False), encoding="utf-8")
+    except Exception as exc:
+        print(f"[ strategy ] snapshot non écrit ({target}) : {exc}", file=sys.stderr)
+    return entry
+
+
+def _confined_out(path: Path, default_name: str) -> Path:
+    """Confine --out sous ROOT_DIR (S8707 : args CLI fournis par le cron/LLM)."""
+    try:
+        resolved = Path(path).expanduser().resolve()
+        if resolved == ROOT_DIR.resolve() or ROOT_DIR.resolve() in resolved.parents:
+            return resolved
+    except Exception:
+        pass
+    return ROOT_DIR / default_name
+
+
+def _delta(new: float | None, old: float | None) -> float | None:
+    try:
+        if new is None or old is None:
+            return None
+        return round(float(new) - float(old), 2)
+    except (TypeError, ValueError):
+        return None
+
+
+def monthly_digest(history: list[dict] | None = None,
+                   today: str | None = None) -> dict[str, Any]:
+    """Mois courant vs mois precedent (derniers snapshots de chaque mois).
+
+    Honnete quand l historique est jeune : il faut 2 mois distincts,
+    sinon statut needs-history avec le compte de snapshots.
+    """
+    from datetime import date as _date
+    today = today or _date.today().isoformat()
+    rows = history if history is not None else load_history()
+    by_month: dict[str, dict] = {}
+    for r in rows:
+        month = str(r.get("date", ""))[:7]
+        if len(month) == 7:
+            by_month[month] = r
+    months = sorted(by_month)
+    cur_month = today[:7]
+    prev_months = [m for m in months if m < cur_month]
+    if not prev_months or cur_month not in by_month:
+        return {"status": "needs-history", "snapshots": len(rows),
+                "months": months}
+    old, new = by_month[prev_months[-1]], by_month[cur_month]
+    old_okrs = {o for o in (old.get("decisions_open") or [])}
+    new_okrs = {o for o in (new.get("decisions_open") or [])}
+    return {
+        "status": "ok",
+        "from": prev_months[-1],
+        "to": cur_month,
+        "runway_delta": _delta(new.get("runway_months"), old.get("runway_months")),
+        "runway_now": new.get("runway_months"),
+        "velocity_delta": _delta(new.get("velocity"), old.get("velocity")),
+        "velocity_now": new.get("velocity"),
+        "okr_avg_delta": _delta(new.get("okr_avg_pct"), old.get("okr_avg_pct")),
+        "okr_avg_now": new.get("okr_avg_pct"),
+        "okr_hit_now": f"{new.get('okr_hit', 0)}/{new.get('okr_total', 0)}",
+        "interviews_delta": _delta(new.get("interviews_7d"), old.get("interviews_7d")),
+        "ci_failures_delta": _delta(new.get("ci_failures"), old.get("ci_failures")),
+        "decisions_opened": sorted(new_okrs - old_okrs),
+        "decisions_resolved": sorted(old_okrs - new_okrs),
+        "decisions_open_now": len(new_okrs),
+    }
+
+
+def render_monthly(digest: dict[str, Any]) -> str:
+    """Digest mensuel lisible (jamais d exception)."""
+    try:
+        if digest.get("status") != "ok":
+            return (f"EVOLUTION MENSUELLE : historique insuffisant "
+                    f"({digest.get('snapshots', 0)} snapshot(s), 2 mois requis) — "
+                    f"lancer `python scripts/kuro_strategy.py --snapshot` regulierement.")
+        def _fmt(value: float | None, suffix: str = "", inverse: bool = False) -> str:
+            if value is None:
+                return "?"
+            arrow = ""
+            if value > 0:
+                arrow = " ▲" if not inverse else " ▼"
+            elif value < 0:
+                arrow = " ▼" if not inverse else " ▲"
+            return f"{value:+}{suffix}{arrow}"
+        lines = [f"EVOLUTION {digest['from']} -> {digest['to']} :",
+                 f"  Runway : {digest.get('runway_now')} mois "
+                 f"({_fmt(digest.get('runway_delta'), ' mois')})",
+                 f"  Velocite : {digest.get('velocity_now')} c/sem "
+                 f"({_fmt(digest.get('velocity_delta'), ' c/sem')})",
+                 f"  OKR : {digest.get('okr_avg_now')}% moy. "
+                 f"({_fmt(digest.get('okr_avg_delta'), ' pts')}), "
+                 f"{digest.get('okr_hit_now')} atteints",
+                 f"  Interviews : {_fmt(digest.get('interviews_delta'))} sur 7j glissants",
+                 f"  CI : {_fmt(digest.get('ci_failures_delta'), ' echecs', inverse=True)}",
+                 f"  Decisions ouvertes : {digest.get('decisions_open_now')} "
+                 f"(+{len(digest.get('decisions_opened') or [])} "
+                 f"/ -{len(digest.get('decisions_resolved') or [])})"]
+        for key in digest.get("decisions_resolved") or []:
+            lines.append(f"    ✓ resolue : {key}")
+        for key in digest.get("decisions_opened") or []:
+            lines.append(f"    → nouvelle : {key}")
+        return "\n".join(lines)
+    except Exception:
+        return "EVOLUTION MENSUELLE : indisponible"
+
+
 # ---------- rendu ----------
 
 def build_payload(track: bool = True) -> dict[str, Any]:
@@ -384,6 +561,9 @@ def build_payload(track: bool = True) -> dict[str, Any]:
             "mrr": finance.get("mrr_monthly"),
             "runway_label": finance.get("runway_label"),
             "status": finance.get("status"),
+            "runway_months": finance.get("runway_months"),
+            "burn_rate_monthly": finance.get("burn_rate_monthly"),
+            "mrr_monthly": finance.get("mrr_monthly"),
         },
         "execution": {
             "velocity": (metrics.get("averages") or {}).get("velocity_per_week"),
@@ -490,12 +670,31 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--discord", action="store_true", help="poster le digest sur Discord si webhook présent")
     parser.add_argument("--out", type=Path, help="écrire le digest dans un fichier")
+    parser.add_argument("--snapshot", action="store_true",
+                        help="enregistre un point d historique mensuel (idempotent par jour)")
+    parser.add_argument("--monthly", action="store_true",
+                        help="affiche l evolution mois courant vs precedent")
     args = parser.parse_args()
 
+    if args.snapshot:
+        payload = build_payload()
+        entry = append_snapshot(payload)
+        print(f"[+] snapshot {entry['date']} "
+              f"(runway {entry.get('runway_months')}, "
+              f"velocite {entry.get('velocity')}, "
+              f"OKR {entry.get('okr_avg_pct')}%)")
+        return 0
+    if args.monthly:
+        digest = monthly_digest()
+        text = render_monthly(digest)
+        if args.out:
+            _confined_out(args.out, "strategy_monthly.md").write_text(text + "\n", encoding="utf-8")
+        print(json.dumps(digest, indent=2, ensure_ascii=False) if args.json else text)
+        return 0
     payload = build_payload()
     text = render(payload)
     if args.out:
-        args.out.write_text(text + "\n", encoding="utf-8")
+        _confined_out(args.out, "strategy_digest.md").write_text(text + "\n", encoding="utf-8")
     print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else text)
     if args.discord:
         ok = post_discord(text)

@@ -23,9 +23,8 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import kuro_proposals as P  # noqa: E402, N812 - alias court, convention de ce module
 from ci_guardian import DEFAULT_OWNERS, _git, api, discover_all  # noqa: E402
-
-import kuro_proposals as P  # noqa: E402
 
 STORE = Path(__file__).resolve().parent.parent / "watchdog.local.json"
 WINDOW_HOURS = 48

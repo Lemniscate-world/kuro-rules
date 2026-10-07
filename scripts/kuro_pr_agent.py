@@ -27,6 +27,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import kuro_proposals as P  # noqa: E402, N812 - alias court, convention de ce module
 from ci_guardian import (  # noqa: E402
     DEFAULT_OWNERS,
     ai_diagnose,
@@ -37,8 +38,6 @@ from ci_guardian import (  # noqa: E402
     fetch_failed_log,
     rerun_failed_jobs,
 )
-
-import kuro_proposals as P  # noqa: E402
 
 SAFE_KLASSES = {"formatting", "protected_files", "lint_dead"}
 PROTECTED_REFS = {"main", "master"}
@@ -219,8 +218,8 @@ def post_comment(repo: str, number: int, body: str, token: str) -> bool:
 
 
 def pr_labels(pr: dict) -> set:
-    return {l.get("name") for l in (pr.get("labels") or [])
-            if isinstance(l, dict) and l.get("name")}
+    return {label.get("name") for label in (pr.get("labels") or [])
+            if isinstance(label, dict) and label.get("name")}
 
 
 def ensure_label(repo: str, name: str, color: str, token: str) -> None:
@@ -371,7 +370,7 @@ def _run_diagnostic(repo: str, pr: dict, token: str, write: bool) -> str:
         return "diagnostic : dry-run, ignore"
     number = pr.get("number")
     failing = failing_checks(repo, (pr.get("head") or {}).get("sha", ""), token)
-    rid = run_id_from_url((failing[0].get("html_url", "") if failing else ""))
+    rid = run_id_from_url(failing[0].get("html_url", "") if failing else "")
     text = ai_diagnose(repo, rid, token) if rid else None
     ok = post_comment(repo, number, f"{MARKER}\n**Diagnostic** :\n\n{text or 'rien a diagnostiquer.'}", token)
     return f"diagnostic -> {'poste' if ok else 'echec post'}"
@@ -433,9 +432,10 @@ def _suggestion_comments(repo: str, number: int, token: str) -> tuple:
 
 def _apply_in_clone(repo: str, head: str, token: str, comments: list) -> tuple:
     """Clone, applique les suggestions, commit+push. Retourne (applied, skipped, erreur)."""
-    from ci_guardian import _git
     import shutil
     import tempfile
+
+    from ci_guardian import _git
     workdir = Path(tempfile.mkdtemp(prefix="kuro-review-"))
     try:
         url = f"https://x-access-token:{token}@github.com/{repo}.git"

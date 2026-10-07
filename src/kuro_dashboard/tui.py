@@ -9,9 +9,11 @@ Usage :
     python -m kuro_dashboard.tui [--interval 2] [--top 10]
 Ancien nom (alias déprécié) : kuro-glances.
 Touches en live : q quitter, espace pause, c/m tri CPU/MEM, / filtre nom,
-Haut/Bas selection, Entree fiche detail, 1-5 montre/cache boxes,
+Haut/Bas selection, Entree fiche detail, 1-7 montre/cache boxes,
 r refresh, +/- vitesse. Couleurs ANSI (coupees hors tty, avec NO_COLOR/--no-color).
 Box 5 MARKETING : pipeline local + drafts LAUNCH_POSTS + tracker acquisition.
+Box 6 STRATÉGIE : runway/velocite/OKR (strategy_history.local.json).
+Box 7 SEO : audit ~/leads/SEO_AUDIT.md (serveur ; absent sur PC = message honnête).
 """
 
 from __future__ import annotations
@@ -26,8 +28,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .face import face_frame, mood_for, should_blink, spinner
 from .agents import agents_lines
+from .face import face_frame, mood_for, should_blink, spinner
 from .kuro_state import collect_kuro_snapshot
 from .projects import quick_lines as git_project_lines
 from .system import collect_system_snapshot
@@ -444,7 +446,45 @@ def spark(values: list | None, width: int = 24) -> str:
     return seq.rjust(width, " ")
 
 
-def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0) -> list[str]:
+def _swap_rates(cur: dict, prev: dict | None, dt: float) -> tuple:
+    """Pagination swap (pages/s) depuis 2 snapshots (None si pas calculable)."""
+    if not prev or dt <= 0:
+        return None, None
+    try:
+        mem, pmem = cur.get("memory") or {}, (prev.get("memory") or {})
+        sin = ((mem.get("swap_sin") or 0) - (pmem.get("swap_sin") or 0)) / dt
+        sout = ((mem.get("swap_sout") or 0) - (pmem.get("swap_sout") or 0)) / dt
+        if mem.get("swap_sin") is None or pmem.get("swap_sin") is None:
+            return None, None
+        return max(0.0, sin), max(0.0, sout)
+    except Exception:
+        return None, None
+
+
+def _disk_busy(cur: dict, prev: dict | None, dt: float) -> float | None:
+    """% de temps disques occupes (read+write time) entre 2 snapshots.
+
+    Exige les 4 compteurs (psutil les documente optionnels par plateforme) :
+    sinon le cumul courant passerait pour un intervalle -> faux 100%.
+    """
+    if not prev or dt <= 0:
+        return None
+    try:
+        io, pio = (cur.get("disk") or {}).get("io") or {}, \
+            (prev.get("disk") or {}).get("io") or {}
+        vals = [io.get("read_time"), io.get("write_time"),
+                pio.get("read_time"), pio.get("write_time")]
+        if any(v is None for v in vals):
+            return None
+        busy_ms = ((io["read_time"] - pio["read_time"])
+                   + (io["write_time"] - pio["write_time"]))
+        return min(100.0, max(0.0, busy_ms / (dt * 1000) * 100))
+    except Exception:
+        return None
+
+
+def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0,
+                prev: dict | None = None, dt: float = 0.0) -> list[str]:
     use = _colors_on()
     cpu = payload.get("cpu") or {}
     mem = payload.get("memory") or {}
@@ -461,6 +501,15 @@ def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0) -> list
     per = (cpu.get("per_cpu") or [])[:8]
     if per:
         lines.append("     " + "  ".join(f"c{i}:{v:.0f}%" for i, v in enumerate(per)))
+    load = (cpu.get("load_avg") or [])[:1]
+    cores = (payload.get("host") or {}).get("cpu_count") or 0
+    if load and cores:
+        try:
+            sat = float(load[0]) / float(cores)
+            flag = "  << file d attente !" if sat >= 1 else ""
+            lines.append(f"     charge 1min {float(load[0]):.2f} / {cores} coeurs{flag}")
+        except Exception:
+            pass
     if hist and len([v for v in (hist.get("cpu") or []) if v is not None]) >= 2:
         gw = max(24, min(term_width(), 100) - 14)
         lines.append(f"CPU graph [{spark(hist.get('cpu'), gw)}]")
@@ -473,6 +522,10 @@ def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0) -> list
     swap = mem.get("swap_percent")
     if swap is not None:
         lines.append(f"SWAP {bar(swap, color=_level(swap) if use else None)} {swap}%")
+    sin, sout = _swap_rates(payload, prev, dt)
+    if sin is not None and sout is not None and (sin > 0 or sout > 0):
+        lines.append(f"     pagination swap : {sin:.0f} pages/s entree, "
+                     f"{sout:.0f} pages/s sortie (saturation memoire !)")
     if hist:
         lines.append(f"MEM hist [{spark(hist.get('mem'), 24)}]")
     return lines
@@ -500,6 +553,18 @@ def sec_disk_net(payload: dict, prev: dict | None, dt: float,
         lines.append(_div("reseau", width))
     sent, recv = _net_rates(payload, prev, dt)
     lines.append(f"NET  envoi {fmt_rate(sent):>12}  reception {fmt_rate(recv):>12}")
+    busy = _disk_busy(payload, prev, dt)
+    if busy is not None:
+        lines.append(f"     disques occupes a {busy:.0f}% "
+                     f"{'<< saturation I/O !' if busy >= 90 else ''}".rstrip())
+    try:
+        io = (payload.get("network") or {}).get("io") or {}
+        errs = sum(int(io.get(k) or 0) for k in
+                   ("errin", "errout", "dropin", "dropout"))
+    except Exception:
+        errs = 0
+    if errs:
+        lines.append(f"     reseau : {errs} erreurs/pertes cumulees (a surveiller)")
     if hist and len([v for v in (hist.get("up") or []) if v is not None]) >= 2:
         lines.append(f"UP   [{spark(hist.get('up'), 24)}] {fmt_rate(sent)}")
         lines.append(f"DOWN [{spark(hist.get('down'), 24)}] {fmt_rate(recv)}")
@@ -535,6 +600,16 @@ def sec_procs(payload: dict, width: int, sort: str = "cpu", filt: str = "",
     if filt:
         title += f"  [filtre:{filt[:20]}]"
     lines = [title]
+    try:
+        states = payload.get("process_states") or {}
+        # waiting = normal sur Windows/macOS (psutil), idle/? = fond.
+        weird = {k: v for k, v in states.items()
+                 if k not in ("running", "sleeping", "waiting", "idle", "?", "") and v}
+        if weird:
+            lines.append("  etats anormaux : " + ", ".join(
+                f"{v} {k}" for k, v in sorted(weird.items())))
+    except Exception:
+        pass
     procs = _visible_procs(payload, sort, filt)
     for idx, proc in enumerate(procs[: max(1, limit)]):
         name = str(proc.get("name") or "?")[: width - 40]
@@ -649,6 +724,46 @@ def _read_brain() -> dict | None:
 _NON_CALL_ENGINES = {"", "cache", "deterministe"}
 
 
+def _latency_pcts() -> dict:
+    """P50/P95 des latences d appels reels 7 j (cache/deterministe exclus).
+
+    La moyenne seule cachait les stalls (ex : 20 min noyees dans 8,1 s).
+    Renvoie {} si moins de 2 valeurs.
+    """
+    lats: list[float] = []
+    try:
+        from datetime import date, timedelta
+        week_ago = (date.today() - timedelta(days=6)).isoformat()
+        lines = LLM_USAGE_FILE.read_text(encoding="utf-8").splitlines()[-2000:]
+    except Exception:
+        return {}
+    for line in lines:
+        try:
+            e = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(e, dict) or (e.get("day") or "") < week_ago:
+            continue
+        if str(e.get("engine") or "?") in _NON_CALL_ENGINES:
+            continue
+        try:
+            lats.append(float(e.get("latency_s") or 0.0))
+        except Exception:
+            continue
+    if len(lats) < 2:
+        return {}
+    ordered = sorted(lats)
+
+    def _pct(p: float) -> float:
+        try:
+            idx = min(len(ordered) - 1, max(0, int(round((p / 100) * (len(ordered) - 1)))))
+            return round(ordered[idx], 1)
+        except Exception:
+            return 0.0
+
+    return {"p50": _pct(50), "p95": _pct(95)}
+
+
 def _pl(n: int, sing: str, plur: str | None = None) -> str:
     """Pluriel francais : 1 appel, 0/2+ appels. Jamais d exception."""
     try:
@@ -669,7 +784,8 @@ def _usage_stats() -> tuple:
     calls_d = cache_d = calls_w = cache_w = 0
     cost_d = cost_w = 0.0
     unk_d = unk_w = 0
-    lat_sum = lat_n = 0
+    lat_sum = 0.0
+    lat_n = 0
     engines: dict[str, int] = {}
     try:
         from datetime import date, timedelta
@@ -820,7 +936,7 @@ def _marketing_pipeline(root: Path) -> tuple:
             except Exception:
                 continue
         last = max(entries, key=lambda e: str(e.get("date", ""))) if entries else {}
-        insight = str((last.get("insight") or "")).strip().replace("\n", " ")
+        insight = str(last.get("insight") or "").strip().replace("\n", " ")
         nxt = ""
         for e in reversed(entries):
             if isinstance(e, dict) and str(e.get("next_step") or "").strip():
@@ -859,9 +975,9 @@ def _marketing_tracker(root: Path) -> tuple:
     except Exception:
         return 0, "?"
     try:
-        rows = [l for l in text.splitlines()
-                if l.strip().startswith("|") and "**" in l
-                and any(k in l for k in ("Reddit", "Discord", "GitHub", "X ", "HN", "Lobsters", "Blog"))]
+        rows = [line for line in text.splitlines()
+                if line.strip().startswith("|") and "**" in line
+                and any(k in line for k in ("Reddit", "Discord", "GitHub", "X ", "HN", "Lobsters", "Blog"))]
         return len(rows), path.name
     except Exception:  # pragma: no cover - comprehension sur str ne leve pas
         return 0, "?"
@@ -918,6 +1034,209 @@ def sec_marketing() -> list[str]:
         return ["MARKETING (indisponible)"]
 
 
+def _strategy_history() -> list[dict]:
+    """Snapshots mensuels (kuro_strategy.py --snapshot). Liste vide si absent."""
+    try:
+        data = json.loads((_rules_dir() / "strategy_history.local.json").read_text(
+            encoding="utf-8"))
+        rows = [r for r in (data if isinstance(data, list) else [])
+                if isinstance(r, dict) and len(str(r.get("date", ""))) == 10]
+        return sorted(rows, key=lambda r: str(r["date"]))
+    except Exception:
+        return []
+
+
+def _strat_delta(new: Any, old: Any, suffix: str = "") -> str:
+    """'+1.2 mois ▲' / '-0.5 ▲...' / '?' si incalculable."""
+    try:
+        if new is None or old is None:
+            return "?"
+        diff = float(new) - float(old)
+        if diff > 0:
+            return f"+{diff:g}{suffix} ▲"
+        if diff < 0:
+            return f"{diff:g}{suffix} ▼"
+        return f"={suffix}"
+    except Exception:
+        return "?"
+
+
+def sec_strategy() -> list[str]:
+    """Suivi strategique mensuel (runway, velocite, OKR, decisions).
+
+    Lit UNIQUEMENT strategy_history.local.json : jamais de git, jamais
+    de LLM, jamais d exception. Historique jeune -> message honnete
+    (pas de courbe avec 1 point).
+    """
+    try:
+        rows = _strategy_history()
+        root = _rules_dir()
+        if not rows:
+            return [f"STRATÉGIE pas d historique (dir {root} : "
+                    "lancer `python scripts/kuro_strategy.py --snapshot`)"]
+        age = _file_age_txt(root / "strategy_history.local.json")
+        last = rows[-1]
+        prev = None
+        for r in reversed(rows[:-1]):
+            if str(r.get("date", ""))[:7] != str(last.get("date", ""))[:7]:
+                prev = r
+                break
+        old = prev or {}
+        okr = last.get("okr_avg_pct")
+        okr_txt = f"{okr}%" if okr is not None else "?"
+        def _val(key: str) -> str:
+            value = last.get(key)
+            return "?" if value is None else str(value)
+
+        lines = [
+            f"runway : {_val('runway_months')} mois "
+            f"({_strat_delta(last.get('runway_months'), old.get('runway_months'), ' mois')})"
+            f"{age}",
+            f"  velocite : {_val('velocity')} c/sem "
+            f"({_strat_delta(last.get('velocity'), old.get('velocity'), ' c/sem')})",
+            f"  OKR : {okr_txt} moy. "
+            f"({_strat_delta(last.get('okr_avg_pct'), old.get('okr_avg_pct'), ' pts')}) "
+            f"{last.get('okr_hit', '?')}/{last.get('okr_total', '?')} atteints",
+            f"  decisions : {len(last.get('decisions_open') or [])} ouvertes "
+            f"· {last.get('interviews_7d', '?')} interviews 7j",
+        ]
+        return lines[:6]
+    except Exception:
+        return ["STRATÉGIE (indisponible)"]
+
+
+# ---------- registre de boxes (point d extension) ----------
+# Les boxes "simples" (lignes pures, meme contenu en large et en etroit)
+# sont cataloguees ici : le rendu itere le registre au lieu d empiler
+# des if. Les tiers ajoutent la leur via register_box() (numeros 8-9,
+# 7 pris par SEO — voir extension SEO plus bas).
+_BOX_DEFS: list[dict] = [
+    {"key": "market", "num": "5", "title": "5 MARKETING", "color": "cyan",
+     "rows": sec_marketing},
+    {"key": "strat", "num": "6", "title": "6 STRATÉGIE", "color": "cyan",
+     "rows": sec_strategy},
+]
+
+
+def _extra_boxes(hidden: set, width: int) -> list[str]:
+    """Boxes du registre en cadres (jamais d exception, ordre catalogue)."""
+    try:
+        body: list[str] = []
+        for defn in list(_BOX_DEFS):
+            try:
+                if str(defn.get("key")) in (hidden or set()):
+                    continue
+                func = defn.get("rows")
+                rows = func() if callable(func) else []
+                rows = list(rows) if isinstance(rows, list) else []
+            except Exception:
+                rows = ["(indisponible)"]
+            body += _box(str(defn.get("title") or "?"), rows,
+                         max(10, int(width)),
+                         defn.get("color") if defn.get("color") in _PAINT_LEVELS else None)
+        return body
+    except Exception:
+        return []
+
+
+def register_box(key: str, title: str, color: str, rows_func) -> str:
+    """Enregistre une box d extension (tiers). Retourne le numero (8-9) ou "".
+
+    rows_func() -> list[str], appelee a chaque frame en mode non-compact.
+    Cles reservees (kuro/cpu/net/proc/market/strat/seo) refusees.
+    """
+    try:
+        key = str(key or "").strip()
+        if not key or not callable(rows_func):
+            return ""
+        taken_keys = {str(b.get("key")) for b in _BOX_DEFS}
+        taken_keys.update(("kuro", "cpu", "net", "proc"))
+        if key in taken_keys:
+            return ""
+        taken_nums = {str(b.get("num")) for b in _BOX_DEFS}
+        num = next((str(n) for n in range(8, 10) if str(n) not in taken_nums), "")
+        if not num:
+            return ""
+        _BOX_DEFS.append({"key": key, "num": num,
+                          "title": f"{num} {str(title or key).strip()}",
+                          "color": color if color in _PAINT_LEVELS else "cyan",
+                          "rows": rows_func})
+        return num
+    except Exception:
+        return ""
+
+
+def _leads_path(name: str) -> Path:
+    """Fichier ~/leads/<name> (existe sur serveur, absent sur PC : honnete)."""
+    try:
+        return Path.home() / "leads" / name
+    except Exception:
+        return Path(name)
+
+
+def sec_seo() -> list[str]:
+    """Audit SEO quotidien (~/leads/SEO_AUDIT.md) : date, P0/P1, top actions.
+
+    Lecture seule du fichier genere par le cron strategy-daily. Absent
+    (PC sans leads) -> message honnete, pas de chiffres inventes.
+    """
+    try:
+        path = _leads_path("SEO_AUDIT.md")
+        try:
+            text = path.read_text(encoding="utf-8")
+        except Exception:
+            return ["SEO pas d audit (cron strategy-daily : ~/leads/SEO_AUDIT.md absent)"]
+        date = ""
+        for line in text.splitlines()[:12]:
+            if line.startswith("Date"):
+                date = line[5:].strip()[:40]
+                break
+        p0 = _seo_items(text, "### P0")
+        p1 = _seo_items(text, "### P1")
+        age = _rel_age(_seo_file_date(path))
+        lines = [(f"audit : {date or '?'}"
+                  + (f" ({age})" if age else ""))[:100]]
+        lines.append(f"  P0 : {len(p0)} actions  ·  P1 : {len(p1)} actions")
+        lines += [f"  -> {item}" for item in p0[:2]]
+        return lines[:6]
+    except Exception:
+        return ["SEO (indisponible)"]
+
+
+def _seo_file_date(path: Path) -> str:
+    """Date ISO du fichier pour _rel_age (via mtime)."""
+    try:
+        from datetime import datetime as _dt
+        return _dt.fromtimestamp(path.stat().st_mtime).astimezone().isoformat(
+            timespec="seconds")
+    except Exception:
+        return ""
+
+
+def _seo_items(text: str, header: str) -> list[str]:
+    """Items numerotes sous un header ### (pur, testable)."""
+    try:
+        out: list[str] = []
+        inside = False
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("### "):
+                inside = stripped == header
+                continue
+            if inside and stripped and stripped[0].isdigit():
+                item = stripped.split(None, 1)
+                out.append(item[1][:110] if len(item) > 1 else stripped[:110])
+        return out
+    except Exception:
+        return []
+
+
+# Extension SEO (box 7) : definie APRES sec_seo (ref avant = NameError
+# a l import). Ordre catalogue : 5 MARKETING, 6 STRATÉGIE, 7 SEO.
+_BOX_DEFS.append({"key": "seo", "num": "7", "title": "7 SEO", "color": "cyan",
+                  "rows": sec_seo})
+
+
 def _rel_age(when: Any) -> str:
     """Age relatif best-effort ("il y a 10h", "il y a 3j", ""). Jamais d exception."""
     try:
@@ -948,6 +1267,29 @@ def _short_model_name(model: Any) -> str:
         return ""
 
 
+def _budgets() -> dict:
+    """Budgets {daily_usd, weekly_usd} depuis budgets.local.json (gitigne)."""
+    try:
+        data = json.loads((_rules_dir() / "budgets.local.json").read_text(
+            encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _budget_txt(spent: float, cap: Any) -> str:
+    """" [$1.20/$2.00 60%]" + " !!" au-dela de 100%, "" si pas de budget."""
+    try:
+        cap_f = float(cap)
+        if cap_f <= 0:
+            return ""
+        pct = float(spent or 0.0) / cap_f * 100
+        flag = " !!" if pct >= 100 else (" !" if pct >= 80 else "")
+        return f" [${float(spent or 0.0):.4f}/${cap_f:.2f} {pct:.0f}%{flag}]"
+    except Exception:
+        return ""
+
+
 def _unk_txt(n: int) -> str:
     """" +2 couts inconnus" / "" si 0. Jamais d exception."""
     try:
@@ -974,10 +1316,15 @@ def sec_brain() -> list[str]:
     (calls_d, cost_d, unk_d, cache_d,
      calls_w, cost_w, unk_w, cache_w, top, lat) = _usage_stats()
     if calls_d or calls_w or cache_d or cache_w:
+        budgets = _budgets()
+        pcts = _latency_pcts()
+        p95 = f" p95:{pcts['p95']}s" if pcts else ""
         lines.append(f"  couts : ~${cost_d:.4f} auj. ({calls_d} {_pl(calls_d, 'appel')}"
-                     f"{_unk_txt(unk_d)})  ~${cost_w:.4f} /7j ({calls_w} "
-                     f"{_pl(calls_w, 'appel')}{_unk_txt(unk_w)})  "
-                     f"top:{top} lat:{lat}s")
+                     f"{_unk_txt(unk_d)}){_budget_txt(cost_d, budgets.get('daily_usd'))}  "
+                     f"~${cost_w:.4f} /7j ({calls_w} "
+                     f"{_pl(calls_w, 'appel')}{_unk_txt(unk_w)})"
+                     f"{_budget_txt(cost_w, budgets.get('weekly_usd'))}  "
+                     f"top:{top} lat:{lat}s{p95}")
         if cache_d or cache_w:
             lines.append(f"  cache local : {cache_d} {_pl(cache_d, 'hit')} auj., "
                          f"{cache_w} {_pl(cache_w, 'hit')} /7j (0 token, instantané)")
@@ -1047,7 +1394,7 @@ def _ollama_state() -> tuple[bool, list]:
         import urllib.request
 
         base = (os.environ.get("OLLAMA_URL") or "http://127.0.0.1:11434").rstrip("/")
-        with urllib.request.urlopen(base + "/api/tags", timeout=2) as resp:
+        with urllib.request.urlopen(base + "/api/tags", timeout=2) as resp:  # nosec B310 - loopback seul (OLLAMA_URL ou 127.0.0.1), timeout 2s
             data = json.loads((resp.read() or b"").decode("utf-8") or "{}")
         if isinstance(data, dict):
             names = [str(m.get("name") or "") for m in (data.get("models") or [])
@@ -1109,14 +1456,23 @@ def _div(label: str, width: int) -> str:
 
 def _help_rows() -> list[str]:
     """Contenu de l aide (touche h)."""
-    return [
+    rows = [
         "q : quitter              espace : pause",
         "c / m : tri CPU / MEM    / : filtre processus",
-        "Haut / Bas : selection   Entree : fiche detail",
-        "1 / 2 / 3 / 4 / 5 : montre/cache KURO, CPU, RESEAU, PROC, MARKETING",
+        "Haut / Bas (ou j / k) : selection   Entree : fiche detail",
+        "1-7 : montre/cache KURO, CPU, RESEAU, PROC, MARKETING, STRATÉGIE, SEO",
         "r : rafraichir           +/- : vitesse",
         "h : cette aide           q / Echap : fermer",
     ]
+    try:
+        extras = [f"{b.get('num')} {b.get('key')}"
+                  for b in list(_BOX_DEFS)
+                  if str(b.get("num")) not in ("5", "6", "7")]
+        if extras:
+            rows.append("8-9 : extensions (" + ", ".join(extras) + ")")
+    except Exception:
+        pass
+    return rows
 
 
 def _box(title: str, rows: list[str], width: int, color: str | None = None) -> list[str]:
@@ -1145,9 +1501,9 @@ def _side_by_side(left: list[str], right: list[str], total: int, rw: int) -> lis
         n = max(len(left), len(right))
         out = []
         for i in range(n):
-            l = left[i] if i < len(left) else ""
-            r = right[i] if i < len(right) else ""
-            out.append(_vpad(_fit(l, lw), lw) + " | " + _vpad(_fit(r, rw), rw))
+            left_cell = left[i] if i < len(left) else ""
+            right_cell = right[i] if i < len(right) else ""
+            out.append(_vpad(_fit(left_cell, lw), lw) + " | " + _vpad(_fit(right_cell, rw), rw))
         return out
     except Exception:
         return [*left, *right]
@@ -1166,6 +1522,66 @@ def _titled(label: str, rows: list[str], width: int) -> list[str]:
             return []
 
 
+def _compact_strat_seo(hidden: set) -> list[str]:
+    """Digest 1 ligne strat+SEO pour le mode compact (budget <=26 rangs).
+
+    Vide si les deux boxes sont cachées. Jamais d exception.
+    """
+    try:
+        parts: list[str] = []
+        if "strat" not in (hidden or set()):
+            try:
+                first = (sec_strategy() or ["?"])[0]
+            except Exception:
+                first = "?"
+            parts.append(str(first).strip()[:60])
+        if "seo" not in (hidden or set()):
+            try:
+                rows = sec_seo() or ["?"]
+                pick = next((r for r in rows if "P0" in r and "P1" in r), rows[0])
+            except Exception:
+                pick = "?"
+            parts.append(str(pick).strip()[:45])
+        if not parts:
+            return []
+        return [" · ".join(parts)[:90]]
+    except Exception:
+        return []
+
+
+def _shrink_compact(parts: list[str], height: int) -> list[str]:
+    """Rogne le compact à `height` rangs (petits écrans).
+
+    Priorité : box PROC d'abord (garde 1 ligne), digest STRAT/SEO ensuite.
+    Header + footer jamais touchés. Pur, testable.
+    """
+    try:
+        parts = list(parts)
+        if len(parts) <= height or height < 12:
+            return parts
+        for marker, keep in (("+- 4 ", 1), ("+- 6 STRAT/SEO", 0)):
+            if len(parts) <= height:
+                break
+            start = next((i for i, line in enumerate(parts)
+                          if line.startswith(marker)), -1)
+            if start < 0:
+                continue
+            end = next((i for i in range(start + 1, len(parts))
+                        if parts[i].startswith("+")
+                        and set(parts[i]) <= {"+", "-"}), -1)
+            if end < 0:
+                continue
+            if keep == 0:
+                del parts[start:end + 1]
+            else:
+                overflow = len(parts) - height
+                removable = max(0, (end - start - 1) - keep)
+                del parts[start + 1:start + 1 + min(removable, overflow)]
+        return parts
+    except Exception:
+        return parts
+
+
 def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
                  kuro: dict | None = None, now: float | None = None,
                  hist: dict | None = None, sort: str = "cpu", filt: str = "",
@@ -1176,7 +1592,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
 
     Terminal large (>=150 cols) : sidebar droite (visage + cerveau + Kuro),
     le reste a gauche. Sinon : empilement classique.
-    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market"} (touches 1-5).
+    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market", "strat", "seo"} (touches 1-7).
     help : affiche l aide au lieu du tableau de bord (touche h).
     compact : TOP 5, sans graphes ni capteurs (auto si <32 rangs tty).
     """
@@ -1188,7 +1604,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             compact = False
     nprocs = 5 if compact else 10
     footer = ("[q] quitter [espace] pause [c/m] tri [/] filtre [HB] choix "
-              "[Entree] detail [1-5] boxes [h] aide [r] refresh [+/-] vitesse")
+              "[Entree] detail [1-7] boxes [h] aide [r] refresh [+/-] vitesse")
     if compact:
         footer = "[q] quitter [/] filtre [HB] choix [Entree] detail [h] aide"
     if filt:
@@ -1199,25 +1615,38 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
         return "\n".join(parts) + "\n"
     if compact:
-        # Slim 25 rangs : que l essentiel, sans graphes ni diviseurs.
+        # Slim <=26 rangs : l essentiel + 1 ligne strat/SEO (sinon l audit
+        # strategique est invisible sur petit terminal — vu en prod).
+        # Budget : UNE box d 1 ligne (3 rangs), pas deux boxes.
         total = min(width, 100)
         mood = sec_face(payload, kuro, now)[-1:]
         ksum = sec_kuro(kuro)[:1]
-        cpu_all = sec_cpu_mem(payload, None)
+        cpu_all = sec_cpu_mem(payload, None, prev=prev, dt=dt)
         net_all = sec_disk_net(payload, prev, dt, None, max_parts=2)
         procs = sec_procs(payload, total - 4, sort=sort, filt=filt, sel=sel,
                            limit=5)
-        body = [*sec_header(payload),
-                *_box("1 KURO", [*mood, *ksum], total, "dim"),
-                *_box("2 CPU / MEMOIRE", cpu_all, total, "ok"),
-                *_box("3 DISQUES / RESEAU", net_all, total, "blue"),
-                *_box("4 " + (procs[0] if procs else "TOP PROCESSUS"),
-                      procs[1:], total, "magenta")]
+        hide_c = set(hidden or ())
+        body = [
+            *sec_header(payload),
+            *_box("1 KURO", [*mood, *ksum], total, "dim"),
+            *_box("2 CPU / MEMOIRE", cpu_all, total, "ok"),
+            *_box("3 DISQUES / RESEAU", net_all, total, "blue"),
+            *_box("4 " + (procs[0] if procs else "TOP PROCESSUS"), procs[1:], total, "magenta"),
+        ]
+        digest = _compact_strat_seo(hide_c)
+        if digest:
+            body += _box("6 STRAT/SEO", digest, total, "cyan")
         if detail:
             body += _box(f"DETAIL {detail.get('pid', '?')}",
                          sec_proc_detail(detail), total, "cyan")
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
         if _stdout_is_tty():
+            try:
+                height = term_height()
+            except Exception:
+                height = 0
+            if height and len(parts) > height:
+                parts = _shrink_compact(parts, height)
             try:
                 room = term_height() - len(parts)
             except Exception:
@@ -1236,14 +1665,15 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         left = []
         if "cpu" not in hide:
             left += _box("2 CPU / MEMOIRE", sec_cpu_mem(payload, hist,
-                                                      width=lw - 4), lw, "ok")
+                                                      width=lw - 4,
+                                                      prev=prev, dt=dt), lw, "ok")
         if "net" not in hide:
             left += _box("3 DISQUES / RESEAU", dn_extra, lw, "blue")
         if "proc" not in hide:
             left += _box("4 " + (procs[0] if procs else "TOP PROCESSUS"),
                          procs[1:], lw, "magenta")
-        if "market" not in hide and not compact:
-            left += _box("5 MARKETING", sec_marketing(), lw, "cyan")
+        if not compact:
+            left += _extra_boxes(hide, lw)
         if detail:
             left += _box(f"DETAIL {detail.get('pid', '?')}",
                          sec_proc_detail(detail), lw, "cyan")
@@ -1281,7 +1711,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             body += _box("1 KURO", kuro_rows, total, "dim")
         if "cpu" not in hide:
             body += _box("2 CPU / MEMOIRE",
-                         sec_cpu_mem(payload, hist, width=inner), total, "ok")
+                         sec_cpu_mem(payload, hist, width=inner,
+                                     prev=prev, dt=dt), total, "ok")
         if "net" not in hide:
             body += _box("3 DISQUES / RESEAU",
                          sec_disk_net(payload, prev, dt, hist,
@@ -1291,8 +1722,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         if "proc" not in hide:
             body += _box("4 " + (procs[0] if procs else "TOP PROCESSUS"),
                          procs[1:], total, "magenta")
-        if "market" not in hide and not compact:
-            body += _box("5 MARKETING", sec_marketing(), total, "cyan")
+        if not compact:
+            body += _extra_boxes(hide, total)
         body += detail_box
     parts = [_fit(p, total) for p in body] + [_fit(f"{footer} {spinner(now)}", total)]
     if _stdout_is_tty():
@@ -1310,10 +1741,10 @@ class _RawKeys:
     """Touches instantanees (sans Entree). Windows: msvcrt. Unix: termios."""
 
     def __init__(self) -> None:
-        self._unix_fd = None
-        self._unix_old = None
+        self._unix_fd: int | None = None
+        self._unix_old: Any = None
 
-    def __enter__(self) -> "_RawKeys":
+    def __enter__(self) -> _RawKeys:
         if os.name != "nt":  # pragma: no cover - branches Unix (CI Windows)
             try:
                 import termios
@@ -1462,7 +1893,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
 
     Sections lentes protegees par caches TTL (agents 60 s, git 60 s,
     disque 120 s) : un refresh ne bloque que sur du jamais-vu.
-    Touches: q,c,m,/,HB,Entree,1-5,h,espace,+,-,r.
+    Touches: q,c,m,/,HB,Entree,1-7,h,espace,+,-,r (+8-9 extensions).
     """
     prev: dict | None = None
     prev_t: float | None = None
@@ -1476,7 +1907,12 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
     hidden: set[str] = set()
     show_help = False
     compact_mode = bool(compact)
-    _KEY2BOX = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc", "5": "market"}
+    key2box = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc"}
+    try:
+        for defn in list(_BOX_DEFS):
+            key2box[str(defn.get("num"))] = str(defn.get("key"))
+    except Exception:
+        pass
     with _RawKeys() as keys:
         while True:
             if compact is None:
@@ -1538,8 +1974,8 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                     sort = "cpu"
                 elif key == "m":
                     sort = "mem"
-                elif key in ("1", "2", "3", "4", "5"):
-                    box = _KEY2BOX[key]
+                elif key in key2box:
+                    box = key2box[key]
                     if box in hidden:
                         hidden.remove(box)
                     else:
@@ -1552,7 +1988,11 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                         filt = got.strip()[:20]
                         sel = -1
                         detail = None
-                elif key in ("up", "down"):
+                elif key in ("up", "down", "k", "j"):
+                    if key == "k":
+                        key = "up"
+                    elif key == "j":
+                        key = "down"
                     if last_procs:
                         step = -1 if key == "up" else 1
                         if sel < 0:
@@ -1579,6 +2019,65 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
     return 0  # pragma: no cover - boucle infinie, sortie par "q"
 
 
+def doctor() -> list[tuple[str, bool, str]]:
+    """Auto-diagnostic Xenon (<3 s, loopback max, jamais de cles affichees).
+
+    Rend [(nom, ok, detail)] : cles presentes (noms seuls), daemon,
+    Ollama local, OpenClaw CLI, fichiers d usage, table de prix.
+    """
+    out: list[tuple[str, bool, str]] = []
+
+    def _add(name: str, ok: bool, detail: str = "") -> None:
+        try:
+            out.append((str(name), bool(ok), str(detail or "")))
+        except Exception:
+            pass
+
+    try:
+        keys = [v for v in ("OPENROUTER_API_KEY", "GROQ_API_KEY",
+                            "DEEPSEEK_API_KEY") if os.environ.get(v)]
+        _add("cles-cloud", True, f"{len(keys)} configuree(s)" if keys
+             else "aucune (mode local/pollinations)")
+    except Exception:
+        _add("cles-cloud", False, "illisibles")
+    try:
+        snap = collect_kuro_snapshot()
+        if not snap.get("db_present"):
+            _add("daemon", False, "base absente (~/.kuro/kuro.db)")
+        else:
+            age = snap.get("heartbeat_age_min")
+            old = age is not None and age >= 15
+            _add("daemon", not old,
+                 "aucun battement" if age is None else f"battement il y a {age:.0f} min")
+    except Exception:
+        _add("daemon", False, "erreur lecture")
+    try:
+        model = os.environ.get("OLLAMA_MODEL")
+        if not model or model.endswith(":cloud"):
+            _add("ollama-local", True, "non configure (off)")
+        else:
+            ok, names = _ollama_state()
+            _add("ollama-local", bool(ok and model in names),
+                 model if ok and model in names else "daemon injoignable ou modele absent")
+    except Exception:
+        _add("ollama-local", False, "erreur sonde")
+    try:
+        import shutil as _sh
+        found = _sh.which("openclaw")
+        _add("openclaw-cli", bool(found), found or "absent (section AGENTS vide)")
+    except Exception:
+        _add("openclaw-cli", False, "erreur")
+    try:
+        have_last = LLM_LAST_FILE.exists()
+        have_usage = LLM_USAGE_FILE.exists()
+        _add("journal-llm", bool(have_last or have_usage),
+             "llm_last.json + usage.jsonl" if have_last and have_usage
+             else "aucun appel enregistre")
+    except Exception:
+        _add("journal-llm", False, "illisible")
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Glances Kuro en terminal (live)")
     parser.add_argument("--interval", type=float, default=DEFAULT_INTERVAL)
@@ -1587,9 +2086,19 @@ def main(argv: list[str] | None = None) -> int:
                         help="pas de couleurs ANSI (pipes, vieilles consoles)")
     parser.add_argument("--compact", action="store_true",
                         help="mode compact (petits ecrans) ; auto si <32 rangs")
+    parser.add_argument("--doctor", action="store_true",
+                        help="auto-diagnostic (cles, daemon, ollama, cli, journal)")
     args = parser.parse_args(argv)
     global _COLOR
     _COLOR = not args.no_color
+    if args.doctor:
+        bad = 0
+        for name, ok, detail in doctor():
+            mark = "OK " if ok else "KO "
+            if not ok:
+                bad += 1
+            sys.stdout.write(f"[{mark}] {name}" + (f" : {detail}" if detail else "") + "\n")
+        return 1 if bad else 0
     if not _stdout_is_tty():
         sys.stdout.write(render_frame(collect_system_snapshot(top_n=args.top),
                                        kuro=collect_kuro_snapshot()))

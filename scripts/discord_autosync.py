@@ -122,7 +122,7 @@ def main(argv=None):
         print(f"[ERR] lecture serveur: {status} {live}")
         return 1
     by_name = {c.get("name", ""): c for c in live if isinstance(c, dict)}
-    by_id = {c.get("id"): c for c in live if isinstance(c, dict)}
+    {c.get("id"): c for c in live if isinstance(c, dict)}
 
     # --- 1. MANQUANTS (PROD + IDEA), avec adoption anti-doublon ---
     actions = []
@@ -198,7 +198,7 @@ def main(argv=None):
     print(f"  sync PROD stats: {stats}")
     if mode_apply:
         # Crée IDEA manquantes pures (pas les adopt-suggest)
-        to_create = [(c, t, p) for k, c, p in actions if k == "create-idea" for (cc, t, pp) in [(None, None, None)]]
+        [(c, t, p) for k, c, p in actions if k == "create-idea" for (cc, t, pp) in [(None, None, None)]]
         # Re-dérive topics IDEA
         idea_by_chan = {chan: (cat, topic) for cat, chan, topic, proj in idea_list}
         cats_live = {c.get("name"): c.get("id") for c in live if isinstance(c, dict) and c.get("type") == 4}

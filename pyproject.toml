@@ -36,3 +36,47 @@ version = { attr = "kuro_dashboard.__version__" }
 
 [tool.setuptools.package-data]
 kuro_dashboard = ["static/*", "*.tcss"]
+
+# Qualité (CI quality.yml + pre-commit) : ruff remplace flake8/isort/black,
+# mypy permissif ciblé (stubs psutil absents, termios/fcntl Unix-only),
+# coverage ciblée tui.py (96 % réel), bandit Medium+ (B110/B112 = design
+# "jamais d'exception" volontaire du TUI, faux positifs B608/B310 en nosec).
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "N"]
+ignore = ["E501", "UP017"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_*.py" = ["S101", "E402"]
+"scripts/*.py" = ["E402", "UP031"]
+# UP031 (printf -> f-string) reste à migrer dans scripts/ : 58 sites sûrs
+# mais trop diffus pour cette PR — suivi dédié, CI src+tests déjà stricte.
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_configs = true
+show_error_codes = true
+[[tool.mypy.overrides]]
+module = "kuro_dashboard.tui"
+ignore_errors = false
+disable_error_code = ["attr-defined", "union-attr"]
+
+[tool.coverage.run]
+source = ["src/kuro_dashboard"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = ["pragma: no cover", "if __name__ =="]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.bandit]
+skips = ["B110", "B112"]

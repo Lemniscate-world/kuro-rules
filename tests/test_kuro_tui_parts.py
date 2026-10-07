@@ -14,8 +14,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from kuro_dashboard import tui  # noqa: E402
 from kuro_dashboard import projects as _git_projects  # noqa: E402
+from kuro_dashboard import tui  # noqa: E402
 
 
 def _stale(ttl):
@@ -464,6 +464,128 @@ def test_read_line_edition(capsys):
     assert tui._read_line(_Boom()) is None
 
 
+def _save_boxes():
+    return [dict(b) for b in tui._BOX_DEFS]
+
+
+def _restore_boxes(saved):
+    tui._BOX_DEFS.clear()
+    tui._BOX_DEFS.extend(saved)
+
+
+def test_register_box_cycle(monkeypatch):
+    saved = _save_boxes()
+    try:
+        assert tui.register_box("", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("market", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("seo", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("cpu", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("x", "X", "cyan", "pas-callable") == ""
+        num = tui.register_box("demo", "Demo Box", "nope-color", lambda: ["hello"])
+        assert num == "8"
+        assert tui._BOX_DEFS[-1]["title"] == "8 Demo Box"
+        assert tui._BOX_DEFS[-1]["color"] == "cyan"
+        monkeypatch.setattr(tui, "term_width", lambda: 80)
+        assert "8 Demo Box" in tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+        sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0,
+                                hidden=("demo",))
+        assert "8 Demo Box" not in sans
+        assert "8 demo" in " ".join(tui._help_rows())
+        # 9 puis saturation (7 pris par SEO)
+        assert tui.register_box("b9", "B9", "cyan", lambda: ["9"]) == "9"
+        assert tui.register_box("b10", "B10", "cyan", lambda: ["x"]) == ""
+    finally:
+        _restore_boxes(saved)
+
+
+def test_extra_box_erreur_rendue(monkeypatch):
+    saved = _save_boxes()
+    try:
+        def _boom():
+            raise RuntimeError("panne extension")
+
+        assert tui.register_box("boom", "Boom", "cyan", _boom) == "8"
+        monkeypatch.setattr(tui, "term_width", lambda: 80)
+        frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+        assert "(indisponible)" in frame
+    finally:
+        _restore_boxes(saved)
+
+
+def test_use_gardes_malformes():
+    assert tui._swap_rates({"memory": None}, {"memory": None}, 1.0) == (None, None)
+    assert tui._disk_busy({"disk": None}, {"disk": None}, 1.0) is None
+    bad = {"host": {"cpu_count": "x"}, "cpu": {"percent": 1.0,
+                                               "load_avg": ["y"]}, "memory": {}}
+    assert not any("charge" in r for r in tui.sec_cpu_mem(bad, None))
+    assert tui.sec_procs("pas-un-dict", 60) == [
+        "TOP PROCESSUS  (tri CPU)",
+        "  (liste indisponible : installez psutil sur l hote)"]
+    assert isinstance(tui.sec_disk_net({"network": "boom"}, None, 1.0), list)
+
+
+def test_latency_pcts_gardes(tmp_path, monkeypatch):
+    usage = tmp_path / "u.jsonl"
+    usage.write_text("[1]\n{bad json\n", encoding="utf-8")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", usage)
+    assert tui._latency_pcts() == {}
+
+
+def test_strat_delta_negatif_et_secours(monkeypatch):
+    assert tui._strat_delta(1.0, 2.0, " mois") == "-1 mois ▼"
+    assert tui._strat_delta("x", 1.0) == "?"
+    monkeypatch.setattr(tui, "_strategy_history",
+                        lambda: (_ for _ in ()).throw(RuntimeError()))
+    assert tui.sec_strategy() == ["STRATÉGIE (indisponible)"]
+
+
+def test_registre_gardes(monkeypatch):
+    monkeypatch.setattr(tui, "_BOX_DEFS", None)
+    assert tui._extra_boxes(set(), 80) == []
+    assert tui.register_box("x", "X", "cyan", lambda: ["x"]) == ""
+    assert "extensions" not in " ".join(tui._help_rows())
+
+
+def test_watch_key2box_garde(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "collect_system_snapshot",
+                        lambda top_n=10: _payload())
+    monkeypatch.setattr(tui, "collect_kuro_snapshot", lambda: _kuro())
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    monkeypatch.setattr(tui.time, "sleep", lambda s: None)
+    monkeypatch.setattr(tui, "_BOX_DEFS", None)
+    monkeypatch.setattr(tui, "_RawKeys", lambda: _ScriptedKeys(["q"]))
+    assert tui.watch(interval=5, top=3) == 0
+
+
+def test_doctor_etats(monkeypatch, tmp_path):
+    monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    monkeypatch.setattr(tui, "collect_kuro_snapshot",
+                        lambda: (_ for _ in ()).throw(RuntimeError()))
+    monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+    rows = dict((n, (ok, d)) for n, ok, d in tui.doctor())
+    assert rows["daemon"] == (False, "erreur lecture")
+    assert rows["ollama-local"][0] is True  # non configure -> off=True honnete
+    assert "journal-llm" in rows
+    monkeypatch.setattr(tui, "collect_kuro_snapshot",
+                        lambda: {"db_present": False})
+    assert dict((n, ok) for n, ok, d in tui.doctor())["daemon"] is False
+    monkeypatch.setattr(tui, "collect_kuro_snapshot",
+                        lambda: {"db_present": True, "heartbeat_age_min": 99.0})
+    assert dict((n, ok) for n, ok, d in tui.doctor())["daemon"] is False
+    monkeypatch.setenv("OLLAMA_MODEL", "qwen:8b")
+    monkeypatch.setattr(tui, "_ollama_state", lambda: (True, ["qwen:8b"]))
+    assert dict((n, ok) for n, ok, d in tui.doctor())["ollama-local"] is True
+
+
+def test_main_doctor_codes(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "doctor", lambda: [("a", True, "ok")])
+    assert tui.main(["--doctor"]) == 0
+    assert "[OK ] a" in capsys.readouterr().out
+    monkeypatch.setattr(tui, "doctor", lambda: [("a", False, "ko")])
+    assert tui.main(["--doctor"]) == 1
+
+
 def test_watch_toutes_touches(monkeypatch, capsys):
     monkeypatch.setattr(tui, "collect_system_snapshot",
                         lambda top_n=10: _payload())
@@ -670,11 +792,12 @@ def test_marketing_absent_et_exception(tmp_path, monkeypatch):
 
 
 def test_file_age_heures(tmp_path):
-    import time as _t
     import os as _os
+    import time as _t
     f = tmp_path / "f.txt"
     f.write_text("x", encoding="utf-8")
-    old = _t.time() - 3 * 3600
+    # Milieu du seau 3h (pas la borne exacte : horloge CI granuleuse/NTP).
+    old = _t.time() - 3.5 * 3600
     _os.utime(f, (old, old))
     assert "3h" in tui._file_age_txt(f)
 
@@ -825,7 +948,7 @@ def test_render_compact_avec_detail(monkeypatch):
     assert "DETAIL pid 7" in frame
 
 
-def test_render_compact_auto_term_casse(monkeypatch):
+def test_render_compact_auto_term_casse_tty(monkeypatch):
     monkeypatch.setattr(tui, "term_width", lambda: 80)
     monkeypatch.setattr(tui.sys.stdout, "isatty", lambda: True)
     monkeypatch.setattr(tui, "term_height",
@@ -1068,6 +1191,55 @@ def test_sec_brain_modele_inconnu_cache(tmp_path, monkeypatch):
     assert "1 appel" in rows[1] and "1 coût inconnu" in rows[1]
 
 
+def test_latency_pcts(tmp_path, monkeypatch):
+    from datetime import date
+    usage = tmp_path / "u.jsonl"
+    usage.write_text(
+        "\n".join(json.dumps({"day": date.today().isoformat(), "engine": "e",
+                              "latency_s": v}) for v in (1.0, 2.0, 3.0, 100.0)),
+        encoding="utf-8")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", usage)
+    assert tui._latency_pcts() == {"p50": 3.0, "p95": 100.0}
+    usage.write_text(json.dumps({"day": date.today().isoformat(),
+                                 "engine": "cache", "latency_s": 0.0}),
+                     encoding="utf-8")
+    assert tui._latency_pcts() == {}, "cache exclu + <2 valeurs"
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    assert tui._latency_pcts() == {}
+
+
+def test_budgets_affichage(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    assert tui._budgets() == {}
+    assert tui._budget_txt(1.0, None) == ""
+    assert tui._budget_txt(1.0, 0) == ""
+    assert tui._budget_txt(1.0, "bad") == ""
+    assert tui._budget_txt(1.0, 2.0) == " [$1.0000/$2.00 50%]"
+    assert tui._budget_txt(1.7, 2.0).endswith(" !]")
+    assert tui._budget_txt(3.0, 2.0).endswith(" !!]")
+    (tmp_path / "budgets.local.json").write_text('{"daily_usd": 1.0}',
+                                                 encoding="utf-8")
+    assert tui._budgets() == {"daily_usd": 1.0}
+    (tmp_path / "budgets.local.json").write_text('[1,2]', encoding="utf-8")
+    assert tui._budgets() == {}
+
+
+def test_pricing_versionne(monkeypatch):
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import kuro_llm as _llm
+    assert _llm._model_rate("m:x:free", "openrouter") == 0.0
+    assert _llm._model_rate("openai/gpt-9", "openrouter") is None
+    assert "v" in _llm.pricing_version() and "@" in _llm.pricing_version()
+    _llm._PRICING_CACHE.clear()
+    monkeypatch.setattr(_llm.Path, "resolve", lambda self: (_ for _ in ()).throw(
+        OSError("disque mort")))
+    try:
+        assert _llm._model_rate("", "deepseek") == 1.0, "repli integre"
+    finally:
+        _llm._PRICING_CACHE.clear()
+
+
 def test_sec_brain_cache_seul(tmp_path, monkeypatch):
     from datetime import date
     monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
@@ -1080,6 +1252,159 @@ def test_sec_brain_cache_seul(tmp_path, monkeypatch):
     rows = tui.sec_brain()
     assert any("cache local" in r for r in rows)
     assert any("0 appel" in r for r in rows)
+
+
+def test_sec_strategy_vide_et_age(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    rows = tui.sec_strategy()
+    assert any("pas d historique" in r for r in rows)
+    hist = [{"date": "2026-09-05", "runway_months": 1.0, "burn": 10.0,
+             "mrr": 5.0, "velocity": 1.0, "lead_time": 3.0, "ci_failures": 2,
+             "okr_avg_pct": 40.0, "okr_hit": 0, "okr_total": 2,
+             "interviews_7d": 0, "pipeline_total": 3, "decisions_open": ["a"]},
+            {"date": "2026-10-06", "runway_months": 2.0, "burn": 10.0,
+             "mrr": 5.0, "velocity": 2.0, "lead_time": 3.0, "ci_failures": 0,
+             "okr_avg_pct": 80.0, "okr_hit": 1, "okr_total": 2,
+             "interviews_7d": 2, "pipeline_total": 4, "decisions_open": []}]
+    import json as _js
+    (tmp_path / "strategy_history.local.json").write_text(_js.dumps(hist),
+                                                          encoding="utf-8")
+    rows2 = tui.sec_strategy()
+    assert any("runway" in r and "+1" in r for r in rows2)
+    assert any("0 ouvertes" in r for r in rows2), "le dernier snapshot n'a aucune décision ouverte"
+    assert tui._strat_delta(None, 1.0) == "?"
+    assert tui._strat_delta("x", 1.0) == "?"
+    assert tui._strat_delta(1.0, 1.0) == "="
+
+
+def test_render_box_strategie_et_touche_6(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+    assert "6 STRAT" in frame
+    assert "7 SEO" in frame
+    sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, hidden=("strat",))
+    assert "6 STRAT" not in sans
+    sans_seo = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, hidden=("seo",))
+    assert "7 SEO" not in sans_seo
+    aide = tui.render_frame(_payload(), help=True)
+    assert "1-7" in aide
+
+
+def test_compact_montre_strat_et_seo(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, compact=True)
+    assert "6 STRAT/SEO" in frame
+    assert "runway" in frame or "STRAT" in frame
+    sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, compact=True,
+                            hidden=("strat", "seo"))
+    assert "6 STRAT/SEO" not in sans
+    rows = frame.splitlines()
+    assert len(rows) <= 26
+
+
+def test_shrink_compact_priorites(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    payload = _payload()
+    payload["processes"] = [
+        {"pid": i, "name": f"p{i}", "cpu": 1.0, "mem": 1.0} for i in range(5)
+    ]
+    frame = tui.render_frame(payload, kuro=_kuro(), now=1.0, compact=True)
+    rows = frame.splitlines()
+    # PROC rogné d'abord, digest gardé, footer intact.
+    mid = tui._shrink_compact(rows, len(rows) - 2)
+    assert len(mid) <= len(rows) - 2
+    assert any(r.startswith("+- 4 ") for r in mid)
+    assert any("STRAT/SEO" in r for r in mid)
+    assert mid[-1] == rows[-1]
+    # Écran minuscule : digest sauté, PROC gardé à 1 ligne, footer intact.
+    tiny = tui._shrink_compact(rows, 16)
+    assert len(tiny) < len(rows)
+    assert tiny[-1] == rows[-1]
+    assert any(r.startswith("+- 4 ") for r in tiny)
+    assert not any("STRAT/SEO" in r for r in tiny)
+    assert tui._shrink_compact(rows, 500) == rows
+
+
+def test_sec_seo_absent_et_parsing(tmp_path, monkeypatch):
+    # Absent (cas PC sans ~/leads) : message honnête, jamais de chiffres inventés.
+    monkeypatch.setattr(tui.Path, "home", lambda: tmp_path)
+    assert any("pas d audit" in r for r in tui.sec_seo())
+    # Présent (cas serveur) : date + P0/P1 + top actions.
+    leads = tmp_path / "leads"
+    leads.mkdir()
+    (leads / "SEO_AUDIT.md").write_text(
+        "Date : 2026-10-07\n\n### P0\n1 Fix title\n2 Fix meta\n\n### P1\n1 Add sitemap\n",
+        encoding="utf-8")
+    rows = tui.sec_seo()
+    assert any("P0" in r and "2" in r for r in rows)
+    assert any("P1" in r and "1" in r for r in rows)
+    assert tui._seo_items("### P0\n1 hello\n### P1\n1 bye", "### P0") == ["hello"]
+    assert tui._seo_items("rien", "### P0") == []
+
+
+def test_watch_touche_6_cache_box(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "collect_system_snapshot",
+                        lambda top_n=10: _payload())
+    monkeypatch.setattr(tui, "collect_kuro_snapshot", lambda: _kuro())
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    monkeypatch.setattr(tui.time, "sleep", lambda s: None)
+    monkeypatch.setattr(tui, "_RawKeys", lambda: _ScriptedKeys(["6", "6", "q"]))
+    assert tui.watch(interval=0.1, top=3) == 0
+    out = capsys.readouterr().out
+    frames = out.split("GLANCES KURO")
+    assert len(frames) >= 4, "3 frames attendues (visible, cachée, visible)"
+    assert "6 STRAT" in frames[1]
+    assert "6 STRAT" not in frames[2]
+    assert "6 STRAT" in frames[3]
+
+
+def test_use_saturation_cpu_swap_disque():
+    plein = {"host": {"cpu_count": 4},
+             "cpu": {"percent": 10.0, "load_avg": [8.0, 1.0, 0.5]},
+             "memory": {"percent": 10.0, "swap_sin": 200, "swap_sout": 100}}
+    avant = {"memory": {"swap_sin": 0, "swap_sout": 0},
+             "disk": {"io": {"read_time": 0, "write_time": 0}},
+             "network": {"io": {}}}
+    rows = tui.sec_cpu_mem(plein, None, prev=avant, dt=2.0)
+    assert any("file d attente" in r for r in rows)
+    assert any("pagination swap" in r for r in rows)
+    calme = {"host": {"cpu_count": 4},
+             "cpu": {"percent": 10.0, "load_avg": [0.5]},
+             "memory": {"percent": 10.0}}
+    assert not any("file d attente" in r for r in tui.sec_cpu_mem(calme, None))
+    assert tui._swap_rates({}, None, 1.0) == (None, None)
+    assert tui._swap_rates({"memory": {}}, {"memory": {}}, 1.0) == (None, None)
+    assert tui._disk_busy({}, None, 1.0) is None
+    occupe = {"disk": {"io": {"read_time": 1900, "write_time": 0}}}
+    assert tui._disk_busy(occupe, avant, 2.0) == 95.0
+    assert tui._disk_busy({"disk": {}}, {"disk": {}}, 0) is None
+
+
+def test_net_erreurs_et_etats_processus():
+    bruyant = {"disk": {"partitions": []},
+               "network": {"io": {"bytes_sent": 0, "bytes_recv": 0,
+                                  "errin": 3, "dropout": 2}}}
+    assert any("erreurs" in r for r in tui.sec_disk_net(bruyant, None, 0.0))
+    payload = {"processes": [{"pid": 1, "name": "z", "cpu": 0.0, "mem": 0.0}],
+               "process_states": {"sleeping": 100, "zombie": 2}}
+    rows = tui.sec_procs(payload, 60)
+    assert any("2 zombie" in r for r in rows)
+    sain = {"processes": [],
+            "process_states": {"sleeping": 100, "running": 5}}
+    assert not any("anormaux" in r for r in tui.sec_procs(sain, 60))
+
+
+def test_watch_jk_selection(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "collect_system_snapshot",
+                        lambda top_n=10: _payload())
+    monkeypatch.setattr(tui, "collect_kuro_snapshot", lambda: _kuro())
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    monkeypatch.setattr(tui.time, "sleep", lambda s: None)
+    monkeypatch.setattr(tui, "_RawKeys",
+                        lambda: _ScriptedKeys(["j", "k", "q"]))
+    assert tui.watch(interval=0.1, top=3) == 0
+    out = capsys.readouterr().out
+    assert "| > " in out, "la touche j doit sélectionner une ligne (marqueur >)"
 
 
 def test_watch_entree_erreur_directe(monkeypatch, capsys):

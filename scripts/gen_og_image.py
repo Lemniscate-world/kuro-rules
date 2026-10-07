@@ -4,8 +4,10 @@
 Usage: python gen_og_image.py [--out chemin/og.png]
 Appelé par generate_portfolio.py si Pillow disponible. Échoue silencieusement sans casser le build.
 """
-import re, sys
+import re
+import sys
 from pathlib import Path
+
 
 def epingle_stats():
     ep = Path.home() / "Documents" / "kuro-rules" / "Epingle_Projets.md"
@@ -24,7 +26,8 @@ def epingle_stats():
                 m = re.search(r"(\d+)", pr)
                 if m:
                     projs += 1
-                    pct_sum += int(m.group(1)); pct_n += 1
+                    pct_sum += int(m.group(1))
+                    pct_n += 1
     if projs == 0:
         return None
     return {"projets": projs, "moyenne": round(pct_sum / pct_n)}
@@ -35,9 +38,9 @@ def main():
           Path.home() / "Documents" / "Lemniscate-world" / "assets" / "og.png"
     out.parent.mkdir(parents=True, exist_ok=True)
 
-    W, H = 1200, 630
+    img_w, img_h = 1200, 630
     paper, ink, muted, hair = (250, 249, 245), (22, 21, 19), (111, 108, 100), (217, 214, 204)
-    img = Image.new("RGB", (W, H), paper)
+    img = Image.new("RGB", (img_w, img_h), paper)
     d = ImageDraw.Draw(img)
 
     def font(size, bold=False, mono=True):
@@ -50,8 +53,8 @@ def main():
         return ImageFont.load_default()
 
     # Cadre ledger
-    d.rectangle([24, 24, W - 24, H - 24], outline=ink, width=3)
-    d.line([24, 96, W - 24, 96], fill=ink, width=2)
+    d.rectangle([24, 24, img_w - 24, img_h - 24], outline=ink, width=3)
+    d.line([24, 96, img_w - 24, 96], fill=ink, width=2)
 
     d.text((56, 44), "LAMBDA-SECTION — REGISTRE DES PROJETS", font=font(22), fill=muted)
     d.text((52, 130), "λ", font=font(150, bold=True, mono=False), fill=ink)
@@ -61,11 +64,11 @@ def main():
 
     st = epingle_stats()
     if st:
-        d.line([56, 420, W - 56, 420], fill=hair, width=1)
+        d.line([56, 420, img_w - 56, 420], fill=hair, width=1)
         d.text((56, 448), f"{st['projets']} projets documentés", font=font(26), fill=ink)
         d.text((56, 492), f"progression moyenne {st['moyenne']}%", font=font(26), fill=ink)
         d.text((56, 536), "AI · Quant · Biohacking · Blockchain", font=font(22), fill=muted)
-    d.text((W - 480, H - 78), "lemniscate-world.github.io/Lemniscate-world", font=font(22), fill=muted)
+    d.text((img_w - 480, img_h - 78), "lemniscate-world.github.io/Lemniscate-world", font=font(22), fill=muted)
 
     img.save(out, "PNG", optimize=True)
     print(f"  og:image -> {out}")

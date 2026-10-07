@@ -4,7 +4,6 @@ import json
 
 import kuro_omnigraph_export as koe
 
-
 SAMPLE = """
 ## Section
 

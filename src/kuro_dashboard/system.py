@@ -97,6 +97,8 @@ def _memory(psutil_mod: Any) -> dict[str, Any]:
         "swap_total": sw.get("total"),
         "swap_used": sw.get("used"),
         "swap_percent": sw.get("percent"),
+        "swap_sin": sw.get("sin"),
+        "swap_sout": sw.get("sout"),
     }
 
 
@@ -230,7 +232,7 @@ def _docker() -> dict[str, Any]:
     return {"available": True, "count": len(containers), "containers": containers}
 
 
-def proc_detail(pid: int) -> dict[str, Any] | None:
+def proc_detail(pid: Any) -> dict[str, Any] | None:
     """Detail d un processus via psutil (None si parti/injoignable)."""
     psutil_mod = _psutil()
     if psutil_mod is None:
@@ -296,31 +298,36 @@ def _prime_process_cpu(psutil_mod: Any) -> None:
         pass
 
 
-def _top_processes(psutil_mod: Any, top_n: int) -> list[dict[str, Any]]:
+def _top_processes(psutil_mod: Any, top_n: int) -> dict[str, Any]:
     if psutil_mod is None:
-        return []
+        return {"top": [], "states": {}}
     _prime_process_cpu(psutil_mod)
     try:
         procs = list(psutil_mod.process_iter(
             ["pid", "name", "cpu_percent", "memory_percent", "status"]))
     except Exception:
-        return []
+        return {"top": [], "states": {}}
     rows: list[dict[str, Any]] = []
+    states: dict[str, int] = {}
     for proc in procs:
         try:
             info = proc.info
+            status = str(info.get("status") or "")
+            states[status or "?"] = states.get(status or "?", 0) + 1
             rows.append({"pid": info.get("pid"), "name": str(info.get("name") or "?")[:64],
                          "cpu": info.get("cpu_percent"), "mem": info.get("memory_percent"),
-                         "status": str(info.get("status") or "")})
+                         "status": status})
         except Exception:
             continue
     rows.sort(key=lambda r: (r["cpu"] or 0), reverse=True)
-    return rows[:max(1, top_n)]
+    return {"top": rows[:max(1, top_n)], "states": states}
 
 
 def collect_system_snapshot(top_n: int = DEFAULT_TOP_N) -> dict[str, Any]:
     """Photo complete de la machine (jamais d exception levee)."""
     psutil_mod = _psutil()
+    procs = _top_processes(psutil_mod, top_n)
+    top, states = procs.get("top", []), procs.get("states", {})
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "psutil_available": psutil_mod is not None,
@@ -332,7 +339,8 @@ def collect_system_snapshot(top_n: int = DEFAULT_TOP_N) -> dict[str, Any]:
         "sensors": _sensors(psutil_mod),
         "gpu": _gpu(),
         "docker": _docker(),
-        "processes": _top_processes(psutil_mod, top_n),
+        "processes": top,
+        "process_states": states,
     }
 
 

@@ -12,16 +12,24 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: compliance-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   compliance:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
 
       - name: Install deps
         run: pip install pyyaml 2>/dev/null || true

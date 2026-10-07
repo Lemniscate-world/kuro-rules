@@ -24,7 +24,6 @@ Codes retour : 0 ok · 1 echec non resolu · 2 bloque par garde-fou ·
 import difflib
 import json
 import re
-import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -159,9 +158,9 @@ def extract_diff(reply: str) -> str | None:
     m = re.search(r"```diff\n(.*?)```", reply, re.S)
     if m:
         return m.group(1).strip()
-    lines = [l for l in reply.splitlines()
-             if l.startswith(("--- ", "+++ ", "@@ ", "+", "-"))]
-    if len(lines) >= 3 and any(l.startswith("--- ") for l in lines):
+    lines = [line for line in reply.splitlines()
+             if line.startswith(("--- ", "+++ ", "@@ ", "+", "-"))]
+    if len(lines) >= 3 and any(line.startswith("--- ") for line in lines):
         return "\n".join(lines)
     return None
 

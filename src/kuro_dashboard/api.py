@@ -15,6 +15,8 @@ Endpoints :
     GET  /api/summary                digest textuel (humain ou prompt LLM)
     GET  /api/finance                burn rate, runway, MRR (R111: 100% local)
     GET  /api/metrics                lead time, velocite, echecs CI, pivots
+    GET  /api/strategy               digest strategique (runway, OKR, decisions)
+    GET  /api/seo                    audit SEO du cron (~/leads/SEO_AUDIT.md)
     POST /api/ask  {"question":".."} question libre -> cerveau Kuro
     GET  /api/compute/offers         offres Helium (GPU/RAM)
     POST /api/compute/request        demande compute {project, rtype, amount...} -> 201
@@ -182,7 +184,7 @@ def get_alerts(unack_only: bool = False) -> list[dict]:
             f"""SELECT a.id, p.name AS project, a.alert_type, a.message, a.severity,
                        a.acknowledged, a.created_at
                 FROM alerts a LEFT JOIN projects p ON p.id = a.project_id
-                {where} ORDER BY a.created_at DESC LIMIT 100""",
+                {where} ORDER BY a.created_at DESC LIMIT 100""",  # nosec B608 - where = littéral fixe, jamais d'entrée user
         )
     finally:
         try:
@@ -199,7 +201,7 @@ def get_sessions(limit: int = 20) -> list[dict]:
             f"""SELECT p.name AS project, s.session_date, s.editor,
                        s.progress_before, s.progress_after, s.tests_status, s.blockers
                 FROM sessions s LEFT JOIN projects p ON p.id = s.project_id
-                ORDER BY s.session_date DESC LIMIT {int(limit)}""",
+                ORDER BY s.session_date DESC LIMIT {int(limit)}""",  # nosec B608 - limit casté int(), jamais d'entrée brute
         )
     finally:
         try:
@@ -303,6 +305,65 @@ def get_strategy() -> dict:
         return {"status": "error", "error": str(exc)}
 
 
+def _seo_items(text: str, header: str) -> list:
+    """Items numérotés sous un header ### (même parsing que Xenon)."""
+    out, inside = [], False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("### "):
+            inside = stripped == header
+            continue
+        if inside and stripped and stripped[0].isdigit():
+            parts = stripped.split(None, 1)
+            out.append(parts[1][:110] if len(parts) > 1 else stripped[:110])
+    return out
+
+
+def _seo_age(path: str) -> str:
+    """Âge du fichier d'audit ('' si illisible)."""
+    try:
+        age_s = _dt_now().timestamp() - os.path.getmtime(path)
+    except OSError:
+        return ""
+    if age_s >= 86400:
+        return f"il y a {int(age_s // 86400)}j"
+    if age_s >= 3600:
+        return f"il y a {int(age_s // 3600)}h"
+    return f"il y a {int(age_s // 60)} min"
+
+
+def get_seo() -> dict:
+    """Audit SEO du cron strategy-daily (~/leads/SEO_AUDIT.md).
+
+    Meme parsing que Xenon (tui.sec_seo) : date, comptes P0/P1, top actions.
+    Absent (PC sans leads) -> statut explicite, jamais de chiffres inventes.
+    """
+    try:
+        path = os.path.join(os.path.expanduser("~"), "leads", "SEO_AUDIT.md")
+        try:
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+        except OSError:
+            return {"status": "missing",
+                    "detail": "cron strategy-daily : ~/leads/SEO_AUDIT.md absent"}
+        date = ""
+        for line in text.splitlines()[:12]:
+            if line.startswith("Date"):
+                date = line[5:].strip()[:40]
+                break
+        p0 = _seo_items(text, "### P0")
+        p1 = _seo_items(text, "### P1")
+        return {"status": "ok", "date": date or "?", "age": _seo_age(path),
+                "p0_count": len(p0), "p1_count": len(p1), "p0_top": p0[:3]}
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+
+
+def _dt_now():
+    """now() centralisé (testable)."""
+    return datetime.now().astimezone()
+
+
 def get_system() -> dict:
     """Snapshot systeme live (Glances Kuro). Ne touche jamais la DB."""
     try:
@@ -391,8 +452,9 @@ class Handler(BaseHTTPRequestHandler):
         qs = urllib.parse.parse_qs(parsed.query)
         path = parsed.path.rstrip("/") or "/"
         try:
-            _DB_OPTIONAL = ("/api/system", "/api/dashboard", "/dashboard-data.json")
-            if path.startswith("/api/") and path not in _DB_OPTIONAL and not DB_PATH.exists():
+            _db_optional = ("/api/system", "/api/dashboard", "/dashboard-data.json",
+                              "/api/seo")
+            if path.startswith("/api/") and path not in _db_optional and not DB_PATH.exists():
                 self._json(503, {"error": "no-db",
                                  "detail": "kuro.db absente : seuls /api/system et "
                                            "/api/dashboard repondent "
@@ -429,6 +491,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, get_metrics())
             elif path == "/api/strategy":
                 self._json(200, get_strategy())
+            elif path == "/api/seo":
+                self._json(200, get_seo())
             elif path == "/api/compute/offers":
                 try:
                     from kuro_compute import list_offers
