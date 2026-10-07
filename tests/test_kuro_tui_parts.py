@@ -796,7 +796,8 @@ def test_file_age_heures(tmp_path):
     import time as _t
     f = tmp_path / "f.txt"
     f.write_text("x", encoding="utf-8")
-    old = _t.time() - 3 * 3600
+    # Milieu du seau 3h (pas la borne exacte : horloge CI granuleuse/NTP).
+    old = _t.time() - 3.5 * 3600
     _os.utime(f, (old, old))
     assert "3h" in tui._file_age_txt(f)
 
