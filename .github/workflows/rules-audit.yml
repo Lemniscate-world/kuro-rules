@@ -14,10 +14,18 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: rules-audit-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit-rules:
     name: Audit kuro-rules policy
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -26,7 +34,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+          cache: 'pip'
 
       - name: Show Python version
         run: python --version

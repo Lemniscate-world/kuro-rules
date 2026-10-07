@@ -10,7 +10,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write # un seul commit par repo (jobs publication)
+
+# Sérialise les runs (schedule 30 min + quotidien) : deux runs concurrents
+# feraient diverger les push --rebase. Pas d'annulation : chaque cycle publie.
+concurrency:
+  group: kuro
+  cancel-in-progress: false
 
 env:
   KURO_RULES_DIR: ${{ github.workspace }}/kuro-rules
@@ -21,6 +27,7 @@ env:
 jobs:
   kuro:
     runs-on: ubuntu-latest
+    timeout-minutes: 60 # cycle complet long (clone + audit + publication)
     steps:
       - name: Checkout kuro-rules
         uses: actions/checkout@v4
@@ -38,10 +45,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
 
       - name: Tests (pytest)
         run: |
-          python -m pip install --only-binary :all: -q pytest
+          python -m pip install --only-binary :all: -q "pytest>=8"
           python -m pytest kuro-rules/tests -q
 
       - name: Clone repos into ~/Documents (source de vérité)
