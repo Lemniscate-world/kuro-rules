@@ -131,6 +131,25 @@ reinstall_package() {
     return 0
 }
 
+mirror_cron_usage() {
+    # Miroir quotidien : activite LLM gateway -> journal Xenon (cerveau).
+    # Idempotent, ~15 s (2 appels openclaw), jamais bloquant ni fatal.
+    local marker="$HOME/.kuro/mirror-mark" now=0 last=0
+    now=$(date +%s)
+    if [ -f "$marker" ]; then
+        last=$(cat "$marker" 2>/dev/null || echo 0)
+    fi
+    case "$last" in ''|*[!0-9]*) last=0 ;; esac
+    if [ $((now - last)) -lt 72000 ]; then
+        return 0
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        python3 "$RULES_DIR/scripts/kuro_mirror_cron_usage.py" >>"$LOG_FILE" 2>&1 || true
+    fi
+    date +%s > "$marker" 2>/dev/null || true
+}
+
+
 check_endpoints() {
     local path="" code=""
     for path in "/" "/api/system" "/api/status" "/api/dashboard"; do
@@ -204,6 +223,9 @@ main() {
         reinstall_package
         log "restart services (kuro-rules ou Kuro a change)"
         restart_and_verify
+    fi
+    if [ "$MODE" != "--dry-run" ]; then
+        mirror_cron_usage
     fi
     if [ "$failed_any" = "1" ]; then
         log "termine avec des echecs (voir ci-dessus)"
