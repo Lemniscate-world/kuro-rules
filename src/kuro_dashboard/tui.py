@@ -9,7 +9,7 @@ Usage :
     python -m kuro_dashboard.tui [--interval 2] [--top 10]
 Ancien nom (alias déprécié) : kuro-glances.
 Touches en live : q quitter, espace pause, c/m tri CPU/MEM, / filtre nom,
-Haut/Bas selection, Entree fiche detail, 1-5 montre/cache boxes,
+Haut/Bas selection, Entree fiche detail, 1-6 montre/cache boxes,
 r refresh, +/- vitesse. Couleurs ANSI (coupees hors tty, avec NO_COLOR/--no-color).
 Box 5 MARKETING : pipeline local + drafts LAUNCH_POSTS + tracker acquisition.
 """
@@ -444,7 +444,37 @@ def spark(values: list | None, width: int = 24) -> str:
     return seq.rjust(width, " ")
 
 
-def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0) -> list[str]:
+def _swap_rates(cur: dict, prev: dict | None, dt: float) -> tuple:
+    """Pagination swap (pages/s) depuis 2 snapshots (None si pas calculable)."""
+    if not prev or dt <= 0:
+        return None, None
+    try:
+        mem, pmem = cur.get("memory") or {}, (prev.get("memory") or {})
+        sin = ((mem.get("swap_sin") or 0) - (pmem.get("swap_sin") or 0)) / dt
+        sout = ((mem.get("swap_sout") or 0) - (pmem.get("swap_sout") or 0)) / dt
+        if mem.get("swap_sin") is None or pmem.get("swap_sin") is None:
+            return None, None
+        return max(0.0, sin), max(0.0, sout)
+    except Exception:
+        return None, None
+
+
+def _disk_busy(cur: dict, prev: dict | None, dt: float) -> float | None:
+    """% de temps disques occupes (read+write time) entre 2 snapshots."""
+    if not prev or dt <= 0:
+        return None
+    try:
+        io, pio = (cur.get("disk") or {}).get("io") or {}, \
+            (prev.get("disk") or {}).get("io") or {}
+        busy_ms = ((io.get("read_time", 0) - pio.get("read_time", 0))
+                   + (io.get("write_time", 0) - pio.get("write_time", 0)))
+        return min(100.0, max(0.0, busy_ms / (dt * 1000) * 100))
+    except Exception:
+        return None
+
+
+def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0,
+                prev: dict | None = None, dt: float = 0.0) -> list[str]:
     use = _colors_on()
     cpu = payload.get("cpu") or {}
     mem = payload.get("memory") or {}
@@ -461,6 +491,15 @@ def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0) -> list
     per = (cpu.get("per_cpu") or [])[:8]
     if per:
         lines.append("     " + "  ".join(f"c{i}:{v:.0f}%" for i, v in enumerate(per)))
+    load = (cpu.get("load_avg") or [])[:1]
+    cores = (payload.get("host") or {}).get("cpu_count") or 0
+    if load and cores:
+        try:
+            sat = float(load[0]) / float(cores)
+            flag = "  << file d attente !" if sat >= 1 else ""
+            lines.append(f"     charge 1min {float(load[0]):.2f} / {cores} coeurs{flag}")
+        except Exception:
+            pass
     if hist and len([v for v in (hist.get("cpu") or []) if v is not None]) >= 2:
         gw = max(24, min(term_width(), 100) - 14)
         lines.append(f"CPU graph [{spark(hist.get('cpu'), gw)}]")
@@ -473,6 +512,10 @@ def sec_cpu_mem(payload: dict, hist: dict | None = None, width: int = 0) -> list
     swap = mem.get("swap_percent")
     if swap is not None:
         lines.append(f"SWAP {bar(swap, color=_level(swap) if use else None)} {swap}%")
+    sin, sout = _swap_rates(payload, prev, dt)
+    if sin is not None and sout is not None and (sin > 0 or sout > 0):
+        lines.append(f"     pagination swap : {sin:.0f} pages/s entree, "
+                     f"{sout:.0f} pages/s sortie (saturation memoire !)")
     if hist:
         lines.append(f"MEM hist [{spark(hist.get('mem'), 24)}]")
     return lines
@@ -500,6 +543,18 @@ def sec_disk_net(payload: dict, prev: dict | None, dt: float,
         lines.append(_div("reseau", width))
     sent, recv = _net_rates(payload, prev, dt)
     lines.append(f"NET  envoi {fmt_rate(sent):>12}  reception {fmt_rate(recv):>12}")
+    busy = _disk_busy(payload, prev, dt)
+    if busy is not None:
+        lines.append(f"     disques occupes a {busy:.0f}% "
+                     f"{'<< saturation I/O !' if busy >= 90 else ''}".rstrip())
+    try:
+        io = (payload.get("network") or {}).get("io") or {}
+        errs = sum(int(io.get(k) or 0) for k in
+                   ("errin", "errout", "dropin", "dropout"))
+    except Exception:
+        errs = 0
+    if errs:
+        lines.append(f"     reseau : {errs} erreurs/pertes cumulees (a surveiller)")
     if hist and len([v for v in (hist.get("up") or []) if v is not None]) >= 2:
         lines.append(f"UP   [{spark(hist.get('up'), 24)}] {fmt_rate(sent)}")
         lines.append(f"DOWN [{spark(hist.get('down'), 24)}] {fmt_rate(recv)}")
@@ -535,6 +590,15 @@ def sec_procs(payload: dict, width: int, sort: str = "cpu", filt: str = "",
     if filt:
         title += f"  [filtre:{filt[:20]}]"
     lines = [title]
+    try:
+        states = payload.get("process_states") or {}
+        weird = {k: v for k, v in states.items()
+                 if k not in ("running", "sleeping", "idle", "?", "") and v}
+        if weird:
+            lines.append("  etats anormaux : " + ", ".join(
+                f"{v} {k}" for k, v in sorted(weird.items())))
+    except Exception:
+        pass
     procs = _visible_procs(payload, sort, filt)
     for idx, proc in enumerate(procs[: max(1, limit)]):
         name = str(proc.get("name") or "?")[: width - 40]
@@ -918,6 +982,77 @@ def sec_marketing() -> list[str]:
         return ["MARKETING (indisponible)"]
 
 
+def _strategy_history() -> list[dict]:
+    """Snapshots mensuels (kuro_strategy.py --snapshot). Liste vide si absent."""
+    try:
+        data = json.loads((_rules_dir() / "strategy_history.local.json").read_text(
+            encoding="utf-8"))
+        rows = [r for r in (data if isinstance(data, list) else [])
+                if isinstance(r, dict) and len(str(r.get("date", ""))) == 10]
+        return sorted(rows, key=lambda r: str(r["date"]))
+    except Exception:
+        return []
+
+
+def _strat_delta(new: Any, old: Any, suffix: str = "") -> str:
+    """'+1.2 mois ▲' / '-0.5 ▲...' / '?' si incalculable."""
+    try:
+        if new is None or old is None:
+            return "?"
+        diff = float(new) - float(old)
+        if diff > 0:
+            return f"+{diff:g}{suffix} ▲"
+        if diff < 0:
+            return f"{diff:g}{suffix} ▼"
+        return f"={suffix}"
+    except Exception:
+        return "?"
+
+
+def sec_strategy() -> list[str]:
+    """Suivi strategique mensuel (runway, velocite, OKR, decisions).
+
+    Lit UNIQUEMENT strategy_history.local.json : jamais de git, jamais
+    de LLM, jamais d exception. Historique jeune -> message honnete
+    (pas de courbe avec 1 point).
+    """
+    try:
+        rows = _strategy_history()
+        root = _rules_dir()
+        if not rows:
+            return [f"STRATÉGIE pas d historique (dir {root} : "
+                    "lancer `python scripts/kuro_strategy.py --snapshot`)"]
+        age = _file_age_txt(root / "strategy_history.local.json")
+        last = rows[-1]
+        prev = None
+        for r in reversed(rows[:-1]):
+            if str(r.get("date", ""))[:7] != str(last.get("date", ""))[:7]:
+                prev = r
+                break
+        old = prev or {}
+        okr = last.get("okr_avg_pct")
+        okr_txt = f"{okr}%" if okr is not None else "?"
+        def _val(key: str) -> str:
+            value = last.get(key)
+            return "?" if value is None else str(value)
+
+        lines = [
+            f"runway : {_val('runway_months')} mois "
+            f"({_strat_delta(last.get('runway_months'), old.get('runway_months'), ' mois')})"
+            f"{age}",
+            f"  velocite : {_val('velocity')} c/sem "
+            f"({_strat_delta(last.get('velocity'), old.get('velocity'), ' c/sem')})"
+            f"  OKR : {okr_txt} moy. "
+            f"({_strat_delta(last.get('okr_avg_pct'), old.get('okr_avg_pct'), ' pts')}) "
+            f"{last.get('okr_hit', '?')}/{last.get('okr_total', '?')} atteints",
+            f"  decisions : {len(last.get('decisions_open') or [])} ouvertes "
+            f"· {last.get('interviews_7d', '?')} interviews 7j",
+        ]
+        return lines[:6]
+    except Exception:
+        return ["STRATÉGIE (indisponible)"]
+
+
 def _rel_age(when: Any) -> str:
     """Age relatif best-effort ("il y a 10h", "il y a 3j", ""). Jamais d exception."""
     try:
@@ -1112,8 +1247,8 @@ def _help_rows() -> list[str]:
     return [
         "q : quitter              espace : pause",
         "c / m : tri CPU / MEM    / : filtre processus",
-        "Haut / Bas : selection   Entree : fiche detail",
-        "1 / 2 / 3 / 4 / 5 : montre/cache KURO, CPU, RESEAU, PROC, MARKETING",
+        "Haut / Bas (ou j / k) : selection   Entree : fiche detail",
+        "1-6 : montre/cache KURO, CPU, RESEAU, PROC, MARKETING, STRATÉGIE",
         "r : rafraichir           +/- : vitesse",
         "h : cette aide           q / Echap : fermer",
     ]
@@ -1176,7 +1311,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
 
     Terminal large (>=150 cols) : sidebar droite (visage + cerveau + Kuro),
     le reste a gauche. Sinon : empilement classique.
-    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market"} (touches 1-5).
+    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market", "strat"} (touches 1-6).
     help : affiche l aide au lieu du tableau de bord (touche h).
     compact : TOP 5, sans graphes ni capteurs (auto si <32 rangs tty).
     """
@@ -1188,7 +1323,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             compact = False
     nprocs = 5 if compact else 10
     footer = ("[q] quitter [espace] pause [c/m] tri [/] filtre [HB] choix "
-              "[Entree] detail [1-5] boxes [h] aide [r] refresh [+/-] vitesse")
+              "[Entree] detail [1-6] boxes [h] aide [r] refresh [+/-] vitesse")
     if compact:
         footer = "[q] quitter [/] filtre [HB] choix [Entree] detail [h] aide"
     if filt:
@@ -1203,7 +1338,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         total = min(width, 100)
         mood = sec_face(payload, kuro, now)[-1:]
         ksum = sec_kuro(kuro)[:1]
-        cpu_all = sec_cpu_mem(payload, None)
+        cpu_all = sec_cpu_mem(payload, None, prev=prev, dt=dt)
         net_all = sec_disk_net(payload, prev, dt, None, max_parts=2)
         procs = sec_procs(payload, total - 4, sort=sort, filt=filt, sel=sel,
                            limit=5)
@@ -1236,7 +1371,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         left = []
         if "cpu" not in hide:
             left += _box("2 CPU / MEMOIRE", sec_cpu_mem(payload, hist,
-                                                      width=lw - 4), lw, "ok")
+                                                      width=lw - 4,
+                                                      prev=prev, dt=dt), lw, "ok")
         if "net" not in hide:
             left += _box("3 DISQUES / RESEAU", dn_extra, lw, "blue")
         if "proc" not in hide:
@@ -1244,6 +1380,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
                          procs[1:], lw, "magenta")
         if "market" not in hide and not compact:
             left += _box("5 MARKETING", sec_marketing(), lw, "cyan")
+        if "strat" not in hide and not compact:
+            left += _box("6 STRATÉGIE", sec_strategy(), lw, "cyan")
         if detail:
             left += _box(f"DETAIL {detail.get('pid', '?')}",
                          sec_proc_detail(detail), lw, "cyan")
@@ -1281,7 +1419,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             body += _box("1 KURO", kuro_rows, total, "dim")
         if "cpu" not in hide:
             body += _box("2 CPU / MEMOIRE",
-                         sec_cpu_mem(payload, hist, width=inner), total, "ok")
+                         sec_cpu_mem(payload, hist, width=inner,
+                                     prev=prev, dt=dt), total, "ok")
         if "net" not in hide:
             body += _box("3 DISQUES / RESEAU",
                          sec_disk_net(payload, prev, dt, hist,
@@ -1293,6 +1432,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
                          procs[1:], total, "magenta")
         if "market" not in hide and not compact:
             body += _box("5 MARKETING", sec_marketing(), total, "cyan")
+        if "strat" not in hide and not compact:
+            body += _box("6 STRATÉGIE", sec_strategy(), total, "cyan")
         body += detail_box
     parts = [_fit(p, total) for p in body] + [_fit(f"{footer} {spinner(now)}", total)]
     if _stdout_is_tty():
@@ -1476,7 +1617,8 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
     hidden: set[str] = set()
     show_help = False
     compact_mode = bool(compact)
-    _KEY2BOX = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc", "5": "market"}
+    _KEY2BOX = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc",
+                "5": "market", "6": "strat"}
     with _RawKeys() as keys:
         while True:
             if compact is None:
@@ -1538,7 +1680,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                     sort = "cpu"
                 elif key == "m":
                     sort = "mem"
-                elif key in ("1", "2", "3", "4", "5"):
+                elif key in ("1", "2", "3", "4", "5", "6"):
                     box = _KEY2BOX[key]
                     if box in hidden:
                         hidden.remove(box)
@@ -1552,7 +1694,11 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                         filt = got.strip()[:20]
                         sel = -1
                         detail = None
-                elif key in ("up", "down"):
+                elif key in ("up", "down", "k", "j"):
+                    if key == "k":
+                        key = "up"
+                    elif key == "j":
+                        key = "down"
                     if last_procs:
                         step = -1 if key == "up" else 1
                         if sel < 0:

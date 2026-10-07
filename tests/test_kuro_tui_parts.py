@@ -1082,6 +1082,97 @@ def test_sec_brain_cache_seul(tmp_path, monkeypatch):
     assert any("0 appel" in r for r in rows)
 
 
+def test_sec_strategy_vide_et_age(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    rows = tui.sec_strategy()
+    assert any("pas d historique" in r for r in rows)
+    hist = [{"date": "2026-09-05", "runway_months": 1.0, "burn": 10.0,
+             "mrr": 5.0, "velocity": 1.0, "lead_time": 3.0, "ci_failures": 2,
+             "okr_avg_pct": 40.0, "okr_hit": 0, "okr_total": 2,
+             "interviews_7d": 0, "pipeline_total": 3, "decisions_open": ["a"]},
+            {"date": "2026-10-06", "runway_months": 2.0, "burn": 10.0,
+             "mrr": 5.0, "velocity": 2.0, "lead_time": 3.0, "ci_failures": 0,
+             "okr_avg_pct": 80.0, "okr_hit": 1, "okr_total": 2,
+             "interviews_7d": 2, "pipeline_total": 4, "decisions_open": []}]
+    import json as _js
+    (tmp_path / "strategy_history.local.json").write_text(_js.dumps(hist),
+                                                          encoding="utf-8")
+    rows2 = tui.sec_strategy()
+    assert any("runway" in r and "+1" in r for r in rows2)
+    assert any("1 ouvertes" in r or "0 ouvertes" in r for r in rows2)
+    assert tui._strat_delta(None, 1.0) == "?"
+    assert tui._strat_delta("x", 1.0) == "?"
+    assert tui._strat_delta(1.0, 1.0) == "="
+
+
+def test_render_box_strategie_et_touche_6(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+    assert "6 STRAT" in frame
+    sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, hidden=("strat",))
+    assert "6 STRAT" not in sans
+    aide = tui.render_frame(_payload(), help=True)
+    assert "1-6" in aide
+
+
+def test_watch_touche_6_cache_box(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "collect_system_snapshot",
+                        lambda top_n=10: _payload())
+    monkeypatch.setattr(tui, "collect_kuro_snapshot", lambda: _kuro())
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    monkeypatch.setattr(tui.time, "sleep", lambda s: None)
+    monkeypatch.setattr(tui, "_RawKeys", lambda: _ScriptedKeys(["6", "6", "q"]))
+    assert tui.watch(interval=0.1, top=3) == 0
+    assert "GLANCES KURO" in capsys.readouterr().out
+
+
+def test_use_saturation_cpu_swap_disque():
+    plein = {"host": {"cpu_count": 4},
+             "cpu": {"percent": 10.0, "load_avg": [8.0, 1.0, 0.5]},
+             "memory": {"percent": 10.0, "swap_sin": 200, "swap_sout": 100}}
+    avant = {"memory": {"swap_sin": 0, "swap_sout": 0},
+             "disk": {"io": {"read_time": 0, "write_time": 0}},
+             "network": {"io": {}}}
+    rows = tui.sec_cpu_mem(plein, None, prev=avant, dt=2.0)
+    assert any("file d attente" in r for r in rows)
+    assert any("pagination swap" in r for r in rows)
+    calme = {"host": {"cpu_count": 4},
+             "cpu": {"percent": 10.0, "load_avg": [0.5]},
+             "memory": {"percent": 10.0}}
+    assert not any("file d attente" in r for r in tui.sec_cpu_mem(calme, None))
+    assert tui._swap_rates({}, None, 1.0) == (None, None)
+    assert tui._swap_rates({"memory": {}}, {"memory": {}}, 1.0) == (None, None)
+    assert tui._disk_busy({}, None, 1.0) is None
+    occupe = {"disk": {"io": {"read_time": 1900, "write_time": 0}}}
+    assert tui._disk_busy(occupe, avant, 2.0) == 95.0
+    assert tui._disk_busy({"disk": {}}, {"disk": {}}, 0) is None
+
+
+def test_net_erreurs_et_etats_processus():
+    bruyant = {"disk": {"partitions": []},
+               "network": {"io": {"bytes_sent": 0, "bytes_recv": 0,
+                                  "errin": 3, "dropout": 2}}}
+    assert any("erreurs" in r for r in tui.sec_disk_net(bruyant, None, 0.0))
+    payload = {"processes": [{"pid": 1, "name": "z", "cpu": 0.0, "mem": 0.0}],
+               "process_states": {"sleeping": 100, "zombie": 2}}
+    rows = tui.sec_procs(payload, 60)
+    assert any("2 zombie" in r for r in rows)
+    sain = {"processes": [],
+            "process_states": {"sleeping": 100, "running": 5}}
+    assert not any("anormaux" in r for r in tui.sec_procs(sain, 60))
+
+
+def test_watch_jk_selection(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "collect_system_snapshot",
+                        lambda top_n=10: _payload())
+    monkeypatch.setattr(tui, "collect_kuro_snapshot", lambda: _kuro())
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    monkeypatch.setattr(tui.time, "sleep", lambda s: None)
+    monkeypatch.setattr(tui, "_RawKeys",
+                        lambda: _ScriptedKeys(["j", "k", "q"]))
+    assert tui.watch(interval=0.1, top=3) == 0
+
+
 def test_watch_entree_erreur_directe(monkeypatch, capsys):
     monkeypatch.setattr(tui, "collect_system_snapshot",
                         lambda top_n=10: _payload())

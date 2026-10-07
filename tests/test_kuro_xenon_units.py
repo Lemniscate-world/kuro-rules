@@ -138,7 +138,7 @@ def test_top_processes_ignore_lignes_cassees(monkeypatch):
 
     monkeypatch.setattr(sy, "_psutil", lambda: _Ps())
     monkeypatch.setattr("time.sleep", lambda s: None)
-    assert sy._top_processes(_Ps(), 5) == []
+    assert sy._top_processes(_Ps(), 5) == {"top": [], "states": {}}
 
 
 def test_snapshot_cache_ttl(monkeypatch):
@@ -186,6 +186,39 @@ def test_host_et_cpu_sans_psutil():
                                 "swap_percent": None}
     assert sy._network(None) == {"io": {}, "interfaces": {}}
     assert sy._sensors(None) == {"temperatures": [], "fans": {}}
+
+
+def test_memory_swap_etats(monkeypatch):
+    from types import SimpleNamespace as _NS
+
+    class _Ps:
+        def virtual_memory(self):
+            return _NS(_asdict=lambda: {"total": 8, "available": 4, "used": 4,
+                                        "percent": 50.0})
+
+        def swap_memory(self):
+            return _NS(_asdict=lambda: {"total": 2, "used": 1, "percent": 50.0,
+                                        "sin": 10, "sout": 20})
+
+    mem = sy._memory(_Ps())
+    assert (mem["swap_sin"], mem["swap_sout"]) == (10, 20)
+
+    class _P:
+        def __init__(self, status):
+            self.info = {"pid": 1, "name": "x", "cpu_percent": 0.0,
+                         "memory_percent": 0.0, "status": status}
+
+        def cpu_percent(self):
+            return 0.0
+
+    class _Ps2:
+        def process_iter(self, _attrs):
+            return [_P("zombie"), _P("running")]
+
+    monkeypatch.setattr("time.sleep", lambda s: None)
+    got = sy._top_processes(_Ps2(), 5)
+    assert got["states"] == {"zombie": 1, "running": 1}
+    assert [p["pid"] for p in got["top"]] == [1, 1]
 
 
 # -- kuro_state -------------------------------------------------------------------

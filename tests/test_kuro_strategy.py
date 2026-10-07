@@ -13,6 +13,60 @@ METRICS = {"averages": {"velocity_per_week": 1.06, "lead_time_days": 47.2}}
 PIPELINE = {"interviews_7d": 1, "total": 4}
 
 
+def _payload(runway=2.0, velocity=1.5, okr_avg=60.0, hit="1/2", itw=2,
+             ci_fail=1, decisions=("velocity",)):
+    okrs = [{"pct": okr_avg, "hit": hit.startswith("2"),
+             "label": "O", "target": 100, "current": okr_avg, "key": "o"}]
+    return {"finance": {"runway_months": runway, "burn_rate_monthly": 10.0,
+                        "mrr_monthly": 5.0},
+            "execution": {"velocity_per_week": velocity, "lead_time_days": 3.0,
+                          "ci": {"failures": ci_fail}},
+            "okr": okrs,
+            "pipeline": {"total": 4, "interviews_7d": itw},
+            "decisions": [{"key": k, "text": k, "status": "OPEN", "age_days": 1}
+                          for k in decisions]}
+
+
+def test_snapshot_entry_champs():
+    e = ks.snapshot_entry(_payload(), "2026-10-06")
+    assert (e["date"], e["runway_months"], e["velocity"]) == ("2026-10-06", 2.0, 1.5)
+    assert e["okr_avg_pct"] == 60.0 and e["decisions_open"] == ["velocity"]
+
+
+def test_append_snapshot_idempotent_et_prune(tmp_path, monkeypatch):
+    hist = tmp_path / "h.json"
+    monkeypatch.setattr(ks, "HISTORY_FILE", hist)
+    ks.append_snapshot(_payload(runway=2.0), today="2026-10-06")
+    ks.append_snapshot(_payload(runway=3.0), today="2026-10-06")
+    rows = ks.load_history()
+    assert len(rows) == 1 and rows[0]["runway_months"] == 3.0
+    ks.append_snapshot(_payload(), today="2020-01-01")
+    assert any(r["date"] == "2020-01-01" for r in ks.load_history())
+    ks.append_snapshot(_payload(), today="2026-10-07")
+    assert not any(r["date"] == "2020-01-01" for r in ks.load_history()), "prune >400 j"
+    monkeypatch.setattr(ks, "HISTORY_FILE", tmp_path / "nope" / "h.json")
+    assert ks.append_snapshot(_payload(), today="2026-10-06")["date"] == "2026-10-06"
+
+
+def test_monthly_deux_mois_et_vide():
+    old = ks.snapshot_entry(_payload(runway=1.0, velocity=1.0, okr_avg=40.0,
+                                     itw=0, ci_fail=3, decisions=("a", "b")),
+                            "2026-09-05")
+    new = ks.snapshot_entry(_payload(runway=2.0, velocity=2.0, okr_avg=80.0,
+                                     itw=2, ci_fail=0, decisions=("b", "c")),
+                            "2026-10-06")
+    d = ks.monthly_digest([old, new], today="2026-10-06")
+    assert d["status"] == "ok" and (d["from"], d["to"]) == ("2026-09", "2026-10")
+    assert (d["runway_delta"], d["velocity_delta"]) == (1.0, 1.0)
+    assert d["okr_avg_delta"] == 40.0
+    assert d["decisions_opened"] == ["c"] and d["decisions_resolved"] == ["a"]
+    assert ks.monthly_digest([new], today="2026-10-06")["status"] == "needs-history"
+    assert ks.monthly_digest([], today="2026-10-06")["status"] == "needs-history"
+    txt = ks.render_monthly(d)
+    assert "2026-09 -> 2026-10" in txt and "nouvelle : c" in txt
+    assert "historique insuffisant" in ks.render_monthly({"status": "x", "snapshots": 1})
+
+
 def test_resolve_metric_finance():
     assert ks.resolve_metric("finance.mrr", {}, FINANCE, METRICS, PIPELINE) == 50.0
 

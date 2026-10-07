@@ -431,8 +431,8 @@ class KuroApp(App):
     def _render_market(self) -> None:
         self._title("market-box", "MARKETING")
         try:
-            from .tui import sec_marketing
-            lines = sec_marketing()
+            from .tui import sec_marketing, sec_strategy
+            lines = [*sec_marketing(), *sec_strategy()]
         except Exception:
             lines = ["MARKETING (indisponible)"]
         try:

@@ -161,6 +161,7 @@ finances.local.json
 strategy.local.json
 pipeline.local.json
 strategy_decisions.local.json
+strategy_history.local.json
 pull_anydo.json
 proposals.local.json
 watchdog.local.json
