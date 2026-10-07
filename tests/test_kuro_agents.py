@@ -81,6 +81,12 @@ def test_cache_60s(monkeypatch):
         _restore_cache(saved)
 
 
+def test_timeout_plancher_regression():
+    """R116 : la gateway met ~7 s (resolution modeles). Un timeout inferieur
+    rend AGENTS faussement indisponible EN PERMANENCE (vecu oct 2026)."""
+    assert agents.OPENCLAW_TIMEOUT_SECONDS >= 10
+
+
 def test_sec_agents_rendu(monkeypatch):
     import kuro_dashboard.tui as tui
 
