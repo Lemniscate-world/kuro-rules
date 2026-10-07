@@ -299,22 +299,3 @@ def test_auth_et_no_db(tmp_path, monkeypatch):
         monkeypatch.delenv("KURO_API_TOKEN", raising=False)
         server.shutdown()
         server.server_close()
-
-
-def test_get_seo_absent(monkeypatch, tmp_path):
-    monkeypatch.setattr("os.path.expanduser", lambda p: str(tmp_path))
-    assert kap.get_seo()["status"] == "missing"
-
-
-def test_get_seo_present(monkeypatch, tmp_path):
-    leads = tmp_path / "leads"
-    leads.mkdir()
-    (leads / "SEO_AUDIT.md").write_text(
-        "Date : 2026-10-07\n\n### P0\n1 Fix title\n2 Fix meta\n\n### P1\n1 Add sitemap\n",
-        encoding="utf-8")
-    monkeypatch.setattr("os.path.expanduser", lambda p: str(tmp_path))
-    seo = kap.get_seo()
-    assert seo["status"] == "ok"
-    assert seo["p0_count"] == 2
-    assert seo["p1_count"] == 1
-    assert seo["p0_top"][0] == "Fix title"

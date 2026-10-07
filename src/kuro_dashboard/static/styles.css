@@ -31,12 +31,6 @@
   box-sizing: border-box;
 }
 
-html {
-  /* Typographie fluide : 13px sur téléphone 360px → 16px dès ~1150px.
-     Tout le reste est en rem et suit automatiquement. */
-  font-size: clamp(13px, 12px + 0.35vw, 16px);
-}
-
 body {
   margin: 0;
   min-height: 100vh;
@@ -46,7 +40,7 @@ body {
     linear-gradient(180deg, #f8f1e6 0%, #efe7da 100%);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 0.9375rem;
+  font-size: 15px;
 }
 
 code {
@@ -204,7 +198,7 @@ code {
 
 .metric-value {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 1rem + 3vw, 2rem);
+  font-size: 2rem;
   line-height: 1;
 }
 
@@ -234,7 +228,7 @@ code {
 }
 
 .section-head h2 {
-  font-size: clamp(1.2rem, 1rem + 1.5vw, 1.6rem);
+  font-size: 1.6rem;
 }
 
 .stack,
@@ -451,36 +445,5 @@ input[type="search"]:focus {
 
   input[type="search"] {
     width: 100%;
-  }
-}
-
-@media (max-width: 560px) {
-  /* Téléphones : 1 colonne partout, paddings resserrés, coins adoucis. */
-  .metric-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .page-shell {
-    width: calc(100vw - 1rem);
-    margin: 0.5rem auto 1rem;
-  }
-
-  .panel {
-    padding: 0.9rem;
-    border-radius: 20px;
-  }
-
-  .hero {
-    padding: 1.2rem;
-  }
-
-  .metric-card,
-  .alert-card,
-  .project-card,
-  .memory-card,
-  .rule-card,
-  .sync-card {
-    border-radius: 18px;
-    padding: 0.8rem;
   }
 }
