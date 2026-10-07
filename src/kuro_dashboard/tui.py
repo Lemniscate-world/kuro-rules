@@ -466,6 +466,8 @@ def _disk_busy(cur: dict, prev: dict | None, dt: float) -> float | None:
     try:
         io, pio = (cur.get("disk") or {}).get("io") or {}, \
             (prev.get("disk") or {}).get("io") or {}
+        if not io and not pio:
+            return None
         busy_ms = ((io.get("read_time", 0) - pio.get("read_time", 0))
                    + (io.get("write_time", 0) - pio.get("write_time", 0)))
         return min(100.0, max(0.0, busy_ms / (dt * 1000) * 100))
@@ -1093,6 +1095,66 @@ def sec_strategy() -> list[str]:
         return ["STRATÉGIE (indisponible)"]
 
 
+# ---------- registre de boxes (point d extension) ----------
+# Les boxes "simples" (lignes pures, meme contenu en large et en etroit)
+# sont cataloguees ici : le rendu itere le registre au lieu d empiler
+# des if. Les tiers ajoutent la leur via register_box() (numeros 7-9).
+_BOX_DEFS: list[dict] = [
+    {"key": "market", "num": "5", "title": "5 MARKETING", "color": "cyan",
+     "rows": sec_marketing},
+    {"key": "strat", "num": "6", "title": "6 STRATÉGIE", "color": "cyan",
+     "rows": sec_strategy},
+]
+
+
+def _extra_boxes(hidden: set, width: int) -> list[str]:
+    """Boxes du registre en cadres (jamais d exception, ordre catalogue)."""
+    try:
+        body: list[str] = []
+        for defn in list(_BOX_DEFS):
+            try:
+                if str(defn.get("key")) in (hidden or set()):
+                    continue
+                func = defn.get("rows")
+                rows = func() if callable(func) else []
+                rows = list(rows) if isinstance(rows, list) else []
+            except Exception:
+                rows = ["(indisponible)"]
+            body += _box(str(defn.get("title") or "?"), rows,
+                         max(10, int(width)),
+                         defn.get("color") if defn.get("color") in _PAINT_LEVELS else None)
+        return body
+    except Exception:
+        return []
+
+
+def register_box(key: str, title: str, color: str, rows_func) -> str:
+    """Enregistre une box d extension (tiers). Retourne le numero (7-9) ou "".
+
+    rows_func() -> list[str], appelee a chaque frame en mode non-compact.
+    Cles reservees (kuro/cpu/net/proc/market/strat) refusees.
+    """
+    try:
+        key = str(key or "").strip()
+        if not key or not callable(rows_func):
+            return ""
+        taken_keys = {str(b.get("key")) for b in _BOX_DEFS}
+        taken_keys.update(("kuro", "cpu", "net", "proc"))
+        if key in taken_keys:
+            return ""
+        taken_nums = {str(b.get("num")) for b in _BOX_DEFS}
+        num = next((str(n) for n in range(7, 10) if str(n) not in taken_nums), "")
+        if not num:
+            return ""
+        _BOX_DEFS.append({"key": key, "num": num,
+                          "title": f"{num} {str(title or key).strip()}",
+                          "color": color if color in _PAINT_LEVELS else "cyan",
+                          "rows": rows_func})
+        return num
+    except Exception:
+        return ""
+
+
 def _rel_age(when: Any) -> str:
     """Age relatif best-effort ("il y a 10h", "il y a 3j", ""). Jamais d exception."""
     try:
@@ -1312,7 +1374,7 @@ def _div(label: str, width: int) -> str:
 
 def _help_rows() -> list[str]:
     """Contenu de l aide (touche h)."""
-    return [
+    rows = [
         "q : quitter              espace : pause",
         "c / m : tri CPU / MEM    / : filtre processus",
         "Haut / Bas (ou j / k) : selection   Entree : fiche detail",
@@ -1320,6 +1382,15 @@ def _help_rows() -> list[str]:
         "r : rafraichir           +/- : vitesse",
         "h : cette aide           q / Echap : fermer",
     ]
+    try:
+        extras = [f"{b.get('num')} {b.get('key')}"
+                  for b in list(_BOX_DEFS)
+                  if str(b.get("num")) not in ("5", "6")]
+        if extras:
+            rows.append("7-9 : extensions (" + ", ".join(extras) + ")")
+    except Exception:
+        pass
+    return rows
 
 
 def _box(title: str, rows: list[str], width: int, color: str | None = None) -> list[str]:
@@ -1446,10 +1517,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         if "proc" not in hide:
             left += _box("4 " + (procs[0] if procs else "TOP PROCESSUS"),
                          procs[1:], lw, "magenta")
-        if "market" not in hide and not compact:
-            left += _box("5 MARKETING", sec_marketing(), lw, "cyan")
-        if "strat" not in hide and not compact:
-            left += _box("6 STRATÉGIE", sec_strategy(), lw, "cyan")
+        if not compact:
+            left += _extra_boxes(hide, lw)
         if detail:
             left += _box(f"DETAIL {detail.get('pid', '?')}",
                          sec_proc_detail(detail), lw, "cyan")
@@ -1498,10 +1567,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         if "proc" not in hide:
             body += _box("4 " + (procs[0] if procs else "TOP PROCESSUS"),
                          procs[1:], total, "magenta")
-        if "market" not in hide and not compact:
-            body += _box("5 MARKETING", sec_marketing(), total, "cyan")
-        if "strat" not in hide and not compact:
-            body += _box("6 STRATÉGIE", sec_strategy(), total, "cyan")
+        if not compact:
+            body += _extra_boxes(hide, total)
         body += detail_box
     parts = [_fit(p, total) for p in body] + [_fit(f"{footer} {spinner(now)}", total)]
     if _stdout_is_tty():
@@ -1685,8 +1752,12 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
     hidden: set[str] = set()
     show_help = False
     compact_mode = bool(compact)
-    _KEY2BOX = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc",
-                "5": "market", "6": "strat"}
+    _KEY2BOX = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc"}
+    try:
+        for defn in list(_BOX_DEFS):
+            _KEY2BOX[str(defn.get("num"))] = str(defn.get("key"))
+    except Exception:
+        pass
     with _RawKeys() as keys:
         while True:
             if compact is None:
@@ -1748,7 +1819,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                     sort = "cpu"
                 elif key == "m":
                     sort = "mem"
-                elif key in ("1", "2", "3", "4", "5", "6"):
+                elif key in _KEY2BOX:
                     box = _KEY2BOX[key]
                     if box in hidden:
                         hidden.remove(box)
@@ -1793,6 +1864,65 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
     return 0  # pragma: no cover - boucle infinie, sortie par "q"
 
 
+def doctor() -> list[tuple[str, bool, str]]:
+    """Auto-diagnostic Xenon (<3 s, loopback max, jamais de cles affichees).
+
+    Rend [(nom, ok, detail)] : cles presentes (noms seuls), daemon,
+    Ollama local, OpenClaw CLI, fichiers d usage, table de prix.
+    """
+    out: list[tuple[str, bool, str]] = []
+
+    def _add(name: str, ok: bool, detail: str = "") -> None:
+        try:
+            out.append((str(name), bool(ok), str(detail or "")))
+        except Exception:
+            pass
+
+    try:
+        keys = [v for v in ("OPENROUTER_API_KEY", "GROQ_API_KEY",
+                            "DEEPSEEK_API_KEY") if os.environ.get(v)]
+        _add("cles-cloud", True, f"{len(keys)} configuree(s)" if keys
+             else "aucune (mode local/pollinations)")
+    except Exception:
+        _add("cles-cloud", False, "illisibles")
+    try:
+        snap = collect_kuro_snapshot()
+        if not snap.get("db_present"):
+            _add("daemon", False, "base absente (~/.kuro/kuro.db)")
+        else:
+            age = snap.get("heartbeat_age_min")
+            old = age is not None and age >= 15
+            _add("daemon", not old,
+                 "aucun battement" if age is None else f"battement il y a {age:.0f} min")
+    except Exception:
+        _add("daemon", False, "erreur lecture")
+    try:
+        model = os.environ.get("OLLAMA_MODEL")
+        if not model or model.endswith(":cloud"):
+            _add("ollama-local", True, "non configure (off)")
+        else:
+            ok, names = _ollama_state()
+            _add("ollama-local", bool(ok and model in names),
+                 model if ok and model in names else "daemon injoignable ou modele absent")
+    except Exception:
+        _add("ollama-local", False, "erreur sonde")
+    try:
+        import shutil as _sh
+        found = _sh.which("openclaw")
+        _add("openclaw-cli", bool(found), found or "absent (section AGENTS vide)")
+    except Exception:
+        _add("openclaw-cli", False, "erreur")
+    try:
+        have_last = LLM_LAST_FILE.exists()
+        have_usage = LLM_USAGE_FILE.exists()
+        _add("journal-llm", bool(have_last or have_usage),
+             "llm_last.json + usage.jsonl" if have_last and have_usage
+             else "aucun appel enregistre")
+    except Exception:
+        _add("journal-llm", False, "illisible")
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Glances Kuro en terminal (live)")
     parser.add_argument("--interval", type=float, default=DEFAULT_INTERVAL)
@@ -1801,9 +1931,19 @@ def main(argv: list[str] | None = None) -> int:
                         help="pas de couleurs ANSI (pipes, vieilles consoles)")
     parser.add_argument("--compact", action="store_true",
                         help="mode compact (petits ecrans) ; auto si <32 rangs")
+    parser.add_argument("--doctor", action="store_true",
+                        help="auto-diagnostic (cles, daemon, ollama, cli, journal)")
     args = parser.parse_args(argv)
     global _COLOR
     _COLOR = not args.no_color
+    if args.doctor:
+        bad = 0
+        for name, ok, detail in doctor():
+            mark = "OK " if ok else "KO "
+            if not ok:
+                bad += 1
+            sys.stdout.write(f"[{mark}] {name}" + (f" : {detail}" if detail else "") + "\n")
+        return 1 if bad else 0
     if not _stdout_is_tty():
         sys.stdout.write(render_frame(collect_system_snapshot(top_n=args.top),
                                        kuro=collect_kuro_snapshot()))

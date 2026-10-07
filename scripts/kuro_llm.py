@@ -1104,12 +1104,86 @@ def available() -> str | None:
     return None
 
 
+def stats_command(since: str = "", as_json: bool = False) -> int:
+    """Stats du journal d usage : appels/couts/latence par moteur (+ cache a part).
+
+    Meme regle d honestete que le TUI : seuls les vrais appels comptent,
+    couts inconnus comptes a part, jamais $0 menteur.
+    """
+    from collections import Counter
+    rows: list[dict] = []
+    try:
+        lines = _usage_path().read_text(encoding="utf-8").splitlines()[-2000:]
+    except Exception:
+        lines = []
+    for line in lines:
+        try:
+            entry = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(entry, dict):
+            continue
+        day = str(entry.get("day") or "")
+        if since and day < since:
+            continue
+        rows.append(entry)
+    real = [e for e in rows if str(e.get("engine") or "?") not in
+            ("", "cache", "deterministe")]
+    cache = len(rows) - len(real)
+    by_engine: dict[str, dict] = {}
+    for e in real:
+        eng = str(e.get("engine") or "?")
+        slot = by_engine.setdefault(eng, {"calls": 0, "cost": 0.0,
+                                         "unknown": 0, "lat": []})
+        slot["calls"] += 1
+        raw = e.get("est_cost_usd")
+        if raw is None:
+            slot["unknown"] += 1
+        else:
+            try:
+                slot["cost"] += float(raw or 0.0)
+            except Exception:
+                pass
+        try:
+            slot["lat"].append(float(e.get("latency_s") or 0.0))
+        except Exception:
+            pass
+    for slot in by_engine.values():
+        lats = sorted(slot.pop("lat"))
+        slot["cost"] = round(slot["cost"], 6)
+        slot["p50"] = lats[len(lats) // 2] if lats else None
+        slot["p95"] = lats[min(len(lats) - 1, int(len(lats) * 0.95))] if lats else None
+    payload = {"entries": len(rows), "real_calls": len(real),
+               "cache_hits": cache, "by_engine": by_engine,
+               "pricing": pricing_version()}
+    if as_json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return 0
+    print(f"Journal : {len(rows)} entrees ({len(real)} appels reels, {cache} hits cache)")
+    for eng in sorted(by_engine, key=lambda k: -by_engine[k]["calls"]):
+        s = by_engine[eng]
+        unk = f" +{s['unknown']} cout inconnu" if s["unknown"] else ""
+        print(f"  {eng:<16} {s['calls']:>4} appels  ~${s['cost']:.4f}{unk}  "
+              f"p50 {s['p50']}s p95 {s['p95']}s")
+    print(f"Tarifs : {payload['pricing']}")
+    return 0
+
+
 if __name__ == "__main__":
     if "--drain" in sys.argv:
         drained = drain_queue()
         for item in drained:
             print(f"[drained] {item['prompt'][:80]} -> {item['text'][:200]}")
         print(f"file traitee : {len(drained)} reponse(s)")
+    elif "--stats" in sys.argv:
+        try:
+            since = sys.argv[sys.argv.index("--stats") + 1]
+            if since.startswith("-"):
+                since = ""
+        except (ValueError, IndexError):
+            since = ""
+        raise SystemExit(stats_command(
+            since=since, as_json="--json" in sys.argv))
     else:
         engine = available()
         print(f"moteur disponible: {engine or 'aucun (mode déterministe)'}")

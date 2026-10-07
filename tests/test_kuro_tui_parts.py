@@ -464,6 +464,128 @@ def test_read_line_edition(capsys):
     assert tui._read_line(_Boom()) is None
 
 
+def _save_boxes():
+    return [dict(b) for b in tui._BOX_DEFS]
+
+
+def _restore_boxes(saved):
+    tui._BOX_DEFS.clear()
+    tui._BOX_DEFS.extend(saved)
+
+
+def test_register_box_cycle(monkeypatch):
+    saved = _save_boxes()
+    try:
+        assert tui.register_box("", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("market", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("cpu", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("x", "X", "cyan", "pas-callable") == ""
+        num = tui.register_box("demo", "Demo Box", "nope-color", lambda: ["hello"])
+        assert num == "7"
+        assert tui._BOX_DEFS[-1]["title"] == "7 Demo Box"
+        assert tui._BOX_DEFS[-1]["color"] == "cyan"
+        monkeypatch.setattr(tui, "term_width", lambda: 80)
+        assert "7 Demo Box" in tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+        sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0,
+                                hidden=("demo",))
+        assert "7 Demo Box" not in sans
+        assert "7 demo" in " ".join(tui._help_rows())
+        # 8, 9 puis saturation
+        assert tui.register_box("b8", "B8", "cyan", lambda: ["8"]) == "8"
+        assert tui.register_box("b9", "B9", "cyan", lambda: ["9"]) == "9"
+        assert tui.register_box("b10", "B10", "cyan", lambda: ["x"]) == ""
+    finally:
+        _restore_boxes(saved)
+
+
+def test_extra_box_erreur_rendue(monkeypatch):
+    saved = _save_boxes()
+    try:
+        def _boom():
+            raise RuntimeError("panne extension")
+
+        assert tui.register_box("boom", "Boom", "cyan", _boom) == "7"
+        monkeypatch.setattr(tui, "term_width", lambda: 80)
+        frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+        assert "(indisponible)" in frame
+    finally:
+        _restore_boxes(saved)
+
+
+def test_use_gardes_malformes():
+    assert tui._swap_rates({"memory": None}, {"memory": None}, 1.0) == (None, None)
+    assert tui._disk_busy({"disk": None}, {"disk": None}, 1.0) is None
+    bad = {"host": {"cpu_count": "x"}, "cpu": {"percent": 1.0,
+                                               "load_avg": ["y"]}, "memory": {}}
+    assert not any("charge" in r for r in tui.sec_cpu_mem(bad, None))
+    assert tui.sec_procs("pas-un-dict", 60) == [
+        "TOP PROCESSUS  (tri CPU)",
+        "  (liste indisponible : installez psutil sur l hote)"]
+    assert isinstance(tui.sec_disk_net({"network": "boom"}, None, 1.0), list)
+
+
+def test_latency_pcts_gardes(tmp_path, monkeypatch):
+    usage = tmp_path / "u.jsonl"
+    usage.write_text("[1]\n{bad json\n", encoding="utf-8")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", usage)
+    assert tui._latency_pcts() == {}
+
+
+def test_strat_delta_negatif_et_secours(monkeypatch):
+    assert tui._strat_delta(1.0, 2.0, " mois") == "-1 mois ▼"
+    assert tui._strat_delta("x", 1.0) == "?"
+    monkeypatch.setattr(tui, "_strategy_history",
+                        lambda: (_ for _ in ()).throw(RuntimeError()))
+    assert tui.sec_strategy() == ["STRATÉGIE (indisponible)"]
+
+
+def test_registre_gardes(monkeypatch):
+    monkeypatch.setattr(tui, "_BOX_DEFS", None)
+    assert tui._extra_boxes(set(), 80) == []
+    assert tui.register_box("x", "X", "cyan", lambda: ["x"]) == ""
+    assert "extensions" not in " ".join(tui._help_rows())
+
+
+def test_watch_key2box_garde(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "collect_system_snapshot",
+                        lambda top_n=10: _payload())
+    monkeypatch.setattr(tui, "collect_kuro_snapshot", lambda: _kuro())
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    monkeypatch.setattr(tui.time, "sleep", lambda s: None)
+    monkeypatch.setattr(tui, "_BOX_DEFS", None)
+    monkeypatch.setattr(tui, "_RawKeys", lambda: _ScriptedKeys(["q"]))
+    assert tui.watch(interval=5, top=3) == 0
+
+
+def test_doctor_etats(monkeypatch, tmp_path):
+    monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    monkeypatch.setattr(tui, "collect_kuro_snapshot",
+                        lambda: (_ for _ in ()).throw(RuntimeError()))
+    monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+    rows = dict((n, (ok, d)) for n, ok, d in tui.doctor())
+    assert rows["daemon"] == (False, "erreur lecture")
+    assert rows["ollama-local"][0] is True  # non configure -> off=True honnete
+    assert "journal-llm" in rows
+    monkeypatch.setattr(tui, "collect_kuro_snapshot",
+                        lambda: {"db_present": False})
+    assert dict((n, ok) for n, ok, d in tui.doctor())["daemon"] is False
+    monkeypatch.setattr(tui, "collect_kuro_snapshot",
+                        lambda: {"db_present": True, "heartbeat_age_min": 99.0})
+    assert dict((n, ok) for n, ok, d in tui.doctor())["daemon"] is False
+    monkeypatch.setenv("OLLAMA_MODEL", "qwen:8b")
+    monkeypatch.setattr(tui, "_ollama_state", lambda: (True, ["qwen:8b"]))
+    assert dict((n, ok) for n, ok, d in tui.doctor())["ollama-local"] is True
+
+
+def test_main_doctor_codes(monkeypatch, capsys):
+    monkeypatch.setattr(tui, "doctor", lambda: [("a", True, "ok")])
+    assert tui.main(["--doctor"]) == 0
+    assert "[OK ] a" in capsys.readouterr().out
+    monkeypatch.setattr(tui, "doctor", lambda: [("a", False, "ko")])
+    assert tui.main(["--doctor"]) == 1
+
+
 def test_watch_toutes_touches(monkeypatch, capsys):
     monkeypatch.setattr(tui, "collect_system_snapshot",
                         lambda top_n=10: _payload())
