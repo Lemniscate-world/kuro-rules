@@ -232,7 +232,7 @@ def _docker() -> dict[str, Any]:
     return {"available": True, "count": len(containers), "containers": containers}
 
 
-def proc_detail(pid: int) -> dict[str, Any] | None:
+def proc_detail(pid: Any) -> dict[str, Any] | None:
     """Detail d un processus via psutil (None si parti/injoignable)."""
     psutil_mod = _psutil()
     if psutil_mod is None:

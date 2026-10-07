@@ -84,7 +84,7 @@ async def test_detail_panel_lifecycle(monkeypatch):
             return SimpleNamespace(user=1.0, system=0.0)
 
     class _Ps:
-        def Process(self, pid):
+        def Process(self, pid):  # noqa: N802 - mock psutil (API Capitalisée imposée)
             return _P(pid)
 
     monkeypatch.setattr(kuro_system, "_psutil", lambda: _Ps())

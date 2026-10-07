@@ -78,7 +78,7 @@ def _count_summaries(base: Path) -> int:
     """SESSION_SUMMARY.md sous base, walk elague (jamais d exception)."""
     found = 0
     try:
-        stack = [base]
+        stack: list[Any] = [base]
         while stack:
             cur = stack.pop()
             try:
@@ -244,7 +244,7 @@ def collect_kuro_snapshot() -> dict[str, Any]:
       (max DB, disque) et ne depend jamais d une table seule.
     """
     live = _db_path()
-    base = {"db_present": False, "heartbeat": None, "heartbeat_age_min": None,
+    base: dict[str, Any] = {"db_present": False, "heartbeat": None, "heartbeat_age_min": None,
             "projects": 0, "sessions": 0, "alerts_open": 0,
             "memory_nodes": 0, "recent_alerts": [],
             "db_path": str(live), "file_age_min": _file_age_min(),

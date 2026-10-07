@@ -182,7 +182,7 @@ def get_alerts(unack_only: bool = False) -> list[dict]:
             f"""SELECT a.id, p.name AS project, a.alert_type, a.message, a.severity,
                        a.acknowledged, a.created_at
                 FROM alerts a LEFT JOIN projects p ON p.id = a.project_id
-                {where} ORDER BY a.created_at DESC LIMIT 100""",
+                {where} ORDER BY a.created_at DESC LIMIT 100""",  # nosec B608 - where = littéral fixe, jamais d'entrée user
         )
     finally:
         try:
@@ -199,7 +199,7 @@ def get_sessions(limit: int = 20) -> list[dict]:
             f"""SELECT p.name AS project, s.session_date, s.editor,
                        s.progress_before, s.progress_after, s.tests_status, s.blockers
                 FROM sessions s LEFT JOIN projects p ON p.id = s.project_id
-                ORDER BY s.session_date DESC LIMIT {int(limit)}""",
+                ORDER BY s.session_date DESC LIMIT {int(limit)}""",  # nosec B608 - limit casté int(), jamais d'entrée brute
         )
     finally:
         try:
@@ -391,8 +391,8 @@ class Handler(BaseHTTPRequestHandler):
         qs = urllib.parse.parse_qs(parsed.query)
         path = parsed.path.rstrip("/") or "/"
         try:
-            _DB_OPTIONAL = ("/api/system", "/api/dashboard", "/dashboard-data.json")
-            if path.startswith("/api/") and path not in _DB_OPTIONAL and not DB_PATH.exists():
+            _db_optional = ("/api/system", "/api/dashboard", "/dashboard-data.json")
+            if path.startswith("/api/") and path not in _db_optional and not DB_PATH.exists():
                 self._json(503, {"error": "no-db",
                                  "detail": "kuro.db absente : seuls /api/system et "
                                            "/api/dashboard repondent "

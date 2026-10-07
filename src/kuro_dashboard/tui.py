@@ -9,9 +9,11 @@ Usage :
     python -m kuro_dashboard.tui [--interval 2] [--top 10]
 Ancien nom (alias déprécié) : kuro-glances.
 Touches en live : q quitter, espace pause, c/m tri CPU/MEM, / filtre nom,
-Haut/Bas selection, Entree fiche detail, 1-6 montre/cache boxes,
+Haut/Bas selection, Entree fiche detail, 1-7 montre/cache boxes,
 r refresh, +/- vitesse. Couleurs ANSI (coupees hors tty, avec NO_COLOR/--no-color).
 Box 5 MARKETING : pipeline local + drafts LAUNCH_POSTS + tracker acquisition.
+Box 6 STRATÉGIE : runway/velocite/OKR (strategy_history.local.json).
+Box 7 SEO : audit ~/leads/SEO_AUDIT.md (serveur ; absent sur PC = message honnête).
 """
 
 from __future__ import annotations
@@ -26,8 +28,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .face import face_frame, mood_for, should_blink, spinner
 from .agents import agents_lines
+from .face import face_frame, mood_for, should_blink, spinner
 from .kuro_state import collect_kuro_snapshot
 from .projects import quick_lines as git_project_lines
 from .system import collect_system_snapshot
@@ -775,7 +777,8 @@ def _usage_stats() -> tuple:
     calls_d = cache_d = calls_w = cache_w = 0
     cost_d = cost_w = 0.0
     unk_d = unk_w = 0
-    lat_sum = lat_n = 0
+    lat_sum = 0.0
+    lat_n = 0
     engines: dict[str, int] = {}
     try:
         from datetime import date, timedelta
@@ -926,7 +929,7 @@ def _marketing_pipeline(root: Path) -> tuple:
             except Exception:
                 continue
         last = max(entries, key=lambda e: str(e.get("date", ""))) if entries else {}
-        insight = str((last.get("insight") or "")).strip().replace("\n", " ")
+        insight = str(last.get("insight") or "").strip().replace("\n", " ")
         nxt = ""
         for e in reversed(entries):
             if isinstance(e, dict) and str(e.get("next_step") or "").strip():
@@ -965,9 +968,9 @@ def _marketing_tracker(root: Path) -> tuple:
     except Exception:
         return 0, "?"
     try:
-        rows = [l for l in text.splitlines()
-                if l.strip().startswith("|") and "**" in l
-                and any(k in l for k in ("Reddit", "Discord", "GitHub", "X ", "HN", "Lobsters", "Blog"))]
+        rows = [line for line in text.splitlines()
+                if line.strip().startswith("|") and "**" in line
+                and any(k in line for k in ("Reddit", "Discord", "GitHub", "X ", "HN", "Lobsters", "Blog"))]
         return len(rows), path.name
     except Exception:  # pragma: no cover - comprehension sur str ne leve pas
         return 0, "?"
@@ -1098,7 +1101,8 @@ def sec_strategy() -> list[str]:
 # ---------- registre de boxes (point d extension) ----------
 # Les boxes "simples" (lignes pures, meme contenu en large et en etroit)
 # sont cataloguees ici : le rendu itere le registre au lieu d empiler
-# des if. Les tiers ajoutent la leur via register_box() (numeros 7-9).
+# des if. Les tiers ajoutent la leur via register_box() (numeros 8-9,
+# 7 pris par SEO — voir extension SEO plus bas).
 _BOX_DEFS: list[dict] = [
     {"key": "market", "num": "5", "title": "5 MARKETING", "color": "cyan",
      "rows": sec_marketing},
@@ -1129,10 +1133,10 @@ def _extra_boxes(hidden: set, width: int) -> list[str]:
 
 
 def register_box(key: str, title: str, color: str, rows_func) -> str:
-    """Enregistre une box d extension (tiers). Retourne le numero (7-9) ou "".
+    """Enregistre une box d extension (tiers). Retourne le numero (8-9) ou "".
 
     rows_func() -> list[str], appelee a chaque frame en mode non-compact.
-    Cles reservees (kuro/cpu/net/proc/market/strat) refusees.
+    Cles reservees (kuro/cpu/net/proc/market/strat/seo) refusees.
     """
     try:
         key = str(key or "").strip()
@@ -1143,7 +1147,7 @@ def register_box(key: str, title: str, color: str, rows_func) -> str:
         if key in taken_keys:
             return ""
         taken_nums = {str(b.get("num")) for b in _BOX_DEFS}
-        num = next((str(n) for n in range(7, 10) if str(n) not in taken_nums), "")
+        num = next((str(n) for n in range(8, 10) if str(n) not in taken_nums), "")
         if not num:
             return ""
         _BOX_DEFS.append({"key": key, "num": num,
@@ -1153,6 +1157,77 @@ def register_box(key: str, title: str, color: str, rows_func) -> str:
         return num
     except Exception:
         return ""
+
+
+def _leads_path(name: str) -> Path:
+    """Fichier ~/leads/<name> (existe sur serveur, absent sur PC : honnete)."""
+    try:
+        return Path.home() / "leads" / name
+    except Exception:
+        return Path(name)
+
+
+def sec_seo() -> list[str]:
+    """Audit SEO quotidien (~/leads/SEO_AUDIT.md) : date, P0/P1, top actions.
+
+    Lecture seule du fichier genere par le cron strategy-daily. Absent
+    (PC sans leads) -> message honnete, pas de chiffres inventes.
+    """
+    try:
+        path = _leads_path("SEO_AUDIT.md")
+        try:
+            text = path.read_text(encoding="utf-8")
+        except Exception:
+            return ["SEO pas d audit (cron strategy-daily : ~/leads/SEO_AUDIT.md absent)"]
+        date = ""
+        for line in text.splitlines()[:12]:
+            if line.startswith("Date"):
+                date = line[5:].strip()[:40]
+                break
+        p0 = _seo_items(text, "### P0")
+        p1 = _seo_items(text, "### P1")
+        age = _rel_age(_seo_file_date(path))
+        lines = [(f"audit : {date or '?'}"
+                  + (f" ({age})" if age else ""))[:100]]
+        lines.append(f"  P0 : {len(p0)} actions  ·  P1 : {len(p1)} actions")
+        lines += [f"  -> {item}" for item in p0[:2]]
+        return lines[:6]
+    except Exception:
+        return ["SEO (indisponible)"]
+
+
+def _seo_file_date(path: Path) -> str:
+    """Date ISO du fichier pour _rel_age (via mtime)."""
+    try:
+        from datetime import datetime as _dt
+        return _dt.fromtimestamp(path.stat().st_mtime).astimezone().isoformat(
+            timespec="seconds")
+    except Exception:
+        return ""
+
+
+def _seo_items(text: str, header: str) -> list[str]:
+    """Items numerotes sous un header ### (pur, testable)."""
+    try:
+        out: list[str] = []
+        inside = False
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("### "):
+                inside = stripped == header
+                continue
+            if inside and stripped and stripped[0].isdigit():
+                item = stripped.split(None, 1)
+                out.append(item[1][:110] if len(item) > 1 else stripped[:110])
+        return out
+    except Exception:
+        return []
+
+
+# Extension SEO (box 7) : definie APRES sec_seo (ref avant = NameError
+# a l import). Ordre catalogue : 5 MARKETING, 6 STRATÉGIE, 7 SEO.
+_BOX_DEFS.append({"key": "seo", "num": "7", "title": "7 SEO", "color": "cyan",
+                  "rows": sec_seo})
 
 
 def _rel_age(when: Any) -> str:
@@ -1312,7 +1387,7 @@ def _ollama_state() -> tuple[bool, list]:
         import urllib.request
 
         base = (os.environ.get("OLLAMA_URL") or "http://127.0.0.1:11434").rstrip("/")
-        with urllib.request.urlopen(base + "/api/tags", timeout=2) as resp:
+        with urllib.request.urlopen(base + "/api/tags", timeout=2) as resp:  # nosec B310 - loopback seul (OLLAMA_URL ou 127.0.0.1), timeout 2s
             data = json.loads((resp.read() or b"").decode("utf-8") or "{}")
         if isinstance(data, dict):
             names = [str(m.get("name") or "") for m in (data.get("models") or [])
@@ -1378,16 +1453,16 @@ def _help_rows() -> list[str]:
         "q : quitter              espace : pause",
         "c / m : tri CPU / MEM    / : filtre processus",
         "Haut / Bas (ou j / k) : selection   Entree : fiche detail",
-        "1-6 : montre/cache KURO, CPU, RESEAU, PROC, MARKETING, STRATÉGIE",
+        "1-7 : montre/cache KURO, CPU, RESEAU, PROC, MARKETING, STRATÉGIE, SEO",
         "r : rafraichir           +/- : vitesse",
         "h : cette aide           q / Echap : fermer",
     ]
     try:
         extras = [f"{b.get('num')} {b.get('key')}"
                   for b in list(_BOX_DEFS)
-                  if str(b.get("num")) not in ("5", "6")]
+                  if str(b.get("num")) not in ("5", "6", "7")]
         if extras:
-            rows.append("7-9 : extensions (" + ", ".join(extras) + ")")
+            rows.append("8-9 : extensions (" + ", ".join(extras) + ")")
     except Exception:
         pass
     return rows
@@ -1419,9 +1494,9 @@ def _side_by_side(left: list[str], right: list[str], total: int, rw: int) -> lis
         n = max(len(left), len(right))
         out = []
         for i in range(n):
-            l = left[i] if i < len(left) else ""
-            r = right[i] if i < len(right) else ""
-            out.append(_vpad(_fit(l, lw), lw) + " | " + _vpad(_fit(r, rw), rw))
+            left_cell = left[i] if i < len(left) else ""
+            right_cell = right[i] if i < len(right) else ""
+            out.append(_vpad(_fit(left_cell, lw), lw) + " | " + _vpad(_fit(right_cell, rw), rw))
         return out
     except Exception:
         return [*left, *right]
@@ -1440,6 +1515,33 @@ def _titled(label: str, rows: list[str], width: int) -> list[str]:
             return []
 
 
+def _compact_strat_seo(hidden: set) -> list[str]:
+    """Digest 1 ligne strat+SEO pour le mode compact (budget <=26 rangs).
+
+    Vide si les deux boxes sont cachées. Jamais d exception.
+    """
+    try:
+        parts: list[str] = []
+        if "strat" not in (hidden or set()):
+            try:
+                first = (sec_strategy() or ["?"])[0]
+            except Exception:
+                first = "?"
+            parts.append(str(first).strip()[:60])
+        if "seo" not in (hidden or set()):
+            try:
+                rows = sec_seo() or ["?"]
+                pick = next((r for r in rows if "P0" in r and "P1" in r), rows[0])
+            except Exception:
+                pick = "?"
+            parts.append(str(pick).strip()[:45])
+        if not parts:
+            return []
+        return [" · ".join(parts)[:90]]
+    except Exception:
+        return []
+
+
 def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
                  kuro: dict | None = None, now: float | None = None,
                  hist: dict | None = None, sort: str = "cpu", filt: str = "",
@@ -1450,7 +1552,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
 
     Terminal large (>=150 cols) : sidebar droite (visage + cerveau + Kuro),
     le reste a gauche. Sinon : empilement classique.
-    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market", "strat"} (touches 1-6).
+    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market", "strat", "seo"} (touches 1-7).
     help : affiche l aide au lieu du tableau de bord (touche h).
     compact : TOP 5, sans graphes ni capteurs (auto si <32 rangs tty).
     """
@@ -1462,7 +1564,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             compact = False
     nprocs = 5 if compact else 10
     footer = ("[q] quitter [espace] pause [c/m] tri [/] filtre [HB] choix "
-              "[Entree] detail [1-6] boxes [h] aide [r] refresh [+/-] vitesse")
+              "[Entree] detail [1-7] boxes [h] aide [r] refresh [+/-] vitesse")
     if compact:
         footer = "[q] quitter [/] filtre [HB] choix [Entree] detail [h] aide"
     if filt:
@@ -1473,7 +1575,9 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
         return "\n".join(parts) + "\n"
     if compact:
-        # Slim 25 rangs : que l essentiel, sans graphes ni diviseurs.
+        # Slim <=26 rangs : l essentiel + 1 ligne strat/SEO (sinon l audit
+        # strategique est invisible sur petit terminal — vu en prod).
+        # Budget : UNE box d 1 ligne (3 rangs), pas deux boxes.
         total = min(width, 100)
         mood = sec_face(payload, kuro, now)[-1:]
         ksum = sec_kuro(kuro)[:1]
@@ -1481,12 +1585,17 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         net_all = sec_disk_net(payload, prev, dt, None, max_parts=2)
         procs = sec_procs(payload, total - 4, sort=sort, filt=filt, sel=sel,
                            limit=5)
-        body = [*sec_header(payload),
-                *_box("1 KURO", [*mood, *ksum], total, "dim"),
-                *_box("2 CPU / MEMOIRE", cpu_all, total, "ok"),
-                *_box("3 DISQUES / RESEAU", net_all, total, "blue"),
-                *_box("4 " + (procs[0] if procs else "TOP PROCESSUS"),
-                      procs[1:], total, "magenta")]
+        hide_c = set(hidden or ())
+        body = [
+            *sec_header(payload),
+            *_box("1 KURO", [*mood, *ksum], total, "dim"),
+            *_box("2 CPU / MEMOIRE", cpu_all, total, "ok"),
+            *_box("3 DISQUES / RESEAU", net_all, total, "blue"),
+            *_box("4 " + (procs[0] if procs else "TOP PROCESSUS"), procs[1:], total, "magenta"),
+        ]
+        digest = _compact_strat_seo(hide_c)
+        if digest:
+            body += _box("6 STRAT/SEO", digest, total, "cyan")
         if detail:
             body += _box(f"DETAIL {detail.get('pid', '?')}",
                          sec_proc_detail(detail), total, "cyan")
@@ -1586,10 +1695,10 @@ class _RawKeys:
     """Touches instantanees (sans Entree). Windows: msvcrt. Unix: termios."""
 
     def __init__(self) -> None:
-        self._unix_fd = None
-        self._unix_old = None
+        self._unix_fd: int | None = None
+        self._unix_old: Any = None
 
-    def __enter__(self) -> "_RawKeys":
+    def __enter__(self) -> _RawKeys:
         if os.name != "nt":  # pragma: no cover - branches Unix (CI Windows)
             try:
                 import termios
@@ -1738,7 +1847,7 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
 
     Sections lentes protegees par caches TTL (agents 60 s, git 60 s,
     disque 120 s) : un refresh ne bloque que sur du jamais-vu.
-    Touches: q,c,m,/,HB,Entree,1-5,h,espace,+,-,r.
+    Touches: q,c,m,/,HB,Entree,1-7,h,espace,+,-,r (+8-9 extensions).
     """
     prev: dict | None = None
     prev_t: float | None = None
@@ -1752,10 +1861,10 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
     hidden: set[str] = set()
     show_help = False
     compact_mode = bool(compact)
-    _KEY2BOX = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc"}
+    key2box = {"1": "kuro", "2": "cpu", "3": "net", "4": "proc"}
     try:
         for defn in list(_BOX_DEFS):
-            _KEY2BOX[str(defn.get("num"))] = str(defn.get("key"))
+            key2box[str(defn.get("num"))] = str(defn.get("key"))
     except Exception:
         pass
     with _RawKeys() as keys:
@@ -1819,8 +1928,8 @@ def watch(interval: float = DEFAULT_INTERVAL, top: int = 10,
                     sort = "cpu"
                 elif key == "m":
                     sort = "mem"
-                elif key in _KEY2BOX:
-                    box = _KEY2BOX[key]
+                elif key in key2box:
+                    box = key2box[key]
                     if box in hidden:
                         hidden.remove(box)
                     else:

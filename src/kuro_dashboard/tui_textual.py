@@ -17,12 +17,11 @@ from __future__ import annotations
 
 import argparse
 import time
-from typing import Any
 
 from .face import mood_for
 from .kuro_state import collect_kuro_snapshot
 from .system import collect_system_snapshot
-from .tui import _net_rates, _uptime, _usage_stats, fmt_bytes
+from .tui import _net_rates, _usage_stats, fmt_bytes
 
 try:
     from textual.app import App, ComposeResult
@@ -431,8 +430,8 @@ class KuroApp(App):
     def _render_market(self) -> None:
         self._title("market-box", "MARKETING")
         try:
-            from .tui import sec_marketing, sec_strategy
-            lines = [*sec_marketing(), *sec_strategy()]
+            from .tui import sec_marketing, sec_seo, sec_strategy
+            lines = [*sec_marketing(), *sec_strategy(), *sec_seo()]
         except Exception:
             lines = ["MARKETING (indisponible)"]
         try:

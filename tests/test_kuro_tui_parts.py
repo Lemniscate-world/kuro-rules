@@ -14,8 +14,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from kuro_dashboard import tui  # noqa: E402
 from kuro_dashboard import projects as _git_projects  # noqa: E402
+from kuro_dashboard import tui  # noqa: E402
 
 
 def _stale(ttl):
@@ -478,20 +478,20 @@ def test_register_box_cycle(monkeypatch):
     try:
         assert tui.register_box("", "X", "cyan", lambda: ["x"]) == ""
         assert tui.register_box("market", "X", "cyan", lambda: ["x"]) == ""
+        assert tui.register_box("seo", "X", "cyan", lambda: ["x"]) == ""
         assert tui.register_box("cpu", "X", "cyan", lambda: ["x"]) == ""
         assert tui.register_box("x", "X", "cyan", "pas-callable") == ""
         num = tui.register_box("demo", "Demo Box", "nope-color", lambda: ["hello"])
-        assert num == "7"
-        assert tui._BOX_DEFS[-1]["title"] == "7 Demo Box"
+        assert num == "8"
+        assert tui._BOX_DEFS[-1]["title"] == "8 Demo Box"
         assert tui._BOX_DEFS[-1]["color"] == "cyan"
         monkeypatch.setattr(tui, "term_width", lambda: 80)
-        assert "7 Demo Box" in tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+        assert "8 Demo Box" in tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
         sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0,
                                 hidden=("demo",))
-        assert "7 Demo Box" not in sans
-        assert "7 demo" in " ".join(tui._help_rows())
-        # 8, 9 puis saturation
-        assert tui.register_box("b8", "B8", "cyan", lambda: ["8"]) == "8"
+        assert "8 Demo Box" not in sans
+        assert "8 demo" in " ".join(tui._help_rows())
+        # 9 puis saturation (7 pris par SEO)
         assert tui.register_box("b9", "B9", "cyan", lambda: ["9"]) == "9"
         assert tui.register_box("b10", "B10", "cyan", lambda: ["x"]) == ""
     finally:
@@ -504,7 +504,7 @@ def test_extra_box_erreur_rendue(monkeypatch):
         def _boom():
             raise RuntimeError("panne extension")
 
-        assert tui.register_box("boom", "Boom", "cyan", _boom) == "7"
+        assert tui.register_box("boom", "Boom", "cyan", _boom) == "8"
         monkeypatch.setattr(tui, "term_width", lambda: 80)
         frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
         assert "(indisponible)" in frame
@@ -792,8 +792,8 @@ def test_marketing_absent_et_exception(tmp_path, monkeypatch):
 
 
 def test_file_age_heures(tmp_path):
-    import time as _t
     import os as _os
+    import time as _t
     f = tmp_path / "f.txt"
     f.write_text("x", encoding="utf-8")
     old = _t.time() - 3 * 3600
@@ -947,7 +947,7 @@ def test_render_compact_avec_detail(monkeypatch):
     assert "DETAIL pid 7" in frame
 
 
-def test_render_compact_auto_term_casse(monkeypatch):
+def test_render_compact_auto_term_casse_tty(monkeypatch):
     monkeypatch.setattr(tui, "term_width", lambda: 80)
     monkeypatch.setattr(tui.sys.stdout, "isatty", lambda: True)
     monkeypatch.setattr(tui, "term_height",
@@ -1280,10 +1280,42 @@ def test_render_box_strategie_et_touche_6(monkeypatch):
     monkeypatch.setattr(tui, "term_width", lambda: 80)
     frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
     assert "6 STRAT" in frame
+    assert "7 SEO" in frame
     sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, hidden=("strat",))
     assert "6 STRAT" not in sans
+    sans_seo = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, hidden=("seo",))
+    assert "7 SEO" not in sans_seo
     aide = tui.render_frame(_payload(), help=True)
-    assert "1-6" in aide
+    assert "1-7" in aide
+
+
+def test_compact_montre_strat_et_seo(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 80)
+    frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, compact=True)
+    assert "6 STRAT/SEO" in frame
+    assert "runway" in frame or "STRAT" in frame
+    sans = tui.render_frame(_payload(), kuro=_kuro(), now=1.0, compact=True,
+                            hidden=("strat", "seo"))
+    assert "6 STRAT/SEO" not in sans
+    rows = frame.splitlines()
+    assert len(rows) <= 26
+
+
+def test_sec_seo_absent_et_parsing(tmp_path, monkeypatch):
+    # Absent (cas PC sans ~/leads) : message honnête, jamais de chiffres inventés.
+    monkeypatch.setattr(tui.Path, "home", lambda: tmp_path)
+    assert any("pas d audit" in r for r in tui.sec_seo())
+    # Présent (cas serveur) : date + P0/P1 + top actions.
+    leads = tmp_path / "leads"
+    leads.mkdir()
+    (leads / "SEO_AUDIT.md").write_text(
+        "Date : 2026-10-07\n\n### P0\n1 Fix title\n2 Fix meta\n\n### P1\n1 Add sitemap\n",
+        encoding="utf-8")
+    rows = tui.sec_seo()
+    assert any("P0" in r and "2" in r for r in rows)
+    assert any("P1" in r and "1" in r for r in rows)
+    assert tui._seo_items("### P0\n1 hello\n### P1\n1 bye", "### P0") == ["hello"]
+    assert tui._seo_items("rien", "### P0") == []
 
 
 def test_watch_touche_6_cache_box(monkeypatch, capsys):
