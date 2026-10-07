@@ -713,6 +713,46 @@ def _read_brain() -> dict | None:
 _NON_CALL_ENGINES = {"", "cache", "deterministe"}
 
 
+def _latency_pcts() -> dict:
+    """P50/P95 des latences d appels reels 7 j (cache/deterministe exclus).
+
+    La moyenne seule cachait les stalls (ex : 20 min noyees dans 8,1 s).
+    Renvoie {} si moins de 2 valeurs.
+    """
+    lats: list[float] = []
+    try:
+        from datetime import date, timedelta
+        week_ago = (date.today() - timedelta(days=6)).isoformat()
+        lines = LLM_USAGE_FILE.read_text(encoding="utf-8").splitlines()[-2000:]
+    except Exception:
+        return {}
+    for line in lines:
+        try:
+            e = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(e, dict) or (e.get("day") or "") < week_ago:
+            continue
+        if str(e.get("engine") or "?") in _NON_CALL_ENGINES:
+            continue
+        try:
+            lats.append(float(e.get("latency_s") or 0.0))
+        except Exception:
+            continue
+    if len(lats) < 2:
+        return {}
+    ordered = sorted(lats)
+
+    def _pct(p: float) -> float:
+        try:
+            idx = min(len(ordered) - 1, max(0, int(round((p / 100) * (len(ordered) - 1)))))
+            return round(ordered[idx], 1)
+        except Exception:
+            return 0.0
+
+    return {"p50": _pct(50), "p95": _pct(95)}
+
+
 def _pl(n: int, sing: str, plur: str | None = None) -> str:
     """Pluriel francais : 1 appel, 0/2+ appels. Jamais d exception."""
     try:
@@ -1083,6 +1123,29 @@ def _short_model_name(model: Any) -> str:
         return ""
 
 
+def _budgets() -> dict:
+    """Budgets {daily_usd, weekly_usd} depuis budgets.local.json (gitigne)."""
+    try:
+        data = json.loads((_rules_dir() / "budgets.local.json").read_text(
+            encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _budget_txt(spent: float, cap: Any) -> str:
+    """" [$1.20/$2.00 60%]" + " !!" au-dela de 100%, "" si pas de budget."""
+    try:
+        cap_f = float(cap)
+        if cap_f <= 0:
+            return ""
+        pct = float(spent or 0.0) / cap_f * 100
+        flag = " !!" if pct >= 100 else (" !" if pct >= 80 else "")
+        return f" [${float(spent or 0.0):.4f}/${cap_f:.2f} {pct:.0f}%{flag}]"
+    except Exception:
+        return ""
+
+
 def _unk_txt(n: int) -> str:
     """" +2 couts inconnus" / "" si 0. Jamais d exception."""
     try:
@@ -1109,10 +1172,15 @@ def sec_brain() -> list[str]:
     (calls_d, cost_d, unk_d, cache_d,
      calls_w, cost_w, unk_w, cache_w, top, lat) = _usage_stats()
     if calls_d or calls_w or cache_d or cache_w:
+        budgets = _budgets()
+        pcts = _latency_pcts()
+        p95 = f" p95:{pcts['p95']}s" if pcts else ""
         lines.append(f"  couts : ~${cost_d:.4f} auj. ({calls_d} {_pl(calls_d, 'appel')}"
-                     f"{_unk_txt(unk_d)})  ~${cost_w:.4f} /7j ({calls_w} "
-                     f"{_pl(calls_w, 'appel')}{_unk_txt(unk_w)})  "
-                     f"top:{top} lat:{lat}s")
+                     f"{_unk_txt(unk_d)}){_budget_txt(cost_d, budgets.get('daily_usd'))}  "
+                     f"~${cost_w:.4f} /7j ({calls_w} "
+                     f"{_pl(calls_w, 'appel')}{_unk_txt(unk_w)})"
+                     f"{_budget_txt(cost_w, budgets.get('weekly_usd'))}  "
+                     f"top:{top} lat:{lat}s{p95}")
         if cache_d or cache_w:
             lines.append(f"  cache local : {cache_d} {_pl(cache_d, 'hit')} auj., "
                          f"{cache_w} {_pl(cache_w, 'hit')} /7j (0 token, instantané)")

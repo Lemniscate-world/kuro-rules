@@ -1,0 +1,27 @@
+{
+  "_comment": "Prix $ / 1M tokens blended (entree+sortie). Versionnes : mettre a jour version+date a chaque revision. 0.0 = vraiment gratuit, null/absent = prix inconnu (compte 'cout inconnu', jamais $0 menteur). Fichier versionne (pas de secret).",
+  "version": 1,
+  "updated": "2026-10-07",
+  "rates": {
+    "groq": 0.0,
+    "nvidia": 0.0,
+    "gemini": 0.0,
+    "hf": 0.0,
+    "mistral": 0.0,
+    "deepseek": 1.0,
+    "ollama-cloud": 2.0,
+    "litellm:openrouter": 0.0,
+    "litellm:groq": 0.0,
+    "litellm:nvidia": 0.0,
+    "litellm:gemini": 0.0,
+    "litellm:huggingface": 0.0,
+    "litellm:mistral": 0.0,
+    "litellm:deepseek": 1.0,
+    "pollinations": 0.0,
+    "cache": 0.0,
+    "deterministe": 0.0,
+    "ollama-local": 0.0,
+    "ollama": 0.0,
+    "local": 0.0
+  }
+}

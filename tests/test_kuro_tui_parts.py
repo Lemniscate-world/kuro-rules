@@ -1068,6 +1068,55 @@ def test_sec_brain_modele_inconnu_cache(tmp_path, monkeypatch):
     assert "1 appel" in rows[1] and "1 coût inconnu" in rows[1]
 
 
+def test_latency_pcts(tmp_path, monkeypatch):
+    from datetime import date
+    usage = tmp_path / "u.jsonl"
+    usage.write_text(
+        "\n".join(json.dumps({"day": date.today().isoformat(), "engine": "e",
+                              "latency_s": v}) for v in (1.0, 2.0, 3.0, 100.0)),
+        encoding="utf-8")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", usage)
+    assert tui._latency_pcts() == {"p50": 3.0, "p95": 100.0}
+    usage.write_text(json.dumps({"day": date.today().isoformat(),
+                                 "engine": "cache", "latency_s": 0.0}),
+                     encoding="utf-8")
+    assert tui._latency_pcts() == {}, "cache exclu + <2 valeurs"
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    assert tui._latency_pcts() == {}
+
+
+def test_budgets_affichage(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    assert tui._budgets() == {}
+    assert tui._budget_txt(1.0, None) == ""
+    assert tui._budget_txt(1.0, 0) == ""
+    assert tui._budget_txt(1.0, "bad") == ""
+    assert tui._budget_txt(1.0, 2.0) == " [$1.0000/$2.00 50%]"
+    assert tui._budget_txt(1.7, 2.0).endswith(" !]")
+    assert tui._budget_txt(3.0, 2.0).endswith(" !!]")
+    (tmp_path / "budgets.local.json").write_text('{"daily_usd": 1.0}',
+                                                 encoding="utf-8")
+    assert tui._budgets() == {"daily_usd": 1.0}
+    (tmp_path / "budgets.local.json").write_text('[1,2]', encoding="utf-8")
+    assert tui._budgets() == {}
+
+
+def test_pricing_versionne(monkeypatch):
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import kuro_llm as _llm
+    assert _llm._model_rate("m:x:free", "openrouter") == 0.0
+    assert _llm._model_rate("openai/gpt-9", "openrouter") is None
+    assert "v" in _llm.pricing_version() and "@" in _llm.pricing_version()
+    _llm._PRICING_CACHE.clear()
+    monkeypatch.setattr(_llm.Path, "resolve", lambda self: (_ for _ in ()).throw(
+        OSError("disque mort")))
+    try:
+        assert _llm._model_rate("", "deepseek") == 1.0, "repli integre"
+    finally:
+        _llm._PRICING_CACHE.clear()
+
+
 def test_sec_brain_cache_seul(tmp_path, monkeypatch):
     from datetime import date
     monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
