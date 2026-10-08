@@ -32,6 +32,9 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_EPINGLE = ROOT_DIR / "Epingle_Projets.md"
 DEFAULT_PROJECTS = ROOT_DIR / "projects.txt"
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 # Basenames ou motifs refuses meme si demandes explicitement (R101/R111).
 DENY_BASENAMES = {
     "finances.local.json",
@@ -260,9 +263,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
-        stats = run_export(Path(args.epingle), Path(args.projects), Path(args.out))
+        stats = run_export(confine_arg(args.epingle, ROOT_DIR, "Epingle_Projets.md"),
+                           confine_arg(args.projects, ROOT_DIR, "projects.txt"),
+                           confine_arg(args.out, ROOT_DIR))
         if args.write_assets:
-            assets = write_assets(Path(args.write_assets))
+            assets = write_assets(confine_arg(args.write_assets, ROOT_DIR))
             stats["schema"] = str(assets["schema"])
             stats["queries"] = str(assets["queries"])
     except ExportError as exc:

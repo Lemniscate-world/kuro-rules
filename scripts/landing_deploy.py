@@ -186,7 +186,12 @@ def main() -> int:
     except ValueError as exc:
         print(str(exc))
         return 2
-    docs = Path(args.repo_dir) / "docs"
+    docs = Path(args.repo_dir).expanduser().resolve() / "docs"
+    # Noms de fichiers figés + cible tenue d'être un repo git : un --repo-dir
+    # piégé (/etc, $HOME, ..) est refusé au lieu d'y écrire landing.html.
+    if not (docs.parent / ".git").is_dir():
+        print(f"[ERR] --repo-dir refusé (pas un repo git) : {args.repo_dir}")
+        return 2
     docs.mkdir(parents=True, exist_ok=True)
     for fname, html in pages.items():
         dest = docs / fname
