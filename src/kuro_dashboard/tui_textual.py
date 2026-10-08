@@ -70,6 +70,8 @@ class KuroApp(App):
         Binding("3", "toggle_net", "Reseau"),
         Binding("4", "toggle_proc", "Proc"),
         Binding("5", "toggle_market", "Marketing"),
+        Binding("6", "toggle_strat", "Stratégie"),
+        Binding("7", "toggle_seo", "SEO"),
     ]
 
     def __init__(self, interval: float = 2.0, top: int = 10) -> None:
@@ -114,6 +116,10 @@ class KuroApp(App):
                     yield Static("", id="detail")
                 with Vertical(id="market-box", classes="box"):
                     yield Static("", id="market")
+                with Vertical(id="strat-box", classes="box"):
+                    yield Static("", id="strategy")
+                with Vertical(id="seo-box", classes="box"):
+                    yield Static("", id="seo")
             with Vertical(id="sidebar"):
                 with Vertical(id="face-box", classes="box"):
                     yield Static("", id="face")
@@ -170,6 +176,12 @@ class KuroApp(App):
 
     def action_toggle_market(self) -> None:
         self._toggle_boxes("market-box")
+
+    def action_toggle_strat(self) -> None:
+        self._toggle_boxes("strat-box")
+
+    def action_toggle_seo(self) -> None:
+        self._toggle_boxes("seo-box")
 
     def action_filter(self) -> None:
         box = self.query_one("#proc-filter", Input)
@@ -230,6 +242,8 @@ class KuroApp(App):
             self._render_procs(snap)
             self._render_sidebar(snap, ksnap)
             self._render_market()
+            self._render_strategy()
+            self._render_seo()
         except Exception:
             pass
         finally:
@@ -428,15 +442,38 @@ class KuroApp(App):
         return lines
 
     def _render_market(self) -> None:
-        self._title("market-box", "MARCHÉ · STRATÉGIE · SEO")
+        self._title("market-box", "MARCHÉ")
         try:
-            from .tui import sec_marketing, sec_seo, sec_strategy
-            lines = [*sec_marketing(), "-- STRATÉGIE --",
-                     *sec_strategy(), "-- SEO --", *sec_seo()]
+            from .tui import sec_marketing
+            lines = sec_marketing()
         except Exception:
             lines = ["MARCHÉ (indisponible)"]
         try:
             self.query_one("#market", Static).update("\n".join(lines))
+        except Exception:
+            pass
+
+    def _render_strategy(self) -> None:
+        self._title("strat-box", "STRATÉGIE")
+        try:
+            from .tui import sec_strategy
+            lines = sec_strategy()
+        except Exception:
+            lines = ["STRATÉGIE (indisponible)"]
+        try:
+            self.query_one("#strategy", Static).update("\n".join(lines))
+        except Exception:
+            pass
+
+    def _render_seo(self) -> None:
+        self._title("seo-box", "SEO")
+        try:
+            from .tui import sec_seo
+            lines = sec_seo()
+        except Exception:
+            lines = ["SEO (indisponible)"]
+        try:
+            self.query_one("#seo", Static).update("\n".join(lines))
         except Exception:
             pass
 
