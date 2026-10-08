@@ -1340,6 +1340,11 @@ def test_sec_seo_absent_et_parsing(tmp_path, monkeypatch):
     assert any("P1" in r and "1" in r for r in rows)
     assert tui._seo_items("### P0\n1 hello\n### P1\n1 bye", "### P0") == ["hello"]
     assert tui._seo_items("rien", "### P0") == []
+    # Format réel du cron serveur (# titre + **Date**: ...).
+    (leads / "SEO_AUDIT.md").write_text(
+        "# Audit Stratégique Quotidien - SEO\n\n**Date**: 2026-10-08\n\n### P0\n1 Fix title\n",
+        encoding="utf-8")
+    assert any("2026-10-08" in r for r in tui.sec_seo())
 
 
 def test_watch_touche_6_cache_box(monkeypatch, capsys):
