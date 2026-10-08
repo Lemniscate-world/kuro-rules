@@ -1100,6 +1100,8 @@ def sec_strategy() -> list[str]:
             f"  decisions : {len(last.get('decisions_open') or [])} ouvertes "
             f"· {last.get('interviews_7d', '?')} interviews 7j",
         ]
+        if prev is None:
+            lines.append("  (1er snapshot : deltas au prochain mois)")
         return lines[:6]
     except Exception:
         return ["STRATÉGIE (indisponible)"]
