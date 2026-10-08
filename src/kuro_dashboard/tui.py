@@ -1188,8 +1188,9 @@ def sec_seo() -> list[str]:
             return ["SEO pas d audit (cron strategy-daily : ~/leads/SEO_AUDIT.md absent)"]
         date = ""
         for line in text.splitlines()[:12]:
-            if line.startswith("Date"):
-                date = line[5:].strip()[:40]
+            cleaned = line.strip().lstrip("#* ").strip()
+            if cleaned.startswith("Date"):
+                date = cleaned[4:].strip("* :")[:40]
                 break
         p0 = _seo_items(text, "### P0")
         p1 = _seo_items(text, "### P1")
