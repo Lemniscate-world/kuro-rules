@@ -165,6 +165,7 @@ strategy_decisions.local.json
 strategy_history.local.json
 pull_anydo.json
 proposals.local.json
+config/posting_overrides.json
 watchdog.local.json
 vacances.flag
 cowork_last_pick.local.json

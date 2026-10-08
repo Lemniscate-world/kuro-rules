@@ -23,6 +23,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parent.parent
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 DEFAULT_OUTPUT = ROOT / "reports" / "discovery_snapshot.json"
 
 REPOS = [
@@ -150,7 +154,7 @@ def main():
     ap.add_argument("--output", default=str(DEFAULT_OUTPUT))
     a = ap.parse_args()
 
-    out = Path(a.output)
+    out = confine_arg(a.output, ROOT, default="reports/discovery_snapshot.json")
     previous = load_previous(out)
     snapshot = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

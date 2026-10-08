@@ -25,6 +25,9 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "outputs"
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 LEAK_PATTERNS = [
     r"(?i)\b(api[_-]?key|token|secret|password)\s*=\s*\S+",
     r"(?i)[a-f0-9]{32,}",
@@ -74,7 +77,7 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true", help="écrit outputs/linkedin_YYYY-MM-DD-<projet>.md")
     args = ap.parse_args()
     if args.from_file:
-        text = Path(args.from_file).read_text(encoding="utf-8", errors="replace")
+        text = confine_arg(args.from_file, ROOT).read_text(encoding="utf-8", errors="replace")
     elif args.text:
         text = args.text
     else:

@@ -24,6 +24,10 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 API = "https://api.buffer.com"
 MAX_LEN = 280
 POST_HOUR_UTC = 20  # heure de publication auto (modifiable via POST_HOUR_UTC)
@@ -205,7 +209,13 @@ def main(argv=None):
             return 0
         text = args.text
         if args.from_file:
-            text = Path(args.from_file).read_text(encoding="utf-8")
+            try:
+                text = confine_arg(args.from_file, ROOT).read_text(encoding="utf-8")
+            except SystemExit:
+                raise
+            except Exception as exc:
+                print(f"[ERR] draft illisible: {exc}")
+                return 2
         text = (text or "").strip()
         mode = "shareNow" if args.now else ("customScheduled" if args.at else "addToQueue")
         print("  {}".format(text.replace("\n", " / ")[:160]))

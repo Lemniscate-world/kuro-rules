@@ -35,7 +35,7 @@ REPO = Path(__file__).resolve().parent.parent
 ALLOW_DIRS = ("src/", "tests/", "scripts/", ".github/", "docs/", "rules/", "prompts/", "templates/",
               "dashboard/")
 ALLOW_FILES = ("pyproject.toml", ".pre-commit-config.yaml", ".sonarcloud.properties",
-               "AGENTS.md", "README.md")
+               ".gitignore", "AGENTS.md", "README.md")
 # Écrits par le bot kuro.yml : jamais touchés ici (conflits garantis sinon).
 BOT_OWNED = (
     "TRUTH_DAILY.md", "tasks_anydo.json", "ci-status.json", "skills.json",

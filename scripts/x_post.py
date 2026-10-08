@@ -31,6 +31,10 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 TWEETS_URL = "https://api.x.com/2/tweets"
 ME_URL = "https://api.x.com/2/users/me"
 MAX_LEN = 280
@@ -162,7 +166,9 @@ def main(argv=None):
     text = args.text
     if args.from_file:
         try:
-            text = Path(args.from_file).read_text(encoding="utf-8")
+            text = confine_arg(args.from_file, ROOT).read_text(encoding="utf-8")
+        except SystemExit:
+            raise
         except Exception as exc:
             print(f"[ERR] draft illisible: {exc}")
             return 2

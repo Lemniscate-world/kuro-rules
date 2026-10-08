@@ -36,6 +36,10 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 # Cles interdites dans un delta (R111 : financier + secrets, meme en staging).
 PRIVATE_KEYS = {
     "amount", "expenses", "revenues", "cash", "mrr", "burn", "runway",
@@ -203,7 +207,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         bin_path = resolve_bin(args.bin)
         if args.cmd == "harvest":
-            print(cmd_harvest(bin_path, args.store, args.branch, Path(args.delta), args.from_branch))
+            print(cmd_harvest(bin_path, args.store, args.branch,
+                              confine_arg(args.delta, ROOT), args.from_branch))
         elif args.cmd == "diff":
             print(cmd_diff(bin_path, args.store, args.branch, args.from_branch, args.limit))
         elif args.cmd == "merge":

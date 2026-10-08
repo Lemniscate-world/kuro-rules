@@ -36,6 +36,9 @@ DELIVERY = OUTPUTS / "post_delivery.json"
 METRICS = OUTPUTS / "post_metrics.json"
 OVERRIDES = KURORULES / "config" / "posting_overrides.json"
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kuro_paths import confine_arg  # noqa: E402
+
 
 def load_overrides(path=None):
     try:
@@ -302,9 +305,13 @@ def main(argv=None):
 
     if args.cmd == "review":
         text = args.text
+        draft_path = None
         if args.from_file:
             try:
-                text = Path(args.from_file).read_text(encoding="utf-8")
+                draft_path = confine_arg(args.from_file, KURORULES)
+                text = draft_path.read_text(encoding="utf-8")
+            except SystemExit:
+                raise
             except Exception as exc:
                 print(f"[ERR] draft illisible: {exc}")
                 return 2
@@ -322,8 +329,8 @@ def main(argv=None):
             new = (rep["rewrite"] or "").strip()
             if new and len(new) <= 280 and not gx.lint_post(args.project, new):
                 det2, _ = deterministic_score(args.project, new)
-                if det2 >= rep["score_det"]:
-                    Path(args.from_file).write_text(new + "\n", encoding="utf-8")
+                if det2 >= rep["score_det"] and draft_path is not None:
+                    draft_path.write_text(new + "\n", encoding="utf-8")
                     print("  [OK] rewrite applique (score %d -> %d)." % (rep["score_det"], det2))
                     return 0
             print("  [SKIP] rewrite rejete (lint ou score).")
