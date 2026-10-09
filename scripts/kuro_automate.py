@@ -4,7 +4,7 @@
 Chaine quotidienne (faits d'abord, publication ensuite) :
   1. doctor (lecture seule)  2. truth audit  3. portfolio+blog
   4. strategy --discord      5. anydo --export  6. finance + investor dry-run
-Le lundi (+ --weekly) ajoute : radar + weekly_report + investor post.
+Le lundi (+ --weekly) ajoute : radar + weekly_report + investor post + veille upstream.
 Securite + guardian : dry-run par defaut, --full pour push/rerun reels.
 
 Usage:
@@ -177,6 +177,12 @@ def main():
         # Digest Discovery hebdo -> Discord (delta vues/clones + referrers, correlation R99)
         if write:
             fails += sh([PY, str(SCRIPTS / "discovery_poll.py"), "--discord"], dry_run=a.dry_run)
+        # 7b. Veille upstream R119/R121 : lecture seule gh + drafts locaux, jamais de post auto.
+        uw = [PY, str(SCRIPTS / "upstream_watch.py"),
+              "--apply" if write else "--dry-run"]
+        if write:
+            uw.append("--discord")
+        fails += sh(uw, dry_run=a.dry_run)
 
     # 8. Publication autonome : artefacts générés + Epingle + truth uniquement.
     if write and not a.dry_run:
