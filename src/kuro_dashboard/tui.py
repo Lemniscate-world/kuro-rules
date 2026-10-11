@@ -24,11 +24,12 @@ import json
 import os
 import shutil
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any
 
-from .agents import agents_lines
+from .agents import _AGENTS_CACHE, AGENTS_TTL_SECONDS, agents_lines
 from .face import face_frame, mood_for, should_blink, spinner
 from .kuro_state import collect_kuro_snapshot
 from .projects import quick_lines as git_project_lines
@@ -1685,6 +1686,56 @@ def _titled(label: str, rows: list[str], width: int) -> list[str]:
             return []
 
 
+_AGENTS_BG: dict = {"t": None}
+
+
+def _agents_refresh_bg() -> None:
+    """Relance le refresh agents en tache de fond (daemon, jamais bloquant).
+
+    La sonde gateway met jusqu a 12 s (R116 : timeout volontaire, la
+    gateway met ~7 s a repondre). Le mode compact (refresh 2 s) ne peut
+    pas l appeler en synchrone sans geler l affichage.
+    """
+    try:
+        old = _AGENTS_BG.get("t")
+        if old is not None and old.is_alive():
+            return
+
+        def _run() -> None:
+            try:
+                agents_lines()
+            except Exception:
+                pass
+
+        th = threading.Thread(target=_run, name="xenon-agents", daemon=True)
+        _AGENTS_BG["t"] = th
+        th.start()
+    except Exception:
+        pass
+
+
+def _agents_head_fast() -> str:
+    """Ligne 'agents : ...' depuis le cache chaud, sans jamais bloquer.
+
+    Cache froid/vide -> declenche un refresh de fond et rend "" (la ligne
+    apparait aux frames suivantes). La vue complete garde l appel
+    synchrone inchange.
+    """
+    try:
+        cached = list(_AGENTS_CACHE.get("lines") or [])
+        try:
+            age = time.monotonic() - float(_AGENTS_CACHE.get("ts") or 0.0)
+        except Exception:
+            age = float("inf")
+        if (not cached or age >= AGENTS_TTL_SECONDS):
+            _agents_refresh_bg()
+        head = next((str(r) for r in cached
+                     if str(r).startswith("agents :")), "")
+        return head.strip()[:76]
+    except Exception:
+        return ""
+
+
 def _compact_kuro_extra(hidden: set) -> list[str]:
     """Digests 1 ligne pour le mode compact (tout voir sur petit terminal).
 
@@ -1701,13 +1752,9 @@ def _compact_kuro_extra(hidden: set) -> list[str]:
         except Exception:
             brain = "?"
         out.append(str(brain).strip()[:76])
-        try:
-            head = next((str(r) for r in (sec_agents() or [])
-                         if str(r).startswith("agents :")), "")
-        except Exception:
-            head = ""
+        head = _agents_head_fast()
         if head:
-            out.append(head.strip()[:76])
+            out.append(head)
         if "market" not in hide:
             try:
                 total, itw_7d, _, _ = _marketing_pipeline(_rules_dir())
