@@ -1646,3 +1646,42 @@ def test_shrink_full_priorites():
     assert petit[-1].startswith("[q]")
     assert any("COMPUTE" in r for r in petit)
     assert tui._shrink_full(parts, 4) == parts
+
+
+def _frame_wide():
+    # Side-by-side : titres/diviseurs au milieu des lignes.
+    top = "+- 4 TOP PROCESSUS ------"
+    return ["GLANCES KURO  srv",
+            top + " | " + "-- agents ----------",
+            "| p0" + " " * 70 + " | " + "agents : a",
+            "| p1" + " " * 70 + " | " + "tache 1",
+            "| p2" + " " * 70 + " | " + "-- projets --------",
+            "| p3" + " " * 70 + " | " + "repo x",
+            "+----------------------" + " | " + "repo y",
+            "+- 5 MARKETING ---------- | ",
+            "[q] quitter"]
+
+
+def test_detecteurs_marquers():
+    assert tui._is_box_title("+- 4 TOP")
+    assert tui._is_box_title("xxx | +- 9 COMPUTE --")
+    assert not tui._is_box_title("| C++ builder")
+    assert tui._is_border("+---+")
+    assert not tui._is_border("| a |")
+    assert tui._is_divider("-- agents ------", "agents")
+    assert tui._is_divider("x | -- projets ---", "projets")
+    assert not tui._is_divider("-- agents ---", "projets")
+    assert not tui._is_divider("| texte -- simple")
+
+
+def test_trim_wide_side_by_side():
+    parts = _frame_wide()
+    assert len(parts) == 9
+    rogne = tui._trim_box_rows(parts, "+- 4 ", 1, 6)
+    assert len(rogne) <= 6
+    assert any("+- 4 TOP" in r for r in rogne)
+    assert any("+- 5 MARKETING" in r for r in rogne)
+    assert rogne[-1] == "[q] quitter"
+    sec = tui._trim_section(parts, "-- agents ", 0, 6)
+    assert not any("agents :" in r for r in sec)
+    assert any("projets" in r for r in sec)
