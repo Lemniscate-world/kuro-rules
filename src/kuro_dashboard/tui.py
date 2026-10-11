@@ -1028,9 +1028,9 @@ def sec_marketing() -> list[str]:
         lines = [f"pipeline : {total} entrees - {itw_7d} {_pl(itw_7d, 'interview')} 7j"
                  f" (cible 3/sem){pipe_age}"]
         if insight:
-            lines.append(f"  insight : {insight}")
+            lines.append(f"  insight : {str(insight).strip()[:100]}")
         if nxt:
-            lines.append(f"  prochain pas : {nxt}")
+            lines.append(f"  prochain pas : {str(nxt).strip()[:100]}")
         if drafts:
             lines.append(f"  drafts : {drafts} posts prets [{publies}/{drafts} publies]{launch_age}")
         if canaux:
@@ -1351,8 +1351,7 @@ def sec_finance() -> list[str]:
             f"| MRR ~{_fin_fmt(mrr, cur)} | net ~{_fin_fmt(net, cur)} "
             f"| runway ~{runway}",
             f"  dernier mois {last_m} : dep {_fin_fmt(last_e, cur)} / "
-            f"rev {_fin_fmt(last_r, cur)}",
-            f"  historique : {hist_n} releves (~/.kuro/finance_history.jsonl)",
+            f"rev {_fin_fmt(last_r, cur)} · histo {hist_n} releves",
         ][:5]
     except Exception:
         return ["FINANCE (indisponible)"]
@@ -1840,6 +1839,38 @@ def _compact_strat_seo(hidden: set) -> list[str]:
         return []
 
 
+def _trim_box_rows(parts: list[str], marker: str, keep: int,
+                   height: int) -> list[str]:
+    """Rogne une box cadre a `keep` lignes de contenu (0 = supprime la box).
+
+    Repere la box par son titre (`marker`, ex "+- 4 ") et sa bordure
+    basse ("+---+"). Ne retire que le depassement (min(rogne, depass)).
+    Pur, testable. Utilise par _shrink_compact et _shrink_full.
+    """
+    try:
+        parts = list(parts)
+        if len(parts) <= height:
+            return parts
+        start = next((i for i, line in enumerate(parts)
+                      if line.startswith(marker)), -1)
+        if start < 0:
+            return parts
+        end = next((i for i in range(start + 1, len(parts))
+                    if parts[i].startswith("+")
+                    and set(parts[i]) <= {"+", "-"}), -1)
+        if end < 0:
+            return parts
+        if keep <= 0:
+            del parts[start:end + 1]
+        else:
+            overflow = len(parts) - height
+            removable = max(0, (end - start - 1) - keep)
+            del parts[start + 1:start + 1 + min(removable, overflow)]
+        return parts
+    except Exception:
+        return parts
+
+
 def _shrink_compact(parts: list[str], height: int) -> list[str]:
     """Rogne le compact à `height` rangs (petits écrans).
 
@@ -1853,21 +1884,27 @@ def _shrink_compact(parts: list[str], height: int) -> list[str]:
         for marker, keep in (("+- 4 ", 1), ("+- 6 STRAT/SEO", 0)):
             if len(parts) <= height:
                 break
-            start = next((i for i, line in enumerate(parts)
-                          if line.startswith(marker)), -1)
-            if start < 0:
-                continue
-            end = next((i for i in range(start + 1, len(parts))
-                        if parts[i].startswith("+")
-                        and set(parts[i]) <= {"+", "-"}), -1)
-            if end < 0:
-                continue
-            if keep == 0:
-                del parts[start:end + 1]
-            else:
-                overflow = len(parts) - height
-                removable = max(0, (end - start - 1) - keep)
-                del parts[start + 1:start + 1 + min(removable, overflow)]
+            parts = _trim_box_rows(parts, marker, keep, height)
+        return parts
+    except Exception:
+        return parts
+
+
+def _shrink_full(parts: list[str], height: int) -> list[str]:
+    """Ajuste la vue complete a `height` rangs (console 48 lignes...).
+
+    Priorité : seule la liste PROC (variable, TOP 10) est rognee (10
+    puis 1 ligne gardee). AUCUNE box n est supprimee : tout reste
+    visible ("tout voir"). Header + footer jamais touchés. Pur, testable.
+    """
+    try:
+        parts = list(parts)
+        if len(parts) <= height or height < 12:
+            return parts
+        for marker, keep in (("+- 4 ", 5), ("+- 4 ", 1)):
+            if len(parts) <= height:
+                break
+            parts = _trim_box_rows(parts, marker, keep, height)
         return parts
     except Exception:
         return parts
@@ -2023,12 +2060,16 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
     parts = [_fit(p, total) for p in body] + [_fit(f"{footer} {spinner(now)}", total)]
     if _stdout_is_tty():
         # Remplit tout l ecran, footer colle en bas (captures/tests : pas de pad).
+        # Depassement : rogne la liste PROC (vue complete) au lieu de couper
+        # le bas (boxes + footer restent visibles).
         try:
-            room = term_height() - len(parts)
+            height = term_height()
         except Exception:
-            room = 0
-        if room > 0:
-            parts = parts[:-1] + [""] * room + parts[-1:]
+            height = 0
+        if height and len(parts) < height:
+            parts = parts[:-1] + [""] * (height - len(parts)) + parts[-1:]
+        elif height and len(parts) > height:
+            parts = _shrink_full(parts, height)
     return "\n".join(parts) + "\n"
 
 

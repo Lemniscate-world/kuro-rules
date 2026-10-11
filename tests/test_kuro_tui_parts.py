@@ -1568,7 +1568,6 @@ def test_fin_digest(tmp_path, monkeypatch):
 
 
 def test_compute_digest(tmp_path, monkeypatch):
-    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", tmp_path / "nope.json")
     assert tui._compute_digest() == "compute : file vide"
     q = tmp_path / "q.json"
     q.write_text(json.dumps(
@@ -1582,3 +1581,68 @@ def test_compute_digest(tmp_path, monkeypatch):
     assert digest.startswith("compute : 2 demandes")
     assert "helium" in digest
     assert len(digest) <= 76
+
+
+# -- vue complete <=48 lignes (console serveur 170x48) -------------------------
+
+def test_finance_ligne_fusionnee(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    (tmp_path / "finances.local.json").write_text(
+        json.dumps(_fin_sample()), encoding="utf-8")
+    monkeypatch.setattr(tui, "FINANCE_HISTORY_FILE", tmp_path / "nope.jsonl")
+    rows = tui.sec_finance()
+    assert len(rows) == 3
+    assert "2026-10" in rows[2]
+    assert "histo 0 releves" in rows[2]
+
+
+def test_marketing_insight_une_ligne(tmp_path, monkeypatch):
+    root = tmp_path / "r"
+    root.mkdir()
+    (root / "pipeline.local.json").write_text(json.dumps(
+        {"entries": [{"type": "note", "date": "2026-10-01",
+                      "insight": "x" * 200, "next": "y" * 200}]}),
+        encoding="utf-8")
+    monkeypatch.setenv("KURO_RULES_DIR", str(root))
+    rows = tui.sec_marketing()
+    insight = next(r for r in rows if "insight :" in r)
+    assert len(insight) <= 13 + 100
+
+
+def test_vue_complete_48_lignes(monkeypatch):
+    monkeypatch.setattr(tui, "term_width", lambda: 170)
+    frame = tui.render_frame(_payload(), kuro=_kuro(), now=1.0)
+    rows = frame.splitlines()
+    assert len(rows) <= 48
+    for box in ("1 KURO", "8 FINANCE", "9 COMPUTE"):
+        assert any(box in r for r in rows)
+
+
+def _frame_parts(n_proc=10):
+    head = ["GLANCES KURO  srv"]
+    proc = ["+- 4 TOP PROCESSUS", *[f"| p{i}" for i in range(n_proc)],
+            "+----------------"]
+    other = ["+- 9 COMPUTE", "| file vide", "+-------------"]
+    foot = ["[q] quitter"]
+    return head + proc + other + foot
+
+
+def test_trim_box_rows():
+    parts = _frame_parts(10)
+    court = tui._trim_box_rows(parts, "+- 4 ", 5, 12)
+    assert len(court) == len(parts) - 5
+    assert court[0].startswith("GLANCES")
+    assert court[-1].startswith("[q]")
+    dropped = tui._trim_box_rows(parts, "+- 9 ", 0, 12)
+    assert not any("COMPUTE" in r for r in dropped)
+    assert tui._trim_box_rows(parts, "+- Z ", 1, 12) == parts
+
+
+def test_shrink_full_priorites():
+    parts = _frame_parts(10)
+    petit = tui._shrink_full(parts, 12)
+    assert len(petit) <= 12
+    assert petit[0].startswith("GLANCES")
+    assert petit[-1].startswith("[q]")
+    assert any("COMPUTE" in r for r in petit)
+    assert tui._shrink_full(parts, 4) == parts
