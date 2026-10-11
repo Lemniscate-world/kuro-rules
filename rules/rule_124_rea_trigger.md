@@ -40,7 +40,18 @@ AVANT toute hypothèse sur le comportement. Réf : https://github.com/morluto/re
   `reverse-engineer-anything` v37.
 - ✅ `REA_JADX_MCP_JAR` persisté (variable utilisateur) + jadx 1.5.6 +
   JDK 21 → APK OK sans autre install.
-- ❌ Hopper, IDA MCP, `adb`, Wakaru (Linux-only, pas de `recover-javascript-sources` sur Windows).
+- ✅ `adb` 37.0.1 (scoop/main) → prêt si device/émulateur connecté.
+- ❌ Hopper : install macOS-only (`hdiutil`/`.dmg`) → impossible sur Windows.
+- ❌ IDA : exige IDA Pro (Hex-Rays) + `ida-pro-mcp` + setup GUI interactif ;
+  IDA Free 9.3 insuffisant ; Ghidra couvre le natif → différé jusqu'à un cas
+  Hex-Rays.
+- ✅ Wakaru 1.14.0 (SHA vérifié) UNIQUEMENT via WSL Ubuntu : Node 24
+  (`/usr/local/bin/node`), `REA_WAKARU_COMMAND=/home/utilisateur/.tools/wakaru/wakaru`,
+  `prlimit` natif. Recette : `wsl -d Ubuntu -- bash -c "export
+  REA_WAKARU_COMMAND=/home/utilisateur/.tools/wakaru/wakaru &&
+  /usr/local/bin/npx -y rea-agents@latest recover-javascript-sources
+  /tmp/in.js /tmp/out --format json"`. Gate codée (`process.platform !==
+  "linux"`) : aucun wrapper Windows ne passe.
 - ✅ Ghidra 12.1.4 (scoop/extras, `GHIDRA_INSTALL_DIR` persisté) + JDK 21 →
   natif OK vérifié (`search` whoami.exe → `logonid` @ 0x14000e7b8).
 - Session CDP Chrome : à la demande uniquement.
