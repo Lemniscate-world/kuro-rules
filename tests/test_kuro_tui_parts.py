@@ -1533,6 +1533,29 @@ def test_compact_kuro_extra(tmp_path, monkeypatch):
     assert not any("compute :" in r for r in cache)
 
 
+def test_compact_agents_sans_blocage(tmp_path, monkeypatch):
+    from kuro_dashboard import agents as _ag
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", tmp_path / "nope.json")
+    saved = dict(_ag._AGENTS_CACHE)
+    try:
+        _ag._AGENTS_CACHE.update({"ts": time.monotonic(),
+                                  "lines": ["agents : a (x, m)"]})
+        called = []
+        monkeypatch.setattr(tui, "agents_lines",
+                            lambda: called.append(1) or ["NEVER"])
+        t0 = time.monotonic()
+        rows = tui._compact_kuro_extra(set())
+        assert time.monotonic() - t0 < 5
+        assert not called
+        assert any("agents : a" in r for r in rows)
+    finally:
+        _ag._AGENTS_CACHE.clear()
+        _ag._AGENTS_CACHE.update(saved)
+
+
 def test_fin_digest(tmp_path, monkeypatch):
     monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
     assert tui._fin_digest() == "finance : pas de donnees"
