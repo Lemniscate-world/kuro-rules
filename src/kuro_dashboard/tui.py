@@ -1686,33 +1686,88 @@ def _titled(label: str, rows: list[str], width: int) -> list[str]:
 
 
 def _compact_kuro_extra(hidden: set) -> list[str]:
-    """Digests cerveau/agents/marketing pour le mode compact.
+    """Digests 1 ligne pour le mode compact (tout voir sur petit terminal).
 
-    Vu en prod : sur petit terminal la box 1 ne montrait que humeur+daemon
-    (mood+ksum), cerveau/marketing disparaissaient sans recours.
-    Budget compact : 2 lignes denses max (agents ignore : longueur
-    imprevisible). Jamais d exception.
+    Vu en prod : la box 1 ne montrait que humeur+daemon (+cerveau/marketing
+    depuis), agents/finance/compute disparaissaient sans recours.
+    Chaque digest tient en 76 colonnes (pas de wrap en box 80).
+    Cles 8/9 (finance/compute) et market respectees. Jamais d exception.
     """
     try:
+        hide = set(hidden or ())
         out: list[str] = []
         try:
             brain = (sec_brain() or ["?"])[0]
         except Exception:
             brain = "?"
-        out.append(str(brain).strip()[:88])
-        if "market" not in (hidden or set()):
+        out.append(str(brain).strip()[:76])
+        try:
+            head = next((str(r) for r in (sec_agents() or [])
+                         if str(r).startswith("agents :")), "")
+        except Exception:
+            head = ""
+        if head:
+            out.append(head.strip()[:76])
+        if "market" not in hide:
             try:
                 total, itw_7d, _, _ = _marketing_pipeline(_rules_dir())
                 out.append(f"marketing : pipeline {total} ({itw_7d} itw 7j)")
             except Exception:
                 pass
-        return out[:2]
+        if "finance" not in hide:
+            out.append(_fin_digest())
+        if "compute" not in hide:
+            out.append(_compute_digest())
+        return [r for r in out if r][:6]
     except Exception:
         return []
 
 
+def _fin_digest() -> str:
+    """1 ligne finance (cash + runway) ou message honnete. Pur, testable."""
+    try:
+        data = json.loads((_rules_dir() / "finances.local.json").read_text(
+            encoding="utf-8"))
+        months = _fin_months(data)
+        if not months:
+            return "finance : fichier invalide"
+        cur = str(data.get("currency") or "USD").upper()
+        win = months[-6:]
+        n = len(win)
+        burn = sum(m["expenses"] for m in win) / n
+        mrr = sum(m["revenues"] for m in win) / n
+        net = burn - mrr
+        try:
+            cash = float(data.get("starting_cash") or 0)
+        except Exception:
+            return "finance : fichier invalide"
+        if net <= 0:
+            runway = "infini" if net < 0 or cash >= 0 else "0"
+        elif cash <= 0:
+            runway = "0 (vide)"
+        else:
+            runway = f"{cash / net:.1f} mois"
+        return (f"finance : cash {_fin_fmt(cash, cur)} {cur} · "
+                f"runway {runway}")[:76]
+    except Exception:
+        return "finance : pas de donnees"
+
+
+def _compute_digest() -> str:
+    """1 ligne compute (file locale) ou message honnete. Pur, testable."""
+    try:
+        entries = json.loads(COMPUTE_QUEUE_FILE.read_text(encoding="utf-8"))
+        if not isinstance(entries, list) or not entries:
+            return "compute : file vide"
+        last = entries[-1] if isinstance(entries[-1], dict) else {}
+        proj = str(last.get("project") or "?")
+        return f"compute : {len(entries)} demandes (>{proj})"[:76]
+    except Exception:
+        return "compute : file vide"
+
+
 def _compact_strat_seo(hidden: set) -> list[str]:
-    """Digest 1 ligne strat+SEO pour le mode compact (budget <=28 rangs).
+    """Digest 1 ligne strat+SEO pour le mode compact (budget <=31 rangs).
 
     Vide si les deux boxes sont cachées. Jamais d exception.
     """
@@ -1805,8 +1860,9 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
         return "\n".join(parts) + "\n"
     if compact:
-        # Slim <=28 rangs : l essentiel + digests (strat/SEO + cerveau/
-        # marketing box 1, sinon invisibles sur petit terminal — vu en prod).
+        # Slim <=31 rangs : l essentiel + digests (strat/SEO + cerveau/
+        # agents/marketing/finance/compute box 1, sinon invisibles sur
+        # petit terminal — vu en prod).
         # L ajustement exact a l ecran reste fait par _shrink_compact.
         # Budget : UNE box d 1 ligne (3 rangs), pas deux boxes.
         total = min(width, 100)

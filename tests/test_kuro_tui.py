@@ -330,7 +330,7 @@ def test_compact_fits_small_console(monkeypatch):
                               "mem": 1.0} for i in range(10)]}
     frame = tui.render_frame(payload, kuro=None, now=1.0, compact=True)
     rows = frame.splitlines()
-    assert len(rows) <= 28
+    assert len(rows) <= 31
     assert "1 KURO" in frame and "4 TOP PROCESSUS" in frame
     for line in rows:
         assert tui._visible_width(line) <= 80
