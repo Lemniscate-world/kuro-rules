@@ -110,6 +110,7 @@ Ces règles DOIVENT toujours être vérifiées. Si non applicables, le projet es
 | R96 | ✅ DONE | Community posts prepared (Reddit + Discord postés) |
 | R97 | ✅ DONE | Launch planning template used |
 | R98 | ✅ DONE | Pre-Launch MVP Verification Protocol (13/13 tests) |
+| R124 | 🔵 N-A | REA trigger — que si tâche sur binaire livré/sans source (rules/rule_124_rea_trigger.md) |
 
 ## Résumé
 
