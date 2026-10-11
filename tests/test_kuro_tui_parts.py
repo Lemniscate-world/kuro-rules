@@ -1302,7 +1302,7 @@ def test_compact_montre_strat_et_seo(monkeypatch):
                             hidden=("strat", "seo"))
     assert "6 STRAT/SEO" not in sans
     rows = frame.splitlines()
-    assert len(rows) <= 28
+    assert len(rows) <= 31
 
 
 def test_shrink_compact_priorites(monkeypatch):
@@ -1521,6 +1521,41 @@ def test_compact_kuro_extra(tmp_path, monkeypatch):
     monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
     monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
     monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", tmp_path / "nope.json")
     rows = tui._compact_kuro_extra(set())
-    assert rows and rows[0].startswith("cerveau : inconnu")
+    assert rows[0].startswith("cerveau : inconnu")
     assert any("marketing : pipeline 0" in r for r in rows)
+    assert any("finance : pas de donnees" in r for r in rows)
+    assert any("compute : file vide" in r for r in rows)
+    cache = tui._compact_kuro_extra({"market", "finance", "compute"})
+    assert not any("marketing :" in r for r in cache)
+    assert not any("finance :" in r for r in cache)
+    assert not any("compute :" in r for r in cache)
+
+
+def test_fin_digest(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    assert tui._fin_digest() == "finance : pas de donnees"
+    (tmp_path / "finances.local.json").write_text(
+        json.dumps(_fin_sample()), encoding="utf-8")
+    digest = tui._fin_digest()
+    assert digest.startswith("finance : cash 1 000.00 USD")
+    assert "runway 25.0 mois" in digest
+    assert len(digest) <= 76
+
+
+def test_compute_digest(tmp_path, monkeypatch):
+    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", tmp_path / "nope.json")
+    assert tui._compute_digest() == "compute : file vide"
+    q = tmp_path / "q.json"
+    q.write_text(json.dumps(
+        [{"request_id": "abc123de", "project": "openquant", "rtype": "gpu",
+          "created_at": "2026-10-11T08:00:00+00:00", "status": "open"},
+         {"request_id": "zz", "project": "helium", "rtype": "cpu",
+          "created_at": "2026-10-11T09:00:00+00:00", "status": "matched"}]),
+        encoding="utf-8")
+    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", q)
+    digest = tui._compute_digest()
+    assert digest.startswith("compute : 2 demandes")
+    assert "helium" in digest
+    assert len(digest) <= 76
