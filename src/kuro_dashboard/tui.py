@@ -1839,29 +1839,70 @@ def _compact_strat_seo(hidden: set) -> list[str]:
         return []
 
 
+def _is_box_title(line: str) -> bool:
+    """Ligne = titre de box "+- N ..." (N = 1-9), n importe ou dans la ligne.
+
+    En large les titres sont en debut de ligne, en sidebar (side-by-side)
+    au milieu : le motif "+- N " ne peut pas apparaitre dans du contenu
+    (barres "#"/"-", sparklines sans digit colle). Pur, testable.
+    """
+    try:
+        s = str(line).strip()
+        return any(f"+- {d} " in s for d in "123456789")
+    except Exception:
+        return False
+
+
+def _is_border(line: str) -> bool:
+    """Ligne = bordure "+---+" pleine largeur. Pur, testable."""
+    try:
+        s = str(line).strip()
+        return len(s) >= 3 and set(s) <= {"+", "-"}
+    except Exception:
+        return False
+
+
+def _is_divider(line: str, label: str | None = None) -> bool:
+    """Ligne = diviseur "-- label -----" (tirets longs obligatoires).
+
+    Sans label : n importe quel diviseur. Pur, testable.
+    """
+    try:
+        s = str(line).strip()
+        if "---" not in s or "-- " not in s:
+            return False
+        if label is None:
+            return True
+        return f"-- {label} " in s
+    except Exception:
+        return False
+
+
 def _trim_box_rows(parts: list[str], marker: str, keep: int,
                    height: int) -> list[str]:
     """Rogne une box cadre a `keep` lignes de contenu (0 = supprime la box).
 
-    Repere la box par son titre (`marker`, ex "+- 4 ") et sa bordure
-    basse ("+---+"). Ne retire que le depassement (min(rogne, depass)).
+    Reperee par son titre (`marker`, ex "+- 4 ") ; fin = prochain titre
+    de box ou bordure pleine largeur. Large (side-by-side) + empile :
+    les titres numerotes sont introuvables dans du contenu.
+    Ne retire que le depassement (min(rogne, depass)).
     Pur, testable. Utilise par _shrink_compact et _shrink_full.
     """
     try:
         parts = list(parts)
         if len(parts) <= height:
             return parts
+        mark = str(marker).strip()
         start = next((i for i, line in enumerate(parts)
-                      if line.startswith(marker)), -1)
+                      if mark in str(line)), -1)
         if start < 0:
             return parts
         end = next((i for i in range(start + 1, len(parts))
-                    if parts[i].startswith("+")
-                    and set(parts[i]) <= {"+", "-"}), -1)
+                    if _is_box_title(parts[i]) or _is_border(parts[i])), -1)
         if end < 0:
             return parts
         if keep <= 0:
-            del parts[start:end + 1]
+            del parts[start:end + 1]  # bordure incluse (la box disparait)
         else:
             overflow = len(parts) - height
             removable = max(0, (end - start - 1) - keep)
@@ -1890,21 +1931,65 @@ def _shrink_compact(parts: list[str], height: int) -> list[str]:
         return parts
 
 
+def _trim_section(parts: list[str], marker: str, keep: int,
+                   height: int) -> list[str]:
+    """Rogne une sous-section '-- label --' a `keep` lignes (0 = supprime).
+
+    `marker` = debut du diviseur (ex "-- agents "). Fin = prochain
+    diviseur, titre de box ou bordure (detecteurs _is_* : large +
+    empile). Le terminateur appartient a la section suivante (exclu).
+    Ne retire que le depassement. Pur, testable.
+    """
+    try:
+        parts = list(parts)
+        if len(parts) <= height:
+            return parts
+        label = str(marker).strip().lstrip("-").strip()
+        start = next((i for i, line in enumerate(parts)
+                      if _is_divider(line, label)), -1)
+        if start < 0:
+            return parts
+        end = -1
+        for i in range(start + 1, len(parts)):
+            if (_is_divider(parts[i], None) or _is_box_title(parts[i])
+                    or _is_border(parts[i])):
+                end = i
+                break
+        if end < 0:
+            return parts
+        if keep <= 0:
+            del parts[start:end]
+        else:
+            overflow = len(parts) - height
+            removable = max(0, (end - start - 1) - keep)
+            del parts[start + 1:start + 1 + min(removable, overflow)]
+        return parts
+    except Exception:
+        return parts
+
+
 def _shrink_full(parts: list[str], height: int) -> list[str]:
     """Ajuste la vue complete a `height` rangs (console 48 lignes...).
 
-    Priorité : seule la liste PROC (variable, TOP 10) est rognee (10
-    puis 1 ligne gardee). AUCUNE box n est supprimee : tout reste
-    visible ("tout voir"). Header + footer jamais touchés. Pur, testable.
+    Priorité (AUCUNE box supprimee : tout reste visible) : liste PROC
+    10 puis 1, agents puis projets (sidebar), contenu MARKETING a 3.
+    Header + footer jamais touchés. Pur, testable.
     """
     try:
         parts = list(parts)
         if len(parts) <= height or height < 12:
             return parts
-        for marker, keep in (("+- 4 ", 5), ("+- 4 ", 1)):
+        for kind, marker, keep in (("box", "+- 4 ", 5),
+                                   ("box", "+- 4 ", 1),
+                                   ("sec", "-- agents ", 3),
+                                   ("sec", "-- projets ", 3),
+                                   ("box", "+- 5 MARKETING", 3)):
             if len(parts) <= height:
                 break
-            parts = _trim_box_rows(parts, marker, keep, height)
+            if kind == "box":
+                parts = _trim_box_rows(parts, marker, keep, height)
+            else:
+                parts = _trim_section(parts, marker, keep, height)
         return parts
     except Exception:
         return parts
