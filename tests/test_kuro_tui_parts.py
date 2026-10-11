@@ -475,6 +475,8 @@ def _restore_boxes(saved):
 
 def test_register_box_cycle(monkeypatch):
     saved = _save_boxes()
+    # Base isolee (5/6/7) : en prod 8-9 sont pris par FINANCE/COMPUTE.
+    tui._BOX_DEFS[:] = [b for b in saved if str(b.get("num")) in ("5", "6", "7")]
     try:
         assert tui.register_box("", "X", "cyan", lambda: ["x"]) == ""
         assert tui.register_box("market", "X", "cyan", lambda: ["x"]) == ""
@@ -491,7 +493,7 @@ def test_register_box_cycle(monkeypatch):
                                 hidden=("demo",))
         assert "8 Demo Box" not in sans
         assert "8 demo" in " ".join(tui._help_rows())
-        # 9 puis saturation (7 pris par SEO)
+        # 9 puis saturation (base isolee : 8-9 libres ici, pris en prod)
         assert tui.register_box("b9", "B9", "cyan", lambda: ["9"]) == "9"
         assert tui.register_box("b10", "B10", "cyan", lambda: ["x"]) == ""
     finally:
@@ -500,6 +502,7 @@ def test_register_box_cycle(monkeypatch):
 
 def test_extra_box_erreur_rendue(monkeypatch):
     saved = _save_boxes()
+    tui._BOX_DEFS[:] = [b for b in saved if str(b.get("num")) in ("5", "6", "7")]
     try:
         def _boom():
             raise RuntimeError("panne extension")
@@ -1299,7 +1302,7 @@ def test_compact_montre_strat_et_seo(monkeypatch):
                             hidden=("strat", "seo"))
     assert "6 STRAT/SEO" not in sans
     rows = frame.splitlines()
-    assert len(rows) <= 26
+    assert len(rows) <= 28
 
 
 def test_shrink_compact_priorites(monkeypatch):
@@ -1424,3 +1427,77 @@ def test_watch_entree_erreur_directe(monkeypatch, capsys):
     monkeypatch.setattr(tui, "_RawKeys",
                         lambda: _ScriptedKeys(["down", "\n", "1", "1", "q"]))
     assert tui.watch(interval=0.1, top=3) == 0
+
+
+# -- finance / compute / compact (boxes 8-9, infos petit terminal) -------------
+
+def _fin_sample():
+    return {"currency": "USD", "starting_cash": 1000,
+            "months": [
+                {"month": "2026-09",
+                 "expenses": [{"label": "srv", "amount": 100}],
+                 "revenues": [{"label": "x", "amount": 20}]},
+                {"month": "2026-10",
+                 "expenses": [{"label": "srv", "amount": 50}],
+                 "revenues": [{"label": "x", "amount": 50}]}]}
+
+
+def test_finance_absent(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    rows = tui.sec_finance()
+    assert rows and "pas de donnees" in rows[0]
+
+
+def test_finance_echantillon(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    (tmp_path / "finances.local.json").write_text(
+        json.dumps(_fin_sample()), encoding="utf-8")
+    monkeypatch.setattr(tui, "FINANCE_HISTORY_FILE", tmp_path / "nope.jsonl")
+    rows = tui.sec_finance()
+    assert rows[0].startswith("FINANCE USD")
+    assert "920.00" in rows[1] and "40.00" in rows[1]
+    assert "35.00" in rows[1] and "23.0 mois" in rows[1]
+    assert "2026-10" in rows[2]
+
+
+def test_finance_invalide(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    (tmp_path / "finances.local.json").write_text("{pas json", encoding="utf-8")
+    assert "pas de donnees" in tui.sec_finance()[0]
+    (tmp_path / "finances.local.json").write_text("[1,2]", encoding="utf-8")
+    assert "invalide" in tui.sec_finance()[0]
+
+
+def test_compute_absent(tmp_path, monkeypatch):
+    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", tmp_path / "nope.json")
+    assert "file vide" in tui.sec_compute()[0]
+
+
+def test_compute_echantillon(tmp_path, monkeypatch):
+    q = tmp_path / "q.json"
+    q.write_text(json.dumps(
+        [{"request_id": "abc123de", "project": "openquant", "rtype": "gpu",
+          "created_at": "2026-10-11T08:00:00+00:00", "status": "open"}]),
+        encoding="utf-8")
+    monkeypatch.setattr(tui, "COMPUTE_QUEUE_FILE", q)
+    rows = tui.sec_compute()
+    assert "1 demandes" in rows[0]
+    assert "openquant" in rows[1] and "abc123" in rows[1]
+
+
+def test_boxes_8_9_enregistrees():
+    defs = {str(b.get("key")): b for b in tui._BOX_DEFS}
+    assert defs["finance"]["num"] == "8"
+    assert defs["compute"]["num"] == "9"
+    assert callable(defs["finance"]["rows"])
+    assert callable(defs["compute"]["rows"])
+    assert any("8-9" in r for r in tui._help_rows())
+
+
+def test_compact_kuro_extra(tmp_path, monkeypatch):
+    monkeypatch.setenv("KURO_RULES_DIR", str(tmp_path))
+    monkeypatch.setattr(tui, "LLM_LAST_FILE", tmp_path / "nope.json")
+    monkeypatch.setattr(tui, "LLM_USAGE_FILE", tmp_path / "nope.jsonl")
+    rows = tui._compact_kuro_extra(set())
+    assert rows and rows[0].startswith("cerveau : inconnu")
+    assert any("marketing : pipeline 0" in r for r in rows)

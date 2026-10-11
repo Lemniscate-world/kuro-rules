@@ -66,6 +66,9 @@ _load_dotenv()
 DEFAULT_INTERVAL = 2.0
 LLM_LAST_FILE = Path.home() / ".kuro" / "llm_last.json"
 LLM_USAGE_FILE = Path.home() / ".kuro" / "llm_usage.jsonl"
+COMPUTE_QUEUE_FILE = Path.home() / ".kuro" / "compute_queue.json"
+FINANCE_HISTORY_FILE = Path.home() / ".kuro" / "finance_history.jsonl"
+FINANCE_NO_DECIMALS = {"XOF", "FCFA", "XAF"}
 HIST_LEN = 48
 WIDE_MIN_WIDTH = 150
 SIDEBAR_WIDTH = 46
@@ -1146,6 +1149,7 @@ def register_box(key: str, title: str, color: str, rows_func) -> str:
 
     rows_func() -> list[str], appelee a chaque frame en mode non-compact.
     Cles reservees (kuro/cpu/net/proc/market/strat/seo) refusees.
+    En prod 8-9 sont pris (FINANCE/COMPUTE first-party) -> "" (complet).
     """
     try:
         key = str(key or "").strip()
@@ -1238,6 +1242,122 @@ def _seo_items(text: str, header: str) -> list[str]:
 # a l import). Ordre catalogue : 5 MARKETING, 6 STRATÉGIE, 7 SEO.
 _BOX_DEFS.append({"key": "seo", "num": "7", "title": "7 SEO", "color": "cyan",
                   "rows": sec_seo})
+
+
+def _fin_sums(month: Any) -> tuple[float, float]:
+    """(depenses, revenus) d un mois finances.local.json. Pur, testable."""
+    try:
+        if not isinstance(month, dict):
+            return 0.0, 0.0
+        exp = sum(float(e.get("amount") or 0)
+                  for e in (month.get("expenses") or []) if isinstance(e, dict))
+        rev = sum(float(r.get("amount") or 0)
+                  for r in (month.get("revenues") or []) if isinstance(r, dict))
+        return exp, rev
+    except Exception:
+        return 0.0, 0.0
+
+
+def _fin_fmt(amount: float, currency: str) -> str:
+    """Montant compact (XOF/FCFA/XAF sans decimales). Pur, testable."""
+    try:
+        if str(currency or "").upper() in FINANCE_NO_DECIMALS:
+            return f"{float(amount):,.0f}".replace(",", " ")
+        return f"{float(amount):,.2f}".replace(",", " ")
+    except Exception:
+        return "?"
+
+
+def sec_finance() -> list[str]:
+    """Box FINANCE : cash/burn/MRR/runway depuis finances.local.json.
+
+    100% local (R111 : les chiffres ne quittent jamais la machine).
+    Absent -> message honnete (le fichier est gitigne, normal sur serveur).
+    """
+    try:
+        path = _rules_dir() / "finances.local.json"
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return ["FINANCE pas de donnees (finances.local.json absent — "
+                    "R111 : reste sur cette machine, voir finances.local.example.json)"]
+        if not isinstance(data, dict):
+            return ["FINANCE (fichier invalide)"]
+        months = [m for m in (data.get("months") or []) if isinstance(m, dict)]
+        if not months:
+            return ["FINANCE pas de mois renseignes"]
+        cur = str(data.get("currency") or "?")
+        nets_all = [_fin_sums(m)[0] - _fin_sums(m)[1] for m in months]
+        win = nets_all[-6:]
+        avg_burn = sum(win) / len(win)
+        revs = [_fin_sums(m)[1] for m in months[-6:]]
+        mrr = sum(revs) / len(revs)
+        last_e, last_r = _fin_sums(months[-1])
+        last_m = str(months[-1].get("month") or "?")
+        try:
+            cash = float(data.get("starting_cash") or 0) - sum(nets_all)
+        except Exception:
+            cash = 0.0
+        runway = (f"{cash / avg_burn:.1f} mois" if avg_burn > 0
+                  else "n/a (excedent)")
+        try:
+            hist_n = sum(1 for _ in FINANCE_HISTORY_FILE.read_text(
+                encoding="utf-8").splitlines() if _.strip())
+        except Exception:
+            hist_n = 0
+        return [
+            f"FINANCE {cur} (finances.local.json)",
+            f"  cash ~{_fin_fmt(cash, cur)} | burn ~{_fin_fmt(avg_burn, cur)}/mois "
+            f"| MRR ~{_fin_fmt(mrr, cur)} | runway ~{runway}",
+            f"  dernier mois {last_m} : dep {_fin_fmt(last_e, cur)} / "
+            f"rev {_fin_fmt(last_r, cur)} / net {_fin_fmt(last_e - last_r, cur)}",
+            f"  historique : {hist_n} releves (~/.kuro/finance_history.jsonl)",
+        ][:5]
+    except Exception:
+        return ["FINANCE (indisponible)"]
+
+
+def sec_compute() -> list[str]:
+    """Box COMPUTE : file locale des demandes Helium.
+
+    Lecture seule de ~/.kuro/compute_queue.json (ecrite par
+    scripts/kuro_compute.py). Zero reseau : pas de sonde du mesh
+    (timeout 10 s incompatible avec un refresh 2 s).
+    """
+    try:
+        try:
+            entries = json.loads(COMPUTE_QUEUE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return ["COMPUTE file vide (demandes : scripts/kuro_compute.py ; "
+                    "offres live : Helium :8787, voir /api/compute/offers)"]
+        if not isinstance(entries, list) or not entries:
+            return ["COMPUTE file vide (demandes : scripts/kuro_compute.py ; "
+                    "offres live : Helium :8787, voir /api/compute/offers)"]
+        lines = [f"COMPUTE file : {len(entries)} demandes"]
+        for entry in entries[-5:]:
+            try:
+                if not isinstance(entry, dict):
+                    continue
+                rid = str(entry.get("request_id") or "?")[:8]
+                age = _rel_age(entry.get("created_at"))
+                lines.append(f"  {entry.get('project', '?')} "
+                             f"{entry.get('rtype', '?')} {rid} "
+                             f"{entry.get('status', '?')}"
+                             + (f" ({age})" if age else ""))
+            except Exception:
+                continue
+        return lines[:7]
+    except Exception:
+        return ["COMPUTE (indisponible)"]
+
+
+# Extensions FINANCE (box 8) + COMPUTE (box 9) : append direct a numero
+# fixe (precedent SEO box 7). register_box() reste pour les tiers a
+# l execution ("" quand 8-9 pris, voir tests).
+_BOX_DEFS.append({"key": "finance", "num": "8", "title": "8 FINANCE",
+                  "color": "ok", "rows": sec_finance})
+_BOX_DEFS.append({"key": "compute", "num": "9", "title": "9 COMPUTE",
+                  "color": "cyan", "rows": sec_compute})
 
 
 def _rel_age(when: Any) -> str:
@@ -1525,8 +1645,34 @@ def _titled(label: str, rows: list[str], width: int) -> list[str]:
             return []
 
 
+def _compact_kuro_extra(hidden: set) -> list[str]:
+    """Digests cerveau/agents/marketing pour le mode compact.
+
+    Vu en prod : sur petit terminal la box 1 ne montrait que humeur+daemon
+    (mood+ksum), cerveau/marketing disparaissaient sans recours.
+    Budget compact : 2 lignes denses max (agents ignore : longueur
+    imprevisible). Jamais d exception.
+    """
+    try:
+        out: list[str] = []
+        try:
+            brain = (sec_brain() or ["?"])[0]
+        except Exception:
+            brain = "?"
+        out.append(str(brain).strip()[:88])
+        if "market" not in (hidden or set()):
+            try:
+                total, itw_7d, _, _ = _marketing_pipeline(_rules_dir())
+                out.append(f"marketing : pipeline {total} ({itw_7d} itw 7j)")
+            except Exception:
+                pass
+        return out[:2]
+    except Exception:
+        return []
+
+
 def _compact_strat_seo(hidden: set) -> list[str]:
-    """Digest 1 ligne strat+SEO pour le mode compact (budget <=26 rangs).
+    """Digest 1 ligne strat+SEO pour le mode compact (budget <=28 rangs).
 
     Vide si les deux boxes sont cachées. Jamais d exception.
     """
@@ -1595,7 +1741,8 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
 
     Terminal large (>=150 cols) : sidebar droite (visage + cerveau + Kuro),
     le reste a gauche. Sinon : empilement classique.
-    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market", "strat", "seo"} (touches 1-7).
+    hidden : sous-ensemble de {"kuro", "cpu", "net", "proc", "market", "strat",
+    "seo", "finance", "compute"} (touches 1-9).
     help : affiche l aide au lieu du tableau de bord (touche h).
     compact : TOP 5, sans graphes ni capteurs (auto si <32 rangs tty).
     """
@@ -1607,7 +1754,7 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
             compact = False
     nprocs = 5 if compact else 10
     footer = ("[q] quitter [espace] pause [c/m] tri [/] filtre [HB] choix "
-              "[Entree] detail [1-7] boxes [h] aide [r] refresh [+/-] vitesse")
+              "[Entree] detail [1-9] boxes [h] aide [r] refresh [+/-] vitesse")
     if compact:
         footer = "[q] quitter [/] filtre [HB] choix [Entree] detail [h] aide"
     if filt:
@@ -1618,8 +1765,9 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         parts = [_fit(p, total) for p in body] + [_fit(footer, total)]
         return "\n".join(parts) + "\n"
     if compact:
-        # Slim <=26 rangs : l essentiel + 1 ligne strat/SEO (sinon l audit
-        # strategique est invisible sur petit terminal — vu en prod).
+        # Slim <=28 rangs : l essentiel + digests (strat/SEO + cerveau/
+        # marketing box 1, sinon invisibles sur petit terminal — vu en prod).
+        # L ajustement exact a l ecran reste fait par _shrink_compact.
         # Budget : UNE box d 1 ligne (3 rangs), pas deux boxes.
         total = min(width, 100)
         mood = sec_face(payload, kuro, now)[-1:]
@@ -1629,9 +1777,10 @@ def render_frame(payload: dict, prev: dict | None = None, dt: float = 0.0,
         procs = sec_procs(payload, total - 4, sort=sort, filt=filt, sel=sel,
                            limit=5)
         hide_c = set(hidden or ())
+        kextra = _compact_kuro_extra(hide_c)
         body = [
             *sec_header(payload),
-            *_box("1 KURO", [*mood, *ksum], total, "dim"),
+            *_box("1 KURO", [*mood, *ksum, *kextra], total, "dim"),
             *_box("2 CPU / MEMOIRE", cpu_all, total, "ok"),
             *_box("3 DISQUES / RESEAU", net_all, total, "blue"),
             *_box("4 " + (procs[0] if procs else "TOP PROCESSUS"), procs[1:], total, "magenta"),
