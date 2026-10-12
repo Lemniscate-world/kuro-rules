@@ -145,7 +145,8 @@ __pycache__/
 .pytest_cache/
 .tmp.*
 *.gdoc
-reports/
+reports/*
+!reports/discovery_history.csv
 
 # Prive (R76)
 SYNC_BACKUPS/

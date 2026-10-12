@@ -5,9 +5,10 @@ Fenetre glissante 14j : la donnee non sondee est perdue, d'ou poll quotidien
 via KuroDaily (scripts/kuro_automate.py). Zero dependance, Windows + Linux.
 
 Usage:
-    python scripts/discovery_poll.py [--discord] [--output reports/discovery_snapshot.json]
+    python scripts/discovery_poll.py [--discord] [--output reports/discovery_snapshot.json] [--history reports/discovery_history.csv]
 
-Stocke : views, clones, referrers par repo + followers + stars NeuralDBG.
+Stocke : views, clones, referrers par repo + followers (user + org LambdaSection) + stars/forks.
+Historique : CSV versionne pour la courbe (le JSON est ecrase a chaque run).
 Digest --discord : delta vs snapshot precedent + referrers (correlation R99).
 """
 import argparse
@@ -28,6 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kuro_paths import confine_arg  # noqa: E402
 
 DEFAULT_OUTPUT = ROOT / "reports" / "discovery_snapshot.json"
+DEFAULT_HISTORY = ROOT / "reports" / "discovery_history.csv"
+HISTORY_HEADER = "timestamp,repo,views,views_uniques,clones,clones_uniques,stars,forks\n"
 
 REPOS = [
     "LambdaSection/NeuralDBG",
@@ -62,14 +65,12 @@ def poll_repo(repo):
     views = gh_api(f"repos/{repo}/traffic/views") or {}
     clones = gh_api(f"repos/{repo}/traffic/clones") or {}
     referrers = gh_api(f"repos/{repo}/traffic/popular/referrers") or []
-    meta = gh_api(f"repos/{repo} --jq '{{\"stars\": .stargazers_count, \"forks\": .forks_count}}'")
-    # gh api with --jq returns raw value; fallback via second call
-    if not isinstance(meta, dict):
-        full = gh_api(f"repos/{repo}")
-        meta = {
-            "stars": (full or {}).get("stargazers_count"),
-            "forks": (full or {}).get("forks_count"),
-        } if full else {}
+    # NOTE: pas de --jq via gh_api (un seul arg path) -> un seul appel meta.
+    full = gh_api(f"repos/{repo}") or {}
+    meta = {
+        "stars": full.get("stargazers_count"),
+        "forks": full.get("forks_count"),
+    }
     return {
         "views": views.get("count", 0),
         "views_uniques": views.get("uniques", 0),
@@ -86,7 +87,20 @@ def poll_repo(repo):
 
 def poll_followers():
     u = gh_api("users/Lemniscate-world") or {}
-    return {"followers": u.get("followers"), "public_repos": u.get("public_repos"), "blog": u.get("blog")}
+    # Org LambdaSection (7/10 repos suivis) : public_repos + followers via /orgs.
+    org = gh_api("orgs/LambdaSection") or {}
+    return {
+        "followers": u.get("followers"),
+        "public_repos": u.get("public_repos"),
+        "blog": u.get("blog"),
+        "orgs": {
+            "LambdaSection": {
+                "public_repos": org.get("public_repos"),
+                "followers": org.get("followers"),
+                "blog": org.get("blog"),
+            }
+        },
+    }
 
 
 def load_previous(path):
@@ -95,6 +109,38 @@ def load_previous(path):
         return d if isinstance(d, dict) else {}
     except Exception:
         return {}
+
+
+def append_history(history_path, snapshot):
+    """Ajoute une ligne par repo au CSV versionne (courbe R113).
+
+    Le snapshot JSON est ecrase a chaque run (fenetre 14j perdue),
+    le CSV garde l'historique : timestamp,repo,views,views_uniques,
+    clones,clones_uniques,stars,forks.
+    """
+    try:
+        p = Path(history_path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        if not p.exists() or p.stat().st_size == 0:
+            p.write_text(HISTORY_HEADER, encoding="utf-8")
+        ts = snapshot.get("generated_at", "")
+        rows = []
+        for repo in REPOS:
+            d = snapshot.get("repos", {}).get(repo, {})
+            if not d:
+                continue
+            rows.append(
+                f"{ts},{repo},{d.get('views', 0)},{d.get('views_uniques', 0)},"
+                f"{d.get('clones', 0)},{d.get('clones_uniques', 0)},"
+                f"{d.get('stars', '')},{d.get('forks', '')}\n"
+            )
+        if rows:
+            with p.open("a", encoding="utf-8", newline="") as f:
+                f.writelines(rows)
+        return str(p)
+    except Exception as exc:
+        print(f"history erreur: {exc}")
+        return ""
 
 
 def render_digest(snapshot, previous):
@@ -112,15 +158,25 @@ def render_digest(snapshot, previous):
         if dv != 0 or dc != 0:
             flag = f" ({dv:+d}v/{dc:+d}c)"
         refs = ", ".join(
-            f"{x['referrer']}({x['count']})" for x in cur.get("referrers", [])[:3]
+            f"{x['referrer']}({x['count']})" for x in cur.get("referrers", [])[:5]
         ) or "-"
-        lines.append(f"- {short}: {cur.get('views',0)}v/{cur.get('clones',0)}c{flag} | refs: {refs}")
+        lines.append(
+            f"- {short}: {cur.get('views', 0)}v({cur.get('views_uniques', 0)}u)"
+            f"/{cur.get('clones', 0)}c({cur.get('clones_uniques', 0)}u)"
+            f"{flag} | refs: {refs}"
+        )
     pf = (previous or {}).get("followers", {})
     cf = snapshot.get("followers", {})
-    if pf and cf:
-        df = (cf.get("followers") or 0) - (pf.get("followers") or 0)
-        lines.append(f"- followers: {cf.get('followers')} ({df:+d}) | blog: '{cf.get('blog') or ''}'")
-    # Spike alert: clones du jour > 50
+    if cf:
+        df = (cf.get("followers") or 0) - (pf.get("followers") or 0) if pf else 0
+        org = (cf.get("orgs") or {}).get("LambdaSection", {})
+        lines.append(
+            f"- followers: {cf.get('followers')} ({df:+d})"
+            f" [LambdaSection: {org.get('followers')}f/{org.get('public_repos')}r]"
+            f" | blog: '{cf.get('blog') or ''}'"
+        )
+    # Spike alert: fenetre glissante 14j avec clones totaux >= 300.
+    # Ratio clones >> vues et clones_uniques eleves = bots/CI probables, a qualifier.
     spikes = [r for r, d in snapshot["repos"].items() if d.get("clones", 0) >= 300]
     head = "Discovery 14j (R113)"
     if spikes:
@@ -152,9 +208,11 @@ def main():
     ap = argparse.ArgumentParser(description="Poll traffic GitHub R113")
     ap.add_argument("--discord", action="store_true", help="poste le digest sur Discord")
     ap.add_argument("--output", default=str(DEFAULT_OUTPUT))
+    ap.add_argument("--history", default=str(DEFAULT_HISTORY))
     a = ap.parse_args()
 
     out = confine_arg(a.output, ROOT, default="reports/discovery_snapshot.json")
+    hist = confine_arg(a.history, ROOT, default="reports/discovery_history.csv")
     previous = load_previous(out)
     snapshot = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -171,6 +229,9 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"snapshot: {out}")
+    hpath = append_history(hist, snapshot)
+    if hpath:
+        print(f"history: {hpath}")
 
     title, digest = render_digest(snapshot, previous)
     print(f"--- {title} ---\n{digest}")
