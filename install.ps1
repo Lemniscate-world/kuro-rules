@@ -18,7 +18,17 @@ $RULE_FILES = @(
     @{ Source = "AGENTS.md"; Target = "AGENTS.md" },
     @{ Source = "AI_GUIDELINES.md"; Target = "AI_GUIDELINES.md" },
     @{ Source = ".cursorrules"; Target = ".cursorrules" },
+    @{ Source = ".windsurfrules"; Target = ".windsurfrules" },
+    @{ Source = "CLAUDE.md"; Target = "CLAUDE.md" },
+    @{ Source = "GEMINI.md"; Target = "GEMINI.md" },
     @{ Source = "copilot-instructions.md"; Target = ".github/copilot-instructions.md" }
+)
+
+# Generated scoped-rule directories (vendored, never .agents/local/)
+$RULE_DIRS = @(
+    @{ Source = ".cursor/rules"; Target = ".cursor/rules" },
+    @{ Source = ".agents/rules"; Target = ".agents/rules" },
+    @{ Source = ".cursor-plugin"; Target = ".cursor-plugin" }
 )
 
 $SCAFFOLD_FILES = @(
@@ -259,10 +269,31 @@ $context = Get-ProjectDefaults -Name $PROJECT_NAME
 
 Write-Host "Installing kuro-rules into $TargetDir" -ForegroundColor Cyan
 
+# Regenerate distribution targets first (best effort, never fatal).
+$generator = Join-Path $RULES_DIR "scripts/generate_targets.py"
+if (Test-Path $generator) {
+    try {
+        & python $generator --apply 2>&1 | ForEach-Object { Write-Host "GEN   $_" }
+    } catch {
+        Write-Host "WARN  generator failed, installing last generated targets" -ForegroundColor Yellow
+    }
+}
+
 foreach ($file in $RULE_FILES) {
     $src = Join-Path $RULES_DIR $file.Source
     $dst = Join-Path $TargetDir $file.Target
     Install-RuleFile -SourcePath $src -DestinationPath $dst -Overwrite:$ForceRules
+}
+
+foreach ($dir in $RULE_DIRS) {
+    $srcDir = Join-Path $RULES_DIR $dir.Source
+    if (-not (Test-Path $srcDir)) { continue }
+    $dstDir = Join-Path $TargetDir $dir.Target
+    foreach ($sf in (Get-ChildItem $srcDir -File -Recurse)) {
+        $rel = $sf.FullName.Substring($srcDir.Length).TrimStart('\', '/')
+        Install-RuleFile -SourcePath $sf.FullName `
+            -DestinationPath (Join-Path $dstDir $rel) -Overwrite:$ForceRules
+    }
 }
 
 $preCommitSrc = Join-Path $RULES_DIR ".pre-commit-config.yaml"

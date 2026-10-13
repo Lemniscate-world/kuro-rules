@@ -31,9 +31,9 @@ import csv
 import hashlib
 import re
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 DEFAULT_BASE = Path.home() / "Documents"
 DEFAULT_RULES_DIR = DEFAULT_BASE / "kuro-rules"
@@ -42,13 +42,21 @@ MASTER_RULE_FILES = [
     ".cursorrules",
     "AGENTS.md",
     "AI_GUIDELINES.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    ".windsurfrules",
 ]
 
 RULE_SET_DISPLAY = [
     "AGENTS.md",
     "AI_GUIDELINES.md",
     ".cursorrules",
+    "CLAUDE.md",
+    "GEMINI.md",
+    ".windsurfrules",
     "copilot-instructions.md -> .github/copilot-instructions.md",
+    ".cursor/rules/*.mdc (generated)",
+    ".agents/rules/*.md (generated)",
 ]
 
 CANONICAL_COPILOT_TARGET = Path(".github") / "copilot-instructions.md"

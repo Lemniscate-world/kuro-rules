@@ -32,10 +32,14 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 
 # Périmètre autosync : code, tests, tooling, CI, docs techniques.
+# Couvre aussi les artefacts générés/gouvernance (VERSIONING.md §6 : le robot
+# mange son propre dogfood, sinon les releases kuro-rules restent manuelles).
 ALLOW_DIRS = ("src/", "tests/", "scripts/", ".github/", "docs/", "rules/", "prompts/", "templates/",
-              "dashboard/")
+              "dashboard/", ".agents/", ".cursor/", ".cursor-plugin/", "runbooks/", "memories/")
 ALLOW_FILES = ("pyproject.toml", ".pre-commit-config.yaml", ".sonarcloud.properties",
-               ".gitignore", "AGENTS.md", "README.md")
+               ".gitignore", "AGENTS.md", "README.md", "VERSION", "CHANGELOG.md",
+               "VERSIONING.md", "SPEC.md", "FLEET_VERSIONS.md", "CLAUDE.md", "GEMINI.md",
+               "release-please-config.json", ".release-please-manifest.json")
 # Écrits par le bot kuro.yml : jamais touchés ici (conflits garantis sinon).
 BOT_OWNED = (
     "TRUTH_DAILY.md", "tasks_anydo.json", "ci-status.json", "skills.json",
