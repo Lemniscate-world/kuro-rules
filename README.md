@@ -2,19 +2,36 @@
 
 Centralized AI coding guidelines and configuration for all my projects.
 
-## How It Works (Symlinks)
+## How It Works (Generate Once, Copy Everywhere)
 
-This repository contains the **master copies** of your rules.
-When you run the install script, we create **symbolic links** (symlinks) in your target project pointing back here.
+This repository contains the **master copies** of your rules (`rules/rule_*.md`
++ `rules/_metadata.yaml` + `VERSION`). The canonical generator vendors them
+into every agent format:
+
+```bash
+python scripts/generate_targets.py --dry-run   # preview (default)
+python scripts/generate_targets.py --check     # CI drift check
+python scripts/generate_targets.py --apply     # write all targets
+```
 
 ```mermaid
 graph LR
-    A[kuro-rules/AI_GUIDELINES.md] -->|Symlink| B[Sugar/AI_GUIDELINES.md]
-    A -->|Symlink| C[Dissect/AI_GUIDELINES.md]
-    A -->|Symlink| D[NewProject/AI_GUIDELINES.md]
+    A[rules/rule_*.md] -->|generate| B[AGENTS.md]
+    A -->|generate| C[.cursor/rules/*.mdc]
+    A -->|generate| D[.agents/rules/*.md]
+    A -->|generate| E[CLAUDE.md / GEMINI.md / copilot-instructions.md]
 ```
 
-**Benefit:** Edit `kuro-rules/AI_GUIDELINES.md` once, and **ALL** projects are instantly updated.
+```text
+kuro-rules/AGENTS.md ──copy──▶ Sugar/AGENTS.md
+kuro-rules/.cursor/rules/*.mdc ──copy──▶ Dissect/.cursor/rules/
+kuro-rules/.agents/rules/*.md ──copy──▶ NewProject/.agents/rules/
+```
+
+**Benefit:** edit `rules/` once, run `--apply`, sync — **ALL** projects get
+self-contained copies. No symlinks (they break on Windows and bare clones).
+Precedence on conflict: more specific `scope` wins
+(`service > team > company`), then higher `priority` (see `SPEC.md`).
 
 ## Usage
 
@@ -26,22 +43,19 @@ graph LR
    ```
 
 2. **Update all projects:**
-   Since they are symlinks, just edit the files in this repo!
+   Edit `rules/`, run `python scripts/generate_targets.py --apply`, then
+   `.\sync-rules.ps1` (or `install.sh` per project).
 
 ### On Windows (PowerShell)
 
-If you are using native Windows (not WSL), symlinks behave differently.
-You should check out this repo to `C:\Users\kuro\Documents\kuro-rules`.
-
-**Option A: Junctions (Recommended for Windows)**
-Windows "Junctions" or "Soft Links" work similar to Linux symlinks.
-You can create a `install.ps1` script (coming soon) or use:
 ```powershell
-New-Item -ItemType SymbolicLink -Path "C:\Path\To\Project\AI_GUIDELINES.md" -Target "C:\Path\To\kuro-rules\AI_GUIDELINES.md"
+.\install.ps1 C:\Path\To\Project
+.\sync-rules.ps1 -DryRun   # preview fleet drift
+.\sync-rules.ps1           # deploy to all tracked projects
 ```
 
-**Option B: Copy Mode**
-If symlinks give you trouble on Windows, you can simply *copy* the files. The downside is you lose the "update once, update everywhere" feature.
+Copies are self-contained — no symlinks, no junctions, clone-safe.
+(`-UseSymlinks` remains as legacy opt-in in `install.ps1`.)
 
 ## New Machine Setup
 
@@ -53,10 +67,18 @@ If symlinks give you trouble on Windows, you can simply *copy* the files. The do
 
 ## The Rules
 
-- **AI_GUIDELINES.md**: High-level principles (Security, Quality, Architecture).
-- **.cursorrules**: Instructions for Cursor AI.
-- **.pre-commit-config.yaml**: Standard git hooks (linting, security).
-- **copilot-instructions.md**: Instructions for GitHub Copilot.
+Canonical source: `rules/rule_*.md` (policy) + `rules/_metadata.yaml`
+(scope/priority/status/trigger). Generated, never hand-edited:
+
+- **AGENTS.md**: redirector index (all agents, entrypoint).
+- **CLAUDE.md / GEMINI.md / .cursorrules / .windsurfrules / AI_GUIDELINES.md**: stubs.
+- **copilot-instructions.md** → deployed as `.github/copilot-instructions.md`.
+- **.cursor/rules/*.mdc**: scoped Cursor rules (`description/globs/alwaysApply`).
+- **.agents/rules/*.md**: portable scoped rules (`trigger/paths/scope/priority`).
+- **.cursor-plugin/marketplace.json**: Cursor team marketplace packaging.
+- **runbooks/**: procedures (one file per procedure, on-demand).
+- **memories/**: lessons from experience (may graduate to rules).
+- See **SPEC.md** for the rules/runbooks/memories contract.
 
 ## Kuro Control Center
 

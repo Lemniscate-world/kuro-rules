@@ -40,3 +40,21 @@ repos:
       language: system
       pass_filenames: false
       stages: [pre-commit]
+    - id: kuro-generate-check
+      name: kuro-rules generated targets in sync
+      entry: python scripts/generate_targets.py --check
+      language: system
+      pass_filenames: false
+      stages: [pre-commit]
+    - id: kuro-spec-check
+      name: kuro-rules SPEC validation
+      entry: python scripts/check_rule_spec.py
+      language: system
+      pass_filenames: false
+      stages: [pre-commit]
+    - id: kuro-bench
+      name: kuro-rules mini-benchmark
+      entry: python scripts/bench_rules.py
+      language: system
+      pass_filenames: false
+      stages: [pre-commit]

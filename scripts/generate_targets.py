@@ -1,0 +1,326 @@
+#!/usr/bin/env python3
+"""generate_targets.py — single canonical generator for kuro-rules distribution.
+
+Canonical source: rules/rule_*.md + rules/_metadata.yaml + VERSION.
+Generated targets (deterministic, LF, trailing newline, UTF-8):
+  - AGENTS.md                      (redirector index, R87/R105 compatible)
+  - CLAUDE.md, GEMINI.md           (cross-tool copies)
+  - .cursorrules, .windsurfrules    (legacy stubs with version)
+  - AI_GUIDELINES.md               (stub with version)
+  - copilot-instructions.md        (canonical, deployed to .github/ by sync)
+  - .cursor/rules/<rule>.mdc       (vendored, frontmatter description/globs/alwaysApply)
+  - .agents/rules/<rule>.md        (vendored, frontmatter name/description/trigger/paths/...)
+  - .cursor-plugin/marketplace.json (Cursor team marketplace packaging)
+
+Usage (R120: --dry-run by default):
+  python scripts/generate_targets.py --dry-run   # preview, exit 0
+  python scripts/generate_targets.py --check     # CI: exit 1 if drift, no write
+  python scripts/generate_targets.py --apply     # write all targets
+
+Precedence (Port.io-style, company -> team -> service):
+  resolve_order() sorts by (specificity, priority desc, name).
+  On conflict: more specific scope wins, then higher priority.
+  See rules/_metadata.yaml for per-rule scope/priority/status.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:  # pragma: no cover
+    yaml = None
+
+REPO = Path(__file__).resolve().parent.parent
+RULES_DIR = REPO / "rules"
+META_PATH = RULES_DIR / "_metadata.yaml"
+VERSION_PATH = REPO / "VERSION"
+
+SCOPE_RANK = {"company": 0, "team": 1, "service": 2}
+VALID_SCOPES = set(SCOPE_RANK)
+VALID_STATUS = {"active", "draft", "deprecated"}
+VALID_TRIGGERS = {"always", "auto", "manual"}
+
+FIRST_HEADING_RE = re.compile(r"^#+\s*(.+?)\s*$")
+REDIRECTOR_LINE_RE = re.compile(r"^-\s+\*\*(rule_[A-Za-z0-9_]+)\*\*", flags=re.M)
+
+
+def load_version(root: Path = REPO) -> str:
+    p = root / "VERSION"
+    if p.exists():
+        return p.read_text(encoding="utf-8").strip()
+    return "0.0.0"
+
+
+def load_metadata(root: Path = REPO) -> tuple[dict, dict]:
+    """Return (defaults, overrides). Missing file -> built-in defaults."""
+    defaults = {
+        "scope": "company",
+        "priority": 2,
+        "status": "active",
+        "trigger": "always",
+        "paths": [],
+        "globs": [],
+        "alwaysApply": True,
+        "description": "",
+    }
+    overrides: dict = {}
+    meta_path = root / "rules" / "_metadata.yaml"
+    if meta_path.exists():
+        if yaml is None:
+            raise RuntimeError("pyyaml required to read rules/_metadata.yaml")
+        data = yaml.safe_load(meta_path.read_text(encoding="utf-8")) or {}
+        defaults.update(data.get("defaults", {}))
+        overrides = data.get("overrides", {}) or {}
+    return defaults, overrides
+
+
+def list_rule_files(root: Path = REPO) -> list[Path]:
+    return sorted((root / "rules").glob("rule_*.md"))
+
+
+def extract_title(path: Path) -> str:
+    """First markdown heading, stripped, single line, <=120 chars."""
+    for raw in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        m = FIRST_HEADING_RE.match(line)
+        if m:
+            return m.group(1).strip()[:120]
+        # fallback: first non-empty line
+        return line.lstrip("# ").strip()[:120]
+    return path.stem
+
+
+def rule_meta(basename: str, defaults: dict, overrides: dict, title: str) -> dict:
+    meta = dict(defaults)
+    meta.update(overrides.get(basename, {}))
+    if not meta.get("description"):
+        meta["description"] = title[:120]
+    # normalize
+    if meta.get("scope") not in VALID_SCOPES:
+        meta["scope"] = "company"
+    if meta.get("status") not in VALID_STATUS:
+        meta["status"] = "active"
+    if meta.get("trigger") not in VALID_TRIGGERS:
+        meta["trigger"] = "always"
+    meta["paths"] = list(meta.get("paths") or [])
+    meta["globs"] = list(meta.get("globs") or [])
+    meta["priority"] = int(meta.get("priority", 2))
+    meta["alwaysApply"] = bool(meta.get("alwaysApply", True))
+    return meta
+
+
+def resolve_order(metas: dict[str, dict]) -> list[str]:
+    """Deterministic precedence: active first, then (scope rank, priority desc, name).
+
+    Only `active` rules are distributed. Draft/deprecated are excluded
+    (but still validated). Returns ordered basenames.
+    """
+    active = {k: v for k, v in metas.items() if v.get("status") == "active"}
+    return sorted(
+        active,
+        key=lambda k: (-SCOPE_RANK.get(active[k].get("scope", "company"), 0),
+                       -int(active[k].get("priority", 2)), k),
+    )
+
+
+def build_agents_index(rule_files: list[Path], version: str) -> str:
+    lines = [
+        "# AGENTS.md -- Kuro Rules Redirector",
+        "# DO NOT EDIT THIS FILE DIRECTLY. Master rules are in: ~/Documents/kuro-rules/rules/",
+        f"# Generated by scripts/generate_targets.py v{version} — DO NOT EDIT.",
+        "",
+        "You MUST read the rules relevant to your current task. Read R1 first.",
+        "To read a rule, use your 'view_file' tool on the corresponding file in the master folder.",
+        "",
+        "## Rule Index",
+    ]
+    for rf in rule_files:
+        title = extract_title(rf)
+        lines.append(f"- **{rf.stem}**: {title}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def build_stub(kind: str, version: str) -> str:
+    return (
+        f"# Kuro Rules - {kind}\n"
+        f"# Generated by scripts/generate_targets.py v{version} — DO NOT EDIT. "
+        "Edit rules/ instead.\n"
+        "\n"
+        "You MUST read AGENTS.md at the start of every session before any other action.\n"
+        "AGENTS.md contains all mandatory rules. It is a CONTRACT, not a suggestion.\n"
+        'After reading it, confirm: "I have read AGENTS.md and will enforce all rules."\n'
+    )
+
+
+def build_copilot_instructions(version: str) -> str:
+    return (
+        "# Kuro Rules - GitHub Copilot\n"
+        f"# Generated by scripts/generate_targets.py v{version} — DO NOT EDIT. "
+        "Edit rules/ instead.\n"
+        "# Canonical target in projects: .github/copilot-instructions.md\n"
+        "\n"
+        "You MUST read AGENTS.md at the start of every session before any other action.\n"
+        "AGENTS.md contains all mandatory rules. It is a CONTRACT, not a suggestion.\n"
+        'After reading it, confirm: "I have read AGENTS.md and will enforce all rules."\n'
+    )
+
+
+def yaml_frontmatter(data: dict) -> str:
+    if yaml is None:
+        raise RuntimeError("pyyaml required")
+    # yaml.safe_dump with sort_keys=False keeps our field order
+    dumped = yaml.safe_dump(data, sort_keys=False, allow_unicode=True).strip()
+    return f"---\n{dumped}\n---\n"
+
+
+def build_mdc(basename: str, meta: dict, body: str) -> str:
+    fm = {
+        "description": meta["description"][:120],
+        "alwaysApply": meta["alwaysApply"],
+    }
+    if meta["globs"]:
+        fm["globs"] = meta["globs"]
+    header = yaml_frontmatter(fm)
+    ref = (
+        f"<!-- Generated from rules/{basename}.md — DO NOT EDIT. "
+        f"scope={meta['scope']} priority={meta['priority']} status={meta['status']} -->\n\n"
+    )
+    return header + "\n" + ref + body.rstrip() + "\n"
+
+
+def build_agents_rule(basename: str, meta: dict, body: str) -> str:
+    fm = {
+        "name": basename.replace("_", "-")[:64],
+        "description": meta["description"][:1024],
+        "trigger": meta["trigger"],
+        "scope": meta["scope"],
+        "priority": meta["priority"],
+        "status": meta["status"],
+    }
+    if meta["paths"]:
+        fm["paths"] = meta["paths"]
+    header = yaml_frontmatter(fm)
+    ref = (
+        f"<!-- Generated from rules/{basename}.md — DO NOT EDIT. "
+        f"scope={meta['scope']} priority={meta['priority']} status={meta['status']} -->\n\n"
+    )
+    return header + "\n" + ref + body.rstrip() + "\n"
+
+
+def build_marketplace(version: str) -> str:
+    obj = {
+        "$schema": "https://cursor.com/schemas/marketplace.json",
+        "name": "kuro-rules",
+        "version": version,
+        "description": "Centralized AI coding guidelines and governance (kuro-rules).",
+        "repository": "https://github.com/Lemniscate-world/kuro-rules",
+        "plugins": [
+            {
+                "name": "kuro-rules",
+                "description": "Shared AI agent rules (AGENTS.md + scoped rules).",
+                "rules": [".cursor/rules/*.mdc"],
+            }
+        ],
+    }
+    return json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
+
+
+def collect_targets(root: Path = REPO) -> dict[str, str]:
+    """Return {relative_posix_path: content} for every generated file."""
+    version = load_version(root)
+    defaults, overrides = load_metadata(root)
+    rule_files = list_rule_files(root)
+
+    metas: dict[str, dict] = {}
+    bodies: dict[str, str] = {}
+    for rf in rule_files:
+        title = extract_title(rf)
+        metas[rf.stem] = rule_meta(rf.stem, defaults, overrides, title)
+        bodies[rf.stem] = rf.read_text(encoding="utf-8-sig", errors="replace")
+
+    ordered = resolve_order(metas)
+    # Index order stays alphabetical (stable diff, sync-rules.ps1 compatible).
+    # Precedence (scope/priority) is enforced by consumers, not by index order.
+    # Only active rules are distributed; draft/deprecated stay in rules/ but
+    # are excluded from AGENTS.md and generated targets.
+    index_files = sorted(
+        [rf for rf in rule_files if rf.stem in ordered], key=lambda p: p.stem)
+    targets: dict[str, str] = {}
+    targets["AGENTS.md"] = build_agents_index(index_files, version)
+    targets["CLAUDE.md"] = build_stub("Claude Code", version)
+    targets["GEMINI.md"] = build_stub("Gemini CLI", version)
+    targets[".cursorrules"] = build_stub("Cursor", version)
+    targets[".windsurfrules"] = build_stub("Windsurf", version)
+    targets["AI_GUIDELINES.md"] = build_stub("AI Guidelines", version)
+    targets["copilot-instructions.md"] = build_copilot_instructions(version)
+    for b in ordered:
+        meta = metas[b]
+        targets[f".cursor/rules/{b}.mdc"] = build_mdc(b, meta, bodies[b])
+        targets[f".agents/rules/{b}.md"] = build_agents_rule(b, meta, bodies[b])
+    targets[".cursor-plugin/marketplace.json"] = build_marketplace(version)
+    return targets
+
+
+def sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="Generate kuro-rules distribution targets.")
+    g = ap.add_mutually_exclusive_group()
+    g.add_argument("--apply", action="store_true", help="write all targets")
+    g.add_argument("--check", action="store_true", help="CI: exit 1 if drift, no write")
+    g.add_argument("--dry-run", action="store_true", default=False,
+                   help="preview only (default)")
+    ap.add_argument("--root", default=str(REPO), help="repo root")
+    args = ap.parse_args(argv)
+
+    root = Path(args.root)
+    targets = collect_targets(root)
+
+    drift: list[str] = []
+    for rel, content in sorted(targets.items()):
+        p = root / rel
+        current = p.read_text(encoding="utf-8-sig", errors="replace") if p.exists() else None
+        if current != content:
+            drift.append(rel)
+
+    if args.check:
+        if drift:
+            print(f"DRIFT: {len(drift)} file(s) would be regenerated:")
+            for rel in drift:
+                print(f"  - {rel}")
+            return 1
+        print(f"OK: all {len(targets)} targets in sync.")
+        return 0
+
+    if args.apply:
+        for rel, content in sorted(targets.items()):
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content, encoding="utf-8", newline="\n")
+        print(f"OK: wrote {len(targets)} targets "
+              f"({len(drift)} changed).")
+        return 0
+
+    # --dry-run (default)
+    if drift:
+        print(f"[dry-run] {len(drift)} file(s) would change:")
+        for rel in drift:
+            print(f"  - {rel}")
+    else:
+        print(f"[dry-run] propre, {len(targets)} targets in sync.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
