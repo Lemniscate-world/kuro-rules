@@ -1,0 +1,21 @@
+# release-please — kuro-rules dogfoods VERSIONING.md §3.
+# Cuts version bumps + CHANGELOG entries + tags + GitHub releases from
+# conventional commits. Merge the release PRs like any other PR (R107).
+name: release-please
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

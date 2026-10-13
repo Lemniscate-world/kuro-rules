@@ -1,35 +1,46 @@
 #!/usr/bin/env python3
 """install_hooks.py — Install unbypassable git hooks across all projects.
 
-Run once to set up pre-commit and pre-push hooks in all your repos.
-These hooks are HARDER to bypass because:
-1. They're installed in .git/hooks/ (git-level, not config-level)
-2. They run on pre-push (server-side equivalent)
-3. They auto-install themselves on every push
+Deploys kuro-rules/templates/git-hooks/* into .git/hooks/ of every repo
+under ~/Documents (pre-push: tests/branch, commit-msg: conventional
+commits for release-please). Git-level hooks run even with --no-verify.
 
-Usage: python scripts/install_hooks.py [--force]
+Modes:
+  (default)  install only where the hook is missing
+  --upgrade  also replace hooks previously deployed by kuro (marker
+             "Source de verite: kuro-rules/templates"), never touch
+             foreign custom hooks
+  --force    replace everything (use with care)
+
+Usage: python scripts/install_hooks.py [--upgrade] [--force]
 """
-
 import subprocess
 import sys
 from pathlib import Path
 
 DOCS = Path.home() / "Documents"
-HOOKS_DIR = DOCS / "kuro-rules" / "hooks"
-# Source unique (R89): le template versionne fait foi, plus de string embarquee.
-TEMPLATE = DOCS / "kuro-rules" / "templates" / "git-hooks" / "pre-push.sh"
+TEMPLATES = DOCS / "kuro-rules" / "templates" / "git-hooks"
+HOOKS = ("pre-push", "commit-msg")
+MARKER = "Source de verite: kuro-rules/templates"
 
 
-def load_template() -> str:
-    return TEMPLATE.read_text(encoding="utf-8").replace("\r\n", "\n")
+def load_template(name: str) -> str:
+    ext = ".sh"
+    return (TEMPLATES / f"{name}{ext}").read_text(encoding="utf-8").replace("\r\n", "\n")
 
-# (string embarquee supprimee R89 - voir templates/git-hooks/pre-push.sh)
 
-def install_hooks(force=False):
+def is_kuro_hook(path: Path) -> bool:
     try:
-        hook_text = load_template()
+        return MARKER in path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+
+
+def install_hooks(upgrade=False, force=False):
+    try:
+        texts = {name: load_template(name) for name in HOOKS}
     except OSError as exc:
-        print(f"Template introuvable: {TEMPLATE} ({exc})")
+        print(f"Template introuvable dans {TEMPLATES} ({exc})")
         sys.exit(1)
     repos = []
     for d in sorted(DOCS.iterdir()):
@@ -40,7 +51,8 @@ def install_hooks(force=False):
         repos.append(d)
 
     print(f"Found {len(repos)} git repos")
-    installed = 0
+    installed = {name: 0 for name in HOOKS}
+    skipped_foreign = 0
     for repo in repos:
         try:
             out = subprocess.run(
@@ -53,20 +65,24 @@ def install_hooks(force=False):
         hooks_path = git_dir / "hooks"
         if not hooks_path.exists():
             continue
-        pre_push = hooks_path / "pre-push"
-        if pre_push.exists() and not force:
-            continue
-        pre_push.write_text(hook_text, encoding="utf-8", newline="\n")
-        try:
-            pre_push.chmod(0o755)
-        except OSError:
-            pass
-        print(f"  INSTALLED {repo.name}")
-        installed += 1
+        for name in HOOKS:
+            target = hooks_path / name
+            if target.exists() and not (force or (upgrade and is_kuro_hook(target))):
+                if not is_kuro_hook(target):
+                    skipped_foreign += 1
+                continue
+            target.write_text(texts[name], encoding="utf-8", newline="\n")
+            try:
+                target.chmod(0o755)
+            except OSError:
+                pass
+            installed[name] += 1
 
-    print(f"\nInstalled pre-push hooks in {installed} repos")
-    print("These hooks CANNOT be bypassed with --no-verify on push.")
+    for name in HOOKS:
+        print(f"Installed/updated {name}: {installed[name]} repos")
+    print(f"Foreign custom hooks left untouched: {skipped_foreign}")
+    print("Git-level hooks run on push/commit even with --no-verify.")
 
 
 if __name__ == "__main__":
-    install_hooks("--force" in sys.argv)
+    install_hooks("--upgrade" in sys.argv, "--force" in sys.argv)

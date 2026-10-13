@@ -3,6 +3,7 @@
 # Quotidien 06:00 : kuro_automate.py --daily
 # Lundi 07:00    : kuro_automate.py --daily --weekly --full (Discord + ecritures)
 # Dimanche 04:00 : Sync-ReposServer.ps1 (miroir ~/Documents -> serveur ~/repos)
+# Samedi 05:00   : fleet_sync_scheduled.ps1 (generate + sync-rules + hooks + FLEET_VERSIONS.md)
 # Usage (tache utilisateur, admin non requis) :
 #   powershell -ExecutionPolicy Bypass -File scripts\Install-KuroScheduledTask.ps1
 #   powershell -ExecutionPolicy Bypass -File scripts\Install-KuroScheduledTask.ps1 -Uninstall
@@ -13,7 +14,8 @@ $Py = (Get-Command python -ErrorAction SilentlyContinue).Source
 if (-not $Py) { throw "python introuvable dans PATH" }
 $Script = Join-Path $Root "scripts\kuro_automate.py"
 $SyncScript = Join-Path $Root "scripts\Sync-ReposServer.ps1"
-foreach ($name in @("KuroDaily", "KuroWeekly", "KuroSyncRepos")) {
+$FleetScript = Join-Path $Root "scripts\fleet_sync_scheduled.ps1"
+foreach ($name in @("KuroDaily", "KuroWeekly", "KuroSyncRepos", "KuroFleetSync")) {
   try { schtasks /Delete /TN $name /F 2>&1 | Out-Null; Write-Host "Supprime : $name" }
   catch { Write-Host "Absente (rien a supprimer) : $name" }
 }
@@ -24,7 +26,10 @@ schtasks /Create /TN "KuroWeekly" /TR "`"$Py`" `"$Script`" --daily --weekly --fu
 if ($LASTEXITCODE -ne 0) { throw "Echec creation KuroWeekly" }
 schtasks /Create /TN "KuroSyncRepos" /TR "powershell -ExecutionPolicy Bypass -File `"$SyncScript`"" /SC WEEKLY /D SUN /ST 04:00 /F
 if ($LASTEXITCODE -ne 0) { throw "Echec creation KuroSyncRepos" }
-Write-Host "Installe : KuroDaily 06:00 quotidien, KuroWeekly lundi 07:00 full, KuroSyncRepos dimanche 04:00."
+schtasks /Create /TN "KuroFleetSync" /TR "powershell -ExecutionPolicy Bypass -File `"$FleetScript`"" /SC WEEKLY /D SAT /ST 05:00 /F
+if ($LASTEXITCODE -ne 0) { throw "Echec creation KuroFleetSync" }
+Write-Host "Installe : KuroDaily 06:00 quotidien, KuroWeekly lundi 07:00 full, KuroSyncRepos dimanche 04:00, KuroFleetSync samedi 05:00."
 schtasks /Query /TN "KuroDaily" | Select-Object -Last 3
 schtasks /Query /TN "KuroWeekly" | Select-Object -Last 3
 schtasks /Query /TN "KuroSyncRepos" | Select-Object -Last 3
+schtasks /Query /TN "KuroFleetSync" | Select-Object -Last 3
