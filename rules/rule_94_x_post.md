@@ -94,7 +94,7 @@ Ownership (miroir `KuroUtils.psm1` + orgs satellites λ, quantifiés `git remote
 - OWNED : `Lemniscate-world/`, `Lemniscate-SHA-256/`, `pbakaus/`, `LambdaSection/`,
   `Quant-Search/` (λ-2), `AI8-Algorithm-Intelligence-Section-8/` (λ-8),
   `Hackin-Life-X/` (λ-3), `N-Hypatia/` (λ-12), `EpureCAD/` (λ-15),
-  `HeliumXChain/` (λ-7), `Rare-Sagittarius/` (λ-9)
+  `HeliumXChain/` (λ-7)
 - EXTERNAL : `Demeter-Financial-Labs/` → exclu
 - UNKNOWN (pas de remote) → exclu, clarification humaine requise
 

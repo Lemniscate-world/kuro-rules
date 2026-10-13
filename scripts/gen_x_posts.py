@@ -54,7 +54,6 @@ OWNED_MARKERS = (
     "github.com/N-Hypatia/",  # λ-12 AEther, Project-Dirac
     "github.com/EpureCAD/",  # λ-15 Epure
     "github.com/HeliumXChain/",  # λ-7 Helium
-    "github.com/Rare-Sagittarius/",  # λ-9 Sagittarius
 )
 EXTERNAL_MARKERS = ("github.com/Demeter-Financial-Labs/",)
 
@@ -238,7 +237,6 @@ PROJECT_LINKS = {
     "solaris": "https://github.com/Lemniscate-world/SOLARIS",
     "dissect": "https://github.com/AI8-Algorithm-Intelligence-Section-8/Dissect",
     "neurodose": "https://github.com/LambdaSection/NeuroDose",
-    "sagittarius": "https://github.com/Rare-Sagittarius/Sagittarius",
     "aquarium": "https://github.com/LambdaSection/Aquarium",
     "astral": "https://github.com/LambdaSection/Astral",
     "tokenwise": "https://github.com/LambdaSection/TokenWise",
