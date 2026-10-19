@@ -206,3 +206,11 @@ def test_scheduled_tasks_health():
     assert ok is False and "KuroDataSync result=1" in detail
     ok, detail = doctor.scheduled_tasks_health({})
     assert ok is False and "absente" in detail
+
+
+def test_scheduled_tasks_health_instance_occupee():
+    """0x800710E0 (IgnoreNew) : pas un échec, mais visible dans le détail."""
+    tout_vert = {n: ("2026-10-19T09:00:00", 0) for n in doctor.KURO_TASKS}
+    occupee = dict(tout_vert, KuroDataSync=("19/10/2026 10:00:00", doctor.TASK_BUSY_RESULT))
+    ok, detail = doctor.scheduled_tasks_health(occupee)
+    assert ok is True and "occupée" in detail and "KuroDataSync" in detail

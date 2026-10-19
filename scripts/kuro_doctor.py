@@ -162,6 +162,9 @@ def push_freshness(log_path=None, replica_age_min=None, max_age_min=20):
 
 # --- Garde R116 (blackout git 16→19/10/2026) : panne multi-jours invisible ---
 
+# Résultat « instance déjà en cours » (0x800710E0, policy IgnoreNew) : signalé
+# dans les détails, pas alarmant — mais visible pour éviter l'alerte fatigue.
+TASK_BUSY_RESULT = -2147020576
 KURO_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroXDaily", "KuroWeekly")
 # 267009 = SCHED_S_TASK_RUNNING (tâche encore en cours au moment du relevé).
 TASK_OK_RESULTS = (0, 267009)
@@ -221,18 +224,31 @@ def parse_task_info(raw):
 
 
 def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
-    """Santé des 5 tâches Kuro d'après leur dernier résultat. Pure."""
+    """Santé des 5 tâches Kuro d'après leur dernier résultat. Pure.
+
+    267009 = encore en cours ; TASK_BUSY_RESULT = instance précédente toujours
+    active (IgnoreNew) — ni l'un ni l'autre n'est un échec, mais les deux
+    apparaissent dans le détail pour rester visibles.
+    """
     problems = []
+    busy = []
     for name in KURO_TASKS:
         if name not in info:
             problems.append(f"{name} absente")
             continue
         _last_run, result = info[name]
-        if result not in ok_results:
+        if result in ok_results:
+            continue
+        if result == TASK_BUSY_RESULT:
+            busy.append(name)
+        else:
             problems.append(f"{name} result={result}")
     if problems:
-        return False, "; ".join(problems)
-    return True, f"{len(KURO_TASKS)} tâches au vert (dernier résultat 0)"
+        return False, "; ".join(problems + [f"{n} occupée" for n in busy])
+    msg = f"{len(KURO_TASKS)} tâches au vert (dernier résultat 0)"
+    if busy:
+        msg += f" ; occupée : {', '.join(busy)}"
+    return True, msg
 
 
 def main(fix=False):
@@ -376,12 +392,17 @@ def main(fix=False):
     check("Push réplica", ok, detail)
 
     # 12. Tâches planifiées Kuro (R116 : KuroAutoSync rendait « result 0 »
-    # pendant que git était complètement à l'arrêt pendant 3 jours)
+    # pendant que git était complètement à l'arrêt pendant 3 jours).
+    # schtasks.exe et NON les cmdlets ScheduledTasks : WMI corrompu sur cette
+    # machine → Get-ScheduledTaskInfo échoue silencieusement (tout « absent »).
+    # Même raison que scripts/Install-KuroScheduledTask.ps1.
     try:
         ps_cmd = (
             "foreach ($t in 'KuroAutoSync','KuroDataSync','KuroDaily','KuroXDaily','KuroWeekly') { "
-            "$i = Get-ScheduledTaskInfo -TaskName $t -ErrorAction SilentlyContinue; "
-            "if ($i) { '{0}|{1}|{2}' -f $t, $i.LastRunTime.ToString('s'), $i.LastTaskResult } }"
+            "$csv = schtasks /query /TN $t /V /FO CSV 2>$null; "
+            "if ($csv) { $v = ($csv | ConvertFrom-Csv | Select-Object -First 1)"
+            ".psobject.Properties.Value; "
+            "'{0}|{1}|{2}' -f $t, $v[5], $v[6] } }"
         )
         out = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd],
                              capture_output=True, text=True, timeout=60)
