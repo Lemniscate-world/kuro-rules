@@ -55,6 +55,47 @@ python kuro-rules/scripts/check_epingle_completeness.py --warn-only
 
 ---
 
+## Incident 2026-10-19 — Blackout git silencieux (index.lock orpheline)
+
+### Problem
+
+Une `.git/index.lock` de 0 octet (17/10 18:54, opération git morte) a bloqué
+**tous** les commits/push pendant 3 jours, en silence :
+1. `kuro_autosync` (tâche 20 min) rendait « rien à synchroniser » (exit 0) car
+   `git status` échouait — l'échec était masqué par une liste vide.
+2. `git add`/`git commit` KO n'étaient journalisés nulle part (sortie console
+   perdue sous `pythonw.exe`).
+3. Aucun doctor ne vérifiait l'âge du verrou, la fraîcheur de l'autosync ni
+   le dernier résultat des 5 tâches planifiées → panic-free mais blind.
+4. `sync_kuro_data.ps1` mourait au 1er `Write-Error` (EAP=Stop) sur un
+   timeout SSH éphémère → KuroDataSync result=1 sans retry.
+5. Fichiers scratch `.tmp-*.sh` non gitignorés (`.tmp.` ≠ `.tmp-`).
+
+### Solution (gardes + preuves négatives)
+
+- `kuro_autosync.clear_stale_lock()` : `.git/index.lock` >10 min retirée en
+  tête de chaque cycle (+ ALERTE journalisée) ; même garde dans
+  `kuro_automate.git_publish()` et `kuro_doctor --fix`.
+- Sorties honnêtes : `changed_files()` lève `AutosyncError` si `git status`/
+  `ls-files` échoue (exit 8) ; toutes les sorties passent par
+  `_exit_logged()` ; rotation du journal (512 Ko / 400 lignes).
+- `kuro_doctor` : 3 nouveaux checks — **Verrou git**, **Autosync**
+  (fraîcheur + dernier verdict), **Tâches planifiées** (5 tâches, dernier
+  résultat ; 267009 = running toléré).
+- `sync_kuro_data.ps1` : retry 3×/fichier (pause 5 s), compteur `fail`,
+  exit 1 si échec partiel, chmod non bloquant.
+- `.gitignore` : `.tmp-*` ajouté.
+
+### Verification
+
+```
+python -m pytest tests/test_kuro_autosync.py tests/test_kuro_doctor.py tests/test_kuro_sync.py -q
+python scripts/kuro_doctor.py        # "Verrou git", "Autosync", "Tâches planifiées" au vert
+python scripts/kuro_autosync.py --dry-run --no-gate   # cycle complet sans verrou
+```
+
+---
+
 **Créée** : 2026-09-21
 **Déclencheur** : Session pipeline X/Discord — 14 projets réintégrés, orgs satellites, alias kuro
 **Application** : MANDATORY — tout ajout parser/registre/format partagé
