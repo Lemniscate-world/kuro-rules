@@ -214,3 +214,48 @@ def test_scheduled_tasks_health_instance_occupee():
     occupee = dict(tout_vert, KuroDataSync=("19/10/2026 10:00:00", doctor.TASK_BUSY_RESULT))
     ok, detail = doctor.scheduled_tasks_health(occupee)
     assert ok is True and "occupée" in detail and "KuroDataSync" in detail
+
+
+# --- Garde R125 (fenêtres CMD) : incident « consoles partout toutes les 5 min » ---
+
+_XML_PYTHONW = "<Command>C:\\Python314\\pythonw.exe</Command><Arguments>x.py</Arguments>"
+_XML_PS_HIDDEN = ("<Command>powershell</Command>"
+                  "<Arguments>-NoProfile -WindowStyle Hidden -File x.ps1</Arguments>")
+_XML_PYTHON_CONSOLE = "<Command>C:\\Python314\\python.exe</Command><Arguments>x.py</Arguments>"
+_XML_PS_VISIBLE = "<Command>powershell</Command><Arguments>-File x.ps1</Arguments>"
+_XML_BAT = "<Command>C:\\Users\\u\\scripts\\push.bat</Command>"
+
+
+def test_task_xml_is_hidden():
+    assert doctor.task_xml_is_hidden(_XML_PYTHONW) is True
+    assert doctor.task_xml_is_hidden(_XML_PS_HIDDEN) is True
+    # L'incident réel : python.exe / powershell nu / .bat → fenêtre visible
+    assert doctor.task_xml_is_hidden(_XML_PYTHON_CONSOLE) is False
+    assert doctor.task_xml_is_hidden(_XML_PS_VISIBLE) is False
+    assert doctor.task_xml_is_hidden(_XML_BAT) is False
+    assert doctor.task_xml_is_hidden("") is False
+    # Case-insensitive : l'installateur peut écrire -WindowStyle en minuscules
+    lower = _XML_PS_HIDDEN.lower()
+    assert doctor.task_xml_is_hidden(lower) is True
+
+
+def test_hidden_tasks_health_tout_vert():
+    xmls = {n: _XML_PYTHONW for n in doctor.HIDDEN_TASKS}
+    xmls["KuroXDaily"] = _XML_PS_HIDDEN
+    ok, detail = doctor.hidden_tasks_health(xmls)
+    assert ok is True and "fenêtre cachée" in detail
+
+
+def test_hidden_tasks_health_fenetre_visible_signalee():
+    """Preuve négative de l'incident : une seule tâche visible = FAIL nommé."""
+    xmls = {n: _XML_PYTHONW for n in doctor.HIDDEN_TASKS}
+    xmls["KuroReplicaPush"] = _XML_BAT  # le coupable réel (toutes les 5 min)
+    ok, detail = doctor.hidden_tasks_health(xmls)
+    assert ok is False and "KuroReplicaPush" in detail and "fenêtre visible" in detail
+
+
+def test_hidden_tasks_health_absente_signalee():
+    """R116 : une tâche disparue silencieusement doit être signalée."""
+    xmls = {n: _XML_PYTHONW for n in doctor.HIDDEN_TASKS if n != "KuroDataSync"}
+    ok, detail = doctor.hidden_tasks_health(xmls)
+    assert ok is False and "KuroDataSync absente" in detail

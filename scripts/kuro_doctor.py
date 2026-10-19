@@ -251,6 +251,53 @@ def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
     return True, msg
 
 
+# --- Garde R125 : aucune fenêtre CMD ne doit s'ouvrir (tâches planifiées) ---
+
+# Toutes les tâches Kuro connues (installateur v2) + OpenQuant (autre repo,
+# mais même machine : fenêtres visibles toutes les 5 min = bruit permanent).
+HIDDEN_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroWeekly",
+                "KuroSyncRepos", "KuroFleetSync", "KuroXDaily", "KuroDbBackup",
+                "KuroOracle", "KuroReplicaPush",
+                "OpenQuantDiscovery", "OpenQuantWatchdog")
+
+
+def task_xml_is_hidden(xml):
+    """True si l'action de la tâche ne peut PAS ouvrir de fenêtre console. Pur.
+
+    Accepté : pythonw.exe (pas de console du tout), ou powershell avec
+    -WindowStyle Hidden. Refusé : python.exe, powershell nu, .bat/.cmd.
+    """
+    low = (xml or "").lower()
+    if "<command>" not in low:
+        return False
+    if "pythonw.exe" in low:
+        return True
+    if "powershell" in low and "-windowstyle hidden" in low:
+        return True
+    return False
+
+
+def hidden_tasks_health(task_xmls):
+    """Santé « fenêtres cachées » d'après les XML des tâches. Pure.
+
+    task_xmls : {nom: xml} — l'absence d'une tâche est signalée (régression
+    R116 : une tâche disparue silencieusement ne doit jamais être ignorée).
+    """
+    problems = []
+    visible = []
+    for name in HIDDEN_TASKS:
+        xml = task_xmls.get(name)
+        if not xml:
+            problems.append(f"{name} absente")
+        elif not task_xml_is_hidden(xml):
+            visible.append(name)
+    if visible:
+        problems.append(f"fenêtre visible : {', '.join(visible)}")
+    if problems:
+        return False, "; ".join(problems)
+    return True, f"{len(HIDDEN_TASKS)} tâches en fenêtre cachée"
+
+
 def main(fix=False):
     print("=== KURO DOCTOR ===\n")
 
@@ -411,6 +458,34 @@ def main(fix=False):
         info = {}
     ok, detail = scheduled_tasks_health(info)
     check("Tâches planifiées", ok, detail)
+
+    # 12bis. R125 : AUCUNE fenêtre CMD (R125 : 11 tâches ouvraient des
+    # consoles visibles, dont 2 en boucle toutes les 5 min). Même raison
+    # WMI : schtasks /XML, pas les cmdlets ScheduledTasks.
+    try:
+        names = ",".join(f"'{n}'" for n in HIDDEN_TASKS)
+        ps_cmd = (
+            f"foreach ($t in @({names})) {{ "
+            "$xml = schtasks /query /TN $t /XML 2>$null; "
+            "if ($xml) { Write-Output ('###TASK:' + $t); Write-Output ($xml -join [char]10); "
+            "Write-Output '###END' } }"
+        )
+        out = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd],
+                             capture_output=True, text=True, timeout=60)
+        xmls, current = {}, None
+        for line in (out.stdout or "").splitlines():
+            if line.startswith("###TASK:"):
+                current = line[8:].strip()
+                xmls[current] = []
+            elif line == "###END":
+                current = None
+            elif current:
+                xmls[current].append(line)
+        xmls = {k: "\n".join(v) for k, v in xmls.items()}
+    except Exception:
+        xmls = {}
+    ok, detail = hidden_tasks_health(xmls)
+    check("Fenêtres cachées", ok, detail)
 
     # 13. Git local sain (R116 : index.lock orpheline bloquait tous les commits)
     ok, detail = stale_lock_check(KURO_ROOT)
