@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# fix-server-xenon.sh — répare Xenon (ex kuro-glances) + désactive veille écran 5 min
+# fix-server-xenon.sh — répare Xenon (ex kuro-glances) sur la console du serveur.
 # Cible : Ubuntu Server console (TTY, pas de GNOME) — à lancer SUR le PC serveur lui-même.
 # Usage : sudo bash fix-server-xenon.sh
+# NOTE (2026-10-19) : l'écran console n'est plus réglé ici — une seule source de vérité :
+#   scripts/server-screen-blank.sh (défaut 30 min, réglable en argument). Voir §3/3.
 set -euo pipefail
 
 echo "=== 1/3 DIAG xenon ==="
@@ -15,7 +17,7 @@ python3 --version || true
 python3 -c "import psutil; print('psutil OK', psutil.__version__)" 2>&1 || echo "MANQUANT: python3-psutil absent"
 echo "-- paquet deb --"
 dpkg -l | grep -i kuro || echo "paquet kuro non installé (dpkg vide)"
-cat /sys/module/kernel/parameters/consoleblank 2>/dev/null && echo "(valeur actuelle consoleblank, 0 = désactivé, 300 = 5 min)" || true
+cat /sys/module/kernel/parameters/consoleblank 2>/dev/null && echo "(consoleblank en secondes : 0 = jamais, 300 = 5 min, 900 = 15 min, 1800 = 30 min)" || true
 
 echo ""
 echo "=== 2/3 INSTALL / REPARE xenon ==="
@@ -50,43 +52,15 @@ else
 fi
 
 echo ""
-echo "=== 3/3 DESACTIVE VEILLE ECRAN CONSOLE (5 min -> jamais) ==="
-# Immédiat sur tous les TTY
-for TTY in /dev/tty1 /dev/tty2 /dev/tty3 /dev/tty4 /dev/tty5 /dev/tty6; do
-  [ -e "$TTY" ] && setterm -blank 0 -powersave off -powerdown 0 < "$TTY" 2>/dev/null || true
-done
-setterm -blank 0 -powersave off -powerdown 0 2>/dev/null || true
-echo "[OK] setterm immédiat appliqué"
-
-# Persistant : kernel consoleblank=0 via GRUB
-if [ -f /etc/default/grub ]; then
-  if grep -q "consoleblank=0" /etc/default/grub; then
-    echo "[OK] consoleblank=0 déjà dans /etc/default/grub"
-  else
-    echo "[fix] ajoute consoleblank=0 à GRUB_CMDLINE_LINUX_DEFAULT"
-    # Ajoute au paramètre existant sans écraser le reste
-    if grep -q '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub; then
-      sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 consoleblank=0"/' /etc/default/grub
-      # Nettoie doublons éventuels
-      sed -i 's/ consoleblank=0 consoleblank=0/ consoleblank=0/g' /etc/default/grub
-    else
-      echo 'GRUB_CMDLINE_LINUX_DEFAULT="consoleblank=0"' >> /etc/default/grub
-    fi
-    update-grub || update-grub2 || true
-    echo "[OK] grub mis à jour — reboot requis pour effet noyau"
-  fi
+echo "=== 3/3 ECRAN CONSOLE (délégué) ==="
+# Source unique de vérité : server-screen-blank.sh (défaut 30 min ; SCREEN_MIN=x pour surcharger)
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+if [ -f "$SELF_DIR/server-screen-blank.sh" ]; then
+  bash "$SELF_DIR/server-screen-blank.sh" "${SCREEN_MIN:-30}"
 else
-  echo "[warn] /etc/default/grub absent (pas GRUB ?) — ajoute consoleblank=0 à ta ligne cmdline manuellement"
+  echo "[warn] $SELF_DIR/server-screen-blank.sh introuvable — copie-le à côté de ce script puis lance :"
+  echo "  sudo bash server-screen-blank.sh 30"
 fi
-
-# Persistant : systemd getty -> setterm à chaque login tty1
-mkdir -p /etc/systemd/system/getty@tty1.service.d
-cat > /etc/systemd/system/getty@tty1.service.d/noblank.conf <<'EOF'
-[Service]
-ExecStartPre=-/bin/sh -c 'setterm -blank 0 -powersave off -powerdown 0 < /dev/%I'
-EOF
-systemctl daemon-reload || true
-echo "[OK] getty@tty1 noblank installé"
 
 # Sécurité : logind ne doit jamais idle-suspendre (serveur)
 if [ -f /etc/systemd/logind.conf ]; then
@@ -99,4 +73,4 @@ fi
 echo ""
 echo "=== VERIF FINALE ==="
 cat /sys/module/kernel/parameters/consoleblank 2>/dev/null || echo "(consoleblank lisible seulement après reboot)"
-[ -n "${XENON_BIN:-}" ] && echo "[DONE] xenon OK + écran ne s'éteindra plus" || echo "[A FAIRE] réinstalle le .deb kuro puis relance ce script"
+[ -n "${XENON_BIN:-}" ] && echo "[DONE] xenon OK + écran console géré par server-screen-blank.sh" || echo "[A FAIRE] réinstalle le .deb kuro puis relance ce script"
