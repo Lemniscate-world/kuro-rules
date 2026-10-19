@@ -21,14 +21,40 @@ Ajouter une ligne dans la section "1. Posts publiés" :
 | {DATE} | {Plateforme} | {Titre ou message (tronqué à 60 car)} | {Lien si public} | {Résultat: 🟢 positif / 🟡 en attente / 🔴 négatif} |
 ```
 
+### Après une réponse envoyée (R96, R107, R119, R121)
+Ajouter dans "2. Réponses envoyées" :
+```
+| {DATE} | {GitHub/X/Discord/...} | {URL du thread} | {Résumé en 1 ligne} | {envoyée / en attente / réponse reçue} |
+```
+
 ### Après un contact prospect
 Ajouter dans "3. Contacts / Prospects" :
 ```
 | {Nom/Handle} | {Plateforme} | {Date} | {Ce qui a été dit, intérêt exprimé} |
 ```
 
+### Suivi 24 h (obligatoire)
+Toute réponse envoyée ouvre une ligne dans "4. Suivi 24 h", close au plus tard à J+1 :
+```
+| {Échéance = date + 24 h} | {URL du thread} | {Dernière interaction} | {Répondre / relancer / archiver} | {à faire / fait} |
+```
+
+### Après une proposition de collaboration reçue
+Ajouter dans "5. Collabs reçues". Statuts : `nouveau` → `répondu` → `qualifié` / `refusé` :
+```
+| {DATE} | {Qui} | {LinkedIn/mail/DM} | {Demande en 1 ligne} | {nouveau} | {Suite prévue} |
+```
+
 ### Après chaque interaction notable
 Ajouter dans "6. Leçons apprises" ce qui a marché ou non.
+
+## Revue quotidienne
+
+`python scripts/kuro_replies.py --gh` liste les réponses en retard (> 24 h),
+les commentaires GitHub à visibilité non confirmée et les collabs `nouveau`.
+`--json --write` produit `outputs/replies_queue.json` ; `--strict` sort en 1
+si quelque chose est en retard (utilisable en cron). Tâche planifiée
+`KuroReplies` : quotidien 09:00 (`--gh --write`).
 
 ## Sanction
 Si une session se termine sans que l'acquisition_tracker ait été mis à jour après une action marketing :
@@ -37,5 +63,8 @@ Si une session se termine sans que l'acquisition_tracker ait été mis à jour a
 
 ## Fichiers associés
 - `docs/tracking/acquisition_tracker.md` — le tracker lui-même
+- `scripts/kuro_replies.py` — file de réponses (retards, collabs, à vérifier)
+- `outputs/replies_queue.json` — sortie machine de la file de réponses
+- `MARKETING_MEMORY/reply-templates.md` — réponses types GitHub/HN/Reddit/collab
 - `LAUNCH_POSTS.md` — drafts des posts
 - `docs/hn_feedback_log.md` — log HN
