@@ -12,3 +12,5 @@
 {"date": "2026-10-04", "projet": "NeuralDBG", "score_det": 72, "issues": ["melange FR/EN : themes non traduits"], "score_llm": null, "rewrite": null, "score": 72}
 {"date": "2026-10-07", "projet": "Helium", "score_det": 55, "issues": ["melange FR/EN : themes non traduits"], "score_llm": null, "rewrite": null, "score": 55}
 {"date": "2026-10-11", "projet": "NeuralDBG", "score_det": 73, "issues": [], "score_llm": null, "rewrite": null, "score": 73}
+{"date": "2026-10-15", "projet": "Forma", "score_det": 72, "issues": ["melange FR/EN : themes non traduits"], "score_llm": null, "rewrite": null, "score": 72}
+{"date": "2026-10-17", "projet": "NeuralDBG", "score_det": 73, "issues": [], "score_llm": null, "rewrite": null, "score": 73}

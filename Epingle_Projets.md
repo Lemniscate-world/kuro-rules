@@ -37,14 +37,14 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **NeuralDBG** |  67%  | Actif | Debugger causal pour PyTorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 PRs upstream (BUG-002 varlen_attn, BUG-006 svdvals, BUG-008 normalize). PR Gate system déployé (6 gates). v1.3.2 sur PyPI. Engine 45 tests. Neural-Agent pipeline CPU validé. Merge rate upstream: 0% — objectif: 1ère PR mergée. |
-| **NeuralDBG-Engine** |  37%  | Actif | Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. |
-| **Neural-Agent** |  45%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
+| **NeuralDBG** |  72%  | Actif | Debugger causal pour PyTorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 PRs upstream (BUG-002 varlen_attn, BUG-006 svdvals, BUG-008 normalize). PR Gate system déployé (6 gates). v1.3.2 sur PyPI. Engine 45 tests. Neural-Agent pipeline CPU validé. Merge rate upstream: 0% — objectif: 1ère PR mergée. |
+| **NeuralDBG-Engine** |  42%  | Actif | Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. |
+| **Neural-Agent** |  50%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
 | **Aladin** | 40% | Actif | Architecture Transformer & recherche LLM. |
 | **Astral** |  15%  | En Pause | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
-| **DataLint** |  10%  | En Pause | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
-| **Odin** |  15%  | En Pause | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. |
-| **NeuroDose** |  35%  | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
+| **DataLint** |  15%  | En Pause | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
+| **Odin** |  20%  | En Pause | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. |
+| **NeuroDose** |  40%  | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
 | **Aquarium** |  15%  | Prototypage | IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. |
 | **Damon** |  10%  | Nouveau | OS Amélioré basé sur Arch Linux. |
 | **Metatron** |  15%  | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
@@ -53,7 +53,7 @@
 | **Automatons** |  15%  | En Pause | Agent orchestration and automation framework. |
 | **Onlook** | 0% | Prototypage | Visual monitoring / observability tool. |
 | **Verbose** |  10%  | En Pause | Logging / communication tool. |
-| Vault |  10%  | Outil | Base de connaissances personnelle (Obsidian). |
+| Vault |  5%  | Outil | Base de connaissances personnelle (Obsidian). |
 | Neural-Again |  0%  | Archive | DSL pour réseaux de neurones. Obsolète, remplacé par Keras/PyTorch + code gen. |
 | Neural-Research |  0%  | Archive | Recherches avancées sur les architectures neuronales. |
 | NeuralDSL | 0% | Archive | Domain Specific Language for neural networks. |
@@ -63,7 +63,7 @@
 | **github-profile** |  10%  | Outil | README de profil de l'organisation (vitrine portfolio et dashboard). |
 | **Oblivion** |  40%  | Actif | IDE Tauri + Monaco à 0 FCFA (routeur multi-providers avec fallback auto, moteur de contexte). 14 commits 30j, 6 fichiers de test. |
 | Haki | 0% | Archive | Renommé **Oblivion** le 2026-09-21 (même vision IDE 0 FCFA). Voir Oblivion. |
-| **KnowledgeOS** |  15%  | En Pause | « GitHub for the Mind » — graphe de connaissances versionné, offline-first, tuteur IA. |
+| **KnowledgeOS** |  20%  | En Pause | « GitHub for the Mind » — graphe de connaissances versionné, offline-first, tuteur IA. |
 
 ---
 
@@ -73,7 +73,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **OpenQuant** |  69%  | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
+| **OpenQuant** |  74%  | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
 | Console |  15%  | Prototypage | Environnement de développement d'outils de trading quantitatifs et algorithmiques. |
 
 **Objectif 2026 — 5 modèles/an :**
@@ -93,9 +93,9 @@
 | **Flow-Regulator** | 5% | Actif | Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode. |
 | Charmed |  15%  | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
 | Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
-| **LifeTrack** |  65%  | Actif | Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. |
+| **LifeTrack** |  58%  | Actif | Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. |
 | **bodydouble** |  15%  | En Pause | Body doubling libre (alternative Focusmate sans abonnement) : file d'attente + visio WebRTC P2P. MVP. |
-| LifeStack |  10%  | Prototypage | Scaffold vide — périmètre à définir. |
+| LifeStack |  15%  | Prototypage | Scaffold vide — périmètre à définir. |
 
 > **Note** : NeuroDose est listé dans λ-Section-1 (AI). Son axe biohacking est couvert par le même projet.
 
@@ -107,12 +107,12 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Hermes** |  20%  | Validation | Outil de coordination des livraisons pour commerçants du Grand Lomé, Togo. Landing page + pipeline automation (R84). Branch: validation/landing-deploy. |
+| **Hermes** |  25%  | Validation | Outil de coordination des livraisons pour commerçants du Grand Lomé, Togo. Landing page + pipeline automation (R84). Branch: validation/landing-deploy. |
 | G&S Solutions | 6% | Actif | Fintech en phase de mindmapping. |
 | Iroko |  15%  | Prototypage | Fintech. |
 | Kapok |  15%  | Prototypage | Insurtech. |
 | FCI | 0% | Prototypage | Accounting/Business solution pour client FCI (ex-SOGEXCO). |
-| **Epure** |  45%  | Actif | Cabinet d'Ingénierie Hybride IA (Togo, West Africa). Services de conception augmentés par IA. Frontend + backend + CAD service + Electron. Stack: React, TypeScript, Python, FreeCAD. |
+| **Epure** |  50%  | Actif | Cabinet d'Ingénierie Hybride IA (Togo, West Africa). Services de conception augmentés par IA. Frontend + backend + CAD service + Electron. Stack: React, TypeScript, Python, FreeCAD. |
 | **Forma** |  65%  | Actif | Système agentique de traitement des sinistres assurance (Vision + OCR, RAG sur contrats, validation humaine). v0.12.1, 200+ fichiers de test, 25 commits 30j. |
 | **DevisPro** |  10%  | En Pause | Devis et factures en 60 secondes pour artisans (PDF, envoi WhatsApp). |
 
@@ -142,7 +142,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Helium** |  38%  | Actif | Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. Recherches stratégiques intégrées. |
+| **Helium** |  43%  | Actif | Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. Recherches stratégiques intégrées. |
 | **GALT-Flatcoin-Concept** |  15%  | Prototypage | Concept de flatcoin DeFi (whitepaper draft, stability engine, tranches). 8 docs de conception. |
 | POFS | 0% | Prototypage | Proof of Stake / File System research. |
 
@@ -154,7 +154,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Dissect** |  25%  | En Pause | Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. |
+| **Dissect** |  30%  | En Pause | Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. |
 | BloomDB |  15%  | Prototypage | Base de données pour stockage et gestion de données probabilistes. |
 | Algoritmi | 0% | Prototypage | Dérivé de Dissect, centré sur la visualisation des algorithmes. |
 
@@ -247,8 +247,8 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Horcruxe Labs** |  55%  | Actif | Labo de recherches personnelles (une recherche = un dossier isolé). Recherche 001 SpiderCache : cache mémoire en toile d'araignée — Toiles 1-3 prouvées dans russel-agent (RAM <1ms, watchers auto-refresh, warmup 60s), Toiles 4-7 à construire (Weaver cross-domain, LRU 2.0, Mmap, cron) + papier draft-001. Onboardé Kuro le 2026-09-20 (SESSION_SUMMARY, indexé daemon). |
-| **russel-agent** |  45%  | Actif | Agent d'origine de SpiderCache (memory/spider_cache.py, memory_tools, dashboard). Réservoir de provenance pour le labo — règle : on ne le modifie jamais depuis Horcruxe Labs. |
+| **Horcruxe Labs** |  60%  | Actif | Labo de recherches personnelles (une recherche = un dossier isolé). Recherche 001 SpiderCache : cache mémoire en toile d'araignée — Toiles 1-3 prouvées dans russel-agent (RAM <1ms, watchers auto-refresh, warmup 60s), Toiles 4-7 à construire (Weaver cross-domain, LRU 2.0, Mmap, cron) + papier draft-001. Onboardé Kuro le 2026-09-20 (SESSION_SUMMARY, indexé daemon). |
+| **russel-agent** |  50%  | Actif | Agent d'origine de SpiderCache (memory/spider_cache.py, memory_tools, dashboard). Réservoir de provenance pour le labo — règle : on ne le modifie jamais depuis Horcruxe Labs. |
 
 ---
 

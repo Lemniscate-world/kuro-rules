@@ -14,8 +14,7 @@ $script:OWNED_ORGS = @(
     "github.com/Hackin-Life-X/",
     "github.com/N-Hypatia/",
     "github.com/EpureCAD/",
-    "github.com/HeliumXChain/",
-    "github.com/Rare-Sagittarius/"
+    "github.com/HeliumXChain/"
 )
 
 $script:EXTERNAL_ORGS = @(

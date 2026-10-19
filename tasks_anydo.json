@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T07:05:54.844667+00:00",
+  "generated_at": "2026-10-19T07:08:21.057454+00:00",
   "mcp_endpoint": "https://mcp.any.do/sse",
   "usage": "Connecter Claude (Settings > Connectors > https://mcp.any.do/sse) puis coller les titres, ex: '@Any.do ajoute [titre] avec rappel lundi 10h'",
   "tasks": [
@@ -30,8 +30,8 @@
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 14,
-      "tag": "J14"
+      "age_days": 21,
+      "tag": "J21"
     },
     {
       "title": "OKR 'Interviews Mom Test / semaine' sous 50% (0.0/3.0) : plan d'action cette semaine",
@@ -39,8 +39,8 @@
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 29,
-      "tag": "J29"
+      "age_days": 36,
+      "tag": "J36"
     },
     {
       "title": "OKR 'Premier revenu MRR (USD) — palier 1' sous 50% (0.0/10.0) : plan d'action cette semaine",
@@ -48,8 +48,8 @@
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 29,
-      "tag": "J29"
+      "age_days": 36,
+      "tag": "J36"
     },
     {
       "title": "OKR 'MRR palier 2 (USD) — activé après palier 1' sous 50% (0.0/100.0) : plan d'action cette semaine",
@@ -57,17 +57,17 @@
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 29,
-      "tag": "J29"
+      "age_days": 36,
+      "tag": "J36"
     },
     {
-      "title": "OKR 'Commits / semaine (moyenne repos actifs)' sous 50% (0.94/10.0) : plan d'action cette semaine",
+      "title": "OKR 'Commits / semaine (moyenne repos actifs)' sous 50% (0.76/10.0) : plan d'action cette semaine",
       "source": "strategy.decision",
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 29,
-      "tag": "J29"
+      "age_days": 36,
+      "tag": "J36"
     },
     {
       "title": "Vélocité moyenne < 1 commit/semaine : choisir UN projet focus et livrer",
@@ -75,8 +75,8 @@
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 10,
-      "tag": "J10"
+      "age_days": 17,
+      "tag": "J17"
     },
     {
       "title": "CI : 1 check(s) en échec — le guardian diagnostique, corrige la cause racine",
@@ -84,8 +84,8 @@
       "date": "",
       "due": "",
       "status": "OPEN",
-      "age_days": 29,
-      "tag": "J29"
+      "age_days": 36,
+      "tag": "J36"
     }
   ]
 }

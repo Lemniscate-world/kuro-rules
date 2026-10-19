@@ -15,3 +15,5 @@
 | 2026-10-04 | hub | NeuralDBG | Ce qu'on a appris sur NeuralDBG : P2b saturation conditioned | 6ac2b05d283083e601c00d40 |
 | 2026-10-07 | hub | Helium | Helium (réseau privé de partage de ressources de calcul (GPU | 6ac6a61ffe0b47947aff9734 |
 | 2026-10-11 | hub | NeuralDBG | NeuralDBG: PyTorch training debugger with error explanations | 6acbebf7ea568e911a3d371f |
+| 2026-10-15 | hub | Forma | Ce qu'on a appris sur Forma : Scan-pc synchrone propage incl | 6ad130e03ccfcf93aab65acd |
+| 2026-10-17 | hub | NeuralDBG | NeuralDBG: 10 commits in 30 days, 2-7 days active, 67% engag | 6ad3d4f6e272c4918f9d5574 |
