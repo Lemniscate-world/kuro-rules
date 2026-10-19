@@ -25,7 +25,7 @@ Ces règles DOIVENT toujours être vérifiées. Si non applicables, le projet es
 | R76 | ✅ DONE | .gitignore covers all sensitive patterns |
 | R79 | ✅ DONE | Compact summary <= 150 words in SESSION_SUMMARY.md |
 | R82 | ✅ DONE | Deep session summary written |
-| R89 | ⏳ PENDING | Lessons learned captured as rules when problems solved |
+| R89 | ✅ DONE | Lessons learned captured as rules when problems solved (2026-10-19 : incident blackout git → R116 §Incident) |
 | R94 | ✅ DONE | Daily X Post generated at session end |
 | R99 | ✅ DONE | Acquisition Tracker updated after each marketing action |
 | R100 | ✅ DONE | Compliance Checklist verified at session start (rules/rule_100_session_compliance.md) |
@@ -116,8 +116,8 @@ Ces règles DOIVENT toujours être vérifiées. Si non applicables, le projet es
 
 | Catégorie | Nb règles | Statut |
 |---|---|---|
-| 🔴🔴 Mandatory ✅ DONE | 12 | 🟢 |
-| 🔴🔴 Mandatory ⏳ PENDING | 2 (R11, R89) | 🟡 |
+| 🔴🔴 Mandatory ✅ DONE | 13 | 🟢 |
+| 🔴🔴 Mandatory ⏳ PENDING | 1 (R11) | 🟡 |
 | 🔵 Optionnelles ✅ DONE | 20 | 🟢 |
 | 🔵 Optionnelles ⏳ PENDING | 2 (R43, R80) | 🟡 |
 | 🔵 Optionnelles 🔵 N-A | ~30 | 🟢 |
