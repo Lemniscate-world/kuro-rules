@@ -144,6 +144,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .tmp.*
+.tmp-*
 *.gdoc
 reports/*
 !reports/discovery_history.csv

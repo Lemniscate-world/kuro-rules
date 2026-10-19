@@ -18,6 +18,7 @@ import argparse
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -79,6 +80,15 @@ def git_publish(repo: Path, message: str, dry_run: bool) -> bool:
     """Commit + push d'un repo si dirty. Retourne True si quelque chose a ete pousse."""
     git = _git_exe()
     try:
+        # R116 : index.lock orpheline = commit impossible en silence (blackout
+        # 16->19/10/2026 sur kuro-rules). Verrou vieilli >10 min = git mort.
+        lock = repo / ".git" / "index.lock"
+        try:
+            if lock.exists() and (time.time() - lock.stat().st_mtime) / 60 > 10:
+                lock.unlink()
+                print(f"  ! index.lock orpheline retiree dans {repo.name}")
+        except OSError:
+            pass
         dirty = subprocess.run([git, "status", "--porcelain"], cwd=str(repo),
                                capture_output=True, text=True, timeout=30)
         if not dirty.stdout.strip():

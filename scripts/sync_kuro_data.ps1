@@ -21,19 +21,29 @@ param(
 $ErrorActionPreference = 'Stop'
 $files = @('pipeline.local.json', 'finances.local.json', 'strategy.local.json', 'TRUTH_DAILY.md')
 $sshOpts = @('-o', "ConnectTimeout=$TimeoutSec", '-o', 'BatchMode=yes')
+$MaxAttempts = 3   # R116 : SSH ephemere (timeout 07:00) ne doit plus tuer la synchro
 
-$ok = 0; $skip = 0
+$ok = 0; $skip = 0; $fail = 0
 foreach ($f in $files) {
     $src = Join-Path $LocalDir $f
     if (-not (Test-Path $src)) { Write-Warning "absent: $f"; $skip++; continue }
-    scp @sshOpts $src "${Server}:${RemoteDir}/$f"
-    if ($LASTEXITCODE -eq 0) { $ok++; Write-Host "ok: $f" }
-    else { Write-Error "scp KO: $f" }
+    $sent = $false
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        scp @sshOpts $src "${Server}:${RemoteDir}/$f"
+        if ($LASTEXITCODE -eq 0) { $sent = $true; break }
+        Write-Warning "scp KO: $f (tentative $attempt/$MaxAttempts)"
+        if ($attempt -lt $MaxAttempts) { Start-Sleep -Seconds 5 }
+    }
+    if ($sent) { $ok++; Write-Host "ok: $f" }
+    else { $fail++; Write-Warning "scp abandonne apres $MaxAttempts essais: $f" }
 }
 
-# Verrouillage des permissions cote serveur (defense en profondeur)
-$remote = "chmod 600 $RemoteDir/* 2>/dev/null; ls -la $RemoteDir"
-ssh @sshOpts $Server $remote | Out-Host
+# Verrouillage des permissions cote serveur (defense en profondeur) —
+# non bloquant : si le serveur est down, la synchro partielle reste valable.
+if ($ok -gt 0) {
+    $remote = "chmod 600 $RemoteDir/* 2>/dev/null; ls -la $RemoteDir"
+    ssh @sshOpts $Server $remote | Out-Host
+}
 
-Write-Host "SYNC-DONE ok=$ok skip=$skip"
-exit $(if ($ok -gt 0) { 0 } else { 1 })
+Write-Host "SYNC-DONE ok=$ok skip=$skip fail=$fail"
+exit $(if ($fail -eq 0 -and $ok -gt 0) { 0 } else { 1 })

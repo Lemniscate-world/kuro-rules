@@ -1,6 +1,13 @@
-"""Tests sync serveur : format liste + syntaxe bash + dry-run sans ecriture."""
+"""Tests sync serveur : format liste + syntaxe bash + dry-run sans ecriture.
+
+R116 (2026-10-19) : couverture de sync_kuro_data.ps1 — gardes retry + syntaxe
+PowerShell. Motivation : le KuroDataSync 07:00 avait rendu result=1 sur un
+timeout SSH ephemere — le script mourait au 1er Write-Error (EAP Stop) sans
+jamais retenter. Garde : 3 essais/ fichier + compteur fail + exit code honnete.
+"""
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -10,7 +17,56 @@ import pytest
 
 REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "kuro_sync_server.sh"
+PS1 = REPO / "scripts" / "sync_kuro_data.ps1"
 LIST = REPO / "scripts" / "sync-repos.txt"
+
+POWERSHELL = shutil.which("powershell") or shutil.which("pwsh")
+
+
+def _ps1_content() -> str:
+    return PS1.read_text(encoding="utf-8")
+
+
+def test_ps1_existe_et_liste_les_fichiers():
+    text = _ps1_content()
+    assert PS1.exists()
+    for f in ("pipeline.local.json", "finances.local.json",
+              "strategy.local.json", "TRUTH_DAILY.md"):
+        assert f in text
+
+
+def test_ps1_garde_retry_presente():
+    """R116 : 3 essais par fichier, pause entre eux, echec collecte."""
+    text = _ps1_content()
+    assert re.search(r"\$MaxAttempts\s*=\s*3", text)
+    assert "Start-Sleep" in text
+    assert "$fail" in text
+    # Write-Error sous EAP=Stop tuait le script au 1er echec (incident 07:00)
+    assert 'Write-Error "scp KO' not in text
+
+
+def test_ps1_sortie_honnete():
+    """exit 1 si echec partiel ou total ; SYNC-DONE porte fail=."""
+    text = _ps1_content()
+    assert "SYNC-DONE" in text and "fail=$fail" in text
+    assert re.search(r"exit\s+\$\(if\s+\(\$fail", text)
+
+
+@pytest.mark.skipif(POWERSHELL is None, reason="powershell absent de la machine")
+def test_ps1_syntaxe_powershell_valide():
+    """ParseFile : syntaxe sans rien executer (R123 hermetic).
+
+    PowerShell 5.1 (Windows PowerShell) : pas de r'...' (syntaxe PS7) —
+    en guillemets simples simples, la backslash est litterale.
+    """
+    ps = (
+        "$errs = $null; $toks = $null; "
+        f"[System.Management.Automation.Language.Parser]::ParseFile('{PS1}', [ref]$toks, [ref]$errs) | Out-Null; "
+        "if ($errs -and $errs.Count) { $errs | ForEach-Object { $_.Message }; exit 1 }"
+    )
+    out = subprocess.run([POWERSHELL, "-NoProfile", "-Command", ps],
+                         capture_output=True, text=True, timeout=60)
+    assert out.returncode == 0, f"erreurs de syntaxe : {out.stdout} {out.stderr}"
 
 
 def _entries():

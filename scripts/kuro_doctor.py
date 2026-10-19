@@ -160,6 +160,81 @@ def push_freshness(log_path=None, replica_age_min=None, max_age_min=20):
     return True, f"push il y a {log_age:.0f} min{extra}"
 
 
+# --- Garde R116 (blackout git 16→19/10/2026) : panne multi-jours invisible ---
+
+KURO_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroXDaily", "KuroWeekly")
+# 267009 = SCHED_S_TASK_RUNNING (tâche encore en cours au moment du relevé).
+TASK_OK_RESULTS = (0, 267009)
+
+
+def stale_lock_check(root, stale_min=15):
+    """index.lock présente + âgée = TOUS les commits bloqués en silence. Pur."""
+    lock = Path(root) / ".git" / "index.lock"
+    try:
+        age_min = (time.time() - lock.stat().st_mtime) / 60
+    except OSError:
+        return True, "aucun verrou"
+    if age_min > stale_min:
+        return False, f"index.lock orpheline ({age_min:.0f} min) — commits bloqués"
+    return True, f"verrou actif ({age_min:.1f} min, opération git en cours)"
+
+
+def autosync_freshness(log_path, max_age_min=90):
+    """Dernière passe autosync (tâche toutes les 20 min) + dernier verdict. Pur.
+
+    Toutes les sorties sont journalisées (R116) : un journal muet = tâche morte ;
+    une dernière ligne KO/REFUS/ALERTE = échec à afficher.
+    """
+    try:
+        lines = [ln for ln in Path(log_path).read_text(
+            encoding="utf-8", errors="replace").splitlines() if ln.strip()]
+    except OSError:
+        return False, "aucun journal autosync — tâche planifiée active ?"
+    if not lines:
+        return False, "journal autosync vide — tâche planifiée active ?"
+    last = lines[-1]
+    try:
+        ts = datetime.fromisoformat(last.split(" ", 1)[0])
+        age_min = (datetime.now(timezone.utc) - ts).total_seconds() / 60
+    except Exception:
+        return False, f"horodatage illisible : {last[:80]}"
+    if age_min > max_age_min:
+        return False, f"dernière passe il y a {age_min:.0f} min (> {max_age_min}) — tâche en panne ?"
+    verdict_ko = any(m in last for m in (" KO ", "REFUS", "ALERTE", "ERREUR"))
+    if verdict_ko:
+        return False, f"dernière passe en échec : {last[:120]}"
+    return True, f"dernière passe il y a {age_min:.0f} min"
+
+
+def parse_task_info(raw):
+    """Lignes 'nom|dernierRun|dernierResult' émises par la commande PS. Pur."""
+    info = {}
+    for line in (raw or "").splitlines():
+        parts = line.strip().split("|")
+        if len(parts) == 3 and parts[0]:
+            try:
+                result = int(parts[2].strip())
+            except ValueError:
+                result = -1
+            info[parts[0]] = (parts[1].strip(), result)
+    return info
+
+
+def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
+    """Santé des 5 tâches Kuro d'après leur dernier résultat. Pure."""
+    problems = []
+    for name in KURO_TASKS:
+        if name not in info:
+            problems.append(f"{name} absente")
+            continue
+        _last_run, result = info[name]
+        if result not in ok_results:
+            problems.append(f"{name} result={result}")
+    if problems:
+        return False, "; ".join(problems)
+    return True, f"{len(KURO_TASKS)} tâches au vert (dernier résultat 0)"
+
+
 def main(fix=False):
     print("=== KURO DOCTOR ===\n")
 
@@ -300,6 +375,28 @@ def main(fix=False):
                                 remote_age)
     check("Push réplica", ok, detail)
 
+    # 12. Tâches planifiées Kuro (R116 : KuroAutoSync rendait « result 0 »
+    # pendant que git était complètement à l'arrêt pendant 3 jours)
+    try:
+        ps_cmd = (
+            "foreach ($t in 'KuroAutoSync','KuroDataSync','KuroDaily','KuroXDaily','KuroWeekly') { "
+            "$i = Get-ScheduledTaskInfo -TaskName $t -ErrorAction SilentlyContinue; "
+            "if ($i) { '{0}|{1}|{2}' -f $t, $i.LastRunTime.ToString('s'), $i.LastTaskResult } }"
+        )
+        out = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd],
+                             capture_output=True, text=True, timeout=60)
+        info = parse_task_info(out.stdout)
+    except Exception:
+        info = {}
+    ok, detail = scheduled_tasks_health(info)
+    check("Tâches planifiées", ok, detail)
+
+    # 13. Git local sain (R116 : index.lock orpheline bloquait tous les commits)
+    ok, detail = stale_lock_check(KURO_ROOT)
+    check("Verrou git", ok, detail)
+    ok, detail = autosync_freshness(KURO_ROOT / "logs" / "autosync.log")
+    check("Autosync", ok, detail)
+
     # verdict
     fails = [n for n, ok, _ in RESULTS if not ok]
     print(f"\nVERDICT: {len(RESULTS) - len(fails)}/{len(RESULTS)} composants OK"
@@ -378,6 +475,16 @@ def apply_fixes(fails):
     if "Dashboard live" in fails:
         print("[FIX] static resynchronisé" if resync_static(KURO_ROOT)
               else "[FIX] ECHEC resync static")
+    if "Verrou git" in fails:
+        lock = KURO_ROOT / ".git" / "index.lock"
+        try:
+            if lock.exists() and (time.time() - lock.stat().st_mtime) / 60 > 15:
+                lock.unlink()
+                print("[FIX] index.lock orpheline retirée")
+            else:
+                print("[FIX] verrou absent ou actif — rien à retirer")
+        except OSError as e:
+            print(f"[FIX] retrait index.lock impossible ({e})")
 
 
 if __name__ == "__main__":

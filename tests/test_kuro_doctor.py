@@ -123,3 +123,86 @@ def test_push_silencieux_malgre_log_frais(tmp_path):
     log.write_text("x\n", encoding="utf-8")
     ok, detail = doctor.push_freshness(log, 99.0)
     assert ok is False and "n arrive pas" in detail
+
+
+# --- Garde R116 (blackout git 16→19/10/2026) ---
+
+
+def _make_lock(root, age_min):
+    gitdir = Path(root) / ".git"
+    gitdir.mkdir(parents=True, exist_ok=True)
+    lock = gitdir / "index.lock"
+    lock.write_text("", encoding="utf-8")
+    vieux = time.time() - age_min * 60
+    os.utime(lock, (vieux, vieux))
+    return lock
+
+
+def test_verrou_absent_ou_frais_sain(tmp_path):
+    ok, detail = doctor.stale_lock_check(tmp_path)
+    assert ok is True and "aucun verrou" in detail
+    _make_lock(tmp_path, age_min=1)
+    ok, detail = doctor.stale_lock_check(tmp_path)
+    assert ok is True and "verrou actif" in detail
+
+
+def test_verrou_orpheline_signalée(tmp_path):
+    """Preuve négative de l'incident : lock >15 min = commits bloqués → FAIL."""
+    _make_lock(tmp_path, age_min=45)
+    ok, detail = doctor.stale_lock_check(tmp_path)
+    assert ok is False and "orpheline" in detail and "commits bloqués" in detail
+
+
+def test_autosync_frais_et_verdict_ok(tmp_path):
+    import datetime as dt
+    log = tmp_path / "autosync.log"
+    stamp = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    log.write_text(f"{stamp} autosync: rien à synchroniser\n", encoding="utf-8")
+    ok, detail = doctor.autosync_freshness(log)
+    assert ok is True and "dernière passe" in detail
+
+
+def test_autosync_muet_ou_vieux_signalé(tmp_path):
+    import datetime as dt
+    log = tmp_path / "autosync.log"
+    assert doctor.autosync_freshness(tmp_path / "absent.log")[0] is False
+    log.write_text("", encoding="utf-8")
+    assert doctor.autosync_freshness(log)[0] is False
+    vieux = (dt.datetime.now(dt.timezone.utc)
+             - dt.timedelta(hours=5)).isoformat(timespec="seconds")
+    log.write_text(f"{vieux} autosync: OK x\n", encoding="utf-8")
+    ok, detail = doctor.autosync_freshness(log, max_age_min=90)
+    assert ok is False and "tâche en panne" in detail
+
+
+def test_autosync_dernier_verdict_ko_signalé(tmp_path):
+    import datetime as dt
+    log = tmp_path / "autosync.log"
+    stamp = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    log.write_text(f"{stamp} autosync: GARDES KO : ruff KO\n", encoding="utf-8")
+    ok, detail = doctor.autosync_freshness(log)
+    assert ok is False and "en échec" in detail
+
+
+def test_parse_task_info_pur():
+    raw = ("KuroAutoSync|2026-10-19T09:11:00|0\n"
+           "KuroDataSync|2026-10-19T09:00:00|1\n"
+           "ligne-malformee\n"
+           "KuroXDaily|2026-10-19T08:00:00|abc\n")
+    info = doctor.parse_task_info(raw)
+    assert info["KuroAutoSync"] == ("2026-10-19T09:11:00", 0)
+    assert info["KuroDataSync"] == ("2026-10-19T09:00:00", 1)
+    assert info["KuroXDaily"] == ("2026-10-19T08:00:00", -1)
+
+
+def test_scheduled_tasks_health():
+    tout_vert = {n: ("2026-10-19T09:00:00", 0) for n in doctor.KURO_TASKS}
+    ok, detail = doctor.scheduled_tasks_health(tout_vert)
+    assert ok is True and "au vert" in detail
+    en_cours = dict(tout_vert, KuroWeekly=("2026-10-19T07:00:00", 267009))
+    assert doctor.scheduled_tasks_health(en_cours)[0] is True
+    echec = dict(tout_vert, KuroDataSync=("2026-10-19T07:00:00", 1))
+    ok, detail = doctor.scheduled_tasks_health(echec)
+    assert ok is False and "KuroDataSync result=1" in detail
+    ok, detail = doctor.scheduled_tasks_health({})
+    assert ok is False and "absente" in detail
