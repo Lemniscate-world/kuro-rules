@@ -25,7 +25,8 @@ REPO = Path(__file__).resolve().parent.parent
 
 def _fm(path: Path) -> dict:
     text = path.read_text(encoding="utf-8-sig")
-    assert text.startswith("---\n"), f"{path}: missing frontmatter"
+    if not text.startswith("---\n"):
+        raise ValueError(f"{path}: missing frontmatter")
     end = text.index("\n---\n", 4)
     return yaml.safe_load(text[4:end]) or {}
 
