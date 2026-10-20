@@ -366,7 +366,9 @@ def batch_review(pattern="x_post_*.md", rewrite=False, project_filter=""):
             text = draft.read_text(encoding="utf-8", errors="replace")
         except Exception:
             continue
-        proj = draft.stem.replace("x_post_", "").replace(today, "").strip("-_")
+        # x_post_2026-10-20-helium -> helium ; x_post_2026-10-15-neuraldbg -> neuraldbg
+        proj = draft.stem.replace("x_post_", "", 1)
+        proj = re.sub(r"^20\d{2}-\d{2}-\d{2}-?", "", proj).strip("-_")
         proj = proj or "hub"
         if project_filter and proj.lower() != project_filter.lower():
             continue
