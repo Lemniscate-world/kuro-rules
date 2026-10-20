@@ -97,11 +97,55 @@ def test_live_null_bytes(tmp_path, monkeypatch):
     assert ok is False and "octets nuls: x.py" in detail
 
 
+
+
+def test_fetch_api_system_retry(monkeypatch):
+    """R125 : un premier timeout (API saturée) ne doit pas donner un FAIL."""
+    import urllib.request
+    calls = {"n": 0}
+
+    class FakeResp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return b'{"host": {"hostname": "x"}}'
+
+    def fake_open(url, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise TimeoutError("timed out")
+        return FakeResp()
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_open)
+    payload = doctor._fetch_api_system("http://127.0.0.1:9", tries=2)
+    assert payload["host"]["hostname"] == "x" and calls["n"] == 2
+    # Épuisement des essais → l'exception remonte (le FAIL reste possible)
+    calls["n"] = 0
+    monkeypatch.setattr(urllib.request, "urlopen",
+                        lambda *a, **k: (_ for _ in ()).throw(TimeoutError("x")))
+    try:
+        doctor._fetch_api_system("http://127.0.0.1:9", tries=2)
+        assert False, "aurait dû lever"
+    except TimeoutError:
+        pass
+
 def test_push_frais(tmp_path):
     log = tmp_path / "replica-push.log"
     log.write_text("[replica-push] replica a jour (04:00:00Z)\n", encoding="utf-8")
     ok, detail = doctor.push_freshness(log, 3.0)
     assert ok is True and "replica distant" in detail
+
+
+def test_push_douteux_quand_ssh_down(tmp_path):
+    """R125 : serveur injoignable → PAS de vert mensonger sur le seul log."""
+    log = tmp_path / "replica-push.log"
+    log.write_text("[replica-push] replica a jour (04:00:00Z)\n", encoding="utf-8")
+    ok, detail = doctor.push_freshness(log, None)
+    assert ok is False and "injoignable" in detail and "non verifiee" in detail
 
 
 def test_push_jamais(tmp_path):
@@ -201,6 +245,9 @@ def test_scheduled_tasks_health():
     assert ok is True and "au vert" in detail
     en_cours = dict(tout_vert, KuroWeekly=("2026-10-19T07:00:00", 267009))
     assert doctor.scheduled_tasks_health(en_cours)[0] is True
+    # 267011 = jamais exécutée (normal après réinscription, installateur v3)
+    jamais = dict(tout_vert, KuroXDaily=("N/A", 267011))
+    assert doctor.scheduled_tasks_health(jamais)[0] is True
     echec = dict(tout_vert, KuroDataSync=("2026-10-19T07:00:00", 1))
     ok, detail = doctor.scheduled_tasks_health(echec)
     assert ok is False and "KuroDataSync result=1" in detail

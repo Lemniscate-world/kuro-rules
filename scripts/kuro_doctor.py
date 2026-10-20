@@ -74,6 +74,23 @@ def tui_commands_ok():
         return False, str(e)[:120]
 
 
+def _fetch_api_system(api_base, timeout=15, tries=2):
+    """GET /api/system avec retry court. Pur (aucun effet de bord).
+
+    R125 : l'API locale peut être momentanément saturée (backlog TIME_WAIT)
+    → un timeout unique de 5 s donnait des faux FAIL « injoignable ».
+    """
+    last = None
+    for _ in range(max(1, tries)):
+        try:
+            with urllib.request.urlopen(api_base + "/api/system",
+                                        timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8", errors="replace"))
+        except Exception as e:
+            last = e
+    raise last
+
+
 def dashboard_live_ok(root, api_base="http://127.0.0.1:8767"):
     """Sync static + octets sains + /api/system. Jamais d exception."""
     try:
@@ -93,9 +110,7 @@ def dashboard_live_ok(root, api_base="http://127.0.0.1:8767"):
                 except Exception:
                     continue
         try:
-            with urllib.request.urlopen(api_base + "/api/system",
-                                        timeout=5) as resp:
-                payload = json.loads(resp.read().decode("utf-8", errors="replace"))
+            payload = _fetch_api_system(api_base)
             host = (payload.get("host") or {}).get("hostname", "?")
         except Exception:
             return False, "; ".join(problems + ["API /api/system injoignable"])
@@ -152,11 +167,16 @@ def push_freshness(log_path=None, replica_age_min=None, max_age_min=20):
         return False, "aucun push enregistre (tache planifiee active ?)"
     if log_age > max_age_min:
         return False, f"dernier push il y a {log_age:.0f} min (> {max_age_min})"
-    if replica_age_min is not None and replica_age_min > max_age_min + 10:
+    # R125 : quand SSH est down, replica_age_min est None — le log local seul
+    # ne prouve RIEN (le push a pu echouer apres ecriture du log). Ne plus
+    # dire OK : signaler explicitement le doute au lieu d'un vert mensonger.
+    if replica_age_min is None:
+        return False, (f"dernier push il y a {log_age:.0f} min MAIS serveur "
+                       "injoignable (SSH down) — reception non verifiee")
+    if replica_age_min > max_age_min + 10:
         return False, (f"pousse mais n arrive pas (replica distant vieux "
                        f"de {replica_age_min:.0f} min)")
-    extra = "" if replica_age_min is None \
-        else f" · replica distant vieux de {replica_age_min:.0f} min"
+    extra = f" · replica distant vieux de {replica_age_min:.0f} min"
     return True, f"push il y a {log_age:.0f} min{extra}"
 
 
@@ -167,7 +187,9 @@ def push_freshness(log_path=None, replica_age_min=None, max_age_min=20):
 TASK_BUSY_RESULT = -2147020576
 KURO_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroXDaily", "KuroWeekly")
 # 267009 = SCHED_S_TASK_RUNNING (tâche encore en cours au moment du relevé).
-TASK_OK_RESULTS = (0, 267009)
+# 267011 = SCHED_S_TASK_HAS_NOT_RUN (tâche jamais exécutée — normal juste
+# après une réinscription, ex. installateur v3 du 20/10/2026).
+TASK_OK_RESULTS = (0, 267009, 267011)
 
 
 def stale_lock_check(root, stale_min=15):
