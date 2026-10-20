@@ -11,7 +11,7 @@ Une seule vue pour répondre vite, sans rien publier :
 
 Sources lues :
   - docs/tracking/acquisition_tracker.md : commentaires GitHub "non prouvés"
-    (section 1) et collabs au statut "nouveau" (section 5).
+    (section 1), relances ouvertes (section 4), collabs "nouveau" (section 5).
   - outputs/replies_inbox.json (optionnel) : DMs / mails / LinkedIn collectés
     à la main, au format [{"source","url","title","received_at"}].
   - `gh api notifications` uniquement avec --gh (réseau opt-in, R123).
@@ -176,7 +176,7 @@ def fetch_github_notifications(runner=None) -> list[dict]:
 
 
 def load_tracker(path: Path) -> dict[str, list]:
-    """Signaux du tracker : commentaires non prouvés + collabs à traiter."""
+    """Signaux du tracker : non prouvés, relances ouvertes, collabs à traiter."""
     text = Path(path).read_text(encoding="utf-8")
     sections = parse_sections(text)
     unverified = []
@@ -189,11 +189,17 @@ def load_tracker(path: Path) -> dict[str, list]:
                 "title": row.get("Titre / message (60 car)", ""),
                 "url": link,
             })
+    followups = []
+    for row in parse_table(sections.get(4, [])):
+        state = (row.get("État") or "").strip().lower()
+        if state in {"fait", "clos", "done", "archivé", "archive"}:
+            continue
+        followups.append(row)
     collabs = []
     for row in parse_table(sections.get(5, [])):
         if (row.get("Statut") or "").strip().lower() in COLLAB_OPEN:
             collabs.append(row)
-    return {"unverified": unverified, "collabs": collabs}
+    return {"unverified": unverified, "followups": followups, "collabs": collabs}
 
 
 def load_inbox(path: Path) -> list[dict]:
@@ -211,7 +217,7 @@ def load_inbox(path: Path) -> list[dict]:
 
 
 def render_text(late: list[dict], due: list[dict], unverified: list[dict],
-                collabs: list[dict]) -> str:
+                collabs: list[dict], followups: list[dict]) -> str:
     lines = ["File de réponses (R96 / R107 / R119 / R121)"]
 
     def block(title, items, fmt):
@@ -229,6 +235,10 @@ def render_text(late: list[dict], due: list[dict], unverified: list[dict],
     block("À TRAITER", due, lambda i: (
         f"[{i.get('age_hours') if i.get('age_hours') is not None else '?'} h] "
         f"{i.get('source')} {i.get('repo')} — {i.get('title')} ({i.get('reason')})"
+    ))
+    block("RELANCES / SUIVI", followups, lambda i: (
+        f"{i.get('Échéance')} — {i.get('Thread / lien')} : {i.get('Action attendue')} "
+        f"[{i.get('État') or 'à faire'}]"
     ))
     block("À VÉRIFIER", unverified, lambda i: (
         f"{i.get('date')} — {i.get('title')} : visibilité publique non confirmée"
@@ -254,10 +264,11 @@ def main(argv: list[str] | None = None) -> int:
     tracker = confine_arg(args.tracker, ROOT)
     inbox = confine_arg(args.inbox, ROOT)
     try:
-        signals = load_tracker(tracker) if tracker.exists() else {"unverified": [], "collabs": []}
+        signals = load_tracker(tracker) if tracker.exists() else {
+            "unverified": [], "followups": [], "collabs": []}
     except Exception as exc:
         print(f"[WARN] tracker illisible : {exc}", file=sys.stderr)
-        signals = {"unverified": [], "collabs": []}
+        signals = {"unverified": [], "followups": [], "collabs": []}
 
     items = load_inbox(inbox)
     if args.gh:
@@ -271,6 +282,7 @@ def main(argv: list[str] | None = None) -> int:
         "late": late,
         "due": due,
         "unverified": signals["unverified"],
+        "followups": signals["followups"],
         "collabs": signals["collabs"],
     }
 
@@ -281,8 +293,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
-        print(render_text(late, due, signals["unverified"], signals["collabs"]))
-    if args.strict and (late or signals["collabs"]):
+        print(render_text(late, due, signals["unverified"], signals["collabs"],
+                          signals["followups"]))
+    if args.strict and (late or signals["collabs"] or signals["followups"]):
         return 1
     return 0
 

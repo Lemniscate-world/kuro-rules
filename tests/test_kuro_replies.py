@@ -68,6 +68,11 @@ def test_tracker_collecte_collabs_et_non_prouves(tmp_path):
         "|---|---|---|---|---|\n"
         "| 2026-09-28 | GitHub | LAN | https://github.com/o/r/issues/1 | "
         "🔴 non prouvé — No activity |\n\n"
+        "## 4. Suivi 24 h\n\n"
+        "| Échéance | Thread / lien | Dernière interaction | Action attendue | État |\n"
+        "|---|---|---|---|---|\n"
+        "| 2026-10-19 | https://github.com/o/r/issues/1 | 0 réponse | relance unique | à faire |\n"
+        "| 2026-10-18 | https://github.com/o/r/issues/2 | répondu | archiver | fait |\n\n"
         "## 5. Collabs reçues\n\n"
         "| Date | Qui | Canal | Demande | Statut | Suite |\n"
         "|---|---|---|---|---|---|\n"
@@ -77,6 +82,8 @@ def test_tracker_collecte_collabs_et_non_prouves(tmp_path):
     )
     signals = kr.load_tracker(tracker)
     assert signals["unverified"][0]["title"] == "LAN"
+    assert len(signals["followups"]) == 1
+    assert signals["followups"][0]["Action attendue"] == "relance unique"
     assert [c["Qui"] for c in signals["collabs"]] == ["Ana"]
 
 
