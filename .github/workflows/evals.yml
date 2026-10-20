@@ -1,0 +1,40 @@
+name: Evals
+
+# Eval deterministe des couches de qualite des posts X (P2 evals).
+# Dataset golden : evals/data/post_cases.jsonl (lint + scoring sans LLM).
+# Rapport : artifact evals/report.json. Bloquant : tout cas echoue = rouge.
+on:
+  push:
+    branches: [main, master, develop, 'feat/*', 'fix/*', 'infra/*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evals:
+    name: Eval posts (deterministe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Evals dataset golden (lint + scoring)
+        run: python evals/eval_posts.py
+      - name: Upload rapport
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evals-report
+          path: evals/report.json
+          if-no-files-found: ignore

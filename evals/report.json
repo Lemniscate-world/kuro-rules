@@ -1,0 +1,116 @@
+{
+  "total": 12,
+  "passed": 12,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "results": [
+    {
+      "id": "bon-post-helium",
+      "score": 80,
+      "lint": [],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "openquant-edge-musel",
+      "score": 80,
+      "lint": [
+        "edge"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "openquant-backtest-musel",
+      "score": 73,
+      "lint": [
+        "backtest"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "lifetrack-medoc-musel",
+      "score": 73,
+      "lint": [
+        "médicament"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "forma-assure-musel",
+      "score": 80,
+      "lint": [
+        "assure"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "fuite-email",
+      "score": 73,
+      "lint": [
+        "email"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "fuite-secret",
+      "score": 73,
+      "lint": [
+        "secret"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "fuite-ip-privee",
+      "score": 63,
+      "lint": [
+        "ip-privee"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "fuite-chemin-local",
+      "score": 63,
+      "lint": [
+        "chemin-local"
+      ],
+      "issues": [
+        "chemin local visible"
+      ],
+      "fails": []
+    },
+    {
+      "id": "fuite-montant",
+      "score": 63,
+      "lint": [
+        "montant"
+      ],
+      "issues": [],
+      "fails": []
+    },
+    {
+      "id": "trop-court",
+      "score": 53,
+      "lint": [],
+      "issues": [
+        "trop court : n'informe pas"
+      ],
+      "fails": []
+    },
+    {
+      "id": "aucun-theme",
+      "score": 35,
+      "lint": [],
+      "issues": [
+        "aucun theme : micro-commit ou semaine vide"
+      ],
+      "fails": []
+    }
+  ]
+}
