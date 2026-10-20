@@ -193,3 +193,4 @@ graph.omni
 # Overrides personnels agent-rules-spec (jamais commites, cf. SPEC.md)
 .agents/local/
 !.agents/local/.gitkeep
+evals/report.json
