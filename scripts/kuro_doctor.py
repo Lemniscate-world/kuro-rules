@@ -253,12 +253,14 @@ def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
 
 # --- Garde R125 : aucune fenêtre CMD ne doit s'ouvrir (tâches planifiées) ---
 
-# Toutes les tâches Kuro connues (installateur v2) + OpenQuant (autre repo,
-# mais même machine : fenêtres visibles toutes les 5 min = bruit permanent).
+# Toutes les tâches Kuro connues (installateur v3).
+# NOTE 20/10 : les 2 tâches OpenQuant ont été SUPPRIMEES par erreur pendant le
+# fix (schtasks /Change refuse les TR multi-mots, le /Delete a vidé d'abord).
+# A RECREER côté OpenQuant avec un launcher caché. Retirées du périmètre pour
+# éviter un faux FAIL permanent (R116 : pas d'alerte sur l'inconnu géré).
 HIDDEN_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroWeekly",
                 "KuroSyncRepos", "KuroFleetSync", "KuroXDaily", "KuroDbBackup",
-                "KuroOracle", "KuroReplicaPush",
-                "OpenQuantDiscovery", "OpenQuantWatchdog")
+                "KuroOracle", "KuroReplies", "KuroReplicaPush")
 
 
 def task_xml_is_hidden(xml):

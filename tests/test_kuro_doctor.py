@@ -244,6 +244,10 @@ def test_hidden_tasks_health_tout_vert():
     xmls["KuroXDaily"] = _XML_PS_HIDDEN
     ok, detail = doctor.hidden_tasks_health(xmls)
     assert ok is True and "fenêtre cachée" in detail
+    # Le périmètre v3 couvre KuroReplies (ajouté en session) et exclut
+    # OpenQuant (autre repo — voir NOTE 20/10 dans kuro_doctor.py).
+    assert "KuroReplies" in doctor.HIDDEN_TASKS
+    assert "OpenQuantWatchdog" not in doctor.HIDDEN_TASKS
 
 
 def test_hidden_tasks_health_fenetre_visible_signalee():
