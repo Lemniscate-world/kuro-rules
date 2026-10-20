@@ -49,7 +49,10 @@ def global_context(max_posts=5, max_learn=4):
     try:
         lines = XLOG.read_text(encoding="utf-8", errors="replace").splitlines()
         for ln in reversed(lines[-40:]):
-            parts = [p.strip(" |") for p in ln.split("|")]
+            # "| date | compte | projet | texte | id |" -> cellule 0 vide (pipe de tete)
+            parts = [p.strip() for p in ln.split("|")]
+            if parts and parts[0] == "":
+                parts = parts[1:]
             if len(parts) >= 4 and parts[0].startswith("20"):
                 ctx["recent"].append({"date": parts[0][:10], "compte": parts[1],
                                       "projet": parts[2], "texte": parts[3][:140]})
@@ -374,7 +377,7 @@ def batch_review(pattern="x_post_*.md", rewrite=False, project_filter=""):
             rep["issues"] = list(dict.fromkeys(
                 rep["issues"] + ["lint: " + ", ".join(lint)]))[:8]
         rep["draft"] = draft.name
-        append_history(rep)
+        append_history(rep, path=HISTORY)
         notes.append(rep)
         if rep["score"] < 55 or lint:
             pires.append(rep)
