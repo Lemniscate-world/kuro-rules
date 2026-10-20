@@ -1,6 +1,7 @@
 """Tests post_brain — memoire et raisonnement, zero reseau (LLM moque)."""
 
 import json
+import os
 import sys
 import types
 
@@ -170,3 +171,83 @@ def test_batch_review_contexte_partage(monkeypatch, tmp_path):
     # filtre projet : ne garde que helium
     notes2, _ = pb.batch_review(pattern="x_post_*.md", project_filter="helium")
     assert len(notes2) == 1 and notes2[0]["projet"] == "helium"
+
+
+# --- Boucle de retour metrics (ingest_metrics -> learn) --------------------
+
+
+def test_get_post_metrics_parse(monkeypatch):
+    """buffer_post.get_post_metrics parse le schema Buffer {type,value}."""
+    import buffer_post as bp
+
+    def _gql(q, k):
+        assert "GetPostMetrics" in q
+        return {"post": {"id": "p1", "metrics": [
+            {"type": "reactions", "value": 4.0},
+            {"type": "comments", "value": 1.0},
+            {"type": "bogus", "value": None}]}}
+    monkeypatch.setattr(bp, "gql", _gql)
+    m = bp.get_post_metrics("p1", "k")
+    assert m == {"reactions": 4.0, "comments": 1.0}  # value None ignoree
+
+
+def test_ingest_metrics_sans_cle(tmp_path, monkeypatch):
+    """Sans BUFFER_API_KEY : no-op totale, zero appel reseau."""
+    monkeypatch.delenv("BUFFER_API_KEY", raising=False)
+    (tmp_path / "st.json").write_text(
+        json.dumps({"a": {"statut": "sent", "projet": "Helium"}}), encoding="utf-8")
+    out = pb.ingest_metrics(state_path=tmp_path / "st.json",
+                            metrics_path=tmp_path / "m.json")
+    assert out == {} and not (tmp_path / "m.json").exists()
+
+
+def test_ingest_metrics_merge_et_filtre_sent(monkeypatch, tmp_path):
+    """Interroge uniquement les 'sent' (8 derniers) et merge dans l'existant."""
+    calls = []
+
+    def _metrics(pid, key):
+        calls.append(pid)
+        return {"reactions": {"value": 2}.get("value")}
+    monkeypatch.setattr("os.environ", dict(os.environ, BUFFER_API_KEY="k"))
+    state = {f"p{i}": {"statut": "sent" if i >= 5 else "scheduled",
+                       "projet": "Helium"} for i in range(10)}
+    sp = tmp_path / "st.json"
+    sp.write_text(json.dumps(state), encoding="utf-8")
+    mp = tmp_path / "m.json"
+    mp.write_text(json.dumps({"ancien": {"projet": "Forma", "metrics": {"reactions": 9}}}),
+                  encoding="utf-8")
+    # buffer_post reel (import reussi) : on mocke juste get_post_metrics
+    import buffer_post as bp
+    monkeypatch.setattr(bp, "get_post_metrics", _metrics)
+    out = pb.ingest_metrics(state_path=sp, metrics_path=mp)
+    assert calls and all(c.startswith("p") and int(c[1:]) >= 5 for c in calls)  # sent only
+    assert len(calls) <= 8  # fenetre glissante
+    assert "ancien" in out  # merge conserve l'historique
+    saved = json.loads(mp.read_text(encoding="utf-8"))
+    assert "ancien" in saved and saved["p5"]["metrics"]["reactions"] == 2
+
+
+def test_learn_constats_engagement(tmp_path):
+    """learn() ajoute les constats d'engagement reel quand METRICS existe."""
+    h = tmp_path / "h.jsonl"
+    h.write_text(json.dumps({"projet": "Helium", "score": 80, "issues": []}) + "\n",
+                 encoding="utf-8")
+    m = tmp_path / "m.json"
+    m.write_text(json.dumps({
+        "p1": {"projet": "Helium", "metrics": {"reactions": 10.0, "comments": 2.0}},
+        "p2": {"projet": "Forma", "metrics": {"reactions": 1.0, "reposts": 1.0}}}),
+        encoding="utf-8")
+    notes = pb.learn(history_path=h, metrics_path=m)
+    joined = " ".join(notes)
+    assert "engagement reel moyen" in joined
+    assert "meilleur terrain : Helium" in joined
+
+
+def test_learn_sans_metrics_regress_pas(tmp_path):
+    """Sans metrics : learn garde son ancien comportement (pas de crash)."""
+    h = tmp_path / "h.jsonl"
+    h.write_text(json.dumps({"projet": "Helium", "score": 40, "issues": ["jargon"]}) + "\n",
+                 encoding="utf-8")
+    notes = pb.learn(history_path=h, metrics_path=tmp_path / "absent.json")
+    assert any("score moyen 40" in n for n in notes)
+    assert not any("engagement" in n for n in notes)

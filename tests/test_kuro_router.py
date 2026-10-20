@@ -327,6 +327,10 @@ def test_usage_tokens_reels(monkeypatch, tmp_path):
         "usage": {"prompt_tokens": 30, "completion_tokens": 70,
                   "total_tokens": 100}})
     monkeypatch.setenv("OPENROUTER_API_KEY", "cle-test")
+    # _load_dotenv injecte le .env du repo (OPENROUTER_MODEL=deepseek-chat
+    # payant) : on verrouille le modele ":free" ici pour un test deterministe.
+    monkeypatch.delenv("OPENROUTER_MODELS", raising=False)
+    monkeypatch.setenv("OPENROUTER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free")
     assert kuro_llm.ask("bonjour le monde") == "salut"
     entry = _last_usage(tmp_path)
     assert entry["engine"] == "openrouter"
@@ -405,6 +409,9 @@ def test_usage_enregistre_modele_complet(monkeypatch, tmp_path):
         "choices": [{"message": {"content": "salut"}}],
         "usage": {"total_tokens": 100}})
     monkeypatch.setenv("OPENROUTER_API_KEY", "cle-test")
+    # Meme garde que test_usage_tokens_reels : .env repo non deterministe.
+    monkeypatch.delenv("OPENROUTER_MODELS", raising=False)
+    monkeypatch.setenv("OPENROUTER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free")
     assert kuro_llm.ask("bonjour le monde") == "salut"
     entry = _last_usage(tmp_path)
     assert entry["model"].endswith(":free"), entry

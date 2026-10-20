@@ -311,7 +311,56 @@ def ingest_delivery(state_path=None, out_path=None):
     return out
 
 
-def learn(history_path=None):
+def ingest_metrics(state_path=None, metrics_path=None, api_key=None):
+    """Boucle de retour : engagement reel des posts publies -> METRICS.
+
+    Best-effort : sans cle Buffer, sans reseau ou sans post 'sent', retourne
+    {} sans casser run_daily. Buffer rafraichit les stats ~24h apres
+    publication — un post recemment envoye remonte souvent un dict vide.
+    """
+    state_path = Path(state_path or DELIVERY)
+    metrics_path = Path(metrics_path or METRICS)
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    key = api_key or os.environ.get("BUFFER_API_KEY", "")
+    if not key or not state:
+        return {}
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import buffer_post
+    except Exception:
+        return {}
+    out = {}
+    try:
+        out = json.loads(metrics_path.read_text(encoding="utf-8"))
+        if not isinstance(out, dict):
+            out = {}
+    except Exception:
+        out = {}
+    sent = [pid for pid, meta in state.items()
+            if isinstance(meta, dict) and meta.get("statut") == "sent"]
+    # Seuls les 8 derniers sent : Buffer rafraichit ~24h/jour, inutile de
+    # re-interroger tout l'historique a chaque run (merge conserve le reste).
+    for pid in sent[-8:]:
+        try:
+            m = buffer_post.get_post_metrics(pid, key)
+        except Exception:
+            continue
+        if m:
+            out[pid] = {"projet": state[pid].get("projet", "?"), "metrics": m}
+    if out:
+        try:
+            metrics_path.parent.mkdir(parents=True, exist_ok=True)
+            metrics_path.write_text(
+                json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+    return out
+
+
+def learn(history_path=None, metrics_path=None):
     """Agrege l'historique -> constats chiffres + propositions. Auto : rien de destructif."""
     notes = []
     rows = []
@@ -322,7 +371,14 @@ def learn(history_path=None):
                 rows.append(json.loads(line))
     except Exception:
         pass
-    if not rows:
+    try:
+        metrics = json.loads(Path(metrics_path or METRICS)
+                              .read_text(encoding="utf-8"))
+        if not isinstance(metrics, dict):
+            metrics = {}
+    except Exception:
+        metrics = {}
+    if not rows and not metrics:
         return ["pas encore d'historique : lance `review` sur les drafts du jour."]
     by_proj = {}
     for r in rows:
@@ -338,6 +394,21 @@ def learn(history_path=None):
             all_issues[i] = all_issues.get(i, 0) + 1
     for issue, n in sorted(all_issues.items(), key=lambda kv: -kv[1])[:5]:
         notes.append("motif recurrent x%d : %s" % (n, issue))
+    # Engagement reel (ingest_metrics) : la verite terrain vs score LLM proxy.
+    eng_by_proj = {}
+    for meta in metrics.values():
+        if not isinstance(meta, dict):
+            continue
+        m = meta.get("metrics") or {}
+        eng = sum(float(m.get(k) or 0) for k in ("reactions", "comments", "reposts"))
+        eng_by_proj.setdefault(meta.get("projet", "?"), []).append(eng)
+    if eng_by_proj:
+        total_n = sum(len(v) for v in eng_by_proj.values())
+        avg_all = sum(sum(v) for v in eng_by_proj.values()) / total_n
+        best = max(eng_by_proj.items(), key=lambda kv: sum(kv[1]) / len(kv[1]))
+        notes.append("engagement reel moyen %.1f sur %d posts publies" % (avg_all, total_n))
+        notes.append("meilleur terrain : %s (moy %.1f reactions+comms+reposts)"
+                     % (best[0], sum(best[1]) / len(best[1])))
     notes.append("proposition : `flag --project <P> --term <mot>` pour museler un terme.")
     return notes
 
@@ -417,6 +488,8 @@ def main(argv=None):
     p_fl.add_argument("--project", required=True)
     p_fl.add_argument("--term", required=True)
     sub.add_parser("ingest")
+    sub.add_parser("ingest-metrics",
+                   help="Engagement reel (Buffer metrics) -> post_metrics.json.")
     sub.add_parser("learn")
     args = ap.parse_args(argv)
 
@@ -436,6 +509,12 @@ def main(argv=None):
         for v in out.values():
             counts[v["statut"]] = counts.get(v["statut"], 0) + 1
         print(f"  diffusion: {counts}")
+        return 0
+
+    if args.cmd == "ingest-metrics":
+        out = ingest_metrics()
+        n_m = sum(len(v.get("metrics", {})) for v in out.values())
+        print(f"  metrics: {len(out)} posts sent avec stats, {n_m} points de mesure.")
         return 0
 
     if args.cmd == "learn":
