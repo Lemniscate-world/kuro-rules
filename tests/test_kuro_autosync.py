@@ -48,6 +48,26 @@ def test_build_message():
     assert "2 fichiers" in msg
 
 
+def test_subprocess_sans_fenetre_console(monkeypatch):
+    r"""R118 : sous pythonw, tout subprocess doit porter CREATE_NO_WINDOW
+    (sinon fenêtre « C:\Windows\SYSTEM32\cmd.exe » visible à chaque cycle)."""
+    captured: dict = {}
+
+    def fake_run(args, **kwargs):
+        captured.update(kwargs)
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    import types
+    fake_mod = types.SimpleNamespace(run=fake_run, CREATE_NO_WINDOW=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    monkeypatch.setattr(autosync, "subprocess", fake_mod)
+    autosync._git("status")
+    if sys.platform == "win32":
+        assert captured.get("creationflags") == subprocess.CREATE_NO_WINDOW
+        assert autosync._NO_WINDOW == {"creationflags": subprocess.CREATE_NO_WINDOW}
+    else:
+        assert autosync._NO_WINDOW == {}
+
+
 def test_classify_inclut_dashboard():
     ok, _skipped = autosync.classify(["dashboard/app.js", "dashboard/styles.css"])
     assert ok == ["dashboard/app.js", "dashboard/styles.css"]

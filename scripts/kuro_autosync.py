@@ -38,6 +38,12 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
+# Sous pythonw (tâche planifiée, sans console parente), chaque subprocess
+# sans CREATE_NO_WINDOW ouvre une fenêtre console visible « C:\Windows\
+# SYSTEM32\cmd.exe » à chaque cycle de 20 min. CREATE_NO_WINDOW l'interdit
+# ; hors Windows (cron serveur) le paramètre n'est simplement pas passé.
+_NO_WINDOW: dict = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
+
 # R116 : verrou orphelin = opération git morte en plein cycle (durées réelles
 # = secondes). Au-delà de ce seuil, il bloque add/commit/push en silence.
 LOCK_STALE_MIN = 10.0
@@ -75,7 +81,7 @@ class AutosyncError(RuntimeError):
 def _git(*args: str, timeout: int = 60) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", *args], cwd=REPO, capture_output=True, text=True,
-        encoding="utf-8", errors="replace", timeout=timeout,
+        encoding="utf-8", errors="replace", timeout=timeout, **_NO_WINDOW,
     )
 
 
@@ -145,14 +151,14 @@ def run_gates(py_files: list[str]) -> tuple[bool, str]:
     if py_files:
         ruff = subprocess.run(
             [sys.executable, "-m", "ruff", "check", *py_files],
-            cwd=REPO, capture_output=True, text=True, timeout=180,
+            cwd=REPO, capture_output=True, text=True, timeout=180, **_NO_WINDOW,
         )
         if ruff.returncode != 0:
             return False, f"ruff KO:\n{ruff.stdout[-2000:]}"
     tests = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/test_kuro_tui_parts.py", "-q",
          "--cov=kuro_dashboard.tui", "--cov-fail-under=90"],
-        cwd=REPO, capture_output=True, text=True, timeout=600,
+        cwd=REPO, capture_output=True, text=True, timeout=600, **_NO_WINDOW,
     )
     if tests.returncode != 0:
         tail = (tests.stdout + tests.stderr)[-2000:]
