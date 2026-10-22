@@ -103,6 +103,27 @@ def test_fetch_gh_panne_donne_liste_vide(capsys):
     assert "gh indisponible" in capsys.readouterr().err
 
 
+def test_notifications_ci_succes_filtrees():
+    def notif(reason, title, unread=True, url=""):
+        return {"reason": reason, "unread": unread, "updated_at": "2026-10-22T22:00:00Z",
+                "repository": {"full_name": "o/r"},
+                "subject": {"title": title, "type": "Issue", "url": url}}
+
+    payload = [
+        notif("ci_activity", "Quality workflow run succeeded for feat/x branch"),
+        notif("ci_activity", "Quality workflow run failed for feat/x branch"),
+        notif("mention", "Fix the race in kuro_replies",
+              url="https://api.github.com/repos/o/r/issues/7"),
+        notif("ci_activity", "Quality workflow run failed for old branch", unread=False),
+    ]
+    kept = kr.fetch_github_notifications(runner=lambda: payload)
+    assert [i["title"] for i in kept] == [
+        "Quality workflow run failed for feat/x branch", "Fix the race in kuro_replies"]
+    assert kept[1]["number"] == "7"
+    raw = kr.fetch_github_notifications(runner=lambda: payload, include_noise=True)
+    assert len(raw) == 3  # la notification lue reste exclue
+
+
 def test_main_json_sans_reseau(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(kr, "confine_arg", lambda value, base: Path(value))
     tracker = tmp_path / "tracker.md"
@@ -130,6 +151,45 @@ def test_main_json_sans_reseau(tmp_path, monkeypatch, capsys):
     assert [i["title"] for i in payload["late"]] == ["Proposition de collab"]
     assert payload["late"][0]["age_hours"] == 48.0
     assert [c["Qui"] for c in payload["collabs"]] == ["Ana"]
+
+
+def test_x_interactions_compteur_seuil(tmp_path):
+    state = tmp_path / "x_posted.json"
+    state.write_text(json.dumps({"hub": [
+        {"id": "pid1", "projet": "Helium", "date": "2026-10-21T20:00:00+00:00"},
+        {"id": "pid2", "projet": "OpenQuant", "date": "2026-10-22T20:00:00+00:00"},
+        {"id": "", "projet": "sans id", "date": ""},
+    ]}), encoding="utf-8")
+
+    def fake(pid, key):
+        return {"comments": 2} if pid == "pid1" else {"comments": 0, "impressions": 12}
+
+    items = kr.x_interactions(state, metrics_fn=fake, api_key="k")
+    assert len(items) == 1
+    item = items[0]
+    assert item["source"] == "x"
+    assert item["repo"] == "Helium"
+    assert item["reason"] == "commentaires"
+    assert item["url"].endswith("/pid1")
+    assert item["updated_at"] == "2026-10-21T20:00:00+00:00"
+
+
+def test_x_interactions_best_effort(tmp_path):
+    # fichier absent -> liste vide
+    assert kr.x_interactions(tmp_path / "absent.json",
+                             metrics_fn=lambda p, k: {"comments": 1}, api_key="k") == []
+    state = tmp_path / "x_posted.json"
+    state.write_text(json.dumps({"hub": [{"id": "p", "projet": "X", "date": ""}]}),
+                     encoding="utf-8")
+    # compteur absent ou nul -> rien a signaler
+    assert kr.x_interactions(state, metrics_fn=lambda p, k: {}, api_key="k") == []
+    # erreur reseau -> jamais d'exception
+    def boom(pid, key):
+        raise RuntimeError("reseau")
+
+    assert kr.x_interactions(state, metrics_fn=boom, api_key="k") == []
+    # sans cle -> pas d'appel
+    assert kr.x_interactions(state, metrics_fn=lambda p, k: {"comments": 1}, api_key="") == []
 
 
 def test_main_strict_sort_1_si_retard(tmp_path, monkeypatch, capsys):

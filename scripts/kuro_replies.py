@@ -5,6 +5,8 @@ Une seule vue pour répondre vite, sans rien publier :
 
   python scripts/kuro_replies.py                 # résumé texte, hors ligne
   python scripts/kuro_replies.py --gh            # + notifications GitHub
+  python scripts/kuro_replies.py --gh --x        # + GitHub et signaux X (Buffer)
+  python scripts/kuro_replies.py --all           # brut : succès CI inclus
   python scripts/kuro_replies.py --json          # sortie machine
   python scripts/kuro_replies.py --write         # outputs/replies_queue.json
   python scripts/kuro_replies.py --strict        # exit 1 si retard
@@ -15,6 +17,9 @@ Sources lues :
   - outputs/replies_inbox.json (optionnel) : DMs / mails / LinkedIn collectés
     à la main, au format [{"source","url","title","received_at"}].
   - `gh api notifications` uniquement avec --gh (réseau opt-in, R123).
+  - interactions Buffer sous nos posts X uniquement avec --x : le plan X Free
+    interdit la lecture des réponses (v1.1 403, v2 402), Buffer ne donne que
+    le nombre de commentaires -> signal "à lire dans l'appli X", pas le texte.
 
 Lecture seule : aucun post, aucune réponse envoyée automatiquement.
 """
@@ -23,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -36,6 +42,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TRACKER = ROOT / "docs" / "tracking" / "acquisition_tracker.md"
 INBOX = ROOT / "outputs" / "replies_inbox.json"
 QUEUE = ROOT / "outputs" / "replies_queue.json"
+X_POSTED = ROOT / "outputs" / "x_posted.json"
 HORIZON_HOURS = 24
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -163,7 +170,14 @@ def _run_gh():
     return json.loads(proc.stdout or "[]")
 
 
-def fetch_github_notifications(runner=None) -> list[dict]:
+def is_noise(item: dict) -> bool:
+    """Succès CI = bruit. Un échec reste actionnable (et un mention, bien sûr)."""
+    if (item.get("reason") or "") != "ci_activity":
+        return False
+    return "failed" not in (item.get("title") or "").lower()
+
+
+def fetch_github_notifications(runner=None, include_noise: bool = False) -> list[dict]:
     """Notifications non lues. Panne gh = liste vide + avertissement."""
     try:
         payload = (runner or _run_gh)()
@@ -172,7 +186,8 @@ def fetch_github_notifications(runner=None) -> list[dict]:
         return []
     if not isinstance(payload, list):
         return []
-    return [normalize_notification(n) for n in payload if n.get("unread", True)]
+    items = [normalize_notification(n) for n in payload if n.get("unread", True)]
+    return items if include_noise else [i for i in items if not is_noise(i)]
 
 
 def load_tracker(path: Path) -> dict[str, list]:
@@ -216,6 +231,59 @@ def load_inbox(path: Path) -> list[dict]:
     return [normalize_inbox_item(i) for i in data if isinstance(i, dict)]
 
 
+def x_interactions(state_path: Path | None = None, metrics_fn=None,
+                   api_key: str | None = None, limit: int = 8) -> list[dict]:
+    """Compteur de commentaires X via Buffer (signal, pas texte).
+
+    Plan X Free : lecture des réponses impossible (403 v1.1, 402 v2).
+    Buffer expose `comments` mais pas le corps : compteur > 0 = "ouvrir
+    l'appli X et répondre sous 24 h". Best-effort, jamais d'exception.
+    """
+    try:
+        state = json.loads(Path(state_path or X_POSTED).read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    key = api_key if api_key is not None else os.environ.get("BUFFER_API_KEY", "")
+    if not key:
+        return []
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import buffer_post
+        get_metrics = metrics_fn or buffer_post.get_post_metrics
+    except Exception:
+        return []
+    entries = state.get("hub") or []
+    if not isinstance(entries, list):
+        return []
+    items = []
+    for entry in reversed([e for e in entries if isinstance(e, dict)][-limit:]):
+        pid = entry.get("id") or ""
+        if not pid:
+            continue
+        try:
+            metrics = get_metrics(pid, key)
+        except Exception:
+            continue
+        try:
+            comments = float((metrics or {}).get("comments"))
+        except (TypeError, ValueError):
+            continue
+        if comments <= 0:
+            continue
+        projet = entry.get("projet", "?")
+        items.append({
+            "source": "x",
+            "repo": projet,
+            "number": "",
+            "title": f"{projet} : {comments:g} commentaire(s) sous le post X (à lire dans l'appli)",
+            "url": f"https://twitter.com/i/web/status/{pid}",
+            "reason": "commentaires",
+            "priority": "haute",
+            "updated_at": entry.get("date", ""),
+        })
+    return items
+
+
 def render_text(late: list[dict], due: list[dict], unverified: list[dict],
                 collabs: list[dict], followups: list[dict]) -> str:
     lines = ["File de réponses (R96 / R107 / R119 / R121)"]
@@ -252,6 +320,10 @@ def render_text(late: list[dict], due: list[dict], unverified: list[dict],
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="File de réponses (lecture seule).")
     parser.add_argument("--gh", action="store_true", help="interroger gh api notifications")
+    parser.add_argument("--x", action="store_true",
+                        help="compteur de commentaires X (Buffer) -> à lire dans l'appli")
+    parser.add_argument("--all", action="store_true",
+                        help="inclure les notifications brutes (succès CI inclus)")
     parser.add_argument("--json", action="store_true", help="sortie JSON")
     parser.add_argument("--write", action="store_true", help="écrire outputs/replies_queue.json")
     parser.add_argument("--strict", action="store_true", help="exit 1 si réponse en retard")
@@ -272,7 +344,9 @@ def main(argv: list[str] | None = None) -> int:
 
     items = load_inbox(inbox)
     if args.gh:
-        items += fetch_github_notifications()
+        items += fetch_github_notifications(include_noise=args.all)
+    if args.x:
+        items += x_interactions()
 
     now = parse_ts(args.now) if args.now else datetime.now(timezone.utc)
     late, due = classify(items, now, args.horizon_hours)
