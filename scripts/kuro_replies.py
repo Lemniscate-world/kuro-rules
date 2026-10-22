@@ -163,7 +163,7 @@ def classify(items: list[dict], now: datetime | None = None,
 def _run_gh():
     proc = subprocess.run(
         ["gh", "api", "notifications?per_page=50"],
-        capture_output=True, text=True, timeout=30,
+        capture_output=True, text=True, timeout=60,
         encoding="utf-8", errors="replace",
     )
     if proc.returncode != 0:
@@ -179,12 +179,21 @@ def is_noise(item: dict) -> bool:
 
 
 def fetch_github_notifications(runner=None, include_noise: bool = False) -> list[dict]:
-    """Notifications non lues. Panne gh = liste vide + avertissement."""
-    try:
-        payload = (runner or _run_gh)()
-    except Exception as exc:
-        print(f"[WARN] gh indisponible : {exc}", file=sys.stderr)
-        return []
+    """Notifications non lues. Panne gh = liste vide + avertissement.
+
+    2 tentatives : le run planifié de 09:00 a déjà observé un timeout réseau
+    transitoire sur `gh` — une reprise suffit à éviter une file vide fausse.
+    """
+    get = runner or _run_gh
+    for attempt in (1, 2):
+        try:
+            payload = get()
+            break
+        except Exception as exc:
+            if attempt == 1:
+                continue
+            print(f"[WARN] gh indisponible : {exc}", file=sys.stderr)
+            return []
     if not isinstance(payload, list):
         return []
     items = [normalize_notification(n) for n in payload if n.get("unread", True)]

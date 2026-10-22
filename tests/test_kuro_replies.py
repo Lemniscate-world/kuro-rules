@@ -139,6 +139,21 @@ def test_fetch_gh_panne_donne_liste_vide(capsys):
     assert "gh indisponible" in capsys.readouterr().err
 
 
+def test_gh_reprise_apres_timeout_transitoire(capsys):
+    calls = {"n": 0}
+
+    def flaky():
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("timeout")
+
+        return []
+
+    assert kr.fetch_github_notifications(runner=flaky) == []
+    assert calls["n"] == 2  # 1 timeout + 1 reprise, sans alerte
+    assert "gh indisponible" not in capsys.readouterr().err
+
+
 def test_notifications_ci_succes_filtrees():
     def notif(reason, title, unread=True, url=""):
         return {"reason": reason, "unread": unread, "updated_at": "2026-10-22T22:00:00Z",

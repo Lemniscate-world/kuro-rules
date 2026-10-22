@@ -12,7 +12,7 @@
 # Quotidien 20:00: run_daily.ps1 (X : hub + annexe Helium, R94/R120)
 # Quotidien 12:00: kuro_db_backup.ps1
 # Quotidien 08:00: run-cowork-pick.ps1 (Oracle Discord)
-# Quotidien 09:00: kuro_replies.py --gh --write (file de réponses R96/R121)
+# Quotidien 09:00: kuro_replies.py --gh --x --write (file R96/R121 + signaux X)
 # Toutes 5 min   : kuro_replica_push.py (RPO <= 10 min)
 # Usage (tache utilisateur, admin non requis) :
 #   powershell -ExecutionPolicy Bypass -File scripts\Install-KuroScheduledTask.ps1
@@ -100,7 +100,7 @@ $Defs = @(
   @{ N = "KuroXDaily"; TR = (Write-PsLauncher "KuroXDaily" $RunDaily (Join-Path $Root "outputs\x-daily.log")); SC = "DAILY"; At = "20:00" },
   @{ N = "KuroDbBackup"; TR = (Write-PsLauncher "KuroDbBackup" $DbBackup ""); SC = "DAILY"; At = "12:00" },
   @{ N = "KuroOracle"; TR = (Write-PsLauncher "KuroOracle" $CoworkPick ""); SC = "DAILY"; At = "08:00" },
-  @{ N = "KuroReplies"; TR = (Write-PyLauncher "KuroReplies" $Replies "--gh --write" (Join-Path $Logs "kuro-replies.log")); SC = "DAILY"; At = "09:00" },
+  @{ N = "KuroReplies"; TR = (Write-PyLauncher "KuroReplies" $Replies "--gh --x --write" (Join-Path $Logs "kuro-replies.log")); SC = "DAILY"; At = "09:00" },
   @{ N = "KuroReplicaPush"; TR = (Write-PyLauncher "KuroReplicaPush" $Replica "" $ReplicaLog); SC = "MINUTE"; At = "00:00"; Mo = "5" }
 )
 foreach ($d in $Defs) {

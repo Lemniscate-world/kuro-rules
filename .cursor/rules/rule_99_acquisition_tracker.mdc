@@ -50,8 +50,12 @@ Ajouter dans "6. Leçons apprises" ce qui a marché ou non.
 
 ## Revue quotidienne
 
-`python scripts/kuro_replies.py --gh` liste les réponses en retard (> 24 h),
-les commentaires GitHub à visibilité non confirmée et les collabs `nouveau`.
+`python scripts/kuro_replies.py --gh --x` liste les réponses en retard (> 24 h),
+les relances ouvertes, les commentaires GitHub à visibilité non confirmée, les
+collabs `nouveau` et les compteurs de commentaires X sous nos posts. Le plan X
+Free ne lit pas les réponses (403 v1.1 / 402 v2) : Buffer ne donne que le
+compteur -> signal « à lire dans l'appli », pas le texte. Les succès CI sont
+filtrés par défaut (`--all` pour les inclure).
 `--json --write` produit `outputs/replies_queue.json` ; `--strict` sort en 1
 si quelque chose est en retard (utilisable en cron). Tâche planifiée
 `KuroReplies` : quotidien 09:00 (`--gh --write`).
