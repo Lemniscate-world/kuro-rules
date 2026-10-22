@@ -226,7 +226,10 @@ def test_sec_marketing_affiche_age_sources(tmp_path, monkeypatch):
         json.dumps({"entries": [{"type": "interview", "date": "2026-10-05",
                                  "insight": "x", "next_step": "y"}]}),
         encoding="utf-8")
-    old_ts = __import__("time").time() - 17 * 86400
+    # Marge de 60 s : sans elle, l'assertion tombe exactement sur la frontiere
+    # de 17 j (int(age // 86400)) et l'arrondi sub-second du mtime bascule le
+    # rendu en "16j" -> Quality workflow flaky (echec du 2026-10-22T22:12Z).
+    old_ts = __import__("time").time() - 17 * 86400 - 60
     os.utime(root / "pipeline.local.json", (old_ts, old_ts))
     (root / "LAUNCH_POSTS.md").write_text("## Post 1\n- [ ] publier\n",
                                           encoding="utf-8")
