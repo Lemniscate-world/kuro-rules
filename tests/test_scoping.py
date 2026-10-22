@@ -2,7 +2,11 @@
 
 from pathlib import Path
 
-import yaml
+import pytest
+
+# Garde R116 : sans PyYAML, skip plutôt que collection-error (exit 2 bloquerait
+# tout le job kuro.yml, publication du portfolio comprise). Cf. test_packaging.py.
+yaml = pytest.importorskip("yaml")
 
 REPO = Path(__file__).resolve().parent.parent
 

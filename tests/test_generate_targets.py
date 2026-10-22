@@ -6,7 +6,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-import yaml
+import pytest
+
+# Garde R116 : sans PyYAML, ce module doit être SKIPÉ, jamais collection-error.
+# Une erreur de collection interrompt pytest (exit 2) et fait échouer TOUT le job
+# kuro.yml — publication du portfolio comprise. Convention : test_packaging.py.
+yaml = pytest.importorskip("yaml")
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "scripts"))

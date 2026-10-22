@@ -5,7 +5,11 @@
 # 4. Refresh FLEET_VERSIONS.md snapshot
 # Logs to logs/fleet-sync.log. Register with Install-KuroScheduledTask.ps1.
 $ErrorActionPreference = "Stop"
-$RULES_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+# BUG 17/10 (et chaque samedi depuis) : $MyInvocation.MyCommand.Path pointe vers
+# CE fichier, donc Split-Path -Parent = <racine>\scripts et non <racine>. Toutes
+# les commandes devaient alors chercher <racine>\scripts\scripts\generate_targets.py
+# -> ERRNO 2 des le pas 1, les 3 suivants jamais executes.
+$RULES_DIR = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $LOG = Join-Path $RULES_DIR "logs\fleet-sync.log"
 $stamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 

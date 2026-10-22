@@ -2,7 +2,13 @@ name: Kuro
 
 on:
   schedule:
-    - cron: "0 5 * * *"    # cycle complet quotidien (vérité + publication)
+    # FIX 22/10 : "0 5 * * *" tombait pile sur le "*/30" (le sentinel passe à :00
+    # et :30). GitHub fusionne les crons dus au même instant en UN SEUL run et
+    # n'expose qu'UNE chaîne dans github.event.schedule — celle du sentinel. Résultat
+    # : KURO_FULL=false, toutes les étapes de publication sautées, et le cycle
+    # complet n'a plus jamais tourné (index.html figé au 04/10, Epingle figé au 05/10).
+    # 04h23 UTC ne coïncide avec aucun :00/:30 → run quotidien dédié et distinct.
+    - cron: "23 4 * * *"    # cycle complet quotidien (vérité + publication)
     - cron: "*/30 * * * *" # sentinelle rapide 24/7 (scan CI seul)
   push:
     paths:
@@ -21,7 +27,9 @@ env:
   KURO_RULES_DIR: ${{ github.workspace }}/kuro-rules
   LEMNISCATE_DIR: ${{ github.workspace }}/lemniscate-world
   DOCS_DIR: /home/runner/Documents
-  KURO_FULL: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.schedule == '0 5 * * *' }}
+  # Gate robuste : plein cycle pour tout run qui N'EST PAS la sentinelle. Une
+  # égalité de chaîne sur le cron quotidien était trop fragile (fusion de crons).
+  KURO_FULL: ${{ github.event_name != 'schedule' || github.event.schedule != '*/30 * * * *' }}
 
 jobs:
   kuro:
@@ -49,7 +57,7 @@ jobs:
 
       - name: Tests (pytest)
         run: |
-          python -m pip install --only-binary :all: -q "pytest==8.4.2"
+          python -m pip install --only-binary :all: -q "pytest==8.4.2" "pyyaml==6.0.3"
           python -m pytest kuro-rules/tests -q
 
       - name: Clone repos into ~/Documents (source de vérité)
