@@ -32,6 +32,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -190,6 +191,24 @@ def fetch_github_notifications(runner=None, include_noise: bool = False) -> list
     return items if include_noise else [i for i in items if not is_noise(i)]
 
 
+def is_github_url(link: str) -> bool:
+    """Vrai si `link` pointe réellement vers github.com (CodeQL: py/incomplete-url-substring-sanitization).
+
+    `"github.com" in link` accepte `https://evil.tld/?next=github.com` : le host
+    n'est jamais vérifié. On compare donc `hostname` — même convention que
+    check_epingle_completeness._owner_from_remote. Sans schéma → faux (le champ
+    Lien du tracker contient toujours une URL complète).
+    """
+    url = (link or "").strip()
+    if "://" not in url:
+        return False
+    try:
+        host = urllib.parse.urlparse(url).hostname or ""
+    except ValueError:
+        return False
+    return host.lower() in ("github.com", "www.github.com")
+
+
 def load_tracker(path: Path) -> dict[str, list]:
     """Signaux du tracker : non prouvés, relances ouvertes, collabs à traiter."""
     text = Path(path).read_text(encoding="utf-8")
@@ -198,7 +217,7 @@ def load_tracker(path: Path) -> dict[str, list]:
     for row in parse_table(sections.get(1, [])):
         link = row.get("Lien", "")
         result = row.get("Résultat", "").lower()
-        if "github.com" in link and ("non prouv" in result or "no activity" in result):
+        if is_github_url(link) and ("non prouv" in result or "no activity" in result):
             unverified.append({
                 "date": row.get("Date", ""),
                 "title": row.get("Titre / message (60 car)", ""),

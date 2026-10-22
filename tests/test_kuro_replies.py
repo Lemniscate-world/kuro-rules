@@ -87,6 +87,42 @@ def test_tracker_collecte_collabs_et_non_prouves(tmp_path):
     assert [c["Qui"] for c in signals["collabs"]] == ["Ana"]
 
 
+def test_is_github_url_rejette_sous_chaine():
+    """R116 + CodeQL py/incomplete-url-substring-sanitization.
+
+    `"github.com" in link` acceptait tout lien où la sous-chaîne apparaît
+    n'importe où (hôte non vérifié) : le champ Lien pilote l'action "relancer
+    le collab", donc un hôte usurpé aurait suffi à faire entrer un lien
+    non-GitHub dans la file de réponses.
+    """
+    assert kr.is_github_url("https://github.com/o/r/issues/1")
+    assert kr.is_github_url("https://www.github.com/o/r")
+    assert not kr.is_github_url("https://evil.tld/?next=github.com")
+    assert not kr.is_github_url("https://github.com.evil.tld/x")
+    assert not kr.is_github_url("https://gitlab.com/x?github.com")
+    assert not kr.is_github_url("github.com/o/r")   # pas de schéma -> hôte invérifiable
+    assert not kr.is_github_url("")
+    assert not kr.is_github_url("not a url ://")
+
+
+def test_tracker_lien_usurpe_ne_passe_pas_en_non_prouve(tmp_path):
+    """Même filtre, mais de bout en bout dans load_tracker."""
+    tracker = tmp_path / "tracker.md"
+    tracker.write_text(
+        "## 1. Posts publiés\n\n"
+        "| Date | Plateforme | Titre / message (60 car) | Lien | Résultat |\n"
+        "|---|---|---|---|---|\n"
+        "| 2026-10-28 | GitHub | fake | https://evil.tld/?next=github.com | "
+        "🔴 non prouvé — No activity |\n"
+        "| 2026-10-27 | GitHub | real | https://github.com/o/r/issues/9 | "
+        "🔴 non prouvé — No activity |\n",
+        encoding="utf-8",
+    )
+    signals = kr.load_tracker(tracker)
+    urls = [s["url"] for s in signals["unverified"]]
+    assert urls == ["https://github.com/o/r/issues/9"]
+
+
 def test_inbox_absente_ou_invalide(tmp_path, capsys):
     assert kr.load_inbox(tmp_path / "absent.json") == []
     bad = tmp_path / "bad.json"
