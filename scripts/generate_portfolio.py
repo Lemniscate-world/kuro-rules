@@ -21,7 +21,10 @@ import sys
 from datetime import date
 from pathlib import Path
 
-LOCAL_EPINGLE = Path.home() / "Documents" / "kuro-rules" / "Epingle_Projets.md"
+# Epingle vit DANS ce repo (kuro-rules) : on la resout relativement au script
+# (racine du repo) plutot que ~/Documents/kuro-rules — meme comportement en local,
+# et correct en CI ou le checkout est $GITHUB_WORKSPACE/kuro-rules.
+LOCAL_EPINGLE = Path(__file__).resolve().parent.parent / "Epingle_Projets.md"
 LOCAL_OUTPUT = Path.home() / "Documents" / "Lemniscate-world" / "index.html"
 LOCAL_README = Path.home() / "Documents" / "Lemniscate-world" / "README.md"
 # Truth enrichment: if local repo exists, append last commit to description
