@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -318,8 +319,11 @@ def ingest_metrics(state_path=None, metrics_path=None, api_key=None):
     {} sans casser run_daily. Buffer rafraichit les stats ~24h apres
     publication — un post recemment envoye remonte souvent un dict vide.
     """
-    state_path = Path(state_path or DELIVERY)
-    metrics_path = Path(metrics_path or METRICS)
+    # S2083 : state_path / metrics_path peuvent venir d'un appelant qui les a
+    # lus dans un fichier ; on les confine au depot (ou au temp des tests).
+    _roots = [KURORULES, Path(tempfile.gettempdir()).resolve()]
+    state_path = confine_arg(state_path or DELIVERY, _roots)
+    metrics_path = confine_arg(metrics_path or METRICS, _roots)
     try:
         state = json.loads(state_path.read_text(encoding="utf-8"))
     except Exception:

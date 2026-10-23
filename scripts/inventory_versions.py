@@ -23,6 +23,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from kuro_paths import confine_arg
+
 REPO = Path(__file__).resolve().parent.parent
 
 
@@ -42,7 +44,10 @@ def static_pyproject_version(text: str) -> str:
 
 def git_tag_count(repo: Path) -> str:
     try:
-        r = subprocess.run(["git", "-C", str(repo), "tag", "--list", "v*"],
+        # cwd= au lieu de "-C <chemin>" : la valeur ne figure plus dans argv,
+        # donc aucun injection d'argument possible (S6350/S8705).
+        r = subprocess.run(["git", "tag", "--list", "v*"],
+                           cwd=str(repo),
                            capture_output=True, text=True, timeout=30)
     except Exception:
         return "?"
@@ -53,7 +58,12 @@ def git_tag_count(repo: Path) -> str:
 
 
 def audit_one(docs: Path, name: str) -> dict:
-    d = docs / name
+    # name vient de projects.txt (fichier externe) : confine a docs avant
+    # toute utilisation, y compris comme argument git (S6350/S8705) et comme
+    # contenu du rapport (S2083). Nom hors docs -> repli sur le basename.
+    d = confine_arg(name, docs, default=Path(name).name)
+    row = {"project": d.name, "present": "no", "version": "-",
+           "source": "-", "changelog": "-", "release_wf": "-", "vtags": "-"}
     row = {"project": name, "present": "no", "version": "-",
            "source": "-", "changelog": "-", "release_wf": "-", "vtags": "-"}
     if not d.is_dir():
@@ -90,7 +100,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--csv", default="")
     ap.add_argument("--markdown", default="")
     args = ap.parse_args(argv)
-    docs = Path(args.docs)
+    # --docs pointe vers ~/Documents (hors depot) : base = home.
+    docs = confine_arg(args.docs, Path.home())
     rows = [audit_one(docs, n) for n in load_project_names(REPO / "projects.txt")]
     present = [r for r in rows if r["present"] == "yes"]
     nover = [r for r in present if r["version"] == "-"]
@@ -108,7 +119,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{r['project']} | {r['version']} | {r['source']} | "
                   f"{r['changelog']} | {r['release_wf']} | {r['vtags']}")
     if args.csv:
-        with open(args.csv, "w", newline="", encoding="utf-8") as f:
+        # Sorties confinées au depot (S8707) ; usage interne = chemins du repo.
+        csv_path = confine_arg(args.csv, REPO)
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
             w.writeheader()
             w.writerows(rows)
@@ -135,7 +148,8 @@ def main(argv: list[str] | None = None) -> int:
                 lines.append(f"| {r['project']} | {r['version']} | {r['source']} | "
                              f"{r['changelog']} | {r['release_wf']} | {r['vtags']} |")
         lines.append("")
-        Path(args.markdown).write_text("\n".join(lines), encoding="utf-8", newline="\n")
+        md_path = confine_arg(args.markdown, REPO)
+        md_path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
         print(f"wrote {args.markdown}")
     return 0
 
