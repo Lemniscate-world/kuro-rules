@@ -1,0 +1,64 @@
+name: Rules Spec
+
+# SPEC.md + multi-format generation + bench (chantiers 1-5).
+# Bloquant : drift générateur, spec, bench, tests nouveaux.
+on:
+  push:
+    branches: [main, master, develop, 'feat/*', 'fix/*', 'infra/*', 'sec/*', 'docs/*']
+    paths:
+      - 'rules/**'
+      - 'scripts/generate_targets.py'
+      - 'scripts/check_rule_spec.py'
+      - 'scripts/bench_rules.py'
+      - 'tests/test_generate_targets.py'
+      - 'tests/test_rule_spec.py'
+      - 'tests/test_scoping.py'
+      - 'tests/test_bench_rules.py'
+      - '.github/workflows/kuro-rules-spec.yml'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rules-spec-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spec:
+    name: Generate check + spec + bench + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install pyyaml + pytest
+        # --only-binary :all: (S8541) + versions epinglees (S8544), meme
+        # convention que kuro.yml.
+        run: python -m pip install --only-binary :all: -q "pytest==8.4.2" "pyyaml==6.0.3"
+
+      - name: Generate targets drift check (bloquant)
+        run: python scripts/generate_targets.py --check
+
+      - name: SPEC validation (bloquant)
+        run: python scripts/check_rule_spec.py
+
+      - name: Mini-benchmark 10/10 (bloquant)
+        run: python scripts/bench_rules.py
+
+      - name: New tests (bloquant)
+        run: >-
+          python -m pytest tests/test_generate_targets.py
+          tests/test_rule_spec.py tests/test_scoping.py
+          tests/test_bench_rules.py -q

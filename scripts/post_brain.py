@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -35,6 +36,69 @@ HISTORY = OUTPUTS / "post_history.jsonl"
 DELIVERY = OUTPUTS / "post_delivery.json"
 METRICS = OUTPUTS / "post_metrics.json"
 OVERRIDES = KURORULES / "config" / "posting_overrides.json"
+XLOG = OUTPUTS / "x_posts_log.md"
+
+
+def global_context(max_posts=5, max_learn=4):
+    """Contexte global pour le raisonnement LLM. Pur (lecture seule).
+
+    Rassemble : derniers posts publies (anti-redondance), constats `learn`
+    (memoire strategies) et termes museles (overrides) — pour que la critique
+    ne raisonne jamais sur un draft isole.
+    """
+    ctx = {"recent": [], "learn": [], "muted": {}}
+    try:
+        lines = XLOG.read_text(encoding="utf-8", errors="replace").splitlines()
+        for ln in reversed(lines[-40:]):
+            # "| date | compte | projet | texte | id |" -> cellule 0 vide (pipe de tete)
+            parts = [p.strip() for p in ln.split("|")]
+            if parts and parts[0] == "":
+                parts = parts[1:]
+            if len(parts) >= 4 and parts[0].startswith("20"):
+                ctx["recent"].append({"date": parts[0][:10], "compte": parts[1],
+                                      "projet": parts[2], "texte": parts[3][:140]})
+                if len(ctx["recent"]) >= max_posts:
+                    break
+    except Exception:
+        pass
+    try:
+        for line in learn()[:max_learn]:
+            ctx["learn"].append(line)
+    except Exception:
+        pass
+    try:
+        for proj, data in load_overrides().items():
+            terms = (data or {}).get("terms") or []
+            if terms:
+                ctx["muted"][proj] = list(terms)[:10]
+    except Exception:
+        pass
+    return ctx
+
+
+def context_block(ctx, lang="fr"):
+    """Formate le contexte global en bloc prompt (borne, sans secrets)."""
+    lines = []
+    if ctx.get("recent"):
+        lines.append("Posts recents (ne pas repeter le meme angle) :"
+                     if (lang or "fr").lower() != "en"
+                     else "Recent posts (do not repeat the same angle):")
+        for r in ctx["recent"]:
+            lines.append(f"- [{r['date']}/{r['compte']}/{r['projet']}] {r['texte']}")
+    if ctx.get("learn"):
+        lines.append("Lecons tirees des reviews passees :"
+                     if (lang or "fr").lower() != "en"
+                     else "Lessons from past reviews:")
+        for n in ctx["learn"]:
+            lines.append(f"- {n[:160]}")
+    muted = ctx.get("muted") or {}
+    if muted:
+        flat = sorted({t for terms in muted.values() for t in terms})[:12]
+        if flat:
+            lines.append("Termes museles (jamais utilises) : " + ", ".join(flat)
+                         if (lang or "fr").lower() != "en"
+                         else "Muted terms (never use): " + ", ".join(flat))
+    return "\n".join(lines)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kuro_paths import confine_arg  # noqa: E402
@@ -94,13 +158,28 @@ def deterministic_score(project, text, themes=(), lang="fr"):
     return max(0, min(100, score)), issues
 
 
-def llm_critique(project, text, lang="fr"):
-    """Critique LLM best-effort. None si aucun moteur dispo. Jamais de crash."""
+def llm_critique(project, text, lang="fr", ctx=None):
+    """Critique LLM best-effort. None si aucun moteur dispo. Jamais de crash.
+
+    ctx : dict de global_context() (posts recents + lecons + termes museles).
+    Le LLM raisonne sur le plan global, pas sur un draft isole.
+    """
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from kuro_llm import ask
     except Exception:
         return None
+    # Contexte global : le LLM voit les derniers posts + lecons + museles.
+    # Construit une seule fois par review (lecture locale, zero reseau).
+    try:
+        block = context_block(ctx if ctx is not None else global_context(),
+                              lang=lang)
+    except Exception:
+        block = ""
+    if block:
+        block = ("\nContexte global du plan X (a respecter) :\n" + block
+                 if (lang or "fr").lower() != "en"
+                 else "\nGlobal X-plan context (must respect):\n" + block)
     if (lang or "fr").lower() == "en":
         prompt = (
             "You are an editor for tech X posts (280 chars max). "
@@ -109,7 +188,7 @@ def llm_critique(project, text, lang="fr"):
             '{"score": <0-100>, "issues": ["..."], "rewrite": "<improved version>" or null}. '
             "Criteria: clarity for non-experts, real informative value, "
             "useless jargon, risk of leaking internal details. "
-            "The rewrite keeps hashtags and metric, <=280 chars.")
+            "The rewrite keeps hashtags and metric, <=280 chars." + block)
         system = "You are a demanding editor. Strict JSON only."
     else:
         prompt = (
@@ -119,7 +198,7 @@ def llm_critique(project, text, lang="fr"):
             '{"score": <0-100>, "issues": ["..."], "rewrite": "<version améliorée>" ou null}. '
             "Critères : clarté pour un non-initié, valeur informative réelle, "
             "jargon inutile, risque de révéler des détails internes. "
-            "Le rewrite garde hashtags et métrique, ≤280 car.")
+            "Le rewrite garde hashtags et métrique, ≤280 car." + block)
         system = "Tu es un éditeur exigeant. JSON strict uniquement."
     try:
         raw = ask(prompt, system=system)
@@ -137,11 +216,12 @@ def llm_critique(project, text, lang="fr"):
         return None
 
 
-def review_draft(project, text, themes=(), lang="fr"):
+def review_draft(project, text, themes=(), lang="fr", ctx=None):
+    """Note un draft. ctx partage (batch) : 1 seul global_context() par jour."""
     det, issues = deterministic_score(project, text, themes)
     out = {"date": date.today().isoformat(), "projet": project,
            "score_det": det, "issues": issues, "score_llm": None, "rewrite": None}
-    crit = llm_critique(project, text, lang=lang)
+    crit = llm_critique(project, text, lang=lang, ctx=ctx)
     if crit:
         out["score_llm"] = max(0, min(100, crit["score"]))
         out["issues"] = list(dict.fromkeys(issues + crit["issues"]))[:8]
@@ -232,7 +312,59 @@ def ingest_delivery(state_path=None, out_path=None):
     return out
 
 
-def learn(history_path=None):
+def ingest_metrics(state_path=None, metrics_path=None, api_key=None):
+    """Boucle de retour : engagement reel des posts publies -> METRICS.
+
+    Best-effort : sans cle Buffer, sans reseau ou sans post 'sent', retourne
+    {} sans casser run_daily. Buffer rafraichit les stats ~24h apres
+    publication — un post recemment envoye remonte souvent un dict vide.
+    """
+    # S2083 : state_path / metrics_path peuvent venir d'un appelant qui les a
+    # lus dans un fichier ; on les confine au depot (ou au temp des tests).
+    _roots = [KURORULES, Path(tempfile.gettempdir()).resolve()]
+    state_path = confine_arg(state_path or DELIVERY, _roots)
+    metrics_path = confine_arg(metrics_path or METRICS, _roots)
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    key = api_key or os.environ.get("BUFFER_API_KEY", "")
+    if not key or not state:
+        return {}
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import buffer_post
+    except Exception:
+        return {}
+    out = {}
+    try:
+        out = json.loads(metrics_path.read_text(encoding="utf-8"))
+        if not isinstance(out, dict):
+            out = {}
+    except Exception:
+        out = {}
+    sent = [pid for pid, meta in state.items()
+            if isinstance(meta, dict) and meta.get("statut") == "sent"]
+    # Seuls les 8 derniers sent : Buffer rafraichit ~24h/jour, inutile de
+    # re-interroger tout l'historique a chaque run (merge conserve le reste).
+    for pid in sent[-8:]:
+        try:
+            m = buffer_post.get_post_metrics(pid, key)
+        except Exception:
+            continue
+        if m:
+            out[pid] = {"projet": state[pid].get("projet", "?"), "metrics": m}
+    if out:
+        try:
+            metrics_path.parent.mkdir(parents=True, exist_ok=True)
+            metrics_path.write_text(
+                json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+    return out
+
+
+def learn(history_path=None, metrics_path=None):
     """Agrege l'historique -> constats chiffres + propositions. Auto : rien de destructif."""
     notes = []
     rows = []
@@ -243,7 +375,14 @@ def learn(history_path=None):
                 rows.append(json.loads(line))
     except Exception:
         pass
-    if not rows:
+    try:
+        metrics = json.loads(Path(metrics_path or METRICS)
+                              .read_text(encoding="utf-8"))
+        if not isinstance(metrics, dict):
+            metrics = {}
+    except Exception:
+        metrics = {}
+    if not rows and not metrics:
         return ["pas encore d'historique : lance `review` sur les drafts du jour."]
     by_proj = {}
     for r in rows:
@@ -259,8 +398,77 @@ def learn(history_path=None):
             all_issues[i] = all_issues.get(i, 0) + 1
     for issue, n in sorted(all_issues.items(), key=lambda kv: -kv[1])[:5]:
         notes.append("motif recurrent x%d : %s" % (n, issue))
+    # Engagement reel (ingest_metrics) : la verite terrain vs score LLM proxy.
+    eng_by_proj = {}
+    for meta in metrics.values():
+        if not isinstance(meta, dict):
+            continue
+        m = meta.get("metrics") or {}
+        eng = sum(float(m.get(k) or 0) for k in ("reactions", "comments", "reposts"))
+        eng_by_proj.setdefault(meta.get("projet", "?"), []).append(eng)
+    if eng_by_proj:
+        total_n = sum(len(v) for v in eng_by_proj.values())
+        avg_all = sum(sum(v) for v in eng_by_proj.values()) / total_n
+        best = max(eng_by_proj.items(), key=lambda kv: sum(kv[1]) / len(kv[1]))
+        notes.append("engagement reel moyen %.1f sur %d posts publies" % (avg_all, total_n))
+        notes.append("meilleur terrain : %s (moy %.1f reactions+comms+reposts)"
+                     % (best[0], sum(best[1]) / len(best[1])))
     notes.append("proposition : `flag --project <P> --term <mot>` pour museler un terme.")
     return notes
+
+
+def batch_review(pattern="x_post_*.md", rewrite=False, project_filter=""):
+    """Revoit TOUS les drafts du jour avec UN contexte global partage.
+
+    C'est le « raisonnement global » : chaque draft est note en voyant les
+    autres (+ recents + lecons + museles). Retourne (notes, pires).
+    Jamais de crash : un draft illisible = SKIP, pas d'arret.
+    """
+    try:
+        files = sorted(OUTPUTS.glob(pattern))
+    except Exception:
+        return [], []
+    today = date.today().isoformat()
+    # Drafts du jour d'abord (hub + annexes), sinon les plus recents.
+    day = [p for p in files if today in p.name] or sorted(
+        files, key=lambda p: p.stat().st_mtime)[-8:]
+    ctx = global_context()
+    notes, pires = [], []
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import gen_x_posts as gx
+    for draft in day:
+        try:
+            text = draft.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+        # x_post_2026-10-20-helium -> helium ; x_post_2026-10-15-neuraldbg -> neuraldbg
+        proj = draft.stem.replace("x_post_", "", 1)
+        proj = re.sub(r"^20\d{2}-\d{2}-\d{2}-?", "", proj).strip("-_")
+        proj = proj or "hub"
+        if project_filter and proj.lower() != project_filter.lower():
+            continue
+        lang = "en" if proj.lower() in ("hub", "") else "fr"
+        rep = review_draft(proj, text, lang=lang, ctx=ctx)
+        lint = gx.lint_post(proj, text)
+        if lint:
+            rep["issues"] = list(dict.fromkeys(
+                rep["issues"] + ["lint: " + ", ".join(lint)]))[:8]
+        rep["draft"] = draft.name
+        append_history(rep, path=HISTORY)
+        notes.append(rep)
+        if rep["score"] < 55 or lint:
+            pires.append(rep)
+        if rewrite and rep.get("rewrite"):
+            new = (rep["rewrite"] or "").strip()
+            if new and len(new) <= 280 and not gx.lint_post(proj, new):
+                det2, _ = deterministic_score(proj, new)
+                if det2 >= rep["score_det"]:
+                    try:
+                        draft.write_text(new + "\n", encoding="utf-8")
+                        rep["rewritten"] = True
+                    except Exception:
+                        pass
+    return notes, pires
 
 
 def main(argv=None):
@@ -273,10 +481,19 @@ def main(argv=None):
     p_rev.add_argument("--text", default="")
     p_rev.add_argument("--rewrite", action="store_true",
                        help="Ecrit la version LLM si meilleure ET lint OK.")
+    p_all = sub.add_parser("review-all",
+                           help="Revue globale : tous les drafts du jour, contexte partage.")
+    p_all.add_argument("--pattern", default="x_post_*.md")
+    p_all.add_argument("--project", default="",
+                       help="Restreindre a un projet (defaut : tous).")
+    p_all.add_argument("--rewrite", action="store_true",
+                       help="Applique les rewrites LLM valides (lint + score).")
     p_fl = sub.add_parser("flag")
     p_fl.add_argument("--project", required=True)
     p_fl.add_argument("--term", required=True)
     sub.add_parser("ingest")
+    sub.add_parser("ingest-metrics",
+                   help="Engagement reel (Buffer metrics) -> post_metrics.json.")
     sub.add_parser("learn")
     args = ap.parse_args(argv)
 
@@ -298,9 +515,31 @@ def main(argv=None):
         print(f"  diffusion: {counts}")
         return 0
 
+    if args.cmd == "ingest-metrics":
+        out = ingest_metrics()
+        n_m = sum(len(v.get("metrics", {})) for v in out.values())
+        print(f"  metrics: {len(out)} posts sent avec stats, {n_m} points de mesure.")
+        return 0
+
     if args.cmd == "learn":
         for line in learn():
             print(f"  - {line}")
+        return 0
+
+    if args.cmd == "review-all":
+        notes, pires = batch_review(pattern=args.pattern, rewrite=args.rewrite,
+                                    project_filter=args.project)
+        if not notes:
+            print("  [SKIP] aucun draft a revoir.")
+            return 0
+        avg = sum(r["score"] for r in notes) / len(notes)
+        print(f"  revue globale : {len(notes)} drafts, score moyen {avg:.0f}/100")
+        for r in sorted(notes, key=lambda x: x["score"])[:5]:
+            print(f"  - {r['draft']} : {r['score']}/100"
+                  + (" [REWRITE]" if r.get("rewritten") else ""))
+        if pires:
+            print(f"  !! {len(pires)} draft(s) faible(s) (< 55 ou lint) : "
+                  + ", ".join(r["draft"] for r in pires))
         return 0
 
     if args.cmd == "review":

@@ -40,8 +40,12 @@
 ## 2. Tout ce que fait OpenClaw (état live 2026-09-28)
 
 Serveur : OpenClaw 2026.9.6 stable, Node 24.21, systemd actif, gateway loopback :18789.
-Cerveau : deepseek-v4-pro (main), deepseek-flash (tâches routinières, ~10x moins cher).
+Cerveau : deepseek-v4-pro (main), deepseek-flash (tâches routinières). Réalité proxy 2026-10-09 : clé DeepSeek HS donc les 2 alias servent groq `gpt-oss-120b` (2 s/réponse testé) + 11 fallbacks derrière. Flash n'est donc PAS un modèle distinct moins cher.
 Clé Ollama cloud épuisée (402) : ne plus compter dessus sans crédits.
+Clé DeepSeek HS depuis 2026-10-09 (401 `Authentication Fails` sur `/user/balance`). Alias basculés sur groq, backup serveur `litellm-config.yaml.bak-20261009-deepseek-dead`. Restauration après rachat : recopier les 3 blocs depuis le `.bak` + `systemctl --user restart litellm-proxy`.
+2026-10-11 : têtes `deepseek-v4-pro` + `deepseek-flash` basculées groq→gemini/gemini-3.8-flash (groq 150-600s + `tool_use_failed` sur flash ; gemini vérifié 28s/9,5s). Backup retour : `~/.openclaw/litellm-config.yaml.bak-20261011-flash-gemini`.
+2026-10-11 (soir, pourquoi les fallbacks ne sauvaient rien) : ① Groq lent mais en streaming → pas d'erreur → pas de fallback (seul le timeout gateway 600s tranche). ② Erreur `tool_use_failed` (string) → crash du handler lui-même (`int()` ligne 1139/1181 `exceptions.py` litellm 1.104.0) → retry 8x même modèle au lieu de bascule. Fix : kuro-patch `try/except→503` sur les 2 sites (backup `exceptions.py.bak-20261011-kuro-patch`, test unitaire 5/5), preuve bout-en-bout = primaire bidon sur alias `deepseek-chat` → HTTP 200 servi par `kuro-groq` en 13ms. Garde-fous : `agents.defaults.compaction.model=deepseek/kuro-gemini` + `memoryFlush.forceFlushTranscriptBytes=1mb` (compteurs tokens sous-estimés 3x : 24k estimé vs 68k réel) ; compactage LLM vérifié 22k→5k. Fallbacks gateway non ajoutés : tout passe par le même proxy, le bon étage c'est lui.
+2026-10-12 (phases 1+2+3) : sonde `~/.openclaw/llm-health.py` + `llm-health.timer` (15 min, 3 alias + liveliness, alerte WhatsApp [sonde-llm] sur changement d'état + récupération ; PATH systemd exige chemin absolu openclaw). Jambes 13/13 : vivantes = groq (1,2s), cohere (1,8s), gemini (429 quota) ; mortes = deepseek 402, hf 402, pollinations 500 ; nvidia pend (timeout, reléguée fin de chaîne) ; or2/or3 périmées (404 → north-mini-code:free / gemma-4-31b-it:free, vérifiées 429 = ids OK) ; cloudflare/requesty renvoient 200 sans choices (inexploitables). Chaîne réordonnée : groq, cohere, gemini, deepseek, or1, or2, or3, hf, mistral, cloudflare, requesty, pollinations, nvidia. Découverte : Groq free = 8k TPM → les 68k tokens ne plantaient pas, ils RAMPAIENT (533s ≈ 7,5k/min). Secours hors proxy : providers `groq-direct` (petits prompts OK, 413 au-delà 8k TPM) + `cohere-direct` (session complète OK 8,5s) ; fallbacks gateway enregistrés dans cet ordre. Piste OpenRouter direct abandonnée (0 crédit + :free throttlés) ; profil fantôme gemini:manual supprimé. Non testé : déclenchement réel du fallback gateway (exigerait arrêt proxy planifié). Kimi-k3 (12/10 soir) : modèle vérifié existant côté NVIDIA, id correct, mais 102s puis timeout 170s sur micro-pong → inutilisable sauf dernier recours, reste dernier de chaîne.
 
 ### Agents
 | Agent | Modèle | Workspace | Rôle effectif |
@@ -53,8 +57,10 @@ Clé Ollama cloud épuisée (402) : ne plus compter dessus sans crédits.
 | Job | Horaire | Cible | Livraison |
 |---|---|---|---|
 | leads-radar-daily | 07:00 Europe/Paris | digest veille ML/quant (HN/Reddit/GitHub/arXiv) | WhatsApp opérateur (vérifié : delivered) |
+| prospects-daily | 08:00 lun-ven Europe/Paris | prospection 3 cibles + BROUILLONS seuls (envoi auto révoqué 2026-10-11, validation humaine obligatoire) — ÉTAPE 0 inbox IMAP obligatoire depuis 2026-10-08 | WhatsApp opérateur |
+| replies-watch | 12:00 + 18:00 7j/7 Europe/Paris (lun-ven avant 2026-10-11 → angle mort week-end : 2 replies manquées 10-11/10, Panos + stop Kristjan) | garde inbox : détecte les `Re:` non traités, statut + suivi auto (créé 2026-10-08 après incident 4 replies sans suivi 29/09→03/10) | WhatsApp opérateur si nouvelle reply, sinon NO_REPLY |
 | repos-refresh-monthly | le 1er, 08:00 | pull + commits/28j par repo, propose ajouts/retraits | WhatsApp opérateur |
-| heartbeat (main) | toutes les 30 min | présence/relances | en attente de route (pas de canal cible) |
+| heartbeat (main) | toutes les 30 min | présence/relances — réveille la session directe main, répond WhatsApp si relance utile sinon NO_REPLY/skip (skip auto si run en cours) | job système non désactivable via cron ; incident 2026-10-09 : contexte 72k + DeepSeek lent 8-10 min = salad multilingue spammé → fix = compactage session + alias vers groq. 2026-10-10 : 2 timeouts 600s côté gateway (proxy jamais touché, groq 1 s en direct) + 1 envoi WhatsApp post-timeout 09:03 → restart gateway, test pong OK 63 s. 2026-10-11 : session main 67k → stall 599s + 6x timeouts WhatsApp + salad multilingue (pattern 09/10) → truncate 200 lignes + têtes v4-pro/flash vers gemini (pong 28s/9,5s OK). `timeoutSeconds` volontairement inchangé (600s défaut). |
 | memory dreaming | 03:00 | consolidation mémoire | interne |
 
 ### Canaux
@@ -79,7 +85,9 @@ Exécution shell (exec), lecture/écriture fichiers, browser automation, web sea
 - Push Git sur branches `openclaw/*` + PR auto + **merge humain obligatoire** (jamais de push direct sur main/master).
 - Dépôt prioritaire : Helium (soft-launch + Show HN).
 
-### Niveau 2 — ACTIF avec limites (réponses + suivi)
+### Niveau 2 — SUSPENDU 2026-10-11 (drafts seuls, envoi = validation humaine)
+- Envois mails auto RÉVOQUÉS le 2026-10-11 (révocation du full-auto du 2026-09-28) : leads-radar = brouillons + statuts uniquement, envoi sur ordre humain explicite après relecture. Cause : modèle dégradé depuis DeepSeek down 09/10 (salad multilingue 09/10 18h, angle mort week-end 10-11/10, "no web-access tool" intermittent).
+- Règle inbox-first (durcie 2026-10-08 après 4 replies sans suivi 29/09→03/10) : aucun premier mail ni relance J+7 sans lecture IMAP préalable (`~/.openclaw/gmail.env`, select readonly, croisé avec `~/leads/SENT.md`). Statuts `repondu/stop/lost/suivi-envoye` = jamais relancés. Procédure dans `~/leads/GMAIL.md`.
 - Réponses auto aux commentaires (HN/Reddit/Discord) : templates R95/R96 uniquement,
   max 1 réponse/thread sans validation, escalade WhatsApp opérateur si question hors template.
 - DMs UNIQUEMENT en suivi opt-in (personne ayant commenté/DM en premier, ou inscrite waitlist).

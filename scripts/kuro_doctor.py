@@ -74,6 +74,23 @@ def tui_commands_ok():
         return False, str(e)[:120]
 
 
+def _fetch_api_system(api_base, timeout=15, tries=2):
+    """GET /api/system avec retry court. Pur (aucun effet de bord).
+
+    R125 : l'API locale peut être momentanément saturée (backlog TIME_WAIT)
+    → un timeout unique de 5 s donnait des faux FAIL « injoignable ».
+    """
+    last = None
+    for _ in range(max(1, tries)):
+        try:
+            with urllib.request.urlopen(api_base + "/api/system",
+                                        timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8", errors="replace"))
+        except Exception as e:
+            last = e
+    raise last
+
+
 def dashboard_live_ok(root, api_base="http://127.0.0.1:8767"):
     """Sync static + octets sains + /api/system. Jamais d exception."""
     try:
@@ -93,9 +110,7 @@ def dashboard_live_ok(root, api_base="http://127.0.0.1:8767"):
                 except Exception:
                     continue
         try:
-            with urllib.request.urlopen(api_base + "/api/system",
-                                        timeout=5) as resp:
-                payload = json.loads(resp.read().decode("utf-8", errors="replace"))
+            payload = _fetch_api_system(api_base)
             host = (payload.get("host") or {}).get("hostname", "?")
         except Exception:
             return False, "; ".join(problems + ["API /api/system injoignable"])
@@ -152,12 +167,160 @@ def push_freshness(log_path=None, replica_age_min=None, max_age_min=20):
         return False, "aucun push enregistre (tache planifiee active ?)"
     if log_age > max_age_min:
         return False, f"dernier push il y a {log_age:.0f} min (> {max_age_min})"
-    if replica_age_min is not None and replica_age_min > max_age_min + 10:
+    # R125 : quand SSH est down, replica_age_min est None — le log local seul
+    # ne prouve RIEN (le push a pu echouer apres ecriture du log). Ne plus
+    # dire OK : signaler explicitement le doute au lieu d'un vert mensonger.
+    if replica_age_min is None:
+        return False, (f"dernier push il y a {log_age:.0f} min MAIS serveur "
+                       "injoignable (SSH down) — reception non verifiee")
+    if replica_age_min > max_age_min + 10:
         return False, (f"pousse mais n arrive pas (replica distant vieux "
                        f"de {replica_age_min:.0f} min)")
-    extra = "" if replica_age_min is None \
-        else f" · replica distant vieux de {replica_age_min:.0f} min"
+    extra = f" · replica distant vieux de {replica_age_min:.0f} min"
     return True, f"push il y a {log_age:.0f} min{extra}"
+
+
+# --- Garde R116 (blackout git 16→19/10/2026) : panne multi-jours invisible ---
+
+# Résultat « instance déjà en cours » (0x800710E0, policy IgnoreNew) : signalé
+# dans les détails, pas alarmant — mais visible pour éviter l'alerte fatigue.
+TASK_BUSY_RESULT = -2147020576
+KURO_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroXDaily", "KuroWeekly")
+# 267009 = SCHED_S_TASK_RUNNING (tâche encore en cours au moment du relevé).
+# 267011 = SCHED_S_TASK_HAS_NOT_RUN (tâche jamais exécutée — normal juste
+# après une réinscription, ex. installateur v3 du 20/10/2026).
+TASK_OK_RESULTS = (0, 267009, 267011)
+
+
+def stale_lock_check(root, stale_min=15):
+    """index.lock présente + âgée = TOUS les commits bloqués en silence. Pur."""
+    lock = Path(root) / ".git" / "index.lock"
+    try:
+        age_min = (time.time() - lock.stat().st_mtime) / 60
+    except OSError:
+        return True, "aucun verrou"
+    if age_min > stale_min:
+        return False, f"index.lock orpheline ({age_min:.0f} min) — commits bloqués"
+    return True, f"verrou actif ({age_min:.1f} min, opération git en cours)"
+
+
+def autosync_freshness(log_path, max_age_min=90):
+    """Dernière passe autosync (tâche toutes les 20 min) + dernier verdict. Pur.
+
+    Toutes les sorties sont journalisées (R116) : un journal muet = tâche morte ;
+    une dernière ligne KO/REFUS/ALERTE = échec à afficher.
+    """
+    try:
+        lines = [ln for ln in Path(log_path).read_text(
+            encoding="utf-8", errors="replace").splitlines() if ln.strip()]
+    except OSError:
+        return False, "aucun journal autosync — tâche planifiée active ?"
+    if not lines:
+        return False, "journal autosync vide — tâche planifiée active ?"
+    last = lines[-1]
+    try:
+        ts = datetime.fromisoformat(last.split(" ", 1)[0])
+        age_min = (datetime.now(timezone.utc) - ts).total_seconds() / 60
+    except Exception:
+        return False, f"horodatage illisible : {last[:80]}"
+    if age_min > max_age_min:
+        return False, f"dernière passe il y a {age_min:.0f} min (> {max_age_min}) — tâche en panne ?"
+    verdict_ko = any(m in last for m in (" KO ", "REFUS", "ALERTE", "ERREUR"))
+    if verdict_ko:
+        return False, f"dernière passe en échec : {last[:120]}"
+    return True, f"dernière passe il y a {age_min:.0f} min"
+
+
+def parse_task_info(raw):
+    """Lignes 'nom|dernierRun|dernierResult' émises par la commande PS. Pur."""
+    info = {}
+    for line in (raw or "").splitlines():
+        parts = line.strip().split("|")
+        if len(parts) == 3 and parts[0]:
+            try:
+                result = int(parts[2].strip())
+            except ValueError:
+                result = -1
+            info[parts[0]] = (parts[1].strip(), result)
+    return info
+
+
+def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
+    """Santé des 5 tâches Kuro d'après leur dernier résultat. Pure.
+
+    267009 = encore en cours ; TASK_BUSY_RESULT = instance précédente toujours
+    active (IgnoreNew) — ni l'un ni l'autre n'est un échec, mais les deux
+    apparaissent dans le détail pour rester visibles.
+    """
+    problems = []
+    busy = []
+    for name in KURO_TASKS:
+        if name not in info:
+            problems.append(f"{name} absente")
+            continue
+        _last_run, result = info[name]
+        if result in ok_results:
+            continue
+        if result == TASK_BUSY_RESULT:
+            busy.append(name)
+        else:
+            problems.append(f"{name} result={result}")
+    if problems:
+        return False, "; ".join(problems + [f"{n} occupée" for n in busy])
+    msg = f"{len(KURO_TASKS)} tâches au vert (dernier résultat 0)"
+    if busy:
+        msg += f" ; occupée : {', '.join(busy)}"
+    return True, msg
+
+
+# --- Garde R125 : aucune fenêtre CMD ne doit s'ouvrir (tâches planifiées) ---
+
+# Toutes les tâches Kuro connues (installateur v3) + OpenQuant recrées.
+# NOTE 20/10 (resolue) : les 2 tâches OpenQuant avaient été SUPPRIMEES par erreur
+# pendant le fix (schtasks /Change refuse les TR multi-mots). RECREEES le 20/10
+# avec launchers caches OpenQuant/scripts/task_launchers/ (TR 162/161 chars,
+# powershell -WindowStyle Hidden) — elles reentrent au perimetre doctor.
+HIDDEN_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroWeekly",
+                "KuroSyncRepos", "KuroFleetSync", "KuroXDaily", "KuroDbBackup",
+                "KuroOracle", "KuroReplies", "KuroReplicaPush",
+                "OpenQuantDiscovery", "OpenQuantWatchdog")
+
+
+def task_xml_is_hidden(xml):
+    """True si l'action de la tâche ne peut PAS ouvrir de fenêtre console. Pur.
+
+    Accepté : pythonw.exe (pas de console du tout), ou powershell avec
+    -WindowStyle Hidden. Refusé : python.exe, powershell nu, .bat/.cmd.
+    """
+    low = (xml or "").lower()
+    if "<command>" not in low:
+        return False
+    if "pythonw.exe" in low:
+        return True
+    if "powershell" in low and "-windowstyle hidden" in low:
+        return True
+    return False
+
+
+def hidden_tasks_health(task_xmls):
+    """Santé « fenêtres cachées » d'après les XML des tâches. Pure.
+
+    task_xmls : {nom: xml} — l'absence d'une tâche est signalée (régression
+    R116 : une tâche disparue silencieusement ne doit jamais être ignorée).
+    """
+    problems = []
+    visible = []
+    for name in HIDDEN_TASKS:
+        xml = task_xmls.get(name)
+        if not xml:
+            problems.append(f"{name} absente")
+        elif not task_xml_is_hidden(xml):
+            visible.append(name)
+    if visible:
+        problems.append(f"fenêtre visible : {', '.join(visible)}")
+    if problems:
+        return False, "; ".join(problems)
+    return True, f"{len(HIDDEN_TASKS)} tâches en fenêtre cachée"
 
 
 def main(fix=False):
@@ -300,6 +463,61 @@ def main(fix=False):
                                 remote_age)
     check("Push réplica", ok, detail)
 
+    # 12. Tâches planifiées Kuro (R116 : KuroAutoSync rendait « result 0 »
+    # pendant que git était complètement à l'arrêt pendant 3 jours).
+    # schtasks.exe et NON les cmdlets ScheduledTasks : WMI corrompu sur cette
+    # machine → Get-ScheduledTaskInfo échoue silencieusement (tout « absent »).
+    # Même raison que scripts/Install-KuroScheduledTask.ps1.
+    try:
+        ps_cmd = (
+            "foreach ($t in 'KuroAutoSync','KuroDataSync','KuroDaily','KuroXDaily','KuroWeekly') { "
+            "$csv = schtasks /query /TN $t /V /FO CSV 2>$null; "
+            "if ($csv) { $v = ($csv | ConvertFrom-Csv | Select-Object -First 1)"
+            ".psobject.Properties.Value; "
+            "'{0}|{1}|{2}' -f $t, $v[5], $v[6] } }"
+        )
+        out = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd],
+                             capture_output=True, text=True, timeout=60)
+        info = parse_task_info(out.stdout)
+    except Exception:
+        info = {}
+    ok, detail = scheduled_tasks_health(info)
+    check("Tâches planifiées", ok, detail)
+
+    # 12bis. R125 : AUCUNE fenêtre CMD (R125 : 11 tâches ouvraient des
+    # consoles visibles, dont 2 en boucle toutes les 5 min). Même raison
+    # WMI : schtasks /XML, pas les cmdlets ScheduledTasks.
+    try:
+        names = ",".join(f"'{n}'" for n in HIDDEN_TASKS)
+        ps_cmd = (
+            f"foreach ($t in @({names})) {{ "
+            "$xml = schtasks /query /TN $t /XML 2>$null; "
+            "if ($xml) { Write-Output ('###TASK:' + $t); Write-Output ($xml -join [char]10); "
+            "Write-Output '###END' } }"
+        )
+        out = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd],
+                             capture_output=True, text=True, timeout=60)
+        xmls, current = {}, None
+        for line in (out.stdout or "").splitlines():
+            if line.startswith("###TASK:"):
+                current = line[8:].strip()
+                xmls[current] = []
+            elif line == "###END":
+                current = None
+            elif current:
+                xmls[current].append(line)
+        xmls = {k: "\n".join(v) for k, v in xmls.items()}
+    except Exception:
+        xmls = {}
+    ok, detail = hidden_tasks_health(xmls)
+    check("Fenêtres cachées", ok, detail)
+
+    # 13. Git local sain (R116 : index.lock orpheline bloquait tous les commits)
+    ok, detail = stale_lock_check(KURO_ROOT)
+    check("Verrou git", ok, detail)
+    ok, detail = autosync_freshness(KURO_ROOT / "logs" / "autosync.log")
+    check("Autosync", ok, detail)
+
     # verdict
     fails = [n for n, ok, _ in RESULTS if not ok]
     print(f"\nVERDICT: {len(RESULTS) - len(fails)}/{len(RESULTS)} composants OK"
@@ -378,6 +596,16 @@ def apply_fixes(fails):
     if "Dashboard live" in fails:
         print("[FIX] static resynchronisé" if resync_static(KURO_ROOT)
               else "[FIX] ECHEC resync static")
+    if "Verrou git" in fails:
+        lock = KURO_ROOT / ".git" / "index.lock"
+        try:
+            if lock.exists() and (time.time() - lock.stat().st_mtime) / 60 > 15:
+                lock.unlink()
+                print("[FIX] index.lock orpheline retirée")
+            else:
+                print("[FIX] verrou absent ou actif — rien à retirer")
+        except OSError as e:
+            print(f"[FIX] retrait index.lock impossible ({e})")
 
 
 if __name__ == "__main__":

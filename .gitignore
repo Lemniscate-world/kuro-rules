@@ -144,8 +144,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .tmp.*
+.tmp-*
 *.gdoc
-reports/
+reports/*
+!reports/discovery_history.csv
 
 # Prive (R76)
 SYNC_BACKUPS/
@@ -187,3 +189,8 @@ litellm-config.yaml
 *.omni/
 *.omni
 graph.omni
+
+# Overrides personnels agent-rules-spec (jamais commites, cf. SPEC.md)
+.agents/local/*
+!.agents/local/.gitkeep
+evals/report.json

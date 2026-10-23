@@ -143,23 +143,37 @@ render_template() {
         "$src" > "$dest"
 }
 
-link_file() {
+refresh_generated() {
+    # Regenerate distribution targets (best effort, never fatal).
+    if command -v python3 >/dev/null 2>&1 && [ -f "$RULES_DIR/scripts/generate_targets.py" ]; then
+        python3 "$RULES_DIR/scripts/generate_targets.py" --apply || \
+            echo -e "  ${YELLOW}WARN${RESET} generator failed, installing last generated targets"
+    elif command -v python >/dev/null 2>&1 && [ -f "$RULES_DIR/scripts/generate_targets.py" ]; then
+        python "$RULES_DIR/scripts/generate_targets.py" --apply || \
+            echo -e "  ${YELLOW}WARN${RESET} generator failed, installing last generated targets"
+    fi
+}
+
+install_rule() {
     local src="$1"
     local dest="$2"
 
     mkdir -p "$(dirname "$dest")"
 
     if [ -L "$dest" ]; then
-        echo -e "  ${GREEN}OK${RESET} Already linked: $(basename "$dest")"
-    elif [ -e "$dest" ]; then
+        echo -e "  ${YELLOW}WARN${RESET} Removing legacy symlink: $(basename "$dest")"
+        rm -f "$dest"
+    fi
+    if [ -e "$dest" ]; then
+        if cmp -s "$src" "$dest"; then
+            echo -e "  ${GREEN}OK${RESET} Already current: $(basename "$dest")"
+            return
+        fi
         echo -e "  ${YELLOW}WARN${RESET} Backing up existing $(basename "$dest") to .bak"
         mv "$dest" "$dest.bak"
-        ln -s "$src" "$dest"
-        echo -e "  ${GREEN}OK${RESET} Linked: $(basename "$dest")"
-    else
-        ln -s "$src" "$dest"
-        echo -e "  ${GREEN}OK${RESET} Linked: $(basename "$dest")"
     fi
+    cp "$src" "$dest"
+    echo -e "  ${GREEN}OK${RESET} Installed: $(basename "$dest")"
 }
 
 copy_if_missing() {
@@ -239,10 +253,26 @@ apply_project_defaults
 
 echo -e "${BLUE}Installing shared rules into: $TARGET_DIR${RESET}"
 
-link_file "$RULES_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
-link_file "$RULES_DIR/AI_GUIDELINES.md" "$TARGET_DIR/AI_GUIDELINES.md"
-link_file "$RULES_DIR/.cursorrules" "$TARGET_DIR/.cursorrules"
-link_file "$RULES_DIR/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md"
+refresh_generated
+
+install_rule "$RULES_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
+install_rule "$RULES_DIR/AI_GUIDELINES.md" "$TARGET_DIR/AI_GUIDELINES.md"
+install_rule "$RULES_DIR/.cursorrules" "$TARGET_DIR/.cursorrules"
+install_rule "$RULES_DIR/.windsurfrules" "$TARGET_DIR/.windsurfrules"
+install_rule "$RULES_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md"
+install_rule "$RULES_DIR/GEMINI.md" "$TARGET_DIR/GEMINI.md"
+install_rule "$RULES_DIR/copilot-instructions.md" "$TARGET_DIR/.github/copilot-instructions.md"
+
+# Generated scoped-rule directories (vendored, never .agents/local/).
+for dir in ".cursor/rules" ".agents/rules" ".cursor-plugin"; do
+    if [ -d "$RULES_DIR/$dir" ]; then
+        mkdir -p "$TARGET_DIR/$dir"
+        for src in "$RULES_DIR/$dir"/*; do
+            [ -e "$src" ] || continue
+            install_rule "$src" "$TARGET_DIR/$dir/$(basename "$src")"
+        done
+    fi
+done
 
 copy_if_missing "$RULES_DIR/.pre-commit-config.yaml" "$TARGET_DIR/.pre-commit-config.yaml"
 

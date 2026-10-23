@@ -149,6 +149,30 @@ def delete_post(post_id, api_key):
     raise BufferError(node.get("message") or f"suppression impossible: {json.dumps(data)[:200]}")
 
 
+def get_post_metrics(post_id, api_key):
+    """Metriques normalisees d'un post publie : {type: value} (best-effort).
+
+    Champ `metrics` de l'API Buffer GraphQL (scope insightsRead, cle perso).
+    Attention : Buffer rafraichit les stats ~24h apres publication, et un type
+    absent de l'array ne veut PAS dire zero (voir docs Post Metrics).
+    """
+    query = ('query GetPostMetrics {{ post(input: {{ id: "{pid}" }}) '
+             '{{ id metrics {{ type value }} }} }}').format(pid=post_id)
+    data = gql(query, api_key)
+    node = data.get("post") or {}
+    out = {}
+    for m in node.get("metrics", []) or []:
+        t = m.get("type")
+        # value None = pas encore mesure par le reseau (docs Buffer :
+        # "a missing metric does not mean zero") -> on n'invente pas un 0.
+        if t and m.get("value") is not None:
+            try:
+                out[t] = float(m.get("value"))
+            except (TypeError, ValueError):
+                continue
+    return out
+
+
 def list_scheduled(api_key, org_id=""):
     if not org_id:
         orgs = list_organizations(api_key)

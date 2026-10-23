@@ -1,0 +1,107 @@
+# kuro-rules rule metadata — single source for scoping + precedence.
+# Format per rule (basename without .md):
+#   scope: company | team | service   (Port.io-style inheritance)
+#   priority: int (higher wins on conflict)
+#   status: active | draft | deprecated
+#   trigger: always | auto | manual    (agent-rules-spec style)
+#   paths: [gitignore-style globs]     (for .agents/rules/)
+#   globs: [cursor-style globs]        (for .cursor/rules/*.mdc)
+#   description: short human summary (<=120 chars)
+#   alwaysApply: bool                  (cursor mdc flag)
+# Missing rules fall back to `defaults` below. Do NOT list every rule here —
+# only overrides. Generator scans rules/rule_*.md automatically.
+defaults:
+  scope: company
+  priority: 2
+  status: active
+  trigger: always
+  paths: []
+  globs: []
+  alwaysApply: true
+  description: ""
+
+overrides:
+  # Code quality / testing / security — active on code paths.
+  rule_05_06_18_19_38_58_59:
+    scope: company
+    priority: 3
+    trigger: auto
+    paths: ["src/**", "**/*.py", "tests/**"]
+    globs: ["**/*.py"]
+    description: "Code quality, testing 70/80%, security scanning, regression"
+    alwaysApply: false
+
+  rule_102_test_coverage:
+    scope: company
+    priority: 3
+    trigger: auto
+    paths: ["tests/**", "src/**", "**/*.py"]
+    globs: ["tests/**", "src/**"]
+    description: "ML test coverage 80%, hermetic tests"
+    alwaysApply: false
+
+  rule_39_41_44_45_54_55_60_61_62_63_74_76:
+    scope: company
+    priority: 3
+    trigger: always
+    paths: []
+    globs: []
+    description: "Security, encoding and policy guardrails"
+    alwaysApply: true
+
+  # Marketing technique — situational, never auto-injected.
+  rule_119_marketing_technique:
+    scope: team
+    priority: 1
+    trigger: manual
+    paths: ["docs/**"]
+    globs: ["docs/**"]
+    description: "Technical marketing: help in public, 1-2 threads/week"
+    alwaysApply: false
+
+  rule_120_kuro_marketing:
+    scope: team
+    priority: 1
+    trigger: manual
+    paths: ["docs/**"]
+    globs: ["docs/**"]
+    description: "Marketing pipeline, human validation gate"
+    alwaysApply: false
+
+  rule_121_pr_fix_marketing:
+    scope: team
+    priority: 1
+    trigger: manual
+    paths: ["docs/**"]
+    globs: ["docs/**"]
+    description: "PR-fix marketing: real fix + traceable PR"
+    alwaysApply: false
+
+  # Branch naming — only relevant on git operations.
+  rule_30_branching:
+    scope: company
+    priority: 2
+    trigger: auto
+    paths: [".git/**"]
+    globs: []
+    description: "Branch naming convention feat/fix/infra/ceo/sec/chore/docs/test"
+    alwaysApply: false
+
+  # Session compliance — always on.
+  rule_01_foundation:
+    scope: company
+    priority: 10
+    trigger: always
+    paths: []
+    globs: []
+    description: "Read rules first, mandatory entrypoint"
+    alwaysApply: true
+
+  rule_100_session_compliance:
+    scope: company
+    priority: 10
+    trigger: always
+    paths: []
+    globs: []
+    description: "Session compliance verification"
+    alwaysApply: true

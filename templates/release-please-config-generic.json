@@ -1,0 +1,10 @@
+{
+  "$schema": "https://github.com/googleapis/release-please/blob/main/schemas/config.json",
+  "_comment": "kuro-rules fleet template (generic VERSION-file tracking). Deployed by sync-rules.ps1, never overwritten once customized.",
+  "release-type": "simple",
+  "packages": {
+    ".": {
+      "version-file": "VERSION"
+    }
+  }
+}
