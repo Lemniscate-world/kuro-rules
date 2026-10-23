@@ -377,10 +377,14 @@ def main(argv: list[str] | None = None) -> int:
         items += x_interactions()
 
     now = parse_ts(args.now) if args.now else datetime.now(timezone.utc)
-    late, due = classify(items, now, args.horizon_hours)
+    # --horizon-hours / --now viennent de la CLI : on les ramene a des
+    # primitives validees (int borne, datetime) avant qu'ils n'entrent dans
+    # payload ecrit (coupe le taint S8707 sur le contenu).
+    horizon = max(1, min(int(args.horizon_hours or HORIZON_HOURS), 8760))
+    late, due = classify(items, now, horizon)
     payload = {
         "generated_at": (now or datetime.now(timezone.utc)).isoformat(),
-        "horizon_hours": args.horizon_hours,
+        "horizon_hours": horizon,
         "late": late,
         "due": due,
         "unverified": signals["unverified"],

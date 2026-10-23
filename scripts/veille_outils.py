@@ -149,7 +149,13 @@ def main() -> int:
         lines.append("| (fetch GitHub échoué — offline ou quota 10 req/min) | — | — | — |")
     lines += ["", "## 3. Agent.reviews / URLs manuelles", ""]
     if args.url:
+        # --url vient de la CLI : on n'accepte que des URLs http(s) pour eviter
+        # tout scheme dangereux (javascript:, file:) et couper le taint S8707.
         for u in args.url:
+            if urllib.parse.urlparse(u).scheme not in ("http", "https"):
+                print(f"[WARN] URL ignoree (scheme non http/https) : {u}",
+                      file=sys.stderr)
+                continue
             lines.append(f"- [ ] {u} — Verdict : à lire, source IA-à-IA à recouper par test hermétique.")
     else:
         lines.append("(aucune URL manuelle — passe `--url https://...` pour tracer une review Agent.reviews)")
