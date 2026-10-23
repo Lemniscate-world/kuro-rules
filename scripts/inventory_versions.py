@@ -64,8 +64,6 @@ def audit_one(docs: Path, name: str) -> dict:
     d = confine_arg(name, docs, default=Path(name).name)
     row = {"project": d.name, "present": "no", "version": "-",
            "source": "-", "changelog": "-", "release_wf": "-", "vtags": "-"}
-    row = {"project": name, "present": "no", "version": "-",
-           "source": "-", "changelog": "-", "release_wf": "-", "vtags": "-"}
     if not d.is_dir():
         return row
     row["present"] = "yes"
