@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import json
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -22,6 +23,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from kuro_paths import confine_arg
+
+# Whitelist avant ecriture d'une valeur CLI dans le rapport : meme pattern que
+# math_catalog (re.sub) qui coupe le taint S8707 sur le CONTENU ecrit (le
+# chemin etait deja confine, mais le contenu transportait args.query/url bruts).
+_CLI_SAFE = re.compile(r"[^\w :><+@#/.?=&%~-]+")
+
+
+def _cli_text(value: str, fill: str = " ") -> str:
+    """Neutralise les caracteres hors-whitelist d'une valeur CLI (S8707)."""
+    return _CLI_SAFE.sub(fill, str(value)).strip()
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -121,7 +132,8 @@ def main() -> int:
     lines = [
         f"# Veille outils IA — {today}",
         "",
-        f"Requête HN : `{args.query}` — Requête GitHub : `{args.gh_query}`",
+        f"Requête HN : `{_cli_text(args.query)}` — "
+        f"Requête GitHub : `{_cli_text(args.gh_query)}`",
         "",
         "## 1. HackerNews",
         "",
@@ -156,7 +168,7 @@ def main() -> int:
                 print(f"[WARN] URL ignoree (scheme non http/https) : {u}",
                       file=sys.stderr)
                 continue
-            lines.append(f"- [ ] {u} — Verdict : à lire, source IA-à-IA à recouper par test hermétique.")
+            lines.append(f"- [ ] {_cli_text(u, fill='')} — Verdict : à lire, source IA-à-IA à recouper par test hermétique.")
     else:
         lines.append("(aucune URL manuelle — passe `--url https://...` pour tracer une review Agent.reviews)")
     lines += [
