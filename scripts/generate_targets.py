@@ -36,6 +36,8 @@ try:
 except ImportError:  # pragma: no cover
     yaml = None
 
+from kuro_paths import confine_arg  # noqa: E402
+
 REPO = Path(__file__).resolve().parent.parent
 RULES_DIR = REPO / "rules"
 META_PATH = RULES_DIR / "_metadata.yaml"
@@ -281,10 +283,13 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--check", action="store_true", help="CI: exit 1 if drift, no write")
     g.add_argument("--dry-run", action="store_true", default=False,
                    help="preview only (default)")
-    ap.add_argument("--root", default=str(REPO), help="repo root")
+    ap.add_argument("--root", default=str(REPO), help="repo root (confine au depot)")
     args = ap.parse_args(argv)
 
-    root = Path(args.root)
+    # S8707 : --root peut venir d'une CLI lancee par un LLM ; les cibles
+    # ecrites plus bas en derivent, donc confinement a REPO (aucun usage
+    # reel ne passe --root : defaut = REPO).
+    root = confine_arg(args.root, REPO)
     targets = collect_targets(root)
 
     drift: list[str] = []

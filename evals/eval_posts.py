@@ -12,22 +12,31 @@ Aucun reseau, aucun LLM : c'est le filet CI deterministe (R115 gate 1).
 import argparse
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from gen_x_posts import lint_post  # noqa: E402
+from kuro_paths import confine_arg  # noqa: E402
 from post_brain import deterministic_score  # noqa: E402
 
 DEFAULT_DATA = ROOT / "evals" / "data" / "post_cases.jsonl"
 DEFAULT_REPORT = ROOT / "evals" / "report.json"
+# Racines legitimes pour --data / --report : le depot, plus le temp systeme
+# (les evals CI tournent dans un tmp_path pytest hors depot).
+_EVAL_ROOTS = [ROOT, Path(tempfile.gettempdir()).resolve()]
 
 
 def load_cases(path=DEFAULT_DATA):
-    """Charge le dataset JSONL (lignes vides / # commentees ignorees)."""
+    """Charge le dataset JSONL (lignes vides / # commentees ignorees).
+
+    `path` peut venir de la CLI (S8707) : confine aux racines d'eval.
+    """
     cases = []
-    for line in Path(path).read_text(encoding="utf-8").splitlines():
+    for line in confine_arg(path, _EVAL_ROOTS).read_text(
+            encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
@@ -96,9 +105,10 @@ def main(argv=None):
         return 1
 
     summary = evaluate(cases)
-    Path(args.report).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.report).write_text(json.dumps(summary, ensure_ascii=False, indent=2),
-                                 encoding="utf-8")
+    report = confine_arg(args.report, _EVAL_ROOTS)
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(json.dumps(summary, ensure_ascii=False, indent=2),
+                      encoding="utf-8")
 
     for r in summary["results"]:
         status = "OK  " if not r["fails"] else "FAIL"

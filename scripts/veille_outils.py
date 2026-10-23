@@ -21,9 +21,12 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+from kuro_paths import confine_arg
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+ROOT = Path(__file__).resolve().parent.parent
 HN_API = "https://hn.algolia.com/api/v1/search"
 GH_API = "https://api.github.com/search/repositories"
 
@@ -105,7 +108,8 @@ def main() -> int:
     ap.add_argument("--url", action="append", default=[], help="URL manuelle (ex: Agent.reviews), répétable")
     args = ap.parse_args()
 
-    out_dir = Path(args.out)
+    # --out vient de la CLI (S8707) : confinement au depot (defaut RESEARCH_MEMORY).
+    out_dir = confine_arg(args.out, ROOT, default="RESEARCH_MEMORY")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     hn = hn_hits(args.query, args.limit)
@@ -157,7 +161,8 @@ def main() -> int:
         "- Règle : une review IA ne vaut jamais un test hermétique local.",
         "",
     ]
-    path.write_text("\n".join(lines), encoding="utf-8")
+    # out_dir est deja confine ; on reconfine le chemin final (sink S8707).
+    confine_arg(path, ROOT).write_text("\n".join(lines), encoding="utf-8")
     n_test = sum(1 for i in range(len(hn)) if verdict_hn(i) == "A tester") + sum(
         1 for i in range(len(gh)) if verdict_gh(i) == "A tester"
     )

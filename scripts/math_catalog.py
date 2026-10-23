@@ -20,8 +20,14 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+from kuro_paths import confine_arg
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+ROOT = Path(__file__).resolve().parent.parent
+# Racines legitimes du cache : le depot ou le temp systeme (defaut de --cache).
+_CACHE_ROOTS = [ROOT, Path(tempfile.gettempdir()).resolve()]
 
 CONTENTS_URL = "https://raw.githubusercontent.com/openai/math/main/CONTENTS.md"
 FAMILY_RE = re.compile(r"\*\*(\d{3})\.\s*(.*?)\*\*", re.DOTALL)
@@ -29,6 +35,8 @@ LINK_RE = re.compile(r"\[.*?\]\((preprints/.*?)\)")
 
 
 def fetch_contents(cache: Path) -> str:
+    # --cache vient de la CLI (S8707) : confinement depot + temp (defaut).
+    cache = confine_arg(cache, _CACHE_ROOTS)
     if cache.exists() and cache.stat().st_size > 100_000:
         return cache.read_text(encoding="utf-8", errors="replace")
     req = urllib.request.Request(CONTENTS_URL, headers={"User-Agent": "kuro-sandbox/1.0"})
@@ -81,8 +89,8 @@ def main() -> int:
             links = LINK_RE.findall(block)
             print(f"\n## {num} — {title}")
             print(f"   preprints: {len(links)}")
-            for L in links[:4]:
-                print(f"   - https://github.com/openai/math/blob/main/{L}")
+            for link in links[:4]:
+                print(f"   - https://github.com/openai/math/blob/main/{link}")
         print(f"\n{len(selected)} famille(s) pour '{args.find}'", file=sys.stderr)
     if args.get:
         selected = [f for f in fams if f[0] == args.get]
@@ -96,7 +104,8 @@ def main() -> int:
         print(plain[:4000])
 
     if args.fiche and selected:
-        out_dir = Path(args.fiche)
+        # --fiche vient de la CLI (S8707) : confinement au depot (RESEARCH_MEMORY).
+        out_dir = confine_arg(args.fiche, ROOT, default="RESEARCH_MEMORY")
         out_dir.mkdir(parents=True, exist_ok=True)
         slug = re.sub(r"[^a-z0-9]+", "-", (args.find or args.get or "math").lower()).strip("-")
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -107,14 +116,15 @@ def main() -> int:
         for num, title, block in selected:
             links = LINK_RE.findall(block)
             lines += [f"## Famille {num} — {title}", ""]
-            for L in links:
-                lines.append(f"- https://github.com/openai/math/blob/main/{L}")
+            for link in links:
+                lines.append(f"- https://github.com/openai/math/blob/main/{link}")
             lines.append("")
         lines += ["## Verdict sandbox",
                   "- [ ] Manuscrit pertinent pour nos besoins (opti/quanti) ? Lire 1 preprint ciblé.",
                   "- [ ] Si preuve Lean dispo : vérifier via Comparator (toolchain Lean 4.32, hors scope PC actuel).",
                   "- Rappel : ceci n'est pas une lib de calcul — proto numérique = SymPy/NumPy, pas ce repo.", ""]
-        path.write_text("\n".join(lines), encoding="utf-8")
+        # slug vient de --find/--get (CLI) : confinement final du chemin d'ecriture.
+        confine_arg(path, ROOT).write_text("\n".join(lines), encoding="utf-8")
         print(f"Fiche {path}", file=sys.stderr)
     return 0
 

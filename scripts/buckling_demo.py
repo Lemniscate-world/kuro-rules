@@ -19,10 +19,12 @@ Usage:
 """
 
 import argparse
-import sys
 from pathlib import Path
 
 import numpy as np
+from kuro_paths import confine_arg
+
+ROOT = Path(__file__).resolve().parent.parent
 
 try:
     from scipy.optimize import brentq
@@ -45,7 +47,10 @@ def branch_angle(lam: float) -> float:
     """Angle de la branche non-triviale pour λ > 1, sinon 0."""
     if lam <= 1.0:
         return 0.0
-    f = lambda t: lam * np.sin(t) - t
+
+    def f(t: float) -> float:
+        return lam * np.sin(t) - t
+
     if HAS_SCIPY:
         return float(brentq(f, 1e-9, np.pi - 1e-6))
     # bissection de secours
@@ -66,11 +71,12 @@ def main() -> int:
     ap.add_argument("--n", type=int, default=120)
     args = ap.parse_args()
 
-    out = Path(args.out)
+    # S8707 : --out vient de la CLI ; ecritures CSV/PNG en derivent.
+    out = confine_arg(args.out, ROOT, default="outputs/buckling")
     out.mkdir(parents=True, exist_ok=True)
 
     lams = np.linspace(0.2, args.lmax, args.n)
-    amps = np.array([branch_angle(l) for l in lams])
+    amps = np.array([branch_angle(lam_) for lam_ in lams])
 
     # Stats démo "mode collapse"
     lam_demo = 2.0
