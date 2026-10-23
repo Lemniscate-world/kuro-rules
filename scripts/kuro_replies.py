@@ -398,8 +398,8 @@ def main(argv: list[str] | None = None) -> int:
         # (meme motif deja NOSONAR sur kuro_watchdog.py:44).
         out_queue = confine_arg(QUEUE, ROOT)
         out_queue.parent.mkdir(parents=True, exist_ok=True)
-        out_queue.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-                             encoding="utf-8")  # NOSONAR
+        data = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+        out_queue.write_text(data, encoding="utf-8")  # NOSONAR
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
