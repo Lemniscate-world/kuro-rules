@@ -946,3 +946,9 @@ Chaque scan ajoute une ligne de synthèse ; chaque auto-action est détaillée.
   - 2026-09-14T09:39Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / kuro-rules-compliance | issue #21 mise à jour
   - 2026-09-14T09:39Z | issue_updated (issue mise à jour) | Lemniscate-world/LifeTrack / CI | issue #22 mise à jour
 - 2026-09-17T15:53Z | github_discovery | 9 repos desc+topics OK, release v1.3.2 NeuralDBG OK, blog profil KO (scope token, dead-end) | reports/discovery_audit_2026-09-17.md
+- 2026-10-24T13:09Z | scan red | 60 checks, 4 repo(s) rouge(s)
+  - 2026-10-24T13:09Z | issue_updated (issue mise à jour) | LambdaSection/Astral / kuro-rules-compliance | issue #1 mise à jour
+  - 2026-10-24T13:09Z | issue_updated (issue mise à jour) | LambdaSection/NeuralDBG / Release Please | issue #691 mise à jour
+  - 2026-10-24T13:09Z | issue_updated (issue mise à jour) | LambdaSection/TokenWise / Release Please | issue #2 mise à jour
+  - 2026-10-24T13:09Z | issue_updated (issue mise à jour) | Lemniscate-world/kuro-rules / release-please | issue #27 mise à jour
+  - 2026-10-24T13:09Z | issue_updated (issue mise à jour) | Lemniscate-world/kuro-rules / .github/workflows/kuro-rules-spec.yml | issue #26 mise à jour
