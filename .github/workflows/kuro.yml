@@ -217,7 +217,7 @@ jobs:
           fi
 
       # --- Un seul commit par repo ---
-      - name: Commit kuro-rules si changements
+      - name: Commit kuro-rules (branche kuro-audit)
         run: |
           cd kuro-rules
           git config user.name "github-actions[bot]"
@@ -225,8 +225,12 @@ jobs:
           git add TRUTH_DAILY.md Epingle_Projets.md KURO_ACTIONS_LOG.md ci-status.json skills.json security-status.json tasks_anydo.json outputs/x_post_*.md || true
           if ! git diff --cached --quiet; then
             git commit -m "kuro: audit quotidien $(date +%Y-%m-%d) [skip ci]"
-            git pull --rebase origin master || true
-            git push
+            # master est protege (GH006 : enforce_admins + 6 checks requis,
+            # aucun bypass) — la snapshot d'artefacts derives part donc sur
+            # kuro-audit, branche dediee non protegee. L'histoire reelle reste
+            # sur master ; kuro-audit = derniere snapshot regeneree (force).
+            # Le portfolio public passe deja par l'autre repo (non protege).
+            git push --force origin HEAD:kuro-audit
           else
             echo "Rien à committer"
           fi
