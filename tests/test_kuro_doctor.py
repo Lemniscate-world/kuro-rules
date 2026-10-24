@@ -312,3 +312,69 @@ def test_hidden_tasks_health_absente_signalee():
     xmls = {n: _XML_PYTHONW for n in doctor.HIDDEN_TASKS if n != "KuroDataSync"}
     ok, detail = doctor.hidden_tasks_health(xmls)
     assert ok is False and "KuroDataSync absente" in detail
+
+
+# --- Garde R125 étendue au LOGIN — incident 24/10 (2 consoles à chaque login) ---
+
+_STARTUP_OK = {
+    "KuroDaemon.bat": '@echo off\r\nstart "" "C:\\Python314\\pythonw.exe" '
+                      '"C:\\Users\\u\\Documents\\kuro\\daemon.py"\r\n',
+    "KuroSupervisor.bat": '@echo off\r\nREM verifie le daemon\r\nstart "" '
+                          '"C:\\Python314\\pythonw.exe" "C:\\u\\kuro_supervisor.py" --check\r\n',
+    "KuroPulse.lnk": "",
+    "KuroBot.lnk": "",
+    "OpenVikingPilot.lnk": "",
+    "Ollama.lnk": "",
+}
+
+# Contenus RÉELS des lanceurs retirés du dossier Demarrage le 24/10.
+_OLD_KUROBOT = ('@echo off\r\ncd /d C:\\kuro\r\nstart /min "KuroBot" cmd /c '
+                '"python -u scripts\\kuro_bot.py >> logs\\kuro-bot.log 2>&1"\r\n')
+_OLD_VIKING = ('@echo off\r\nstart "OpenVikingPilot" cmd /c ""C:\\x\\openviking-server.exe" '
+               '>> "%USERPROFILE%\\.openviking\\server-login.log" 2>&1"\r\n')
+_OLD_MEMOS = '@echo off\r\nstart "" "C:\\nvm4w\\nodejs\\node.exe" --daemon --home=C:\\h\r\n'
+_OLD_HORCRUXE = '@echo off\r\nstart /min "" "C:\\x\\orx.exe" up --no-browser\r\n'
+
+
+def _mk_startup(tmp_path, files):
+    for name, content in files.items():
+        (tmp_path / name).write_text(content, encoding="utf-8")
+    return tmp_path
+
+
+def test_startup_launchers_health_login_sain(tmp_path):
+    """Un login 100 % silencieux : .lnk + .bat réservés à pythonw.exe."""
+    startup = _mk_startup(tmp_path, _STARTUP_OK)
+    ok, detail = doctor.startup_launchers_health(startup)
+    assert ok is True and "sans console" in detail
+
+
+def test_startup_launchers_health_anciens_lanceurs_signales(tmp_path):
+    """Preuve négative de l'incident 24/10 : chacun des 4 anciens .bat échoue."""
+    anciens = (("KuroBot.cmd", _OLD_KUROBOT), ("OpenVikingPilot.bat", _OLD_VIKING),
+               ("MemosPilot.bat", _OLD_MEMOS), ("horcruxe-lab.bat", _OLD_HORCRUXE))
+    for name, content in anciens:
+        startup = _mk_startup(tmp_path, {**_STARTUP_OK, name: content})
+        ok, detail = doctor.startup_launchers_health(startup)
+        assert ok is False and name in detail, name
+        assert "fenêtre possible" in detail, name
+
+
+def test_startup_launchers_health_entree_manquante(tmp_path):
+    """R116 : une entrée de login disparue silencieusement doit être signalée."""
+    files = {k: v for k, v in _STARTUP_OK.items() if k != "KuroBot.lnk"}
+    startup = _mk_startup(tmp_path, files)
+    ok, detail = doctor.startup_launchers_health(startup)
+    assert ok is False and "KuroBot.lnk absente" in detail
+
+
+def test_startup_launchers_health_dossier_absent(tmp_path):
+    ok, detail = doctor.startup_launchers_health(tmp_path / "nope")
+    assert ok is False and "introuvable" in detail
+
+
+def test_startup_required_couvre_les_services():
+    """Périmètre login : daemon, pulse, bot et openviking (fix du 24/10)."""
+    assert "KuroBot.lnk" in doctor.STARTUP_REQUIRED
+    assert "OpenVikingPilot.lnk" in doctor.STARTUP_REQUIRED
+    assert len(doctor.STARTUP_REQUIRED) == 4

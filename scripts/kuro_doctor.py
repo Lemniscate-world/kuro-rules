@@ -9,6 +9,7 @@ Une seule commande qui teste tous les composants et dit la vérité :
 
 import json
 import os
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -274,7 +275,6 @@ def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
 
 
 # --- Garde R125 : aucune fenêtre CMD ne doit s'ouvrir (tâches planifiées) ---
-
 # Toutes les tâches Kuro connues (installateur v3) + OpenQuant recrées.
 # NOTE 20/10 (resolue) : les 2 tâches OpenQuant avaient été SUPPRIMEES par erreur
 # pendant le fix (schtasks /Change refuse les TR multi-mots). RECREEES le 20/10
@@ -321,6 +321,86 @@ def hidden_tasks_health(task_xmls):
     if problems:
         return False, "; ".join(problems)
     return True, f"{len(HIDDEN_TASKS)} tâches en fenêtre cachée"
+
+
+# --- Garde R125 étendue au LOGIN (dossier Demarrage) ------------------------
+# Incident 24/10 : la garde ci-dessus ne couvrait QUE les tâches planifiées.
+# Résultat : KuroBot.cmd et OpenVikingPilot.bat ouvraient 2 consoles visibles
+# à CHAQUE connexion, et MemosPilot.bat / horcruxe-lab.bat échouaient en
+# clignotant (package stage effacé de Temp, ligne cd/python collée).
+# Seule la cible pythonw.exe est admise ici : c'est le lancement sans console.
+# Les services passent par un .lnk -> pythonw + task_launchers/hidden_launch.py
+# (pythonw n'a pas de console ; CREATE_NO_WINDOW bloque celle du fils).
+STARTUP_DIR = HOME / "AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
+STARTUP_REQUIRED = ("KuroDaemon.bat", "KuroPulse.lnk", "KuroBot.lnk",
+                    "OpenVikingPilot.lnk")
+# Marqueurs de lancement CONSOLE. `start ""` et `start /min` ne sont PAS des
+# marqueurs : KuroDaemon.bat / KuroSupervisor.bat les utilisent sur pythonw.exe
+# et n'ouvrent aucune fenêtre. C'est l'exécutable qui décide.
+_CONSOLE_MARKERS = ("cmd /c", "cmd.exe", "python.exe", "python ", "node.exe",
+                    "powershell", "orx.exe")
+
+
+def _foreign_exes(text):
+    """Chemins .exe du texte qui ne sont PAS pythonw.exe. Pur.
+
+    Comparaison sur le nom de fichier uniquement : la regex capture des chemins
+    complets (C:\\Python314\\pythonw.exe), et le test doit rester valable sur
+    Linux (R93 : les séparateurs ne sont pas interchangeables via Path.name).
+    """
+    out = set()
+    for token in re.findall(r'"?([\w: .\-\\]+?\.exe)"?', (text or "").lower()):
+        token = token.strip()
+        if token.replace("\\", "/").rsplit("/", 1)[-1] != "pythonw.exe":
+            out.add(token)
+    return sorted(out)
+
+
+def bat_opens_console(text):
+    """True si ce texte de .bat/.cmd peut ouvrir une fenêtre console. Pur.
+
+    Seul pythonw.exe est admis : c'est le lancement sans console. `start ""` et
+    `start /min` ne sont PAS des marqueurs — KuroDaemon.bat / KuroSupervisor.bat
+    les utilisent sur pythonw.exe et n'ouvrent rien. C'est l'exécutable qui
+    décide, pas la syntaxe de démarrage.
+    """
+    low = (text or "").lower()
+    if any(marker in low for marker in _CONSOLE_MARKERS):
+        return True
+    return bool(_foreign_exes(low))
+
+
+def startup_launchers_health(startup_dir):
+    """Santé « fenêtres au login » du dossier Demarrage. Pure.
+
+    Tout .bat/.cmd de ce dossier s'exécute à chaque connexion : il ne doit
+    lancer QUE pythonw.exe (aucune console). Les .lnk (apps GUI) et les .bat
+    restant sur pythonw sont admis ; une entrée obligatoire manquante est
+    signalée (R116 : une entrée disparue silencieusement n'est jamais ignorée).
+    """
+    startup = Path(startup_dir)
+    if not startup.is_dir():
+        return False, "dossier Demarrage introuvable"
+    problems = []
+    for name in STARTUP_REQUIRED:
+        if not (startup / name).exists():
+            problems.append(f"{name} absente")
+    for path in sorted(startup.iterdir()):
+        if path.suffix.lower() not in (".bat", ".cmd"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            problems.append(f"{path.name} illisible")
+            continue
+        low = text.lower()
+        if bat_opens_console(low):
+            foreign = _foreign_exes(low)
+            extra = f" : {', '.join(foreign)}" if foreign else ""
+            problems.append(f"{path.name} (fenêtre possible{extra})")
+    if problems:
+        return False, "; ".join(problems)
+    return True, f"{len(STARTUP_REQUIRED)} entrées de login sans console"
 
 
 def main(fix=False):
@@ -433,10 +513,12 @@ def main(fix=False):
           latest.name if latest else "aucun — lance scripts/kuro_db_backup.ps1")
 
     # 9. Auto-start login
-    startup = HOME / "AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
+    startup = STARTUP_DIR
     entries = {
         "KuroDaemon": (startup / "KuroDaemon.bat").exists(),
         "KuroPulse": (startup / "KuroPulse.lnk").exists(),
+        "KuroBot": (startup / "KuroBot.lnk").exists(),
+        "OpenVikingPilot": (startup / "OpenVikingPilot.lnk").exists(),
     }
     check("Auto-start login", all(entries.values()),
           ", ".join(k for k, v in entries.items() if v) or "aucun")
@@ -511,6 +593,12 @@ def main(fix=False):
         xmls = {}
     ok, detail = hidden_tasks_health(xmls)
     check("Fenêtres cachées", ok, detail)
+
+    # 12ter. R125 au LOGIN : les .bat du dossier Demarrage s'exécutent à chaque
+    # connexion (incident 24/10 : KuroBot + OpenVikingPilot ouvraient 2 consoles
+    # visibles ; MemosPilot + horcruxe-lab clignotaient en échec).
+    ok, detail = startup_launchers_health(STARTUP_DIR)
+    check("Fenêtres au login", ok, detail)
 
     # 13. Git local sain (R116 : index.lock orpheline bloquait tous les commits)
     ok, detail = stale_lock_check(KURO_ROOT)
