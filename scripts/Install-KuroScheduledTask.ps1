@@ -73,8 +73,39 @@ function New-KuroTask {
 }
 function Remove-KuroTask {
   param([string]$Name)
-  cmd.exe /c "schtasks /Delete /TN `"$Name`" /F" 2>&1 | Out-Null
-  Write-Host "Supprime (ou absente) : $Name"
+  # Le "2>nul" doit etre DU cote cmd.exe : en PowerShell 5.1, "2>&1" d'une
+  # commande native transforme la sortie d'erreur en ErrorRecord, et $ErrorActionPreference
+  # = "Stop" du script ABORT l'installateur (incident 24/10 : HeliumMarketing
+  # absente -> 10 taches supprimees, 0 recreees). Suppression idempotente.
+  cmd.exe /c "schtasks /Delete /TN `"$Name`" /F 2>nul" | Out-Null
+}
+function Set-TaskRobustness {
+  # R116 : les parametres par defaut de schtasks font RATER des executions.
+  # Incident 24/10 : KuroDbBackup ne tournait pas les jours de sommeil/PC eteint
+  # a 12:00 ni sur batterie (dernier resultat 0x800710E0) -> doctor en FAIL.
+  # Round-trip XML (meme technique que le fix) :
+  #   - StartWhenAvailable : rattraper des que possible un creneau manque
+  #   - batterie et nee permissives : la tache ne saute plus sur les cond.
+  param([string]$Name)
+  $tmp = Join-Path $env:TEMP "kuro-task-$Name.xml"
+  $lines = cmd.exe /c "schtasks /Query /TN `"$Name`" /XML 2>nul"
+  if ($LASTEXITCODE -ne 0 -or -not $lines) {
+    Write-Host "  robustesse : XML indisponible pour $Name"
+    return
+  }
+  $t = $lines -join "`r`n"
+  if ($t -notlike '*StartWhenAvailable*') {
+    $t = $t -replace '<Settings>', "<Settings>`r`n    <StartWhenAvailable>true</StartWhenAvailable>"
+  }
+  $t = $t -replace '<DisallowStartIfOnBatteries>true</DisallowStartIfOnBatteries>', '<DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>'
+  $t = $t -replace '<StopIfGoingOnBatteries>true</StopIfGoingOnBatteries>', '<StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>'
+  $t = $t -replace '<StopOnIdleEnd>true</StopOnIdleEnd>', '<StopOnIdleEnd>false</StopOnIdleEnd>'
+  [System.IO.File]::WriteAllText($tmp, $t, [System.Text.Encoding]::Unicode)
+  cmd.exe /c "schtasks /Create /TN `"$Name`" /XML `"$tmp`" /F"
+  $ok = $LASTEXITCODE -eq 0
+  Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+  if ($ok) { Write-Host "  robustesse : $Name (rattrapage creneaux + batterie + nee)" }
+  else { Write-Host "  robustesse : ECHEC $Name" }
 }
 
 # --- (suppression idempotente : voir plus bas, APRES validation des TR) ---
@@ -88,6 +119,7 @@ $DbBackup = Join-Path $Root "scripts\kuro_db_backup.ps1"
 $CoworkPick = Join-Path $Root "run-cowork-pick.ps1"
 $Replica = Join-Path $Root "scripts\kuro_replica_push.py"
 $Replies = Join-Path $Root "scripts\kuro_replies.py"
+$Watchdog = Join-Path $Root "scripts\kuro_watchdog_win.ps1"
 $ReplicaLog = Join-Path $env:USERPROFILE ".kuro\replica-push.log"
 
 # Garde v3 : generer TOUS les launchers d'abord (la limite /TR est connue
@@ -101,31 +133,38 @@ $Defs = @(
   @{ N = "KuroDbBackup"; TR = (Write-PsLauncher "KuroDbBackup" $DbBackup ""); SC = "DAILY"; At = "12:00" },
   @{ N = "KuroOracle"; TR = (Write-PsLauncher "KuroOracle" $CoworkPick ""); SC = "DAILY"; At = "08:00" },
   @{ N = "KuroReplies"; TR = (Write-PyLauncher "KuroReplies" $Replies "--gh --x --write" (Join-Path $Logs "kuro-replies.log")); SC = "DAILY"; At = "09:00" },
-  @{ N = "KuroReplicaPush"; TR = (Write-PyLauncher "KuroReplicaPush" $Replica "" $ReplicaLog); SC = "MINUTE"; At = "00:00"; Mo = "5" }
+  @{ N = "KuroReplicaPush"; TR = (Write-PyLauncher "KuroReplicaPush" $Replica "" $ReplicaLog); SC = "MINUTE"; At = "00:00"; Mo = "5" },
+  # NOTE 24/10 : la tache du watchdog reseau avait DISPARU (log fige au 02/10,
+  # serveur 192.168.1.84 down sans aucune alerte). Elle appartient au perimetre
+  # HIDDEN_TASKS de kuro_doctor : la recreer ici garantit qu'elle revient.
+  @{ N = "KuroWatchdogWin"; TR = (Write-PsLauncher "KuroWatchdogWin" $Watchdog ""); SC = "MINUTE"; At = "00:00"; Mo = "15" }
 )
 foreach ($d in $Defs) {
   if ($d.TR.Length -gt $MaxTR) { throw "TR trop long pour $($d.N) ($($d.TR.Length) > $MaxTR)" }
 }
 
-# --- Suppression idempotente (APRES validation : plus jamais de suppression
-# sans recreation derriere — inclut l'ancienne tache HeliumMarketing) -------
+# --- Suppression minimisee (APRES validation) -------------------------------
+# PLUS DE SUPPRESSION COLLECTIVE : New-KuroTask passe /F, l'ecrasement suffit.
+# Supprimer puis recrée = fenetre d'ouverture ou tout echec (TR, encodage)
+# laisse des taches mortes — incident 19/10 (8 effacees) et 24/10 (10 effacees,
+# 0 recreees, abort sur HeliumMarketing absente). On ne retire que l'heritage.
 if ($Uninstall) {
   foreach ($name in ($Defs | ForEach-Object { $_.N }) + @("HeliumMarketing")) {
     Remove-KuroTask $name
   }
   Write-Host "Desinstalle."; exit 0
 }
-foreach ($name in ($Defs | ForEach-Object { $_.N }) + @("HeliumMarketing")) {
-  Remove-KuroTask $name
-}
+Remove-KuroTask "HeliumMarketing"
 
 foreach ($d in $Defs) {
   $extra = @{}
   if ($d.Day) { $extra.Day = $d.Day }
   if ($d.Mo) { $extra.Mo = $d.Mo }
   New-KuroTask -Name $d.N -TR $d.TR -SC $d.SC -At $d.At @extra
+  Set-TaskRobustness -Name $d.N
 }
 
 Write-Host "Installe (fenetres cachees) : KuroDaily 06:00, KuroWeekly lun 07:00, KuroSyncRepos dim 04:00,"
 Write-Host "KuroFleetSync sam 05:00, KuroXDaily 20:00 (X unifie hub+Helium), KuroDbBackup 12:00,"
-Write-Host "KuroOracle 08:00, KuroReplies 09:00, KuroReplicaPush /5min. HeliumMarketing supprime (merge dans KuroXDaily)."
+Write-Host "KuroOracle 08:00, KuroReplies 09:00, KuroReplicaPush /5min, KuroWatchdogWin /15min."
+Write-Host "HeliumMarketing supprime (merge dans KuroXDaily). Robustesse : rattrapage creneaux + batterie."

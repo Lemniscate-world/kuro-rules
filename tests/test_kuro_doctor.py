@@ -293,10 +293,12 @@ def test_hidden_tasks_health_tout_vert():
     assert ok is True and "fenêtre cachée" in detail
     # Perimetre v3 : 11 tâches Kuro (KuroReplies ajouté en session) + les 2
     # tâches OpenQuant RECREEES le 20/10 avec launchers caches (voir NOTE).
+    # 24/10 : KuroWatchdogWin recréée (sa tâche avait disparu, log figé 02/10).
     assert "KuroReplies" in doctor.HIDDEN_TASKS
     assert "OpenQuantWatchdog" in doctor.HIDDEN_TASKS
     assert "OpenQuantDiscovery" in doctor.HIDDEN_TASKS
-    assert len(doctor.HIDDEN_TASKS) == 13
+    assert "KuroWatchdogWin" in doctor.HIDDEN_TASKS
+    assert len(doctor.HIDDEN_TASKS) == 14
 
 
 def test_hidden_tasks_health_fenetre_visible_signalee():

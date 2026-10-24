@@ -283,7 +283,11 @@ def scheduled_tasks_health(info, ok_results=TASK_OK_RESULTS):
 HIDDEN_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroWeekly",
                 "KuroSyncRepos", "KuroFleetSync", "KuroXDaily", "KuroDbBackup",
                 "KuroOracle", "KuroReplies", "KuroReplicaPush",
-                "OpenQuantDiscovery", "OpenQuantWatchdog")
+                "OpenQuantDiscovery", "OpenQuantWatchdog",
+                # NOTE 24/10 : KuroWatchdogWin surveille le serveur Linux (15 min)
+                # mais sa tâche avait DISPARU — log figé au 02/10, serveur down
+                # sans aucune alerte. Recréée et placée sous la garde R125.
+                "KuroWatchdogWin")
 
 
 def task_xml_is_hidden(xml):
