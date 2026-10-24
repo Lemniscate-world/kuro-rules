@@ -266,8 +266,14 @@ def test_scheduled_tasks_health_instance_occupee():
 # --- Garde R125 (fenêtres CMD) : incident « consoles partout toutes les 5 min » ---
 
 _XML_PYTHONW = "<Command>C:\\Python314\\pythonw.exe</Command><Arguments>x.py</Arguments>"
-_XML_PS_HIDDEN = ("<Command>powershell</Command>"
-                  "<Arguments>-NoProfile -WindowStyle Hidden -File x.ps1</Arguments>")
+_XML_PS_HEADLESS = ("<Command>conhost.exe</Command>"
+                    "<Arguments>--headless powershell.exe -NoProfile "
+                    "-WindowStyle Hidden -File x.ps1</Arguments>")
+# L'incident réel du 24/10 soir : powershell -WindowStyle Hidden SANS conhost.
+# Le flag ne fait que masquer la console après coup → CLIGNOTEMENT à chaque
+# exécution (KuroReplicaPush : toutes les 5 min). L'ancienne garde disait True.
+_XML_PS_FLASH = ("<Command>powershell.exe</Command>"
+                 "<Arguments>-NoProfile -WindowStyle Hidden -File x.ps1</Arguments>")
 _XML_PYTHON_CONSOLE = "<Command>C:\\Python314\\python.exe</Command><Arguments>x.py</Arguments>"
 _XML_PS_VISIBLE = "<Command>powershell</Command><Arguments>-File x.ps1</Arguments>"
 _XML_BAT = "<Command>C:\\Users\\u\\scripts\\push.bat</Command>"
@@ -275,20 +281,26 @@ _XML_BAT = "<Command>C:\\Users\\u\\scripts\\push.bat</Command>"
 
 def test_task_xml_is_hidden():
     assert doctor.task_xml_is_hidden(_XML_PYTHONW) is True
-    assert doctor.task_xml_is_hidden(_XML_PS_HIDDEN) is True
+    assert doctor.task_xml_is_hidden(_XML_PS_HEADLESS) is True
     # L'incident réel : python.exe / powershell nu / .bat → fenêtre visible
     assert doctor.task_xml_is_hidden(_XML_PYTHON_CONSOLE) is False
     assert doctor.task_xml_is_hidden(_XML_PS_VISIBLE) is False
     assert doctor.task_xml_is_hidden(_XML_BAT) is False
     assert doctor.task_xml_is_hidden("") is False
     # Case-insensitive : l'installateur peut écrire -WindowStyle en minuscules
-    lower = _XML_PS_HIDDEN.lower()
+    lower = _XML_PS_HEADLESS.lower()
     assert doctor.task_xml_is_hidden(lower) is True
+
+
+def test_task_xml_is_hidden_windowstyle_seul_clignote():
+    """-WindowStyle Hidden SANS conhost = flash à chaque exécution (R125 v2)."""
+    assert doctor.task_xml_is_hidden(_XML_PS_FLASH) is False
+    assert doctor.task_xml_is_hidden(_XML_PS_FLASH.lower()) is False
 
 
 def test_hidden_tasks_health_tout_vert():
     xmls = {n: _XML_PYTHONW for n in doctor.HIDDEN_TASKS}
-    xmls["KuroXDaily"] = _XML_PS_HIDDEN
+    xmls["KuroXDaily"] = _XML_PS_HEADLESS
     ok, detail = doctor.hidden_tasks_health(xmls)
     assert ok is True and "fenêtre cachée" in detail
     # Perimetre v3 : 11 tâches Kuro (KuroReplies ajouté en session) + les 2

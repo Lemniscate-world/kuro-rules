@@ -35,14 +35,28 @@ def startup_links():
 
     Défini en fonction et non en constante : les chemins dépendent du dépôt et
     du profil, donc du contexte d'exécution (tests hermétiques, R123).
+
+    24/10 soir : KuroDaemon et KuroSupervisor migrent du .bat au .lnk. Un .bat
+    du Démarrage est exécuté par cmd.exe (ftype batfile = "%1" %*), qui alloue
+    une console visible — donc CLIGNOTEMENT à chaque login, même en ne lançant
+    que pythonw.exe. Vérifié avant migration : les deux scripts n'utilisent que
+    des chemins absolus (HOME / ".kuro"), donc le cwd imposé par hidden_launch
+    (log.parent) ne peut rien casser.
     """
     bot_log = ROOT / "logs" / "kuro-bot.log"
     viking_log = HOME / ".openviking" / "server-login.log"
+    daemon_log = ROOT / "logs" / "kuro-daemon.log"
+    supervisor_log = ROOT / "logs" / "kuro-supervisor.log"
     return (
         ("KuroBot.lnk", PYW,
          f'"{HELPER}" --log "{bot_log}" "{PY}" -u "{ROOT / "scripts" / "kuro_bot.py"}"'),
         ("OpenVikingPilot.lnk", PYW,
          f'"{HELPER}" --log "{viking_log}" "{HOME / ".local" / "bin" / "openviking-server.exe"}"'),
+        ("KuroDaemon.lnk", PYW,
+         f'"{HELPER}" --log "{daemon_log}" "{PYW}" "{HOME.parent / "kuro" / "daemon.py"}"'),
+        ("KuroSupervisor.lnk", PYW,
+         f'"{HELPER}" --log "{supervisor_log}" "{PYW}" '
+         f'"{ROOT / "scripts" / "kuro_supervisor.py"}" --check --fix'),
     )
 
 

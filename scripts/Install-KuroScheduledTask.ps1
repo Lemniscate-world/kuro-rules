@@ -36,25 +36,29 @@ $LauncherDir = Join-Path $Root "scripts\task_launchers"
 $MaxTR = 250
 function Write-PyLauncher {
   param([string]$Name, [string]$Script, [string]$ScriptArgs, [string]$LogFile)
-  # Meme commande que l'installateur v2 (prouvee : KuroDaily s'est creee OK) :
-  # powershell -WindowStyle Hidden herite sa console cachee au python fils,
-  # *>> conserve les logs exactement comme avant, exit propage le code.
+  # conhost --headless (et NON pas powershell -WindowStyle Hidden seul) :
+  # -WindowStyle Hidden ne fait que masquer la console APRES coup, le
+  # planificateur crée d'abord le nœud conhost visible → CLIGNOTEMENT à chaque
+  # exécution (incident 24/10 soir : KuroReplicaPush toutes les 5 min).
+  # conhost --headless n'a aucun nœud de fenêtre. *>> conserve les logs,
+  # exit propage le code (garde R116).
   $call = "& '$Py' '$Script'"
   if ($ScriptArgs) { $call += " $ScriptArgs" }
   $call += " *>> '$LogFile'"
   $content = $call + "`r`nexit `$LASTEXITCODE`r`n"
   $path = Join-Path $LauncherDir "$Name.ps1"
   Set-Content -Path $path -Value $content -Encoding UTF8
-  return "powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$path`""
+  return "conhost.exe --headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$path`""
 }
 function Write-PsLauncher {
   param([string]$Name, [string]$Ps1, [string]$LogFile)
+  # Meme motif conhost --headless que Write-PyLauncher (voir note ci-dessus).
   $call = "& powershell.exe -NoProfile -ExecutionPolicy Bypass -File '$Ps1'"
   if ($LogFile) { $call += " *>> '$LogFile'" }
   $content = $call + "`r`nexit `$LASTEXITCODE`r`n"
   $path = Join-Path $LauncherDir "$Name.ps1"
   Set-Content -Path $path -Value $content -Encoding UTF8
-  return "powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$path`""
+  return "conhost.exe --headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$path`""
 }
 function New-KuroTask {
   param([string]$Name, [string]$TR, [string]$SC, [string]$At, [string]$Day = "", [string]$Mo = "")

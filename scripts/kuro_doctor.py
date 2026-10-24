@@ -293,15 +293,22 @@ HIDDEN_TASKS = ("KuroAutoSync", "KuroDataSync", "KuroDaily", "KuroWeekly",
 def task_xml_is_hidden(xml):
     """True si l'action de la tâche ne peut PAS ouvrir de fenêtre console. Pur.
 
-    Accepté : pythonw.exe (pas de console du tout), ou powershell avec
-    -WindowStyle Hidden. Refusé : python.exe, powershell nu, .bat/.cmd.
+    Seuls admis : pythonw.exe (aucune console) et conhost.exe --headless
+    (consoleheadless : aucun nœud de fenêtre). REFUSÉ depuis l'incident du
+    24/10 soir : « powershell -WindowStyle Hidden » SANS conhost. Le flag
+    -WindowStyle Hidden ne fait que MASQUER la console après coup — le
+    planificateur crée d'abord le nœud conhost visible, d'où un CLIGNOTEMENT
+    à chaque exécution (KuroReplicaPush : toutes les 5 min). C'est exactement
+    ce que constate le commentaire de l'installateur (« le flag -WindowStyle
+    Hidden seul ne suffit pas ») mais que l'ancienne garde acceptait à tort.
+    Refusé aussi : python.exe, powershell nu, .bat/.cmd.
     """
     low = (xml or "").lower()
     if "<command>" not in low:
         return False
     if "pythonw.exe" in low:
         return True
-    if "powershell" in low and "-windowstyle hidden" in low:
+    if "conhost.exe" in low and "--headless" in low:
         return True
     return False
 
@@ -336,8 +343,12 @@ def hidden_tasks_health(task_xmls):
 # Les services passent par un .lnk -> pythonw + task_launchers/hidden_launch.py
 # (pythonw n'a pas de console ; CREATE_NO_WINDOW bloque celle du fils).
 STARTUP_DIR = HOME / "AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
-STARTUP_REQUIRED = ("KuroDaemon.bat", "KuroPulse.lnk", "KuroBot.lnk",
-                    "OpenVikingPilot.lnk")
+# 24/10 soir : KuroDaemon BAT -> LNK (un .bat du Démarrage est executé par
+# cmd.exe → console visible au login, meme en ne lançant que pythonw), et
+# KuroSupervisor rejoint la liste : il tournait à chaque login SANS être
+# sous garde, donc une régression y serait passée inaperçue.
+STARTUP_REQUIRED = ("KuroDaemon.lnk", "KuroSupervisor.lnk", "KuroPulse.lnk",
+                    "KuroBot.lnk", "OpenVikingPilot.lnk")
 # Marqueurs de lancement CONSOLE. `start ""` et `start /min` ne sont PAS des
 # marqueurs : KuroDaemon.bat / KuroSupervisor.bat les utilisent sur pythonw.exe
 # et n'ouvrent aucune fenêtre. C'est l'exécutable qui décide.
@@ -377,10 +388,16 @@ def bat_opens_console(text):
 def startup_launchers_health(startup_dir):
     """Santé « fenêtres au login » du dossier Demarrage. Pure.
 
-    Tout .bat/.cmd de ce dossier s'exécute à chaque connexion : il ne doit
-    lancer QUE pythonw.exe (aucune console). Les .lnk (apps GUI) et les .bat
-    restant sur pythonw sont admis ; une entrée obligatoire manquante est
-    signalée (R116 : une entrée disparue silencieusement n'est jamais ignorée).
+    INCIDENT 24/10 soir (flash au login) : un .bat/.cmd de ce dossier est
+    exécuté par cmd.exe (ftype batfile = "%1" %*), qui ALLOUE une console
+    visible — même si le .bat ne lance que pythonw.exe. La garde précédente
+    ne regardait que la cible et laissait donc passer KuroDaemon.bat et
+    KuroSupervisor.bat, qui clignotaient à chaque connexion. La règle est
+    donc sans appel : AUCUN .bat/.cmd au Démarrage, quel qu'en soit le
+    contenu. Seuls des .lnk (cible pythonw.exe) y ont leur place.
+
+    Les entrées obligatoires manquantes sont signalées (R116 : une entrée
+    disparue silencieusement n'est jamais ignorée).
     """
     startup = Path(startup_dir)
     if not startup.is_dir():
@@ -392,16 +409,7 @@ def startup_launchers_health(startup_dir):
     for path in sorted(startup.iterdir()):
         if path.suffix.lower() not in (".bat", ".cmd"):
             continue
-        try:
-            text = path.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            problems.append(f"{path.name} illisible")
-            continue
-        low = text.lower()
-        if bat_opens_console(low):
-            foreign = _foreign_exes(low)
-            extra = f" : {', '.join(foreign)}" if foreign else ""
-            problems.append(f"{path.name} (fenêtre possible{extra})")
+        problems.append(f"{path.name} (exécutée par cmd.exe → console au login)")
     if problems:
         return False, "; ".join(problems)
     return True, f"{len(STARTUP_REQUIRED)} entrées de login sans console"
