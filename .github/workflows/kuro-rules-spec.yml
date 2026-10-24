@@ -45,8 +45,11 @@ jobs:
 
       - name: Install pyyaml + pytest
         # --only-binary :all: (S8541) + versions epinglees (S8544), meme
-        # convention que kuro.yml.
-        run: python -m pip install --only-binary :all: -q "pytest==8.4.2" "pyyaml==6.0.3"
+        # convention que kuro.yml. Bloc run: | obligatoire : en scalaire nu,
+        # le ": " de ":all: " fait un mapping YAML -> workflow refuse a la
+        # creation (0s, jobs vides). Cf. commit 6cf6781.
+        run: |
+          python -m pip install --only-binary :all: -q "pytest==8.4.2" "pyyaml==6.0.3"
 
       - name: Generate targets drift check (bloquant)
         run: python scripts/generate_targets.py --check
