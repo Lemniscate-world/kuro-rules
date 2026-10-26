@@ -18,6 +18,7 @@ defaults:
   paths: []
   globs: []
   alwaysApply: true
+  packs: [medium, heavy]
   description: ""
 
 overrides:
@@ -48,6 +49,7 @@ overrides:
     globs: []
     description: "Security, encoding and policy guardrails"
     alwaysApply: true
+    packs: [lite, medium, heavy]
 
   # Marketing technique — situational, never auto-injected.
   rule_119_marketing_technique:
@@ -96,6 +98,7 @@ overrides:
     globs: []
     description: "Read rules first, mandatory entrypoint"
     alwaysApply: true
+    packs: [lite, medium, heavy]
 
   rule_100_session_compliance:
     scope: company
@@ -105,3 +108,37 @@ overrides:
     globs: []
     description: "Session compliance verification"
     alwaysApply: true
+    packs: [lite, medium, heavy]
+
+  # Regles mandatory (COMPLIANCE_CHECKLIST 🔴🔴) : toujours dans lite.
+  rule_04_36_42_43_47_50_51_52:
+    packs: [lite, medium, heavy]
+    description: "Session, traceability and reporting mandatory rules"
+
+  rule_07_08_09_10_11_12_13_15_16_17:
+    packs: [lite, medium, heavy]
+    description: "Planning, roadmap and core behaviour mandatory rules"
+
+  rule_65_66_67_68_70_71_72:
+    packs: [lite, medium, heavy]
+    description: "Behaviour and code design mandatory rules (KISS/SRP)"
+
+  rule_77_79:
+    packs: [lite, medium, heavy]
+    description: "L2 pipeline + compact summary mandatory rules"
+
+  rule_82_deep_session:
+    packs: [lite, medium, heavy]
+    description: "Deep session summary mandatory rule"
+
+  rule_89_lessons_learned:
+    packs: [lite, medium, heavy]
+    description: "Lessons learned as rules mandatory rule"
+
+  rule_94_x_post:
+    packs: [lite, medium, heavy]
+    description: "Daily X post mandatory rule"
+
+  rule_99_acquisition_tracker:
+    packs: [lite, medium, heavy]
+    description: "Acquisition tracker mandatory rule"
