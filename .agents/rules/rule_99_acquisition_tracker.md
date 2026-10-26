@@ -1,6 +1,6 @@
 ---
 name: rule-99-acquisition-tracker
-description: 'RULE 99: Acquisition Tracker — Mémoire des Posts Marketing'
+description: Acquisition tracker mandatory rule
 trigger: always
 scope: company
 priority: 2

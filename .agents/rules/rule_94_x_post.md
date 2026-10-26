@@ -1,6 +1,6 @@
 ---
 name: rule-94-x-post
-description: 'RULE 94: Daily X Post — Obligation de Publication Quotidienne'
+description: Daily X post mandatory rule
 trigger: always
 scope: company
 priority: 2

@@ -1,0 +1,51 @@
+{
+  "frozen_at": "2026-10-26T15:06:46+00:00",
+  "eval_sha256": "3981e4bb62458beec17ddfb96cd9315622359808a9e7a0bfd2c8e49403464276",
+  "baseline": {
+    "total": 10,
+    "passed": 10,
+    "pass_rate": 1.0,
+    "checks": [
+      {
+        "id": "utf8_rules",
+        "ok": true
+      },
+      {
+        "id": "no_mojibake_rules",
+        "ok": true
+      },
+      {
+        "id": "index_in_sync",
+        "ok": true
+      },
+      {
+        "id": "checklist_no_violated",
+        "ok": true
+      },
+      {
+        "id": "checklist_mandatory_listed",
+        "ok": true
+      },
+      {
+        "id": "session_summary_exists",
+        "ok": true
+      },
+      {
+        "id": "compact_summary_r79",
+        "ok": true
+      },
+      {
+        "id": "gitignore_sensitive",
+        "ok": true
+      },
+      {
+        "id": "metadata_valid",
+        "ok": true
+      },
+      {
+        "id": "rule_files_hygiene",
+        "ok": true
+      }
+    ]
+  }
+}

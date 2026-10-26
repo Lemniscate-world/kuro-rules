@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-10-26T15:06:46+00:00",
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "checks": [
+    {
+      "id": "utf8_rules",
+      "ok": true,
+      "detail": "UTF-8 strict OK"
+    },
+    {
+      "id": "no_mojibake_rules",
+      "ok": true,
+      "detail": "aucun mojibake"
+    },
+    {
+      "id": "index_in_sync",
+      "ok": true,
+      "detail": "63 regles indexees"
+    },
+    {
+      "id": "checklist_no_violated",
+      "ok": true,
+      "detail": "aucune violation declaree"
+    },
+    {
+      "id": "checklist_mandatory_listed",
+      "ok": true,
+      "detail": "17 mandatory listees"
+    },
+    {
+      "id": "session_summary_exists",
+      "ok": true,
+      "detail": "present"
+    },
+    {
+      "id": "compact_summary_r79",
+      "ok": true,
+      "detail": "dernier compact = 108 mots"
+    },
+    {
+      "id": "gitignore_sensitive",
+      "ok": true,
+      "detail": "patterns sensibles couverts"
+    },
+    {
+      "id": "metadata_valid",
+      "ok": true,
+      "detail": "17 overrides valides"
+    },
+    {
+      "id": "rule_files_hygiene",
+      "ok": true,
+      "detail": "tous les fichiers de regles ont un heading"
+    }
+  ]
+}

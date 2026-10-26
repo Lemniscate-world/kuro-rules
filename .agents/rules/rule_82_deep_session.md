@@ -1,6 +1,6 @@
 ---
 name: rule-82-deep-session
-description: 'RULE 82: Deep Session Summary — Full Detail'
+description: Deep session summary mandatory rule
 trigger: always
 scope: company
 priority: 2

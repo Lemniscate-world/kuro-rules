@@ -1,6 +1,6 @@
 ---
 name: rule-89-lessons-learned
-description: 'RULE 89: Lessons Learned - Rule Creation from Problems Solved'
+description: Lessons learned as rules mandatory rule
 trigger: always
 scope: company
 priority: 2

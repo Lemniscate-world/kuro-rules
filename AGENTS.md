@@ -37,6 +37,7 @@ To read a rule, use your 'view_file' tool on the corresponding file in the maste
 - **rule_122_open_design**: RULE 122: OpenDesign — donner le brief, pas de contrat forcé
 - **rule_123_hermetic_test_env**: RULE 123: Hermetic Tests & Demo Isolation — MANDATORY
 - **rule_124_rea_trigger**: RULE 124: REA Reverse-Engineering Trigger — quand et comment appeler REA — MANDATORY (conditionnel)
+- **rule_125_harness_evolution**: RULE 125: Harness Evolution — Évolution des Règles avec Évaluateur Figé
 - **rule_14_validation_and_failure**: RULE 14.5: 5-Risk Failure Mode Table - Full Detail
 - **rule_20_21_22_23_24_25_26_27_29_31_32_33_34_35_37_40**: LINEAR, TEAM & PROJECT MANAGEMENT RULES - Full Detail
 - **rule_28_linear_review**: RULE 28: Linear Automation and DevOps Review - Full Detail
