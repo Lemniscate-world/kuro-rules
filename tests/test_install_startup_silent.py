@@ -7,25 +7,24 @@
 #
 # Ce test reproduit le contenu REEL des 5 entrees du dossier et verifie :
 #   1. aucune entree ne peut ouvrir de fenetre (doctor : startup_launchers_health)
-#   2. les 4 entrees obligatoires sont bien presentes
+#   2. les 5 entrees obligatoires sont bien presentes
 #   3. la detection repere encore un .bat console (preuve negative, R116)
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-import kuro_doctor as doctor  # noqa: E402
 import install_startup_silent as inst  # noqa: E402
+import kuro_doctor as doctor  # noqa: E402
 
 # Contenus reels recopies du dossier au moment du fix (24/10/2026).
+# 24/10 soir : etat POST-migration — KuroDaemon et KuroSupervisor sont des
+# .lnk (un .bat du Demarrage est execute par cmd.exe -> console au login,
+# quel que soit son contenu).
 _FIXTURE = {
-    "KuroDaemon.bat": '@echo off\nstart "" "C:\\Python314\\pythonw.exe" '
-                      '"C:\\Users\\Utilisateur\\Documents\\kuro\\daemon.py"\n',
-    "KuroSupervisor.bat": 'REM verifie le daemon Kuro a chaque login\n'
-                          'start "" "C:\\Python314\\pythonw.exe" '
-                          '"C:\\Users\\Utilisateur\\Documents\\kuro-rules\\scripts\\kuro_supervisor.py"'
-                          " --check --fix\n",
+    "KuroDaemon.lnk": "",
+    "KuroSupervisor.lnk": "",
     "KuroBot.lnk": "",
     "OpenVikingPilot.lnk": "",
     "KuroPulse.lnk": "",
@@ -68,11 +67,29 @@ def test_bat_console_still_detected(tmp_path):
 
 
 def test_lanceur_cache_present():
-    """hidden_launch.py doit exister : c'est la cible des 2 nouveaux .lnk."""
+    """hidden_launch.py doit exister : c'est la cible des nouveaux .lnk."""
     helper = doctor.KURO_ROOT / "scripts" / "task_launchers" / "hidden_launch.py"
     assert helper.exists()
     assert doctor.STARTUP_REQUIRED == (
-        "KuroDaemon.bat", "KuroPulse.lnk", "KuroBot.lnk", "OpenVikingPilot.lnk")
+        "KuroDaemon.lnk", "KuroSupervisor.lnk", "KuroPulse.lnk",
+        "KuroBot.lnk", "OpenVikingPilot.lnk")
+
+
+def test_cleanup_retire_tous_les_bat(tmp_path):
+    """Preuve négative : meme un .bat innocent (pythonw seul) doit partir.
+
+    L'ancienne regle ne deplacait que les .bat « console » detectes par
+    contenu : KuroDaemon.bat / KuroSupervisor.bat restaient et clignotaient.
+    """
+    startup = _populate(tmp_path)
+    (startup / "KuroDaemon.bat").write_text(
+        '@echo off\nstart "" "C:\\Python314\\pythonw.exe" '
+        '"C:\\Users\\Utilisateur\\Documents\\kuro\\daemon.py"\n', encoding="utf-8")
+    moved = inst.cleanup_console_bat(startup)
+    assert "KuroDaemon.bat" in moved
+    assert not (startup / "KuroDaemon.bat").exists()
+    # Les .lnk, eux, restent en place.
+    assert (startup / "KuroBot.lnk").exists()
 
 
 @pytest.mark.parametrize("link,target,args", inst.STARTUP_LINKS)

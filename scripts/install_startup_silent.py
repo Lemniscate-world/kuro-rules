@@ -53,7 +53,7 @@ def startup_links():
         ("OpenVikingPilot.lnk", PYW,
          f'"{HELPER}" --log "{viking_log}" "{HOME / ".local" / "bin" / "openviking-server.exe"}"'),
         ("KuroDaemon.lnk", PYW,
-         f'"{HELPER}" --log "{daemon_log}" "{PYW}" "{HOME.parent / "kuro" / "daemon.py"}"'),
+         f'"{HELPER}" --log "{daemon_log}" "{PYW}" "{HOME / "Documents" / "kuro" / "daemon.py"}"'),
         ("KuroSupervisor.lnk", PYW,
          f'"{HELPER}" --log "{supervisor_log}" "{PYW}" '
          f'"{ROOT / "scripts" / "kuro_supervisor.py"}" --check --fix'),
@@ -104,14 +104,18 @@ def create_links(startup, links=STARTUP_LINKS, dry_run=False):
 
 
 def cleanup_console_bat(startup, dry_run=False):
-    """Deplace en sauvegarde tout .bat/.cmd qui ouvrirait une fenêtre."""
+    """Deplace en sauvegarde TOUS les .bat/.cmd du Demarrage.
+
+    24/10 soir : la regle precedente ne deplacait que les .bat detectes
+    « console » par bat_opens_console, donc KuroDaemon.bat et KuroSupervisor.bat
+    (qui ne lancent que pythonw) ETAIENT LAISSES — et clignotaient quand meme,
+    parce que c'est cmd.exe (ftype batfile = "%1" %*) qui alloue la fenetre,
+    pas le contenu du .bat. Toute entree .bat/.cmd part en sauvegarde.
+    """
     moved = []
     BACKUP.mkdir(parents=True, exist_ok=True)
     for path in sorted(Path(startup).glob("*")):
         if path.suffix.lower() not in (".bat", ".cmd"):
-            continue
-        text = path.read_text(encoding="utf-8", errors="replace")
-        if not doctor.bat_opens_console(text):
             continue
         if dry_run:
             moved.append(path.name)

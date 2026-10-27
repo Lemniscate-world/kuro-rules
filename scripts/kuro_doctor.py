@@ -525,13 +525,13 @@ def main(fix=False):
           latest.name if latest else "aucun — lance scripts/kuro_db_backup.ps1")
 
     # 9. Auto-start login
+    # Derive de STARTUP_REQUIRED plutot qu'une 2e liste en dur : les deux
+    # definitions venaient de diverger (le check exigeait encore KuroDaemon.bat
+    # apres la migration .bat -> .lnk du 24/10 soir -> FAIL spurieux). Une seule
+    # source de verite pour le perimetre de login.
     startup = STARTUP_DIR
-    entries = {
-        "KuroDaemon": (startup / "KuroDaemon.bat").exists(),
-        "KuroPulse": (startup / "KuroPulse.lnk").exists(),
-        "KuroBot": (startup / "KuroBot.lnk").exists(),
-        "OpenVikingPilot": (startup / "OpenVikingPilot.lnk").exists(),
-    }
+    entries = {name.rsplit(".", 1)[0]: (startup / name).exists()
+               for name in STARTUP_REQUIRED}
     check("Auto-start login", all(entries.values()),
           ", ".join(k for k, v in entries.items() if v) or "aucun")
 

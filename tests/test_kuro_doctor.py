@@ -330,11 +330,12 @@ def test_hidden_tasks_health_absente_signalee():
 
 # --- Garde R125 étendue au LOGIN — incident 24/10 (2 consoles à chaque login) ---
 
+# État POST-migration (24/10 soir) : plus aucun .bat au Démarrage. Un .bat y
+# est exécuté par cmd.exe (ftype batfile = "%1" %*) → console visible au login,
+# même en ne lançant que pythonw. KuroDaemon/KuroSupervisor sont des .lnk.
 _STARTUP_OK = {
-    "KuroDaemon.bat": '@echo off\r\nstart "" "C:\\Python314\\pythonw.exe" '
-                      '"C:\\Users\\u\\Documents\\kuro\\daemon.py"\r\n',
-    "KuroSupervisor.bat": '@echo off\r\nREM verifie le daemon\r\nstart "" '
-                          '"C:\\Python314\\pythonw.exe" "C:\\u\\kuro_supervisor.py" --check\r\n',
+    "KuroDaemon.lnk": "",
+    "KuroSupervisor.lnk": "",
     "KuroPulse.lnk": "",
     "KuroBot.lnk": "",
     "OpenVikingPilot.lnk": "",
@@ -357,7 +358,7 @@ def _mk_startup(tmp_path, files):
 
 
 def test_startup_launchers_health_login_sain(tmp_path):
-    """Un login 100 % silencieux : .lnk + .bat réservés à pythonw.exe."""
+    """Un login 100 % silencieux : uniquement des .lnk (plus aucun .bat)."""
     startup = _mk_startup(tmp_path, _STARTUP_OK)
     ok, detail = doctor.startup_launchers_health(startup)
     assert ok is True and "sans console" in detail
@@ -371,7 +372,22 @@ def test_startup_launchers_health_anciens_lanceurs_signales(tmp_path):
         startup = _mk_startup(tmp_path, {**_STARTUP_OK, name: content})
         ok, detail = doctor.startup_launchers_health(startup)
         assert ok is False and name in detail, name
-        assert "fenêtre possible" in detail, name
+        assert "cmd.exe" in detail, name
+
+
+def test_startup_launchers_health_bat_pythonw_aucun_contenu_compte(tmp_path):
+    """Flash au login : un .bat qui ne lance QUE pythonw est TOUT DE MÊME signalé.
+
+    C'est l'erreur exacte de la garde précédente : elle ne jugeait que le
+    contenu et laissait KuroDaemon.bat / KuroSupervisor.bat passer, alors que
+    c'est cmd.exe qui alloue la fenêtre — le contenu est sans importance.
+    """
+    bat = ('@echo off\r\nstart "" "C:\\Python314\\pythonw.exe" '
+           '"C:\\Users\\u\\Documents\\kuro\\daemon.py"\r\n')
+    startup = _mk_startup(tmp_path, {**_STARTUP_OK, "KuroDaemon.bat": bat})
+    ok, detail = doctor.startup_launchers_health(startup)
+    assert ok is False
+    assert "KuroDaemon.bat" in detail and "cmd.exe" in detail
 
 
 def test_startup_launchers_health_entree_manquante(tmp_path):
@@ -388,7 +404,12 @@ def test_startup_launchers_health_dossier_absent(tmp_path):
 
 
 def test_startup_required_couvre_les_services():
-    """Périmètre login : daemon, pulse, bot et openviking (fix du 24/10)."""
+    """Périmètre login : les 5 services qui tournent à chaque connexion."""
     assert "KuroBot.lnk" in doctor.STARTUP_REQUIRED
     assert "OpenVikingPilot.lnk" in doctor.STARTUP_REQUIRED
-    assert len(doctor.STARTUP_REQUIRED) == 4
+    # 24/10 soir : KuroDaemon migre .bat -> .lnk, KuroSupervisor rejoint le
+    # perimetre (il tournait deja a chaque login SANS etre sous garde).
+    assert "KuroDaemon.lnk" in doctor.STARTUP_REQUIRED
+    assert "KuroSupervisor.lnk" in doctor.STARTUP_REQUIRED
+    assert not any(n.endswith((".bat", ".cmd")) for n in doctor.STARTUP_REQUIRED)
+    assert len(doctor.STARTUP_REQUIRED) == 5
