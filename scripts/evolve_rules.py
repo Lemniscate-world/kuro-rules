@@ -150,16 +150,18 @@ def load_pack_membership() -> dict[str, list[str]]:
 
 
 def mandatory_ids() -> set[str]:
-    text = (RULES_DIR / "COMPLIANCE_CHECKLIST.md").read_text(encoding="utf-8")
-    section = text.split("OPTIONNELLES")[0]
-    return set(re.findall(r"^\|\s*(R[\d.]+)\s*\|", section, flags=re.M))
+    """IDs mandatory — delegation au module canonique (gen_rule_packs)."""
+    import gen_rule_packs
+    return gen_rule_packs.mandatory_ids()
 
 
 def pareto_packs(membership: dict[str, list[str]]) -> list[dict]:
     """Tableau perf/coût des 3 packs + dominance. Perf = couverture ponderee."""
+    import gen_rule_packs
     all_rules = sorted(membership)
-    mand = mandatory_ids()
-    mand_files = [n for n in all_rules if any(r[1:] in n for r in mand)]
+    mand_nums = gen_rule_packs.mandatory_rule_numbers()
+    mand_files = [n for n in all_rules
+                  if gen_rule_packs.rule_numbers(n) & mand_nums]
     # poids : mandatory x2 (papier : la couverture mandatory domine)
     max_perf = 2 * len(mand_files) + (len(all_rules) - len(mand_files))
 

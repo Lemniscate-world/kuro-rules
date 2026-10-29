@@ -7,7 +7,7 @@ Pack de regles servant le sous-ensemble adapte au budget de la session (HarnessP
 - medium : mandatory + regles situationnelles (defaut)
 - heavy : toutes les regles (releases, launches, compliance totale)
 
-Cout estime : ~53152 tokens de regles ; couverture mandatory : 0
+Cout estime : ~53152 tokens de regles ; couverture mandatory : 11/17 IDs
 
 ## Rule Index
 

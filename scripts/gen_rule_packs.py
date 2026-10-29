@@ -95,6 +95,32 @@ def mandatory_ids() -> set[str]:
     return set(re.findall(r"^\|\s*(R[\d.]+)\s*\|", mandatory_section, flags=re.M))
 
 
+def rule_numbers(stem: str) -> set[int]:
+    """IDs de regle portes par un nom de fichier, par PREFIXE numerique.
+
+    rule_01_foundation -> {1} ; rule_100_session_compliance -> {100} ;
+    rule_04_36_42_43_47_50_51_52 -> {4,36,42,43,47,50,51,52}.
+
+    Comparaison par ENTIER et non par sous-chaine (incident 29/10 : « R1 »
+    matchait "1" dans "rule_100..." — 55/63 fichiers classes a tort
+    mandatory, perf du front de Pareto faussee ; et « R1 » majuscule ne
+    matchait jamais les stems minuscules — couverture affichee 0).
+    """
+    tail = stem[len("rule_"):] if stem.startswith("rule_") else stem
+    nums: set[int] = set()
+    for tok in tail.split("_"):
+        if tok.isdigit():
+            nums.add(int(tok))
+        else:
+            break
+    return nums
+
+
+def mandatory_rule_numbers() -> set[int]:
+    """IDs numeriques des regles mandatory (checklist section 🔴🔴)."""
+    return {int(r[1:]) for r in mandatory_ids()}
+
+
 def pack_rules(membership: dict[str, list[str]], pack: str) -> list[Path]:
     return [RULES_DIR / f"{name}.md"
             for name, packs in membership.items() if pack in packs]
@@ -103,7 +129,7 @@ def pack_rules(membership: dict[str, list[str]], pack: str) -> list[Path]:
 def render_pack(pack: str, paths: list[Path], membership: dict) -> str:
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     tokens = estimate_tokens(paths)
-    mand = mandatory_ids()
+    mand_nums = mandatory_rule_numbers()
     lines = [
         f"# AGENTS_{pack}.md -- Kuro Rules Redirector (pack {pack})",
         "",
@@ -117,7 +143,9 @@ def render_pack(pack: str, paths: list[Path], membership: dict) -> str:
         "- heavy : toutes les regles (releases, launches, compliance totale)",
         "",
         f"Cout estime : ~{tokens} tokens de regles"
-        f" ; couverture mandatory : {sum(1 for p in paths if any(r in p.stem for r in mand))}",
+        f" ; couverture mandatory :"
+        f" {sum(1 for p in paths if rule_numbers(p.stem) & mand_nums)}"
+        f"/{len(mand_nums)} IDs",
         "",
         "## Rule Index",
         "",

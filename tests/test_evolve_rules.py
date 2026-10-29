@@ -100,6 +100,31 @@ def test_pareto_lite_cheaper_than_heavy():
     assert by_pack["lite"]["perf_cover"] < by_pack["heavy"]["perf_cover"]
 
 
+def test_pareto_mandatory_cover_not_substring_bug():
+    """R116 : la perf pondere sur les VRAIS mandatory (parsing numerique).
+
+    Incident 29/10 : `any(r[1:] in n)` comparait "1" a l interieur de
+    "rule_100..." → 55/63 fichiers mandatory, max_perf ecrase, et lite
+    affiche a 19% alors qu il contient les 11 fichiers mandatory reels
+    (les 17 IDs de la checklist). Ici : 11 fichiers, pas 55.
+    """
+    import gen_rule_packs
+    membership = gen_rule_packs_membership()
+    rows = evolve_rules.pareto_packs(membership)
+    by_pack = {r["pack"]: r for r in rows}
+    mand_nums = gen_rule_packs.mandatory_rule_numbers()
+    # Reconstitution independante du denominateur attendu.
+    all_rules = sorted(membership)
+    mand_files = [n for n in all_rules
+                  if gen_rule_packs.rule_numbers(n) & mand_nums]
+    assert len(mand_files) == 11
+    max_perf = 2 * len(mand_files) + (len(all_rules) - len(mand_files))
+    # lite contient exactement les 11 fichiers mandatory → perf = 2*11/max.
+    assert by_pack["lite"]["perf_cover"] == round(2 * 11 / max_perf, 3)
+    # heavy couvre tout → 100%.
+    assert by_pack["heavy"]["perf_cover"] == 1.0
+
+
 def gen_rule_packs_membership():
     import gen_rule_packs
     return gen_rule_packs.rule_packs(gen_rule_packs.load_metadata())
