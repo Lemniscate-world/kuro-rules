@@ -39,7 +39,10 @@ jobs:
           BRANCH="${{ github.head_ref || github.ref_name }}"
           echo "Branch: $BRANCH"
           # Valid patterns: main, master, develop, feat/*, fix/*, infra/*, ceo/*, sec/*, chore/*
-          if echo "$BRANCH" | grep -Eq '^(main|master|develop|feat/|fix/|infra/|ceo/|sec/|chore/|docs/|test/)'; then
+          # release-please--branches--* : nom genere par le bot release-please,
+          # non modifiable. Sans ce carve-out, aucune PR de release ne peut
+          # jamais passer le check requis "compliance".
+          if echo "$BRANCH" | grep -Eq '^(main|master|develop|feat/|fix/|infra/|ceo/|sec/|chore/|docs/|test/|release-please--)'; then
             echo "✅ Branch name OK"
           else
             echo "❌ Branch '$BRANCH' violates naming convention"
