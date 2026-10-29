@@ -4,7 +4,14 @@
   "release-type": "simple",
   "packages": {
     ".": {
-      "version-file": "VERSION"
+      "version-file": "VERSION",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".cursor-plugin/marketplace.json",
+          "jsonpath": "$.version"
+        }
+      ]
     }
   }
 }

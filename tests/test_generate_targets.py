@@ -50,7 +50,12 @@ def test_version_consistent():
     version = gt.load_version(REPO)
     assert re.match(r"^\d+\.\d+\.\d+$", version)
     targets = gt.collect_targets(REPO)
-    assert f"v{version}" in targets["AGENTS.md"]
+    # Decouplage (R91) : les 7 redirigeurs portent la version du GENERATEUR,
+    # pas celle du depot. release-please ne peut pas les regenerer, donc une
+    # VERSION embarquee dedans casserait le drift check a chaque release.
+    assert f"v{gt.GENERATOR_VERSION}" in targets["AGENTS.md"]
+    assert f"v{version}" not in targets["AGENTS.md"]
+    # Seul l'artefact Cursor publie porte la vraie VERSION du depot.
     mp = json.loads(targets[".cursor-plugin/marketplace.json"])
     assert mp["version"] == version
 
