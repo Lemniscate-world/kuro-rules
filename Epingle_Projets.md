@@ -37,29 +37,29 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **NeuralDBG** |  72%  | Actif | Debugger causal pour PyTorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 PRs upstream (BUG-002 varlen_attn, BUG-006 svdvals, BUG-008 normalize). PR Gate system déployé (6 gates). v1.3.2 sur PyPI. Engine 45 tests. Neural-Agent pipeline CPU validé. Merge rate upstream: 0% — objectif: 1ère PR mergée. |
-| **NeuralDBG-Engine** |  42%  | Actif | Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. |
-| **Neural-Agent** |  50%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
+| **NeuralDBG** |  62%  | Actif | Debugger causal pour PyTorch. 309 tests (92.6% coverage), 10 bugs catalogués, 3 PRs upstream (BUG-002 varlen_attn, BUG-006 svdvals, BUG-008 normalize). PR Gate system déployé (6 gates). v1.3.2 sur PyPI. Engine 45 tests. Neural-Agent pipeline CPU validé. Merge rate upstream: 0% — objectif: 1ère PR mergée. |
+| **NeuralDBG-Engine** |  47%  | Actif | Moteur causal propriétaire. v1.0.0 packagé (GitHub Packages). 45 tests (API contract, gradient, activation, data, coupling, full pipeline). Drop-in upgrade pour NeuralDBG. |
+| **Neural-Agent** |  55%  | Actif | Agent auto-correcteur pour entraînement RN. 87 tests, pipeline CPU validé (tiny-gpt2 + LoRA, 5 steps). Règle MHA wired. Modèle pas encore entraîné (Kaggle notebook prêt). Boucle fermée : NeuralDBG → Diagnostic → Fix. |
 | **Aladin** | 40% | Actif | Architecture Transformer & recherche LLM. |
-| **Astral** |  15%  | En Pause | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
-| **DataLint** |  15%  | En Pause | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
-| **Odin** |  20%  | En Pause | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. |
+| **Astral** |  20%  | En Pause | Multi-repo intelligence avec client Hindsight. Data Gravity moat implémenté, Next.js MVP. |
+| **DataLint** |  20%  | En Pause | Gouvernance kuro-rules + validation ML. 4 tests. Alignement sync-rules.ps1 avec projects.txt, workspace audit. R105 (Multi-Repo) + R87 (Ownership) déployées. 54 projets scannés. |
+| **Odin** |  10%  | En Pause | Fork/customisation d'Open Interpreter — exécution locale de code (Python, JS, Shell) via LLM. 1 test. Dernier merge upstream: PR #1686. |
 | **NeuroDose** |  40%  | Actif | Cognitive Supplement Tracker & Visualizer. Optimisation santé cognitive via modélisation pharmacocinétique. |
-| **Aquarium** |  15%  | Prototypage | IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. |
+| **Aquarium** |  5%  | Prototypage | IDE visuel (Tauri) pour NeuralDBG. MVP livré, dormant. Export JSON + 14 tests Aquarium. |
 | **Damon** |  10%  | Nouveau | OS Amélioré basé sur Arch Linux. |
-| **Metatron** |  15%  | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
-| **TokenWise** |  15%  | En Pause | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
+| **Metatron** |  5%  | Prototypage | Multi-language debugger with abductive reasoning. Motto : « Buy time ». |
+| **TokenWise** |  20%  | En Pause | Analyse et réduction du coût par tokens utilisés. Phase validation Mom Test. |
 | **Prompt2Model** | 0% | Validation | Génération automatique de modèles ML à partir de descriptions textuelles. Phase validation Mom Test. |
-| **Automatons** |  15%  | En Pause | Agent orchestration and automation framework. |
+| **Automatons** |  20%  | En Pause | Agent orchestration and automation framework. |
 | **Onlook** | 0% | Prototypage | Visual monitoring / observability tool. |
-| **Verbose** |  10%  | En Pause | Logging / communication tool. |
+| **Verbose** |  0%  | En Pause | Logging / communication tool. |
 | Vault |  5%  | Outil | Base de connaissances personnelle (Obsidian). |
 | Neural-Again |  0%  | Archive | DSL pour réseaux de neurones. Obsolète, remplacé par Keras/PyTorch + code gen. |
 | Neural-Research |  0%  | Archive | Recherches avancées sur les architectures neuronales. |
 | NeuralDSL | 0% | Archive | Domain Specific Language for neural networks. |
 | NeuralPaper | 0% | Archive | Drafts and research for neural network papers. |
 | **Metatron-clean** |  35%  | Actif | Debugger IA qui explique les erreurs en langage clair et suit les régressions. CLI npm, 13 commits 30j. |
-| **NeuralPrune** |  10%  | En Pause | Diagnostic de pruning PyTorch non-destructif (neurones morts, redondance, quantification). |
+| **NeuralPrune** |  15%  | En Pause | Diagnostic de pruning PyTorch non-destructif (neurones morts, redondance, quantification). |
 | **github-profile** |  10%  | Outil | README de profil de l'organisation (vitrine portfolio et dashboard). |
 | **Oblivion** |  40%  | Actif | IDE Tauri + Monaco à 0 FCFA (routeur multi-providers avec fallback auto, moteur de contexte). 14 commits 30j, 6 fichiers de test. |
 | Haki | 0% | Archive | Renommé **Oblivion** le 2026-09-21 (même vision IDE 0 FCFA). Voir Oblivion. |
@@ -73,7 +73,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **OpenQuant** |  74%  | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
+| **OpenQuant** |  64%  | Actif | Trading quantitatif avec MiroFish (swarm LLM). 18+ fichiers de test, backtest harness + 1-year Gold validation, NewsAPI integre. v0.3.0-kuro. Phase 4 backtest complete. |
 | Console |  15%  | Prototypage | Environnement de développement d'outils de trading quantitatifs et algorithmiques. |
 
 **Objectif 2026 — 5 modèles/an :**
@@ -89,11 +89,11 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **EchoX** |  22%  | En Pause | SRS avec forgetting curves (PyQt6). Validation L1 complète ($23.9B marché), GUI desktop opérationnelle. 6 tests. Structure Tauri initialisée. |
+| **EchoX** |  12%  | En Pause | SRS avec forgetting curves (PyQt6). Validation L1 complète ($23.9B marché), GUI desktop opérationnelle. 6 tests. Structure Tauri initialisée. |
 | **Flow-Regulator** | 5% | Actif | Environnement de productivité premium avec Pomodoro adaptatif, binaural beats, contrôle Philips Hue et focus mode. |
 | Charmed |  15%  | Pivot | Projet réveil Spotify ARRÊTÉ (viabilité remise en cause). Phase recherche nouveau problème. |
 | Thanatos | 0% | Prototypage | Application mobile mixant entraînements arts martiaux et callisthénie. |
-| **LifeTrack** |  58%  | Actif | Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. |
+| **LifeTrack** |  48%  | Actif | Desktop habit tracker (Tauri v2 + React 19 + TypeScript). 559 tests, 14 types de donnees, UI pastel. Ollama AI local (Deep Analysis), 7-location auto-backup (Dropbox/OneDrive/Google Drive), urge surfing, habit stacking, mood tracking, N=1 experiments. Multi-OS: Windows MSI + NSIS. v0.3.2. |
 | **bodydouble** |  15%  | En Pause | Body doubling libre (alternative Focusmate sans abonnement) : file d'attente + visio WebRTC P2P. MVP. |
 | LifeStack |  15%  | Prototypage | Scaffold vide — périmètre à définir. |
 
@@ -113,7 +113,7 @@
 | Kapok |  15%  | Prototypage | Insurtech. |
 | FCI | 0% | Prototypage | Accounting/Business solution pour client FCI (ex-SOGEXCO). |
 | **Epure** |  50%  | Actif | Cabinet d'Ingénierie Hybride IA (Togo, West Africa). Services de conception augmentés par IA. Frontend + backend + CAD service + Electron. Stack: React, TypeScript, Python, FreeCAD. |
-| **Forma** |  65%  | Actif | Système agentique de traitement des sinistres assurance (Vision + OCR, RAG sur contrats, validation humaine). v0.12.1, 200+ fichiers de test, 25 commits 30j. |
+| **Forma** |  55%  | Actif | Système agentique de traitement des sinistres assurance (Vision + OCR, RAG sur contrats, validation humaine). v0.12.1, 200+ fichiers de test, 25 commits 30j. |
 | **DevisPro** |  10%  | En Pause | Devis et factures en 60 secondes pour artisans (PDF, envoi WhatsApp). |
 
 ---
@@ -142,7 +142,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Helium** |  43%  | Actif | Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. Recherches stratégiques intégrées. |
+| **Helium** |  38%  | Actif | Blockchain Rust avec 4 crates (libp2p, WireGuard, Firecracker). Architecture MVP complète, POC scripts prêts. Recherches stratégiques intégrées. |
 | **GALT-Flatcoin-Concept** |  15%  | Prototypage | Concept de flatcoin DeFi (whitepaper draft, stability engine, tranches). 8 docs de conception. |
 | POFS | 0% | Prototypage | Proof of Stake / File System research. |
 
@@ -154,7 +154,7 @@
 
 | Projet | Progression | Statut | Description |
 |--------|-------------|--------|-------------|
-| **Dissect** |  30%  | En Pause | Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. |
+| **Dissect** |  35%  | En Pause | Outil d'audit et de visualisation de l'orchestration des agents IA. 9 tests, branch: main. |
 | BloomDB |  15%  | Prototypage | Base de données pour stockage et gestion de données probabilistes. |
 | Algoritmi | 0% | Prototypage | Dérivé de Dissect, centré sur la visualisation des algorithmes. |
 
@@ -200,7 +200,7 @@
 | Logical Calculus | 0% | Recherche | Nouveau système de calcul infinitésimal basé sur la logique et le calcul de Newton. Formalisation en cours. → labo Horcruxe 002-calcul-logique. |
 | Math. Theorization of Linguistics | 0% | Recherche | Mathématisation du langage par théorie de Shannon, espaces de probabilités linguistiques. → labo Horcruxe 003-linguistique-mathematique. |
 | Project-Dirac |  15%  | Prototypage | Physics-inspired computational model. |
-| **SOLARIS** |  15%  | En Pause | Critique physique neuro-symbolique (PDB, raisonneur symbolique, prédicteur neuronal). Phases 1-2 validées. |
+| **SOLARIS** |  5%  | En Pause | Critique physique neuro-symbolique (PDB, raisonneur symbolique, prédicteur neuronal). Phases 1-2 validées. |
 
 ---
 
